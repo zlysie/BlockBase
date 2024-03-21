@@ -1,7 +1,11 @@
 package net.oikmo.engine;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.Calendar;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -13,7 +17,10 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
+import net.oikmo.main.Main;
 import net.oikmo.toolbox.IconUtils;
+import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 /**
  * Handles window layout and updates
@@ -65,6 +72,10 @@ public class DisplayManager {
 				if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 					closeDisplay();
 				}
+				
+				if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+					saveScreenshot();
+				}
 			}	
 		}
 		
@@ -73,6 +84,57 @@ public class DisplayManager {
 		lastFrameTime = currentFrameTime;		
 	}
 
+	/**
+	 * Captures a frame of the screen (getImage()) and saves it to the screenshots folder.
+	 * 
+	 * @see getImage()
+	 */
+	public static void saveScreenshot() {
+		Calendar cal = Calendar.getInstance();
+		int dy = cal.get(Calendar.DAY_OF_MONTH);
+		int mon = cal.get(Calendar.MONTH) + 1;
+		int yr = cal.get(Calendar.YEAR);
+
+		int hr = cal.get(Calendar.HOUR_OF_DAY);
+		int min = cal.get(Calendar.MINUTE);
+		int sec = cal.get(Calendar.SECOND);
+
+		String day = "" + dy;
+		String month = "" + mon;
+		String year = String.valueOf(yr).substring(2);
+
+		String hour = "" + hr;
+		String minute = "" + min;
+		String second = "" + sec;
+
+		if(dy < 10) { day = "0" + dy; }
+		if(mon < 10) { month = "0" + mon; }
+
+		if(hr < 10) { hour = "0" + hr; } 
+		if(min < 10) { minute = "0" + min; }
+		if(sec < 10) { second = "0" + sec; }
+
+		String name = day + "-" + month + "-" + year + "_" + hour + "." + minute + "." + second;
+		File saveDirectory =  new File(Main.getDir().getPath()+"/screenshots/");
+
+		if (!saveDirectory.exists()) {
+			try {
+				saveDirectory.mkdir();
+			} catch (SecurityException e) {
+				return;
+			}
+		}
+
+		File file = new File(saveDirectory + "/" + name + ".png"); // The file to save the pixels too.
+		String format = "png";
+		try {
+			ImageIO.write(getImage(null, null), format, file);
+			Logger.log(LogLevel.INFO, "Saved screenshot!");
+		} catch (Exception e) {
+			Main.error("Failed to save screenshot! : " + name+".png", e);
+		}
+	}
+	
 	/**
 	 * Destroys the display (not the program)
 	 */

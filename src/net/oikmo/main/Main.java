@@ -1,5 +1,8 @@
 package net.oikmo.main;
 
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
 import org.lwjgl.opengl.Display;
@@ -11,11 +14,18 @@ import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
 import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.error.PanelCrashReport;
+import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main {
-
+	
+	public static String gameName = "BlockBase";
+	public static String version = "[a0.0.1]";
+	public static String gameVersion = gameName + " " + version;
+	
+	public static boolean displayRequest = false;
 	public static int WIDTH = 854;
 	public static int HEIGHT = 640;																
 	
@@ -23,34 +33,82 @@ public class Main {
 	
 	public static Vector3f camPos = new Vector3f(0,0,0);
 	
-	public static boolean displayRequest = false;
+	static Frame frame;
 	
 	public static void main(String[] args) {
-		DisplayManager.createDisplay(WIDTH, HEIGHT);
-		MasterRenderer.getInstance();
+		removeHSPIDERR();
+		try {
+			DisplayManager.createDisplay(WIDTH, HEIGHT);
+			Keyboard.create();
+			MasterRenderer.getInstance();
 
-		theWorld = new World("ballsack!!!");
-		
-		Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
-		
-		
-
-		while(!Display.isCloseRequested()) {
-			camera.update();
-			camPos = new Vector3f(camera.getPosition());
+			theWorld = new World("ballsack!!!");
 			
-			theWorld.update(camera);
+			Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
 			
-			DisplayManager.updateDisplay();
+			while(!Display.isCloseRequested()) {
+				camera.update();
+				camPos = new Vector3f(camera.getPosition());
+				
+				theWorld.update(camera);
+				
+				DisplayManager.updateDisplay();
+			}
+			DisplayManager.closeDisplay();
+		} catch(Exception e) {
+			Main.error("Runtime Error!", e);
 		}
 		displayRequest = true;
-		DisplayManager.closeDisplay();
+		
+		Logger.saveLog();
 	}
 	
-	
-
+	static PanelCrashReport report;
+	static boolean balls = false;
 	/**
-	 * Retrieves data directory of .pepdog/ using {@code Main.getAppDir(String)}
+	 * Creates a frame with the error log embedded inside.
+	 * 
+	 * @param id (String)
+	 * @param throwable (Throwable)
+	 */
+	public static void error(String id, Throwable throwable) {
+		if(!balls) {
+			frame = new Frame();
+			frame.addWindowListener(new WindowAdapter(){  
+	            public void windowClosing(WindowEvent e) {  
+	            	frame.dispose(); 
+	                System.exit(0);
+	            }  
+	        });
+			frame.setTitle(Main.gameName + " Error!");
+			frame.setSize(WIDTH, HEIGHT);
+			frame.setVisible(true);
+			UnexpectedThrowable unexpectedThrowable = new UnexpectedThrowable(id, throwable);
+			if(report == null) {
+				report = new PanelCrashReport(unexpectedThrowable);
+			} else {
+				report.set(unexpectedThrowable);
+			}
+			frame.add(report, "Center");
+			frame.validate();
+			
+			balls = true;
+		}	
+	}
+
+	private static void removeHSPIDERR() {
+		File path = new File(".");
+		String[] files = path.list();
+		for(int i = 0; i < files.length; i++) {
+			if(files[i].contains("hs_err_pid")) {
+				File file = new File(path.getAbsoluteFile() + "\\" + files[i]);
+				file.delete();
+			}
+		}
+	}
+	
+	/**
+	 * Retrieves data directory of .blockbase/ using {@code Main.getAppDir(String)}
 	 * @return Directory (File)
 	 */
 	public static File getDir() {

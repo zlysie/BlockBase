@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
 
+import net.oikmo.main.Main;
+
 public class Logger {
 	
 	private static String completeLog = "";
@@ -29,7 +31,7 @@ public class Logger {
 	}
 	
 	public static void saveLog() {
-		File saveDirectory =  new File("/logs/");
+		File saveDirectory =  new File(Main.getDir() + "/logs/");
 		if (!saveDirectory.exists()) {
 	        try {
 	        	saveDirectory.mkdir();
