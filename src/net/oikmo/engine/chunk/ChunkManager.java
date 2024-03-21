@@ -37,14 +37,20 @@ public class ChunkManager {
 			
 			if (block != null) {
 	            if (chunk.blocks[localX][localY][localZ] == null) {
-	                chunk.blocks[localX][localY][localZ] = block;
-	                Main.refreshChunks();
+	            	if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
+	            		chunk.blocks[localX][localY][localZ] = block;
+		                Main.refreshChunks();
+	            	}
+	                
 	            } else {
 	                return;
 	            }
 	        } else {
-	            chunk.blocks[localX][localY][localZ] = null;
-	            Main.refreshChunks();
+	        	if(chunk.blocks[localX][localY][localZ] != null) {
+	        		chunk.blocks[localX][localY][localZ] = null;
+		            Main.refreshChunks();
+	        	}
+	            
 	        }
 			
 			

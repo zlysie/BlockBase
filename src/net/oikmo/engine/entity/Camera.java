@@ -17,18 +17,18 @@ import net.oikmo.main.Main;
  * @author <i>Oikmo</i>
  */
 public class Camera {
-	
-	
+
+
 	private int maxVerticalTurn = 80;
 	Vector3f position;
 
 	public float pitch = 0;
 	public float yaw = 0;
 	public float roll = 0;
-	
+
 	private int chunkX, chunkZ;
 	private Chunk currentChunk;
-	
+
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -43,7 +43,7 @@ public class Camera {
 		flyCam = true;
 		startThread1();
 	}
-	
+
 
 	private void startThread1() {
 
@@ -59,7 +59,7 @@ public class Camera {
 							chunkX = (int) (position.x / Chunk.CHUNK_SIZE)-1;
 						}
 					}
-					
+
 					if(position.z >= 0) {
 						chunkZ = (int) position.z / Chunk.CHUNK_SIZE;
 					} else {
@@ -69,7 +69,7 @@ public class Camera {
 							chunkZ = (int) (position.z / Chunk.CHUNK_SIZE)-1;
 						}
 					}
-					
+
 					//System.out.println("("+(int) position.x+ " " + (int) position.z + ") (" + chunkX + " " + chunkZ + ")");
 					for(int i = 0; i < Main.chunks.size(); i++) {
 						Chunk chunk = Main.chunks.get(i);
@@ -78,7 +78,7 @@ public class Camera {
 							if(chunk.origin.x/16 == chunkX && chunk.origin.z/16 == chunkZ) {
 								currentChunk = chunk;
 							}
-							
+
 						} else {
 							System.out.println("Null!");
 						}
@@ -86,11 +86,11 @@ public class Camera {
 				}
 			}
 		});
-		
+
 		chunkGetter.setName("Chunk Grabber");
 		chunkGetter.start();
 	}
-	
+
 	/**
 	 * Moves camera based on given values.
 	 * @param dx
@@ -124,7 +124,7 @@ public class Camera {
 		this.yaw = dy;
 		this.roll = dz;
 	}
-	
+
 	/**
 	 * Sets position to given 3D Vector
 	 * @param vector
@@ -138,25 +138,20 @@ public class Camera {
 	private float moveAt;
 	private boolean flyCam = true;
 	private boolean lockInCam;
-	
+
 	/**
 	 * Fly cam
 	 */
 	public void update() {
-		
-			if(currentChunk != null) {
-			
-			//System.out.println("(" + (int)currentChunk.chunk.origin.x + " " + (int)currentChunk.chunk.origin.z + ") ("  + (int) position.x  + " " + (int) position.z+")");
+
+		if(currentChunk != null) {
 			if(Mouse.isButtonDown(1)) {
-				//System.out.println("");
-				ChunkManager.setBlock(new Vector3f(position), Block.bedrock, currentChunk);
+				ChunkManager.setBlock(new Vector3f(position), Block.treebark, currentChunk);
 			} else if(Mouse.isButtonDown(0)) {
 				ChunkManager.setBlock(new Vector3f(position), null, currentChunk);
 			}
-		} else {
-			//System.out.println("ball scak!!!");
 		}
-		
+
 		if(!lockInCam) {
 			if(Keyboard.isKeyDown(Keyboard.KEY_Q)) {
 				flyCam = !flyCam;
@@ -167,24 +162,24 @@ public class Camera {
 				lockInCam = false;
 			}
 		}
-		
+
 		if(Mouse.isGrabbed() != flyCam) {
 			Mouse.setGrabbed(flyCam);
 		}
-		
+
 		if(flyCam) {
 			if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
 				speeds = 6;
 			} else {
 				speeds = 2;
 			}
-			
+
 			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
 				position.y += speed * speeds;
 			} else if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
 				position.y -= speed * speeds;
 			}
-			
+
 			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
 				moveAt = -speed * speeds;
 			} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
@@ -192,7 +187,7 @@ public class Camera {
 			} else {
 				moveAt = 0;
 			}
-			
+
 			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
 				position.x += (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw)));
 				position.z -= (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw)));
@@ -200,7 +195,7 @@ public class Camera {
 				position.x -= (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw)));
 				position.z += (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw)));
 			}
-			
+
 			pitch -= Mouse.getDY() * GameSettings.sensitivity*2;
 			if(pitch < -maxVerticalTurn){
 				pitch = -maxVerticalTurn;
@@ -208,7 +203,7 @@ public class Camera {
 				pitch = maxVerticalTurn;
 			}
 			yaw += Mouse.getDX() * GameSettings.sensitivity;
-			
+
 			position.x += (float) -(moveAt * Math.sin(Math.toRadians(yaw)));
 			position.y += (float) (moveAt * Math.sin(Math.toRadians(pitch)));
 			position.z += (float) (moveAt * Math.cos(Math.toRadians(yaw)));
@@ -222,7 +217,7 @@ public class Camera {
 	public Vector3f getPosition() {
 		return position;
 	}
-	
+
 	public float getPitch() {
 		return pitch;
 	}
