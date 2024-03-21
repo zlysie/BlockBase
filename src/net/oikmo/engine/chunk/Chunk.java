@@ -75,6 +75,21 @@ public class Chunk {
 	    }
 	}
 	
+	private Block getBlockFromTopLayer(int blocky) {
+
+	    for (int x = 0; x < CHUNK_SIZE; x++) {
+	        for (int z = 0; z < CHUNK_SIZE; z++) {
+	            for (int y = Main.WORLD_HEIGHT - 1; y >= 0; y--) {
+	                if (blocks[x][y][z] != null) {
+	                	return blocks[x][y - blocky][z];
+	                }
+	            }
+	        }
+	    }
+		return null;
+	}
+	
+	
 	private Block calculateBlockType(int height) {
 	    if (height >= 60) {
 	        return Block.dirt;
