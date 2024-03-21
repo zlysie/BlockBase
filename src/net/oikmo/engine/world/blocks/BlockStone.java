@@ -1,8 +1,8 @@
-package net.oikmo.engine.chunk.blocks;
+package net.oikmo.engine.world.blocks;
 
-public class BlockTreeBark extends Block {
+public class BlockStone extends Block {
 	
-	public BlockTreeBark(Type type) {
+	public BlockStone(Type type) {
 		super(type);
 	}
 
@@ -11,10 +11,11 @@ public class BlockTreeBark extends Block {
 	}
 	
 	public float getStrength() {
-		return 0.5f;
+		return 0.6f;
 	}
 	
 	public boolean blocksLight() {
 		return false;
 	}
+	
 }

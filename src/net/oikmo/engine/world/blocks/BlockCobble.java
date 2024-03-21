@@ -1,8 +1,8 @@
-package net.oikmo.engine.chunk.blocks;
+package net.oikmo.engine.world.blocks;
 
-public class BlockStone extends Block {
+public class BlockCobble extends Block {
 	
-	public BlockStone(Type type) {
+	public BlockCobble(Type type) {
 		super(type);
 	}
 
@@ -17,5 +17,4 @@ public class BlockStone extends Block {
 	public boolean blocksLight() {
 		return false;
 	}
-	
 }

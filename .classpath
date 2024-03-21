@@ -19,6 +19,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="libraries/jar/PNGDecoder.jar"/>
-	<classpathentry kind="lib" path="libraries/jar/slick-util.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

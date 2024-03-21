@@ -1,4 +1,4 @@
-package net.oikmo.engine.chunk;
+package net.oikmo.engine.world.chunk;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,10 +7,9 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.chunk.blocks.Block;
-import net.oikmo.engine.chunk.cube.Vertex;
 import net.oikmo.engine.models.CubeModel;
-import net.oikmo.main.Main;
+import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
 
 public class ChunkMesh {
 	public List<Vertex> vertices;
@@ -39,7 +38,7 @@ public class ChunkMesh {
 		uniqueVertices.clear();
 		//loop thru each block in chunk and determine which faces are visible :3
 		for (int x = 0; x < chunk.blocks.length; x++) {
-		    for (int y = 0; y < Main.WORLD_HEIGHT; y++) {
+		    for (int y = 0; y < World.WORLD_HEIGHT; y++) {
 		        for (int z = 0; z < chunk.blocks[x][y].length; z++) {
 		            Block blockI = chunk.blocks[x][y][z];
 		            boolean px = false, nx = false, py = false, ny = false, pz = false, nz = false;
@@ -62,7 +61,7 @@ public class ChunkMesh {
 		                        
 		                        // Check if the neighbour is within the chunk bounds
 		                        if (neighborX >= 0 && neighborX < Chunk.CHUNK_SIZE &&
-		                            neighborY >= 0 && neighborY < 128 &&
+		                            neighborY >= 0 && neighborY < World.WORLD_HEIGHT &&
 		                            neighborZ >= 0 && neighborZ < Chunk.CHUNK_SIZE) {
 		                            Block blockJ = chunk.blocks[neighborX][neighborY][neighborZ];
 		                            
@@ -103,7 +102,7 @@ public class ChunkMesh {
 	                }
 
 	                if (!nx) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, CubeModel.NORMALS);
+	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_PX, CubeModel.NORMALS);
 	                } 
 
 	                if (!py) {
@@ -119,7 +118,7 @@ public class ChunkMesh {
 	                }
 
 	                if (!nz) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, CubeModel.NORMALS);
+	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_PZ, CubeModel.NORMALS);
 	                }
 		        }	
 		        

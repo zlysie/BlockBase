@@ -5,8 +5,8 @@ import java.util.Random;
 public class PerlinNoiseGenerator {
 
   	public static float AMPLITUDE = 10f;
-    public static int OCTAVES = 8;
-    public static float ROUGHNESS = 0.1f;
+    public static int OCTAVES = 2;
+    public static float ROUGHNESS = 0.3f;
  
     private Random random = new Random();
     private int seed;

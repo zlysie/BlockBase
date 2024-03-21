@@ -1,4 +1,4 @@
-package net.oikmo.engine.chunk.cube;
+package net.oikmo.engine.world.chunk;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;

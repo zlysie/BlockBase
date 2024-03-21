@@ -5,9 +5,9 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.chunk.Chunk;
-import net.oikmo.engine.chunk.ChunkManager;
-import net.oikmo.engine.chunk.blocks.Block;
+import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.Chunk;
+import net.oikmo.engine.world.chunk.ChunkManager;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
 
@@ -49,7 +49,7 @@ public class Camera {
 
 		Thread chunkGetter = new Thread(new Runnable() {
 			public void run() {
-				while(!Display.isCloseRequested()) {
+				while(!Main.displayRequest) {
 					if(position.x >= 0) {
 						chunkX = (int) position.x / Chunk.CHUNK_SIZE;
 					} else {
@@ -71,8 +71,8 @@ public class Camera {
 					}
 
 					//System.out.println("("+(int) position.x+ " " + (int) position.z + ") (" + chunkX + " " + chunkZ + ")");
-					for(int i = 0; i < Main.chunks.size(); i++) {
-						Chunk chunk = Main.chunks.get(i);
+					for(int i = 0; i < Main.theWorld.chunks.size(); i++) {
+						Chunk chunk = Main.theWorld.chunks.get(i);
 						if(chunk != null) {
 							//
 							if(chunk.origin.x/16 == chunkX && chunk.origin.z/16 == chunkZ) {
@@ -138,15 +138,20 @@ public class Camera {
 	private float moveAt;
 	private boolean flyCam = true;
 	private boolean lockInCam;
-
+	private Block selectedBlock;
+	
 	/**
 	 * Fly cam
 	 */
 	public void update() {
-
+		try {
+			int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
+			selectedBlock = Block.blocks[index] != null ? Block.blocks[index] : Block.bedrock;
+		} catch(NumberFormatException e) {}
+		
 		if(currentChunk != null) {
 			if(Mouse.isButtonDown(1)) {
-				ChunkManager.setBlock(new Vector3f(position), Block.treebark, currentChunk);
+				ChunkManager.setBlock(new Vector3f(position), selectedBlock, currentChunk);
 			} else if(Mouse.isButtonDown(0)) {
 				ChunkManager.setBlock(new Vector3f(position), null, currentChunk);
 			}
@@ -168,6 +173,7 @@ public class Camera {
 		}
 
 		if(flyCam) {
+			
 			if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
 				speeds = 6;
 			} else {

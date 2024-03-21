@@ -1,4 +1,4 @@
-package net.oikmo.engine.chunk.blocks;
+package net.oikmo.engine.world.blocks;
 
 public class BlockBedrock extends Block {
 

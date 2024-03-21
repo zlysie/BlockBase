@@ -1,21 +1,21 @@
-package net.oikmo.engine.chunk.blocks;
+package net.oikmo.engine.world.blocks;
 
-public class BlockDirt extends Block {
-
-	public BlockDirt(Type type) {
+public class BlockTreeLeaf extends Block {
+	
+	public BlockTreeLeaf(Type type) {
 		super(type);
 	}
-	
+
 	public boolean isSolid() {
 		return true;
 	}
 	
 	public float getStrength() {
-		return 0.2f;
+		return 0.1f;
 	}
 	
 	public boolean blocksLight() {
 		return false;
 	}
-
+	
 }

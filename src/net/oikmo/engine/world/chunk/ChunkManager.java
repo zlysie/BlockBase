@@ -1,8 +1,9 @@
-package net.oikmo.engine.chunk;
+package net.oikmo.engine.world.chunk;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.chunk.blocks.Block;
+import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 
 public class ChunkManager {
@@ -39,7 +40,7 @@ public class ChunkManager {
 	            if (chunk.blocks[localX][localY][localZ] == null) {
 	            	if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
 	            		chunk.blocks[localX][localY][localZ] = block;
-		                Main.refreshChunks();
+	            		Main.theWorld.refreshChunks();
 	            	}
 	                
 	            } else {
@@ -48,7 +49,7 @@ public class ChunkManager {
 	        } else {
 	        	if(chunk.blocks[localX][localY][localZ] != null) {
 	        		chunk.blocks[localX][localY][localZ] = null;
-		            Main.refreshChunks();
+	        		Main.theWorld.refreshChunks();
 	        	}
 	            
 	        }
@@ -60,7 +61,7 @@ public class ChunkManager {
 
 	public static boolean isWithinChunk(int localX, int localY, int localZ) {
 		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
-				localY >= 0 && localY < Main.WORLD_HEIGHT &&
+				localY >= 0 && localY < World.WORLD_HEIGHT &&
 				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
 	}
 }
