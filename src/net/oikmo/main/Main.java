@@ -36,7 +36,7 @@ public class Main {
 	public static List<Vector3f> usedPos = new ArrayList<>();
 	private static Vector3f camPos = new Vector3f(0,0,0);
 
-	private static final int WORLD_SIZE = 15;
+	private static final int WORLD_SIZE = 16;
 	private static int index = 0;
 	public static void main(String[] args) {
 		DisplayManager.createDisplay(WIDTH, HEIGHT);
@@ -108,7 +108,7 @@ public class Main {
 				
 				
 				
-				if((distX <= WORLD_SIZE) && (distZ <= WORLD_SIZE)) {
+				if((distX <= WORLD_SIZE*2) && (distZ <= WORLD_SIZE*2)) {
 					r.addEntity(entities.get(i));
 				}
 				

@@ -2,14 +2,10 @@ package net.oikmo.engine.chunk;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.Loader;
 import net.oikmo.engine.chunk.blocks.Block;
-import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.main.Main;
 
 public class ChunkManager {
-	static Loader loader = Loader.getInstance();
-	static ModelTexture texture = new ModelTexture(loader.loadTexture("defaultPack"));
 	public static Block getBlock(Vector3f globalOrigin, ChunkMesh chunkMesh) {
 		Chunk chunk = chunkMesh.chunk;
 		int localX = (int) (globalOrigin.x - chunk.origin.x);
@@ -42,17 +38,17 @@ public class ChunkManager {
 			if (block != null) {
 	            if (chunk.blocks[localX][localY][localZ] == null) {
 	                chunk.blocks[localX][localY][localZ] = block;
+	                Main.refreshChunks();
 	            } else {
 	                return;
 	            }
 	        } else {
 	            chunk.blocks[localX][localY][localZ] = null;
+	            Main.refreshChunks();
 	        }
 			
-			Main.refreshChunks();
+			
 
-		} else {
-			//System.out.println("am i out? (" + localX + " " + localY + " " + localZ + ")");
 		}
 	}
 
