@@ -1,0 +1,235 @@
+package net.oikmo.engine.entity;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
+
+import net.oikmo.engine.chunk.Chunk;
+import net.oikmo.engine.chunk.ChunkManager;
+import net.oikmo.engine.chunk.blocks.Block;
+import net.oikmo.main.GameSettings;
+import net.oikmo.main.Main;
+
+/**
+ * Camera class. Allows the player to see the world.
+ * 
+ * @author <i>Oikmo</i>
+ */
+public class Camera {
+	
+	
+	private int maxVerticalTurn = 80;
+	Vector3f position;
+
+	public float pitch = 0;
+	public float yaw = 0;
+	public float roll = 0;
+	
+	private int chunkX, chunkZ;
+	private Chunk currentChunk;
+	
+	/**
+	 * Camera constructor. Sets position and rotation.
+	 * 
+	 * @param position
+	 * @param rotation
+	 * @param scale
+	 */
+	public Camera(Vector3f position, Vector3f rotation) {
+		this.position = position;
+		this.pitch = rotation.x;
+		this.roll = rotation.z;
+		flyCam = true;
+		startThread1();
+	}
+	
+
+	private void startThread1() {
+
+		Thread chunkGetter = new Thread(new Runnable() {
+			public void run() {
+				while(!Display.isCloseRequested()) {
+					if(position.x >= 0) {
+						chunkX = (int) position.x / Chunk.CHUNK_SIZE;
+					} else {
+						if(position.x > -16) {
+							chunkX = (int)-1;
+						} else {
+							chunkX = (int) (position.x / Chunk.CHUNK_SIZE)-1;
+						}
+					}
+					
+					if(position.z >= 0) {
+						chunkZ = (int) position.z / Chunk.CHUNK_SIZE;
+					} else {
+						if(position.z > -16) {
+							chunkZ = (int)-1;
+						} else {
+							chunkZ = (int) (position.z / Chunk.CHUNK_SIZE)-1;
+						}
+					}
+					
+					//System.out.println("("+(int) position.x+ " " + (int) position.z + ") (" + chunkX + " " + chunkZ + ")");
+					for(int i = 0; i < Main.chunks.size(); i++) {
+						Chunk chunk = Main.chunks.get(i);
+						if(chunk != null) {
+							//
+							if(chunk.origin.x/16 == chunkX && chunk.origin.z/16 == chunkZ) {
+								currentChunk = chunk;
+							}
+							
+						} else {
+							System.out.println("Null!");
+						}
+					}
+				}
+			}
+		});
+		
+		chunkGetter.setName("Chunk Grabber");
+		chunkGetter.start();
+	}
+	
+	/**
+	 * Moves camera based on given values.
+	 * @param dx
+	 * @param dy
+	 * @param dz
+	 */
+	public void increasePosition(float dx, float dy, float dz) {
+		this.position.x += dx;
+		this.position.y += dy;
+		this.position.z += dz;
+	}
+	/**
+	 * Rotates the camera based on given values.
+	 * @param dx
+	 * @param dy
+	 * @param dz
+	 */
+	public void increaseRotation(float dx, float dy, float dz) {
+		this.pitch += dx;
+		this.yaw += dy;
+		this.roll += dz;
+	}
+	/**
+	 * Sets the rotation of the camera based on given values.
+	 * @param dx
+	 * @param dy
+	 * @param dz
+	 */
+	public void setRotation(float dx, float dy, float dz) {
+		this.pitch = dx;
+		this.yaw = dy;
+		this.roll = dz;
+	}
+	
+	/**
+	 * Sets position to given 3D Vector
+	 * @param vector
+	 */
+	public void setPosition(Vector3f v) {
+		this.position = v;
+	}
+
+	private float speeds = 0f;
+	private float speed = 0.1f;
+	private float moveAt;
+	private boolean flyCam = true;
+	private boolean lockInCam;
+	
+	/**
+	 * Fly cam
+	 */
+	public void update() {
+		
+			if(currentChunk != null) {
+			
+			//System.out.println("(" + (int)currentChunk.chunk.origin.x + " " + (int)currentChunk.chunk.origin.z + ") ("  + (int) position.x  + " " + (int) position.z+")");
+			if(Mouse.isButtonDown(1)) {
+				//System.out.println("");
+				ChunkManager.setBlock(new Vector3f(position), Block.bedrock, currentChunk);
+			} else if(Mouse.isButtonDown(0)) {
+				ChunkManager.setBlock(new Vector3f(position), null, currentChunk);
+			}
+		} else {
+			//System.out.println("ball scak!!!");
+		}
+		
+		if(!lockInCam) {
+			if(Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				flyCam = !flyCam;
+				lockInCam = true;
+			}
+		} else {
+			if(!Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				lockInCam = false;
+			}
+		}
+		
+		if(Mouse.isGrabbed() != flyCam) {
+			Mouse.setGrabbed(flyCam);
+		}
+		
+		if(flyCam) {
+			if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+				speeds = 6;
+			} else {
+				speeds = 2;
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+				position.y += speed * speeds;
+			} else if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+				position.y -= speed * speeds;
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
+				moveAt = -speed * speeds;
+			} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
+				moveAt = speed * speeds;
+			} else {
+				moveAt = 0;
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
+				position.x += (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw)));
+				position.z -= (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw)));
+			} else if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
+				position.x -= (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw)));
+				position.z += (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw)));
+			}
+			
+			pitch -= Mouse.getDY() * GameSettings.sensitivity*2;
+			if(pitch < -maxVerticalTurn){
+				pitch = -maxVerticalTurn;
+			}else if(pitch > maxVerticalTurn){
+				pitch = maxVerticalTurn;
+			}
+			yaw += Mouse.getDX() * GameSettings.sensitivity;
+			
+			position.x += (float) -(moveAt * Math.sin(Math.toRadians(yaw)));
+			position.y += (float) (moveAt * Math.sin(Math.toRadians(pitch)));
+			position.z += (float) (moveAt * Math.cos(Math.toRadians(yaw)));
+		} else {
+			if(Mouse.isGrabbed()) {
+				Mouse.setGrabbed(false);
+			}
+		}
+	}
+
+	public Vector3f getPosition() {
+		return position;
+	}
+	
+	public float getPitch() {
+		return pitch;
+	}
+	public float getYaw() {
+		return yaw;
+	}
+	public float getRoll() {
+		return roll;
+	}
+}

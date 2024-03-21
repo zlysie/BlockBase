@@ -1,0 +1,162 @@
+package net.oikmo.engine;
+
+import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
+
+import net.oikmo.toolbox.IconUtils;
+
+/**
+ * Handles window layout and updates
+ * 
+ * @author <i>Oikmo</i>
+ */
+public class DisplayManager {
+
+	private static int fps, literalfps;
+	private static long lastFrameTime, lastFPS;
+	private static float delta;
+	
+	/**
+	 * Creates window by size (loads cursor and window icon) and sets OpenGL version.
+	 * 
+	 * @author <i>Oikmo</i>
+	 */
+	public static void createDisplay(int width, int height) {
+		DisplayMode mode = new DisplayMode(width, height);
+		try {
+			Display.create();
+			Display.setDisplayMode(mode);
+			Display.setTitle("VoxelEngine");
+			Display.setIcon(IconUtils.getFavicon());
+			
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}
+
+		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		lastFrameTime = getCurrentTime();
+		lastFPS = getCurrentTime();
+	}
+	
+	/**
+	 * Updates the display to show a new frame and calculates the last frame time.
+	 * <br>
+	 * Currently capped at <b>60 FPS.</b>
+	 * <br>
+	 * Handles fullscreen and taking screenshots on the press of a key.
+	 */
+	public static void updateDisplay() {
+		updateFPS();
+		Display.update();
+		Display.sync(60);
+		
+		while(Keyboard.next()) {
+			if(Keyboard.getEventKeyState()) {
+				if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+					closeDisplay();
+				}
+			}	
+		}
+		
+		long currentFrameTime = getCurrentTime();
+		delta = (currentFrameTime - lastFrameTime)/1000f;
+		lastFrameTime = currentFrameTime;		
+	}
+
+	/**
+	 * Destroys the display (not the program)
+	 */
+	public static void closeDisplay() {
+		Display.destroy();
+	}	
+	
+	/**
+	 * Updates FPS counter.
+	 */
+	static void updateFPS() {
+		if (getCurrentTime() - lastFPS > 1000)	{
+			literalfps = fps;
+			fps = 0; //reset the FPS counter
+			lastFPS += 1000; //add one second
+			//System.gc();
+		}
+		fps++;
+	}
+
+	/**
+	 * Gets frames per second
+	 * @return {@link Integer}
+	 */
+	public static int getFPSCount() {
+		return (int)literalfps;
+	}
+
+	private static long getCurrentTime() {
+		return Sys.getTime()*1000/Sys.getTimerResolution();
+	}
+
+	public static float getDelta() {
+		return delta + 1;
+	}
+
+
+	/**
+	 * Creates a buffered image from the OpenGL pixel buffer.
+	 *
+	 * @param destination The destination BufferedImage to store in, if null a new one will be created.
+	 * @param buffer The buffer to store OpenGL data into, if null a new one will be created.
+	 *
+	 * @return A new buffered image containing the displays data.
+	 */
+	public static BufferedImage getImage(BufferedImage destination, ByteBuffer buffer) {
+		// Creates a new destination if it does not exist, or fixes a old one,
+		if (destination == null || buffer == null || destination.getWidth() != Display.getWidth() || destination.getHeight() != Display.getHeight()) {
+			destination = new BufferedImage(Display.getWidth(), Display.getHeight(), BufferedImage.TYPE_INT_RGB);
+			buffer = BufferUtils.createByteBuffer(Display.getWidth() * Display.getHeight() * 4);
+		}
+
+		// Creates a new buffer and stores the displays data into it.
+		GL11.glReadPixels(0, 0, Display.getWidth(), Display.getHeight(), GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+
+		// Transfers the data from the buffer into the image. This requires bit shifts to get the components data.
+		for (int x = destination.getWidth() - 1; x >= 0; x--) {
+			for (int y = destination.getHeight() - 1; y >= 0; y--) {
+				int i = (x + Display.getWidth() * y) * 4;
+				destination.setRGB(x, destination.getHeight() - 1 - y, (((buffer.get(i) & 0xFF) & 0x0ff) << 16) | (((buffer.get(i + 1) & 0xFF) & 0x0ff) << 8) | ((buffer.get(i + 2) & 0xFF) & 0x0ff));
+			}
+		}
+
+		return destination;
+	}
+
+	/**
+	 * Returns delta time
+	 * @return deltaTim
+	 */
+	public static float getFrameTimeSeconds() {
+		return delta;
+	}
+	/**
+	 * Converts mouse coordinates from (pixels) screen to window (float).
+	 * <br>
+	 * -1f to 1f
+	 * 
+	 * @return
+	 */
+	public static Vector2f getNormalisedMouseCoords() {
+		float normalisedX = -1.0f + 2.0f * (float) Mouse.getX() / (float) Display.getWidth();
+		float normalisedY = 1.0f - 2.0f * (float) Mouse.getY() / (float) Display.getHeight();
+		return new Vector2f(normalisedX, normalisedY);
+	}
+}
+
