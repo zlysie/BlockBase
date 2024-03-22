@@ -12,50 +12,46 @@ public class ChunkManager {
 		int localX = (int) (globalOrigin.x - chunk.origin.x);
 		int localY = (int) globalOrigin.y;
 		int localZ = (int) (globalOrigin.z - chunk.origin.z);
-		
+
 		Block block = null;
-		
+
 		if (isWithinChunk(localX, localY, localZ)) {
 			block = chunk.blocks[localX][localY][localZ];
 			//chunkMesh.chunk = chunk;
 		}
 		return block;
 	}
-	
+
 	public static void literallyJustForTesting(Vector3f globalOrigin, Chunk chunk) {
 		int localX = (int) (globalOrigin.x + chunk.origin.x);
 		int localY = (int) globalOrigin.y;
 		int localZ = (int) (globalOrigin.z + chunk.origin.z);
 		System.out.println("(" + localX + " " + localY + " " + localZ + ") (" + (int)globalOrigin.x + " " + (int)globalOrigin.y + " " + (int)globalOrigin.z + ")");
 	}
-	
+
 	public static void setBlock(Vector3f globalOrigin, Block block, Chunk chunk) {
 		int localX = (int) (globalOrigin.x - chunk.origin.x);
 		int localY = (int) globalOrigin.y;
 		int localZ = (int) (globalOrigin.z - chunk.origin.z);
-		
-		if (isWithinChunk(localX, localY, localZ)) {
-			
-			if (block != null) {
-	            if (chunk.blocks[localX][localY][localZ] == null) {
-	            	if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
-	            		chunk.blocks[localX][localY][localZ] = block;
-	            		Main.theWorld.refreshChunks();
-	            	}
-	                
-	            } else {
-	                return;
-	            }
-	        } else {
-	        	if(chunk.blocks[localX][localY][localZ] != null) {
-	        		chunk.blocks[localX][localY][localZ] = null;
-	        		Main.theWorld.refreshChunks();
-	        	}
-	            
-	        }
-			
-			
 
+		if (isWithinChunk(localX, localY, localZ)) {
+
+			if (block != null) {
+				if (chunk.blocks[localX][localY][localZ] == null) {
+					if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
+						chunk.blocks[localX][localY][localZ] = block;
+						Main.theWorld.refreshCertainChunk(chunk);
+					}
+
+				} else {
+					return;
+				}
+			} else {
+				if(chunk.blocks[localX][localY][localZ] != null) {
+					chunk.blocks[localX][localY][localZ] = null;
+					Main.theWorld.refreshCertainChunk(chunk);
+				}
+			}
 		}
 	}
 

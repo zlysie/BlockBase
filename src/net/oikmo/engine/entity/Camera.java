@@ -2,7 +2,6 @@ package net.oikmo.engine.entity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.blocks.Block;
@@ -154,6 +153,11 @@ public class Camera {
 				ChunkManager.setBlock(new Vector3f(position), selectedBlock, currentChunk);
 			} else if(Mouse.isButtonDown(0)) {
 				ChunkManager.setBlock(new Vector3f(position), null, currentChunk);
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
+				currentChunk.setBlockFromTopLayer((int)position.x, (int)position.z, selectedBlock);
+				
 			}
 		}
 

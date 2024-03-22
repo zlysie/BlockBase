@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
@@ -93,20 +92,25 @@ public class World {
 			}
 		}
 		
-		if(index < chunkMeshes.size()) {
-			ChunkMesh mesh = chunkMeshes.get(index);
-			RawModel model123 = Loader.getInstance().loadToVAO(mesh.positions, mesh.uvs);
-			TexturedModel texModel123 = new TexturedModel(model123, tex);
-			Entity entity = new Entity(texModel123, mesh.chunk.origin, new Vector3f(0,0,0),1);
+		synchronized(chunks) {
+			for(Chunk chunk : chunks) {
+				if(chunk.hasMesh && chunk.mesh != null) {
+					if(chunk.mesh.positions != null && chunk.mesh.uvs != null && chunk.mesh.normals != null) {
+						RawModel model123 = Loader.getInstance().loadToVAO(chunk.mesh.positions, chunk.mesh.uvs);
+						TexturedModel texModel123 = new TexturedModel(model123, tex);
+						Entity entity = new Entity(texModel123, chunk.origin, new Vector3f(0,0,0),1);
+						chunk.mesh.entity = entity;
+						entities.add(entity);
 
-			entities.add(entity);
-
-			mesh.positions = null;
-			mesh.uvs = null;
-			mesh.normals = null;
-			
-			index++;
+						chunk.mesh.positions = null;
+						chunk.mesh.uvs = null;
+						chunk.mesh.normals = null;
+					}
+					
+				}
+			}
 		}
+		
 
 		for(int i = 0; i < entities.size(); i++) {
 			Vector3f origin = entities.get(i).getPosition();
@@ -123,9 +127,21 @@ public class World {
 	}
 
 	
+	public void refreshCertainChunk(Chunk chunk) {
+		if(chunk.hasMesh && chunk.mesh != null) {
+			chunk.hasMesh = false;
+			entities.remove(chunk.mesh.entity);
+			chunkMeshes.remove(chunk.mesh);
+			chunk.mesh = null;
+			chunkMeshes.add(new ChunkMesh(chunk));
+		}
+		
+	}
+	
 	public void refreshChunks() {
 		for(Chunk chunk : chunks) {
 			chunk.hasMesh = false;
+			chunk.mesh = null;
 		}
 		entities.clear();
 		chunkMeshes.clear();

@@ -5,6 +5,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -38,21 +39,29 @@ public class Main {
 	public static void main(String[] args) {
 		removeHSPIDERR();
 		try {
+			
 			DisplayManager.createDisplay(WIDTH, HEIGHT);
-			Keyboard.create();
+			
 			MasterRenderer.getInstance();
 
 			theWorld = new World("ballsack!!!");
 			
 			Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
 			
-			while(!Display.isCloseRequested()) {
+			while(!displayRequest) {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
 				
 				theWorld.update(camera);
 				
 				DisplayManager.updateDisplay();
+				
+				if(Keyboard.next()) {
+					if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+						DisplayManager.saveScreenshot();
+					}
+				}
+				
 			}
 			DisplayManager.closeDisplay();
 		} catch(Exception e) {

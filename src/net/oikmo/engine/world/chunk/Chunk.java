@@ -11,6 +11,8 @@ public class Chunk {
 	
 	public static final int CHUNK_SIZE = 16;
 	
+	public ChunkMesh mesh;
+	
 	public Block[][][] blocks;
 	public boolean hasMesh = false;
 	
@@ -67,18 +69,17 @@ public class Chunk {
 	    }
 	}
 	
-	private Block getBlockFromTopLayer(int blocky) {
-
-	    for (int x = 0; x < CHUNK_SIZE; x++) {
-	        for (int z = 0; z < CHUNK_SIZE; z++) {
-	            for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-	                if (blocks[x][y][z] != null) {
-	                	return blocks[x][y - blocky][z];
-	                }
-	            }
-	        }
-	    }
-		return null;
+	public void setBlockFromTopLayer(int x, int z, Block block) {
+		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
+			try {
+				 if (blocks[x][y][z] != null) {
+		            	blocks[x][y - 0][z] = block;
+		            	Main.theWorld.refreshCertainChunk(this);
+		            	break;
+		            }
+			} catch(ArrayIndexOutOfBoundsException e) {}
+           
+        }
 	}
 	
 	

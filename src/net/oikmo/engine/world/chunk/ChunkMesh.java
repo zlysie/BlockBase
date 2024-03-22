@@ -7,6 +7,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
@@ -17,18 +18,15 @@ public class ChunkMesh {
 	public float[] positions, uvs, normals;
 	
 	public Chunk chunk;
+	public Entity entity;
 	
 	public ChunkMesh(Chunk chunk) {
 		this.chunk = chunk;
+		this.chunk.mesh = this;
+		this.chunk.hasMesh = true;
 		
 		vertices = new ArrayList<Vertex>();
 		
-		buildMesh();
-		populateLists();
-	}
-
-	public void rebuildMesh() {
-		vertices.clear();
 		buildMesh();
 		populateLists();
 	}

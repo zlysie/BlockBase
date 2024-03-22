@@ -32,7 +32,7 @@ public class DisplayManager {
 	private static int fps, literalfps;
 	private static long lastFrameTime, lastFPS;
 	private static float delta;
-	
+
 	/**
 	 * Creates window by size (loads cursor and window icon) and sets OpenGL version.
 	 * 
@@ -45,16 +45,16 @@ public class DisplayManager {
 			Display.setDisplayMode(mode);
 			Display.setTitle("VoxelEngine");
 			Display.setIcon(IconUtils.getFavicon());
-			
+			Keyboard.create();
 		} catch (LWJGLException e) {
-			e.printStackTrace();
+			Main.error("Failed to create Display!", e);
 		}
 
 		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		lastFrameTime = getCurrentTime();
 		lastFPS = getCurrentTime();
 	}
-	
+
 	/**
 	 * Updates the display to show a new frame and calculates the last frame time.
 	 * <br>
@@ -66,18 +66,6 @@ public class DisplayManager {
 		updateFPS();
 		Display.update();
 		Display.sync(60);
-		
-		while(Keyboard.next()) {
-			if(Keyboard.getEventKeyState()) {
-				if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-					closeDisplay();
-				}
-				
-				if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
-					saveScreenshot();
-				}
-			}	
-		}
 		
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;
@@ -134,14 +122,14 @@ public class DisplayManager {
 			Main.error("Failed to save screenshot! : " + name+".png", e);
 		}
 	}
-	
+
 	/**
 	 * Destroys the display (not the program)
 	 */
 	public static void closeDisplay() {
 		Display.destroy();
 	}	
-	
+
 	/**
 	 * Updates FPS counter.
 	 */
