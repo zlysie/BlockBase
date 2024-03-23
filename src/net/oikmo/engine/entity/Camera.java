@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.ChunkManager;
+import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
 
@@ -19,14 +20,14 @@ public class Camera {
 
 
 	private int maxVerticalTurn = 80;
-	Vector3f position;
-
+	private Vector3f position;
+	private Vector3f chunkPosition;
+	
 	public float pitch = 0;
 	public float yaw = 0;
 	public float roll = 0;
-
-	private int chunkX, chunkZ;
-	private Chunk currentChunk;
+	
+	private MasterChunk currentChunk;
 
 	/**
 	 * Camera constructor. Sets position and rotation.
@@ -37,6 +38,7 @@ public class Camera {
 	 */
 	public Camera(Vector3f position, Vector3f rotation) {
 		this.position = position;
+		this.chunkPosition = new Vector3f();
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
 		flyCam = true;
@@ -50,30 +52,35 @@ public class Camera {
 			public void run() {
 				while(!Main.displayRequest) {
 					if(position.x >= 0) {
-						chunkX = (int) position.x / Chunk.CHUNK_SIZE;
+						chunkPosition.x = (int) (position.x / Chunk.CHUNK_SIZE)*16;
 					} else {
 						if(position.x > -16) {
-							chunkX = (int)-1;
+							chunkPosition.x = (int)-1*16;
 						} else {
-							chunkX = (int) (position.x / Chunk.CHUNK_SIZE)-1;
+							chunkPosition.x = (int) ((position.x / Chunk.CHUNK_SIZE)-1)*16;
 						}
 					}
 
 					if(position.z >= 0) {
-						chunkZ = (int) position.z / Chunk.CHUNK_SIZE;
+						chunkPosition.z = (int) (position.z / Chunk.CHUNK_SIZE) * 16;
 					} else {
 						if(position.z > -16) {
-							chunkZ = (int)-1;
+							chunkPosition.z = (int)-1 * 16;
 						} else {
-							chunkZ = (int) (position.z / Chunk.CHUNK_SIZE)-1;
+							chunkPosition.z = (int) ((position.z / Chunk.CHUNK_SIZE)-1)*16;
 						}
 					}
-
-					//System.out.println("("+(int) position.x+ " " + (int) position.z + ") (" + chunkX + " " + chunkZ + ")");
-					for(int i = 0; i < Main.theWorld.chunks.size(); i++) {
+					
+					MasterChunk master = MasterChunk.getChunkFromPosition(chunkPosition);
+					if(master != null) {
+						currentChunk = master;
+					}
+					
+					
+					
+					/*for(int i = 0; i < Main.theWorld.chunks.size(); i++) {
 						Chunk chunk = Main.theWorld.chunks.get(i);
 						if(chunk != null) {
-							//
 							if(chunk.origin.x/16 == chunkX && chunk.origin.z/16 == chunkZ) {
 								currentChunk = chunk;
 							}
@@ -81,7 +88,7 @@ public class Camera {
 						} else {
 							System.out.println("Null!");
 						}
-					}
+					}*/
 				}
 			}
 		});
@@ -156,7 +163,7 @@ public class Camera {
 			}
 			
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				currentChunk.setBlockFromTopLayer((int)position.x, (int)position.z, selectedBlock);
+				currentChunk.getChunk().setBlockFromTopLayer((int)position.x, (int)position.z, selectedBlock);
 				
 			}
 		}

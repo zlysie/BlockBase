@@ -48,7 +48,7 @@ public class Main {
 			
 			Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
 			
-			while(!displayRequest) {
+			while(!Display.isCloseRequested()) {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
 				
@@ -67,6 +67,7 @@ public class Main {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
+		DisplayManager.closeDisplay();
 		displayRequest = true;
 		
 		Logger.saveLog();

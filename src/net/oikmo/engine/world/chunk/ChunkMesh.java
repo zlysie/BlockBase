@@ -22,8 +22,6 @@ public class ChunkMesh {
 	
 	public ChunkMesh(Chunk chunk) {
 		this.chunk = chunk;
-		this.chunk.mesh = this;
-		this.chunk.hasMesh = true;
 		
 		vertices = new ArrayList<Vertex>();
 		
@@ -142,10 +140,17 @@ public class ChunkMesh {
 	    }
 	}
 	
-
+	public void removeMeshInfo() {
+		this.positions = null;
+		this.uvs = null;
+		this.normals = null;
+	}
+	
+	public boolean hasMeshInfo() {
+		return this.positions != null && this.uvs != null && this.normals != null;
+	}
 	
 	private void populateLists() {
-		
 		int numVertices = vertices.size();
 	    positions = new float[numVertices * 3]; // Each vertex has 3 position components
 	    uvs = new float[numVertices * 2]; // Each vertex has 2 uv components
@@ -168,6 +173,5 @@ public class ChunkMesh {
 	        normals[normalIndex + 1] = vertex.normals.y;
 	        normals[normalIndex + 2] = vertex.normals.z;
 	    }
-		
 	}
 } 

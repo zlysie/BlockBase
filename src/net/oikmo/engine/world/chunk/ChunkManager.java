@@ -29,27 +29,29 @@ public class ChunkManager {
 		System.out.println("(" + localX + " " + localY + " " + localZ + ") (" + (int)globalOrigin.x + " " + (int)globalOrigin.y + " " + (int)globalOrigin.z + ")");
 	}
 
-	public static void setBlock(Vector3f globalOrigin, Block block, Chunk chunk) {
-		int localX = (int) (globalOrigin.x - chunk.origin.x);
+	public static void setBlock(Vector3f globalOrigin, Block block, MasterChunk chunk) {
+		int localX = (int) (globalOrigin.x - chunk.getOrigin().x);
 		int localY = (int) globalOrigin.y;
-		int localZ = (int) (globalOrigin.z - chunk.origin.z);
-
+		int localZ = (int) (globalOrigin.z - chunk.getOrigin().z);
+		
+		System.out.println("(" + localX + " " + localY + " " + localZ + ") (" + (int)globalOrigin.x + " " + (int)globalOrigin.y + " " + (int)globalOrigin.z + ")" + chunk.getOrigin());
+		
 		if (isWithinChunk(localX, localY, localZ)) {
 
 			if (block != null) {
-				if (chunk.blocks[localX][localY][localZ] == null) {
-					if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
-						chunk.blocks[localX][localY][localZ] = block;
-						Main.theWorld.refreshCertainChunk(chunk);
+				if (chunk.getChunk().blocks[localX][localY][localZ] == null) {
+					if(chunk.getChunk().blocks[localX][localY][localZ] != block || chunk.getChunk().blocks[localX][localY][localZ].getType() != block.getType()) {
+						chunk.getChunk().blocks[localX][localY][localZ] = block;
+						Main.theWorld.refreshChunk(chunk);
 					}
 
 				} else {
 					return;
 				}
 			} else {
-				if(chunk.blocks[localX][localY][localZ] != null) {
-					chunk.blocks[localX][localY][localZ] = null;
-					Main.theWorld.refreshCertainChunk(chunk);
+				if(chunk.getChunk().blocks[localX][localY][localZ] != null) {
+					chunk.getChunk().blocks[localX][localY][localZ] = null;
+					Main.theWorld.refreshChunk(chunk);
 				}
 			}
 		}

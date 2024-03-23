@@ -9,12 +9,8 @@ import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 public class Chunk {
 	
-	public static final int CHUNK_SIZE = 16;
-	
-	public ChunkMesh mesh;
-	
+	public static final byte CHUNK_SIZE = 16;
 	public Block[][][] blocks;
-	public boolean hasMesh = false;
 	
 	
 	public Vector3f origin;
@@ -36,10 +32,10 @@ public class Chunk {
 	private void generateChunk() {
 	    for (int x = 0; x < CHUNK_SIZE; x++) {
 	        for (int z = 0; z < CHUNK_SIZE; z++) {
-	            int actualX = (int) (origin.x + x);
-	            int actualZ = (int) (origin.z + z);
+	        	int actualX = (int) (origin.x + x);
+	        	int actualZ = (int) (origin.z + z);
 
-	            int height = (int) noiseGen.generateHeight(actualX, actualZ);
+	        	int height = (int) noiseGen.generateHeight(actualX, actualZ);
 	            for (int y = 0; y < World.WORLD_HEIGHT; y++) {
 	                if (y < height) {
 	                    // Create a solid block at this position                    
@@ -74,7 +70,7 @@ public class Chunk {
 			try {
 				 if (blocks[x][y][z] != null) {
 		            	blocks[x][y - 0][z] = block;
-		            	Main.theWorld.refreshCertainChunk(this);
+		            	Main.theWorld.refreshChunks();
 		            	break;
 		            }
 			} catch(ArrayIndexOutOfBoundsException e) {}
