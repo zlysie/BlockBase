@@ -144,7 +144,7 @@ public class Camera {
 	private float moveAt;
 	private boolean flyCam = true;
 	private boolean lockInCam;
-	private Block selectedBlock;
+	private Block selectedBlock = Block.cobble;
 	
 	/**
 	 * Fly cam
