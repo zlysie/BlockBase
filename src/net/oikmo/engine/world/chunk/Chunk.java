@@ -65,20 +65,6 @@ public class Chunk {
 	    }
 	}
 	
-	public void setBlockFromTopLayer(int x, int z, Block block) {
-		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-			try {
-				 if (blocks[x][y][z] != null) {
-		            	blocks[x][y - 0][z] = block;
-		            	Main.theWorld.refreshChunks();
-		            	break;
-		            }
-			} catch(ArrayIndexOutOfBoundsException e) {}
-           
-        }
-	}
-	
-	
 	private Block calculateBlockType(int height) {
 	    if (height >= 60) {
 	        return Block.dirt;

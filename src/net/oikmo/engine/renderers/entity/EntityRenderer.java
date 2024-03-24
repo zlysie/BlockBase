@@ -43,7 +43,13 @@ public class EntityRenderer {
 					Entity entity = batch.get(i);
 					Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 					shader.loadTransformationMatrix(transformationMatrix);
-					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
+					
+					if(entity.drawAsElements()) {
+						GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+					} else {
+						GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
+					}
+					
 				}
 				
 				GL20.glDisableVertexAttribArray(0);

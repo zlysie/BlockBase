@@ -88,7 +88,7 @@ public class AudioMaster {
 		byte[] stream = null;
 		InputStream res = load.getResourceAsStream(path);
 		if(res == null) {
-			res = load.getResourceAsStream("content/sounds/Kid saying Ouch.wav");
+			res = load.getResourceAsStream("assets/sounds/fallback.wav");
 		}
 		try {
 			stream = IOUtils.toByteArray(res);

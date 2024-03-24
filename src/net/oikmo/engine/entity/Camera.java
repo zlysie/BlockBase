@@ -4,12 +4,21 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.Loader;
+import net.oikmo.engine.models.CubeModel;
+import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.renderers.MasterRenderer;
+import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.ChunkManager;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Maths;
+import net.oikmo.toolbox.MousePicker;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 /**
  * Camera class. Allows the player to see the world.
@@ -19,16 +28,26 @@ import net.oikmo.main.Main;
 public class Camera {
 
 
-	private int maxVerticalTurn = 80;
+	private int maxVerticalTurn = 90;
 	private Vector3f position;
 	private Vector3f chunkPosition;
+	private Vector3f roundedPosition;
 	
 	public float pitch = 0;
 	public float yaw = 0;
 	public float roll = 0;
 	
 	private MasterChunk currentChunk;
-
+	private MousePicker picker;
+	private Entity block;
+	
+	private float speeds = 0f;
+	private float speed = 0.1f;
+	private float moveAt;
+	private boolean flyCam = true;
+	private boolean lockInCam;
+	private Block selectedBlock = Block.cobble;
+	
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -39,12 +58,14 @@ public class Camera {
 	public Camera(Vector3f position, Vector3f rotation) {
 		this.position = position;
 		this.chunkPosition = new Vector3f();
+		this.roundedPosition = new Vector3f();
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
+		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
+		this.block = new Entity(true, new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.indices, CubeModel.uv), new ModelTexture(Loader.getInstance().loadTexture("dirtTex"))), position, rotation, 1);
 		flyCam = true;
 		startThread1();
 	}
-
 
 	private void startThread1() {
 
@@ -75,20 +96,6 @@ public class Camera {
 					if(master != null) {
 						currentChunk = master;
 					}
-					
-					
-					
-					/*for(int i = 0; i < Main.theWorld.chunks.size(); i++) {
-						Chunk chunk = Main.theWorld.chunks.get(i);
-						if(chunk != null) {
-							if(chunk.origin.x/16 == chunkX && chunk.origin.z/16 == chunkZ) {
-								currentChunk = chunk;
-							}
-
-						} else {
-							System.out.println("Null!");
-						}
-					}*/
 				}
 			}
 		});
@@ -96,60 +103,25 @@ public class Camera {
 		chunkGetter.setName("Chunk Grabber");
 		chunkGetter.start();
 	}
-
-	/**
-	 * Moves camera based on given values.
-	 * @param dx
-	 * @param dy
-	 * @param dz
-	 */
-	public void increasePosition(float dx, float dy, float dz) {
-		this.position.x += dx;
-		this.position.y += dy;
-		this.position.z += dz;
-	}
-	/**
-	 * Rotates the camera based on given values.
-	 * @param dx
-	 * @param dy
-	 * @param dz
-	 */
-	public void increaseRotation(float dx, float dy, float dz) {
-		this.pitch += dx;
-		this.yaw += dy;
-		this.roll += dz;
-	}
-	/**
-	 * Sets the rotation of the camera based on given values.
-	 * @param dx
-	 * @param dy
-	 * @param dz
-	 */
-	public void setRotation(float dx, float dy, float dz) {
-		this.pitch = dx;
-		this.yaw = dy;
-		this.roll = dz;
-	}
-
-	/**
-	 * Sets position to given 3D Vector
-	 * @param vector
-	 */
-	public void setPosition(Vector3f v) {
-		this.position = v;
-	}
-
-	private float speeds = 0f;
-	private float speed = 0.1f;
-	private float moveAt;
-	private boolean flyCam = true;
-	private boolean lockInCam;
-	private Block selectedBlock = Block.cobble;
 	
 	/**
 	 * Fly cam
 	 */
 	public void update() {
+		roundedPosition.x = Maths.roundFloat(position.x);
+		roundedPosition.y = Maths.roundFloat(position.y);
+		roundedPosition.z = Maths.roundFloat(position.z);
+		
+		picker.update();
+		Vector3f pos = picker.getPoint();
+		pos.x = Maths.roundFloat(pos.x);
+		pos.y = Maths.roundFloat(pos.y);
+		pos.z = Maths.roundFloat(pos.z);
+		
+		block.setPosition(pos);
+		
+		MasterRenderer.getInstance().addEntity(block);
+		
 		try {
 			int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
 			selectedBlock = Block.blocks[index] != null ? Block.blocks[index] : Block.bedrock;
@@ -157,26 +129,26 @@ public class Camera {
 		
 		if(currentChunk != null) {
 			if(Mouse.isButtonDown(1)) {
-				ChunkManager.setBlock(new Vector3f(position), selectedBlock, currentChunk);
+				ChunkManager.setBlock(roundedPosition, selectedBlock, currentChunk);
 			} else if(Mouse.isButtonDown(0)) {
-				ChunkManager.setBlock(new Vector3f(position), null, currentChunk);
+				ChunkManager.setBlock(roundedPosition, null, currentChunk);
 			}
 			
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				currentChunk.getChunk().setBlockFromTopLayer((int)position.x, (int)position.z, selectedBlock);
+				ChunkManager.setBlockFromTopLayer((int)roundedPosition.x, (int)roundedPosition.z, selectedBlock, currentChunk);
 				
 			}
+		} else {
+			Logger.log(LogLevel.WARN, "No chunk loaded!");
 		}
-
-		if(!lockInCam) {
-			if(Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+			if(!lockInCam) {
 				flyCam = !flyCam;
 				lockInCam = true;
 			}
 		} else {
-			if(!Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-				lockInCam = false;
-			}
+			lockInCam = false;
 		}
 
 		if(Mouse.isGrabbed() != flyCam) {
@@ -229,6 +201,48 @@ public class Camera {
 				Mouse.setGrabbed(false);
 			}
 		}
+	}
+	
+	/**
+	 * Moves camera based on given values.
+	 * @param dx
+	 * @param dy
+	 * @param dz
+	 */
+	public void increasePosition(float dx, float dy, float dz) {
+		this.position.x += dx;
+		this.position.y += dy;
+		this.position.z += dz;
+	}
+	/**
+	 * Rotates the camera based on given values.
+	 * @param dx
+	 * @param dy
+	 * @param dz
+	 */
+	public void increaseRotation(float dx, float dy, float dz) {
+		this.pitch += dx;
+		this.yaw += dy;
+		this.roll += dz;
+	}
+	/**
+	 * Sets the rotation of the camera based on given values.
+	 * @param dx
+	 * @param dy
+	 * @param dz
+	 */
+	public void setRotation(float dx, float dy, float dz) {
+		this.pitch = dx;
+		this.yaw = dy;
+		this.roll = dz;
+	}
+
+	/**
+	 * Sets position to given 3D Vector
+	 * @param vector
+	 */
+	public void setPosition(Vector3f v) {
+		this.position = v;
 	}
 
 	public Vector3f getPosition() {

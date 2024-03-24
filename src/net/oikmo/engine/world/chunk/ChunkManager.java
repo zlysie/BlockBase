@@ -22,29 +22,18 @@ public class ChunkManager {
 		return block;
 	}
 
-	public static void literallyJustForTesting(Vector3f globalOrigin, Chunk chunk) {
-		int localX = (int) (globalOrigin.x + chunk.origin.x);
-		int localY = (int) globalOrigin.y;
-		int localZ = (int) (globalOrigin.z + chunk.origin.z);
-		System.out.println("(" + localX + " " + localY + " " + localZ + ") (" + (int)globalOrigin.x + " " + (int)globalOrigin.y + " " + (int)globalOrigin.z + ")");
-	}
-
 	public static void setBlock(Vector3f globalOrigin, Block block, MasterChunk chunk) {
 		int localX = (int) (globalOrigin.x - chunk.getOrigin().x);
 		int localY = (int) globalOrigin.y;
 		int localZ = (int) (globalOrigin.z - chunk.getOrigin().z);
-		
-		System.out.println("(" + localX + " " + localY + " " + localZ + ") (" + (int)globalOrigin.x + " " + (int)globalOrigin.y + " " + (int)globalOrigin.z + ")" + chunk.getOrigin());
-		
-		if (isWithinChunk(localX, localY, localZ)) {
 
+		if (isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
 				if (chunk.getChunk().blocks[localX][localY][localZ] == null) {
 					if(chunk.getChunk().blocks[localX][localY][localZ] != block || chunk.getChunk().blocks[localX][localY][localZ].getType() != block.getType()) {
 						chunk.getChunk().blocks[localX][localY][localZ] = block;
 						Main.theWorld.refreshChunk(chunk);
 					}
-
 				} else {
 					return;
 				}
@@ -57,9 +46,30 @@ public class ChunkManager {
 		}
 	}
 
+	public static void setBlockFromTopLayer(int x, int z, Block block, MasterChunk chunk) {
+		int localX = (int) (x - chunk.getOrigin().x);
+		int localZ = (int) (z - chunk.getOrigin().z);
+		if(isWithinChunk(localX, localZ)) {
+			for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
+				try {
+					if (chunk.getChunk().blocks[localX][y][localZ] != null) {
+						chunk.getChunk().blocks[localX][y - 0][localZ] = block;
+						Main.theWorld.refreshChunk(chunk);
+						break;
+					}
+				} catch(ArrayIndexOutOfBoundsException e) {}
+			}
+		}
+	}
+
 	public static boolean isWithinChunk(int localX, int localY, int localZ) {
 		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
 				localY >= 0 && localY < World.WORLD_HEIGHT &&
+				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
+	}
+
+	public static boolean isWithinChunk(int localX, int localZ) {
+		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
 				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
 	}
 }

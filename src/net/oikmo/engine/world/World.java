@@ -7,7 +7,6 @@ import java.util.List;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
@@ -18,11 +17,13 @@ import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.FastMath;
+import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 public class World {
 
 	public static final int WORLD_HEIGHT = 128;
-	public static final int WORLD_SIZE = 16;
+	public static final int WORLD_SIZE = 2*8;
 	
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	public List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
@@ -30,8 +31,6 @@ public class World {
 	public String seed = null;
 	
 	private ModelTexture tex;
-	
-	private float timer = 0;
 
 	private boolean lockInRefresh = false;
 	
@@ -55,9 +54,9 @@ public class World {
 							synchronized(MasterChunk.usedPositions) {
 								if(!MasterChunk.isPositionUsed(chunkPos)) {
 									masterChunks.add(new MasterChunk(chunkPos));
+									Logger.log(LogLevel.INFO, "Creating chunk!");
 								}
 							}
-							
 						}
 					}
 				}
@@ -68,19 +67,13 @@ public class World {
 	}
 	
 	public void update(Camera camera) {
-
-		timer += DisplayManager.getFrameTimeSeconds();
-		//System.out.println(timer);
 		if(Keyboard.isKeyDown(Keyboard.KEY_F)) {
 			if(!lockInRefresh) {
 				refreshChunks();
 				lockInRefresh = true;
 			}
-
 		} else {
-			if(lockInRefresh) {
-				lockInRefresh = false;
-			}
+			lockInRefresh = false;
 		}
 		
 		synchronized(masterChunks) {

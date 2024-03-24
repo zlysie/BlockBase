@@ -6,15 +6,28 @@ import net.oikmo.engine.models.TexturedModel;
 
 public class Entity {
 	
-	TexturedModel model;
-	Vector3f position, rotation;
-	float scale;
+	private TexturedModel model;
+	private Vector3f position, rotation;
+	private float scale;
+	private boolean elements;
 	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
+	}
+	
+	public Entity(boolean elements, TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
+		this.model = model;
+		this.position = position;
+		this.rotation = rotation;
+		this.scale = scale;
+		this.elements = elements;
+	}
+	
+	public boolean drawAsElements() {
+		return elements;
 	}
 	
 	public TexturedModel getModel() {

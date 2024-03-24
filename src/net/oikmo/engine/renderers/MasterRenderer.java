@@ -60,7 +60,9 @@ public class MasterRenderer {
 		List<Entity> batch = entities.get(model);
 		
 		if(batch != null) {
-			batch.add(entity);
+			if(!batch.contains(entity)) {
+				batch.add(entity);
+			}
 		} else {
 			List<Entity> newBatch = new ArrayList<>();
 			newBatch.add(entity);
@@ -83,5 +85,9 @@ public class MasterRenderer {
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 = -(2 * FAR_PLANE * NEAR_PLANE) / zm;
 		projectionMatrix.m33 = 0;
+	}
+
+	public Matrix4f getProjectionMatrix() {
+		return this.projectionMatrix;
 	}
 }

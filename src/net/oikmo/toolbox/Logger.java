@@ -15,12 +15,19 @@ public class Logger {
 	
 	public enum LogLevel {
 		INFO,
-		WARNING,
+		WARN,
 		ERROR
 	}
 	
 	public static void log(LogLevel level, Object message) {
-		String toLog = getCurrentTime() + " [" + level.name() + "] "  + "[" + getCallerClassName() + "] " + message.toString();
+		String toLog = "";
+		ThreadCall call = getThreadCall();
+		if(!call.getClassCall().contains("$")) {
+			toLog = getCurrentTime() + " [" + call.getThreadCall() + "/" + level.name() + "] "  + "[" + call.getClassCall() + "] " + message.toString();
+		} else {
+			toLog = getCurrentTime() + " [" + call.getThreadCall() + "/" + level.name() + "] " + message.toString();
+		}
+		
 		completeLog += toLog + "\r\n";
 		
 		if(level == LogLevel.ERROR) {
@@ -61,13 +68,14 @@ public class Logger {
 	 * returns who ran the function.
 	 * @return class name
 	 */
-	private static String getCallerClassName() { 
+	private static ThreadCall getThreadCall() { 
+		ThreadCall call;
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
         for(int i = 1; i < stElements.length; i++) {
             StackTraceElement ste = stElements[i];
             if(!ste.getClassName().equals(Logger.class.getName()) && ste.getClassName().indexOf("java.lang.Thread") != 0) {
             	String[] res = ste.getClassName().split("\\.");
-                return res[res.length-1];
+                return new ThreadCall(Thread.currentThread().getName(), res[res.length-1]);
             }
         }
         return null;
@@ -154,5 +162,22 @@ public class Logger {
 		String time = hour + "." + minute + "." + second;
 
 		return date + "_" + time;
+	}
+	
+	private static class ThreadCall {
+		private String threadCall;
+		private String classCall;
+		public ThreadCall(String threadCall, String classCall) {
+			this.threadCall = threadCall;
+			this.classCall = classCall;
+		}
+		
+		public String getThreadCall() {
+			return threadCall;
+		}
+		
+		public String getClassCall() {
+			return classCall;
+		}
 	}
 }

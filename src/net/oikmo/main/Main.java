@@ -11,6 +11,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.Loader;
+import net.oikmo.engine.audio.AudioMaster;
+import net.oikmo.engine.audio.Source;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
@@ -41,13 +43,13 @@ public class Main {
 		try {
 			
 			DisplayManager.createDisplay(WIDTH, HEIGHT);
-			
+			AudioMaster.init();
 			MasterRenderer.getInstance();
 
 			theWorld = new World("ballsack!!!");
-			
+			Source source = new Source();
+			source.play(AudioMaster.getSound("penis"));
 			Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
-			
 			while(!Display.isCloseRequested()) {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
@@ -63,7 +65,6 @@ public class Main {
 				}
 				
 			}
-			DisplayManager.closeDisplay();
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}

@@ -20,7 +20,7 @@ public class MasterChunk {
 	private Entity entity;
 	
 	public MasterChunk(Vector3f origin) {
-		index = usedPositions.size();
+		setIndex(usedPositions.size());
 		this.origin = origin;
 		this.chunk = new Chunk(this.origin);
 		this.mesh = new ChunkMesh(this.chunk);
@@ -69,7 +69,6 @@ public class MasterChunk {
 	}
 	
 	public void createMesh() {
-		System.out.println("YEAH! CREATING MESH " + index);
 		this.mesh = new ChunkMesh(this.chunk);
 	}
 	
@@ -79,5 +78,13 @@ public class MasterChunk {
 	
 	public void setEntity(Entity entity) {
 		this.entity = entity;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	private void setIndex(int index) {
+		this.index = index;
 	}
 }
