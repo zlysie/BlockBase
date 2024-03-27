@@ -5,7 +5,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class CubeModel {
 
-public static Vector3f[] PX_POS = {
+	public static Vector3f[] PX_POS = {
 			
 			new Vector3f(0.5f,0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,-0.5f),
@@ -15,7 +15,6 @@ public static Vector3f[] PX_POS = {
 			new Vector3f(0.5f,0.5f,-0.5f)
 			
 	};
-	
 	public static Vector3f[] NX_POS = {
 			
 			new Vector3f(-0.5f,0.5f,-0.5f),
@@ -26,7 +25,6 @@ public static Vector3f[] PX_POS = {
 			new Vector3f(-0.5f,0.5f,-0.5f)
 			
 	};
-	
 	public static Vector3f[] PY_POS = {
 			
 			new Vector3f(-0.5f,0.5f,0.5f),
@@ -37,7 +35,6 @@ public static Vector3f[] PX_POS = {
 			new Vector3f(-0.5f,0.5f,0.5f)
 			
 	};
-	
 	public static Vector3f[] NY_POS = {
 			
 			new Vector3f(-0.5f,-0.5f,0.5f),
@@ -48,7 +45,6 @@ public static Vector3f[] PX_POS = {
 			new Vector3f(-0.5f,-0.5f,0.5f)
 			
 	};
-	
 	public static Vector3f[] PZ_POS = {
 			
 			new Vector3f(-0.5f,0.5f,0.5f),
@@ -59,7 +55,6 @@ public static Vector3f[] PX_POS = {
 			new Vector3f(-0.5f,0.5f,0.5f)
 			
 	};
-	
 	public static Vector3f[] NZ_POS = {
 			
 			new Vector3f(-0.5f,0.5f,-0.5f),
@@ -70,6 +65,7 @@ public static Vector3f[] PX_POS = {
 			new Vector3f(-0.5f,0.5f,-0.5f)
 			
 	};
+	
 	public static Vector2f[] UV_PX = {
 
 			// GRASS
@@ -469,27 +465,29 @@ public static Vector3f[] PX_POS = {
             1,1,
             1,0,
             0,0,
+            
             0,1,
             1,1,
             1,0,
             0,0,
             0,1,
+            
             1,1,
             1,0,
             0,0,
             0,1,
             1,1,
+            
             1,0,
             0,0,
             0,1,
             1,1,
+            
             1,0,
             0,0,
             0,1,
             1,1,
             1,0
-
-
     };
 
     public static int[] indices = {
@@ -506,4 +504,44 @@ public static Vector3f[] PX_POS = {
             20,21,23,
             23,21,22
 	};
+    
+
+    static Vector2f[][] UVS;
+    static Vector3f[][] VERTS;
+	public static float[] convert(int is) {
+		UVS = UVS == null ? new Vector2f[][]{CubeModel.UV_PX, CubeModel.UV_NX, CubeModel.UV_PY, CubeModel.UV_NY, CubeModel.UV_PZ, CubeModel.UV_NZ} : UVS;
+		int totalLength = UVS.length * 6 * 2; // 5 vectors for each array
+
+		float[] result = new float[totalLength];
+		int index = 0;
+		int startIndex = is * 6;
+		
+		for (Vector2f[] uvArray : UVS) {
+			for (int i = startIndex; i < startIndex + 6; i++) {
+				Vector2f uv = uvArray[i];
+				result[index++] = uv.x;
+				result[index++] = uv.y;
+			}
+		}
+
+		return result;
+	}
+
+	public static void createVertices() {
+		VERTS = VERTS == null ? new Vector3f[][]{CubeModel.PX_POS, CubeModel.NX_POS, CubeModel.PY_POS, CubeModel.NY_POS, CubeModel.PZ_POS, CubeModel.NZ_POS} : VERTS;
+		int totalLength = VERTS.length * 6 * 3; // 6 vectors for each array
+
+		vertices = new float[totalLength];
+		int index = 0;
+
+		for (Vector3f[] uvArray : VERTS) {
+			for (int i = 0; i < 6; i++) {
+				Vector3f uv = uvArray[i];
+				vertices[index++] = uv.x;
+				vertices[index++] = uv.y;
+				vertices[index++] = uv.z;
+
+			}
+		}
+	}
 }

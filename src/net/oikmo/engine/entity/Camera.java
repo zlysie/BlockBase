@@ -62,7 +62,7 @@ public class Camera {
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
-		this.block = new Entity(true, new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.indices, CubeModel.uv), new ModelTexture(Loader.getInstance().loadTexture("dirtTex"))), position, rotation, 1);
+		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(Loader.getInstance().loadTexture("defaultPack"))), position, rotation, 1);
 		flyCam = true;
 		startThread1();
 	}
@@ -124,14 +124,23 @@ public class Camera {
 		
 		try {
 			int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
-			selectedBlock = Block.blocks[index] != null ? Block.blocks[index] : Block.bedrock;
+			
+			System.out.println(index);
+			if(Block.blocks[index] != null) {
+				if(selectedBlock != Block.blocks[index]) {
+					selectedBlock = Block.blocks[index];
+					block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())));
+				}
+			} else {
+				
+			}
 		} catch(NumberFormatException e) {}
 		
 		if(currentChunk != null) {
 			if(Mouse.isButtonDown(1)) {
-				ChunkManager.setBlock(roundedPosition, selectedBlock, currentChunk);
+				ChunkManager.setBlock(pos, selectedBlock, currentChunk);
 			} else if(Mouse.isButtonDown(0)) {
-				ChunkManager.setBlock(roundedPosition, null, currentChunk);
+				ChunkManager.setBlock(pos, null, currentChunk);
 			}
 			
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {

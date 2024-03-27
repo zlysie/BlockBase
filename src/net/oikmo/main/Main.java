@@ -14,6 +14,7 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.audio.AudioMaster;
 import net.oikmo.engine.audio.Source;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
 import net.oikmo.toolbox.Logger;
@@ -39,10 +40,11 @@ public class Main {
 	static Frame frame;
 	
 	public static void main(String[] args) {
+		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
 		try {
-			
 			DisplayManager.createDisplay(WIDTH, HEIGHT);
+			CubeModel.createVertices();
 			AudioMaster.init();
 			MasterRenderer.getInstance();
 
