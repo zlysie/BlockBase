@@ -1,12 +1,19 @@
 package net.oikmo.main;
 
+import java.awt.BorderLayout;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
@@ -39,6 +46,7 @@ public class Main {
 	public static Vector3f camPos = new Vector3f(0,0,0);
 	
 	static Frame frame;
+	static Canvas gameCanvas;
 	
 	private static GuiScreen currentScreen;
 	
@@ -46,7 +54,23 @@ public class Main {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
 		try {
-			DisplayManager.createDisplay(WIDTH, HEIGHT);
+			
+			frame = new Frame(Main.gameVersion);
+			gameCanvas = new Canvas();
+			Graphics var1 = gameCanvas.getGraphics();
+			if(var1 != null) {
+				var1.setColor(Color.BLUE);
+				var1.fillRect(0, 0, WIDTH, HEIGHT);
+				var1.dispose();
+			}
+
+			frame.setLayout(new BorderLayout());
+			frame.add(gameCanvas, "Center");
+			gameCanvas.setPreferredSize(new Dimension(WIDTH, HEIGHT)); //480
+			frame.pack();
+			frame.setLocationRelativeTo((Component)null);
+			frame.setVisible(true);
+			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
 			CubeModel.createVertices();
 			AudioMaster.init();
 			MasterRenderer.getInstance();
@@ -60,10 +84,24 @@ public class Main {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
 				
-				currentScreen.update();
+				//currentScreen.update();
 				theWorld.update(camera);
 				
-				DisplayManager.updateDisplay();
+				if(gameCanvas != null && (gameCanvas.getWidth() != WIDTH || gameCanvas.getHeight() != HEIGHT)) {
+					WIDTH = gameCanvas.getWidth();
+					HEIGHT = gameCanvas.getHeight();
+					if(WIDTH <= 0) {
+						WIDTH = 1;
+					}
+
+					if(HEIGHT <= 0) {
+						HEIGHT = 1;
+					}
+					
+					Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
+				}
+				
+				DisplayManager.updateDisplay(gameCanvas);
 				
 				if(Keyboard.next()) {
 					if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
@@ -79,6 +117,10 @@ public class Main {
 		displayRequest = true;
 		
 		Logger.saveLog();
+	}
+	
+	public static void start(String var0, String var1, String var2) {
+		
 	}
 	
 	static PanelCrashReport report;

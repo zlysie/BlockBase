@@ -1,5 +1,6 @@
 package net.oikmo.engine;
 
+import java.awt.Canvas;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -39,10 +40,11 @@ public class DisplayManager {
 	 * 
 	 * @author <i>Oikmo</i>
 	 */
-	public static void createDisplay(int width, int height) {
+	public static void createDisplay(Canvas canvas, int width, int height) {
 		DisplayMode mode = new DisplayMode(width, height);
 		try {
 			Display.create();
+			Display.setParent(canvas);
 			Display.setDisplayMode(mode);
 			Display.setTitle("VoxelEngine");
 			Display.setIcon(IconUtils.getFavicon());
@@ -51,7 +53,7 @@ public class DisplayManager {
 			Main.error("Failed to create Display!", e);
 		}
 
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT);
 		lastFrameTime = getCurrentTime();
 		lastFPS = getCurrentTime();
 	}
@@ -63,11 +65,11 @@ public class DisplayManager {
 	 * <br>
 	 * Handles fullscreen and taking screenshots on the press of a key.
 	 */
-	public static void updateDisplay() {
+	public static void updateDisplay(Canvas canvas) {
 		updateFPS();
 		Display.update();
 		Display.sync(60);
-		
+		//GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT);
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;
 		lastFrameTime = currentFrameTime;		
