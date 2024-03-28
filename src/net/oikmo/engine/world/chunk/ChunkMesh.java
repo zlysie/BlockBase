@@ -7,31 +7,23 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 
 public class ChunkMesh {
-	public List<Vertex> vertices;
-	HashMap<Vector3f, Vertex> uniqueVertices = new HashMap<>();
+	private List<Vertex> vertices;
+	private HashMap<Vector3f, Vertex> uniqueVertices = new HashMap<>();
 	public float[] positions, uvs, normals;
 	
-	public Chunk chunk;
-	public Entity entity;
-	
 	public ChunkMesh(Chunk chunk) {
-		this.chunk = chunk;
-		
 		vertices = new ArrayList<Vertex>();
 		
-		buildMesh();
+		buildMesh(chunk);
 		populateLists();
 	}
 	
-	private void buildMesh() {
-		vertices.clear();
-		uniqueVertices.clear();
+	private void buildMesh(Chunk chunk) {
 		//loop thru each block in chunk and determine which faces are visible :3
 		for (int x = 0; x < chunk.blocks.length; x++) {
 		    for (int y = 0; y < World.WORLD_HEIGHT; y++) {
@@ -39,7 +31,7 @@ public class ChunkMesh {
 		            Block blockI = chunk.blocks[x][y][z];
 		            boolean px = false, nx = false, py = false, ny = false, pz = false, nz = false;
 		            
-		            if(blockI == null) { continue; }
+		            if(blockI == null) { continue; } //skip it
 		            
 		            // Loop through the neighbouring blocks
 		            for (int dx = -1; dx <= 1; dx++) {
@@ -61,7 +53,7 @@ public class ChunkMesh {
 		                            neighborZ >= 0 && neighborZ < Chunk.CHUNK_SIZE) {
 		                            Block blockJ = chunk.blocks[neighborX][neighborY][neighborZ];
 		                            
-		                            if(blockJ == null) { continue; }
+		                            if(blockJ == null) { continue; } //skip it
 		                            
 		                            //PX
 		            				if(((x + 1) == (neighborX)) && ((y) == (neighborY)) && ((z) == (neighborZ))) {

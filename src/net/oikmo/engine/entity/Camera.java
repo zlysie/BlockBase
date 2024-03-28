@@ -5,6 +5,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.Loader;
+import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
@@ -37,16 +38,20 @@ public class Camera {
 	public float yaw = 0;
 	public float roll = 0;
 	
-	private MasterChunk currentChunk;
-	private MousePicker picker;
-	private Entity block;
-	
 	private float speeds = 0f;
 	private float speed = 0.1f;
 	private float moveAt;
+	
 	private boolean flyCam = true;
 	private boolean lockInCam;
+	
+	private MasterChunk currentChunk;
+	private MousePicker picker;
+	
+	private int texturePackTexture;
+	private int invisibleTexture;
 	private Block selectedBlock = Block.cobble;
+	private Entity block;
 	
 	/**
 	 * Camera constructor. Sets position and rotation.
@@ -62,7 +67,9 @@ public class Camera {
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
-		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(Loader.getInstance().loadTexture("defaultPack"))), position, rotation, 1);
+		this.texturePackTexture = ResourceLoader.loadTexture("defaultPack");
+		this.invisibleTexture = ResourceLoader.loadTexture("transparent");
+		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(texturePackTexture)), position, rotation, 1);
 		flyCam = true;
 		startThread1();
 	}
@@ -72,23 +79,23 @@ public class Camera {
 		Thread chunkGetter = new Thread(new Runnable() {
 			public void run() {
 				while(!Main.displayRequest) {
-					if(position.x >= 0) {
-						chunkPosition.x = (int) (position.x / Chunk.CHUNK_SIZE)*16;
+					if(block.getPosition().x >= 0) {
+						chunkPosition.x = (int) (block.getPosition().x / Chunk.CHUNK_SIZE)*16;
 					} else {
-						if(position.x > -16) {
+						if(block.getPosition().x > -16) {
 							chunkPosition.x = (int)-1*16;
 						} else {
-							chunkPosition.x = (int) ((position.x / Chunk.CHUNK_SIZE)-1)*16;
+							chunkPosition.x = (int) ((block.getPosition().x / Chunk.CHUNK_SIZE)-1)*16;
 						}
 					}
 
-					if(position.z >= 0) {
-						chunkPosition.z = (int) (position.z / Chunk.CHUNK_SIZE) * 16;
+					if(block.getPosition().z >= 0) {
+						chunkPosition.z = (int) (block.getPosition().z / Chunk.CHUNK_SIZE) * 16;
 					} else {
-						if(position.z > -16) {
+						if(block.getPosition().z > -16) {
 							chunkPosition.z = (int)-1 * 16;
 						} else {
-							chunkPosition.z = (int) ((position.z / Chunk.CHUNK_SIZE)-1)*16;
+							chunkPosition.z = (int) ((block.getPosition().z / Chunk.CHUNK_SIZE)-1)*16;
 						}
 					}
 					
@@ -125,7 +132,6 @@ public class Camera {
 		try {
 			int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
 			
-			System.out.println(index);
 			if(Block.blocks[index] != null) {
 				if(selectedBlock != Block.blocks[index]) {
 					selectedBlock = Block.blocks[index];
@@ -137,6 +143,16 @@ public class Camera {
 		} catch(NumberFormatException e) {}
 		
 		if(currentChunk != null) {
+			if(ChunkManager.getBlock(roundedPosition, currentChunk) == null) {
+				if(block.getModel().getTexture().getTextureID() != texturePackTexture) {
+					block.getModel().getTexture().setTextureID(texturePackTexture);
+				}
+			} else {
+				if(block.getModel().getTexture().getTextureID() != invisibleTexture) {
+					block.getModel().getTexture().setTextureID(invisibleTexture);
+				}
+			}
+			
 			if(Mouse.isButtonDown(1)) {
 				ChunkManager.setBlock(pos, selectedBlock, currentChunk);
 			} else if(Mouse.isButtonDown(0)) {

@@ -9,10 +9,15 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
+import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.gui.font.meshcreator.FontType;
+import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
+import net.oikmo.engine.renderers.gui.GuiRenderer;
+import net.oikmo.engine.textures.GuiTexture;
 
 public class MasterRenderer {
 	
@@ -24,18 +29,38 @@ public class MasterRenderer {
 		return instance;
 	}
 	
+	
 	private float FOV = 60f;
 	private final float NEAR_PLANE = 0.1f, FAR_PLANE = 10000f;
 	
 	private Matrix4f projectionMatrix;
 	
 	private EntityRenderer entityRenderer;
+	private GuiRenderer guiRenderer;
+	
+	public static FontType font;
+	public int ui_nuhuh;
+	public int ui_button;
+	public int ui_smallbutton;
+	public int ui_hover;
+	public int ui_smallhover;
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
+	private List<GuiTexture> guis = new ArrayList<>();
 	
 	public MasterRenderer() {
 		createProjectionMatrix();
-		entityRenderer = new EntityRenderer(projectionMatrix);	
+		entityRenderer = new EntityRenderer(projectionMatrix);
+		guiRenderer = new GuiRenderer(projectionMatrix);
+		ui_nuhuh = ResourceLoader.loadTexture("ui/ui_nuhuh");
+		ui_button = ResourceLoader.loadTexture("ui/normal/ui_button");
+		ui_hover = ResourceLoader.loadTexture("ui/normal/ui_button_hover");
+
+		ui_smallbutton = ResourceLoader.loadTexture("ui/small/ui_button");
+		ui_smallhover = ResourceLoader.loadTexture("ui/small/ui_button_hover");
+		
+		
+		TextMaster.init();
 	}
 	
 	public void prepare() {
@@ -49,9 +74,26 @@ public class MasterRenderer {
 	public void render(Camera camera) {
 		prepare();
 		entityRenderer.render(entities, camera);
-		
-		
+		guiRenderer.render(guis);
+		TextMaster.render();
 		entities.clear();
+		guis.clear();
+	}
+	
+	public List<GuiTexture> getGUIList() {
+		return guis;
+	}
+	
+	public void addToGUIs(GuiTexture texture) {
+		if(!guis.contains(texture)) {
+			guis.add(texture);
+		}
+	}
+	
+	public void removeFromGUIs(GuiTexture texture) {
+		if(guis.contains(texture)) {
+			guis.remove(texture);
+		}
 	}
 	
 	public void addEntity(Entity entity) {

@@ -7,40 +7,40 @@ import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 
 public class ChunkManager {
-	public static Block getBlock(Vector3f globalOrigin, ChunkMesh chunkMesh) {
-		Chunk chunk = chunkMesh.chunk;
-		int localX = (int) (globalOrigin.x - chunk.origin.x);
+	public static Block getBlock(Vector3f globalOrigin, MasterChunk master) {
+		Chunk chunk = master.getChunk();
+		int localX = (int) (globalOrigin.x - master.getOrigin().x);
 		int localY = (int) globalOrigin.y;
-		int localZ = (int) (globalOrigin.z - chunk.origin.z);
+		int localZ = (int) (globalOrigin.z - master.getOrigin().z);
 
 		Block block = null;
 
 		if (isWithinChunk(localX, localY, localZ)) {
 			block = chunk.blocks[localX][localY][localZ];
-			//chunkMesh.chunk = chunk;
 		}
 		return block;
 	}
 
-	public static void setBlock(Vector3f globalOrigin, Block block, MasterChunk chunk) {
-		int localX = (int) (globalOrigin.x - chunk.getOrigin().x);
+	public static void setBlock(Vector3f globalOrigin, Block block, MasterChunk master) {
+		Chunk chunk = master.getChunk();
+		int localX = (int) (globalOrigin.x - master.getOrigin().x);
 		int localY = (int) globalOrigin.y;
-		int localZ = (int) (globalOrigin.z - chunk.getOrigin().z);
+		int localZ = (int) (globalOrigin.z - master.getOrigin().z);
 
 		if (isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
-				if (chunk.getChunk().blocks[localX][localY][localZ] == null) {
-					if(chunk.getChunk().blocks[localX][localY][localZ] != block || chunk.getChunk().blocks[localX][localY][localZ].getType() != block.getType()) {
-						chunk.getChunk().blocks[localX][localY][localZ] = block;
-						Main.theWorld.refreshChunk(chunk);
+				if (chunk.blocks[localX][localY][localZ] == null) {
+					if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
+						chunk.blocks[localX][localY][localZ] = block;
+						Main.theWorld.refreshChunk(master);
 					}
 				} else {
 					return;
 				}
 			} else {
-				if(chunk.getChunk().blocks[localX][localY][localZ] != null) {
-					chunk.getChunk().blocks[localX][localY][localZ] = null;
-					Main.theWorld.refreshChunk(chunk);
+				if(chunk.blocks[localX][localY][localZ] != null) {
+					chunk.blocks[localX][localY][localZ] = null;
+					Main.theWorld.refreshChunk(master);
 				}
 			}
 		}

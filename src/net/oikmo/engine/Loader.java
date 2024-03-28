@@ -17,10 +17,7 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
@@ -55,22 +52,48 @@ public class Loader {
 
 		return vaoID;
 	}
-
+	
+	/**
+	 * Quad maker (a plane)
+	 * 
+	 * @param positions
+	 * @param dimensions
+	 * @return RawModel
+	 */
+	public RawModel loadToVAO(float[] positions, int dimensions) {
+		int vaoID = createVAO();
+		storeDataInAttributeList(positions, 0, dimensions);
+		unbindVAO();
+		return new RawModel(vaoID, positions.length / dimensions);
+	}
+	
 	public RawModel loadToVAO(float[] vertices, int[] indices, float[] uv) { 
 		int vaoID = createVAO();
 		storeDataInAttributeList(vertices, 0, 3);
 		storeDataInAttributeList(uv, 1, 2);
 		bindIndicesBuffer(indices);
-		GL30.glBindVertexArray(0);
+		unbindVAO();
 		return new RawModel(vaoID, indices.length); 
 	}
-
+	
 	public RawModel loadToVAO(float[] vertices,  float[] uv) { 
 		int vaoID = createVAO();
 		storeDataInAttributeList(vertices, 0, 3);
 		storeDataInAttributeList(uv, 1, 2);
-		GL30.glBindVertexArray(0);
+		unbindVAO();
 		return new RawModel(vaoID, vertices.length); 
+	}
+	
+	public int loadQuadToVAO(float[] positions, float[] textureCoords) {
+		int vaoID = createVAO();
+		storeDataInAttributeList(positions, 0, 2);
+		storeDataInAttributeList(textureCoords, 1, 2);
+		unbindVAO();
+		return vaoID;
+	}
+	
+	private void unbindVAO() {
+		GL30.glBindVertexArray(0);
 	}
 
 	private void storeDataInAttributeList(float[] data, int attributeNumber, int dimensions) {

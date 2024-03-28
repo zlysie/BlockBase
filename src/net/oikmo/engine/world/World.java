@@ -8,6 +8,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.Loader;
+import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.models.RawModel;
@@ -19,6 +20,7 @@ import net.oikmo.main.Main;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
+import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 public class World {
 
@@ -28,19 +30,19 @@ public class World {
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	public List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	
-	public String seed = null;
+	private PerlinNoiseGenerator noiseGen;
 	
 	private ModelTexture tex;
 
 	private boolean lockInRefresh = false;
 	
+	private Thread chunkCreator;
+	
 	public World(String seed) {
-		tex = new ModelTexture(Loader.getInstance().loadTexture("defaultPack"));
-		this.seed = seed;
+		tex = new ModelTexture(ResourceLoader.loadTexture("defaultPack"));
+		this.noiseGen = new PerlinNoiseGenerator(seed);
 		init();
 	}
-	
-	Thread chunkCreator;
 	
 	public void init() {
 		chunkCreator = new Thread(new Runnable() { 
@@ -53,7 +55,7 @@ public class World {
 							Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 							synchronized(MasterChunk.usedPositions) {
 								if(!MasterChunk.isPositionUsed(chunkPos)) {
-									masterChunks.add(new MasterChunk(chunkPos));
+									masterChunks.add(new MasterChunk(noiseGen, chunkPos));
 									Logger.log(LogLevel.INFO, "Creating chunk!");
 								}
 							}

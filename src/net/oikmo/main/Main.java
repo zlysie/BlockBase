@@ -12,11 +12,12 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.audio.AudioMaster;
-import net.oikmo.engine.audio.Source;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
+import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
@@ -31,13 +32,15 @@ public class Main {
 	
 	public static boolean displayRequest = false;
 	public static int WIDTH = 854;
-	public static int HEIGHT = 640;																
+	public static int HEIGHT = 480;																
 	
 	public static World theWorld;
 	
 	public static Vector3f camPos = new Vector3f(0,0,0);
 	
 	static Frame frame;
+	
+	private static GuiScreen currentScreen;
 	
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
@@ -49,13 +52,15 @@ public class Main {
 			MasterRenderer.getInstance();
 
 			theWorld = new World("ballsack!!!");
-			Source source = new Source();
-			source.play(AudioMaster.getSound("penis"));
+			
+			currentScreen = new GuiInGame();
+			
 			Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
 				
+				currentScreen.update();
 				theWorld.update(camera);
 				
 				DisplayManager.updateDisplay();

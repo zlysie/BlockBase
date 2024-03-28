@@ -16,6 +16,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.IconUtils;
@@ -207,6 +208,18 @@ public class DisplayManager {
 		float normalisedX = -1.0f + 2.0f * (float) Mouse.getX() / (float) Display.getWidth();
 		float normalisedY = 1.0f - 2.0f * (float) Mouse.getY() / (float) Display.getHeight();
 		return new Vector2f(normalisedX, normalisedY);
+	}
+	
+	/**
+	 * Returns Window size as OpenGL coordinates.
+	 * @param position - ({@link Vector2f})
+	 * @param scale - ({@link Vector2f})
+	 * @return {@link Vector3f}
+	 */
+	public static Vector2f getNormalizedDeviceCoords(Vector2f position, Vector2f scale) {
+		float x = (((2f * position.x + scale.x) / Display.getWidth()) - 1f);
+		float y = ((((2f * position.y +  scale.y) / Display.getHeight()) - 1f) * -1f);
+		return new Vector2f(x, y);
 	}
 }
 

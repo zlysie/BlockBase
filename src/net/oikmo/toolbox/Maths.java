@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.entity.Camera;
@@ -42,6 +43,22 @@ public class Maths {
 		Matrix4f.scale(getScaleFromPool(scale), matrix, matrix);
 		return matrix;
 
+	}
+	
+	/**
+	 * Creates and returns a transformation matrix so that 2D is real.<br>
+	 * 
+	 * @param translation - to be positioned. ({@link Vector2f})
+	 * @param scale - to be scaled. ({@link Vector2f})
+	 * 
+	 * @return <b>matrix</b> - ({@link Matrix4f})
+	 */
+	public static Matrix4f createTransformationMatrix(Vector2f translation, Vector2f scale) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.setIdentity();
+		Matrix4f.translate(translation, matrix, matrix);
+		Matrix4f.scale(new Vector3f(scale.x, scale.y, 1f), matrix, matrix);
+		return matrix;
 	}
 
 	public static Matrix4f createViewMatrix(Camera camera) {

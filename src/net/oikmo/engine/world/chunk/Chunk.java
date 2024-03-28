@@ -4,32 +4,21 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
-import net.oikmo.main.Main;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 public class Chunk {
 	
 	public static final byte CHUNK_SIZE = 16;
 	public Block[][][] blocks;
-	
-	
-	public Vector3f origin;
-	PerlinNoiseGenerator noiseGen;
-	public Chunk(Vector3f origin, String seed) {
-		this.origin = origin;
-		blocks = new Block[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		noiseGen = new PerlinNoiseGenerator(seed);
-		generateChunk();
-	}
+	private PerlinNoiseGenerator noiseGen;
 
-	public Chunk(Vector3f origin) {
-		this.origin = origin;
+	public Chunk(PerlinNoiseGenerator gen, Vector3f origin) {
 		blocks = new Block[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		noiseGen = new PerlinNoiseGenerator();
-		generateChunk();
+		noiseGen = gen;
+		generateChunk(origin);
 	}
 	
-	private void generateChunk() {
+	private void generateChunk(Vector3f origin) {
 	    for (int x = 0; x < CHUNK_SIZE; x++) {
 	        for (int z = 0; z < CHUNK_SIZE; z++) {
 	        	int actualX = (int) (origin.x + x);
