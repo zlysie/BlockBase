@@ -12,6 +12,7 @@ public class GuiInGame extends GuiScreen {
 	
 	public void onInit() {
 		texture = ResourceLoader.loadTexture("dirtTex");
+		
 	}
 	
 	public void onUpdate() {

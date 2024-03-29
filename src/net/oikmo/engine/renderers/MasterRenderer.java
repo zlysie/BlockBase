@@ -128,7 +128,12 @@ public class MasterRenderer {
 		projectionMatrix.m32 = -(2 * FAR_PLANE * NEAR_PLANE) / zm;
 		projectionMatrix.m33 = 0;
 	}
-
+	
+	public void updateProjectionMatrix() {
+		createProjectionMatrix();
+		entityRenderer.updateProjectionMatrix(projectionMatrix);
+	}
+	
 	public Matrix4f getProjectionMatrix() {
 		return this.projectionMatrix;
 	}

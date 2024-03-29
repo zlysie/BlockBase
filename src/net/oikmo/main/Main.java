@@ -9,11 +9,13 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
@@ -56,13 +58,18 @@ public class Main {
 		try {
 			
 			frame = new Frame(Main.gameVersion);
+			frame.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent e) {
+					displayRequest = true;
+					Logger.saveLog();
+					System.exit(0);
+					DisplayManager.closeDisplay();
+					
+				}
+			});
 			gameCanvas = new Canvas();
-			Graphics var1 = gameCanvas.getGraphics();
-			if(var1 != null) {
-				var1.setColor(Color.BLUE);
-				var1.fillRect(0, 0, WIDTH, HEIGHT);
-				var1.dispose();
-			}
+			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
+			gameCanvas.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 
 			frame.setLayout(new BorderLayout());
 			frame.add(gameCanvas, "Center");
@@ -84,22 +91,8 @@ public class Main {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
 				
-				//currentScreen.update();
+				currentScreen.update();
 				theWorld.update(camera);
-				
-				if(gameCanvas != null && (gameCanvas.getWidth() != WIDTH || gameCanvas.getHeight() != HEIGHT)) {
-					WIDTH = gameCanvas.getWidth();
-					HEIGHT = gameCanvas.getHeight();
-					if(WIDTH <= 0) {
-						WIDTH = 1;
-					}
-
-					if(HEIGHT <= 0) {
-						HEIGHT = 1;
-					}
-					
-					Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
-				}
 				
 				DisplayManager.updateDisplay(gameCanvas);
 				
@@ -113,13 +106,8 @@ public class Main {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		DisplayManager.closeDisplay();
-		displayRequest = true;
 		
-		Logger.saveLog();
-	}
-	
-	public static void start(String var0, String var1, String var2) {
+		
 		
 	}
 	

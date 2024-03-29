@@ -19,6 +19,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.IconUtils;
 import net.oikmo.toolbox.Logger;
@@ -65,11 +66,25 @@ public class DisplayManager {
 	 * <br>
 	 * Handles fullscreen and taking screenshots on the press of a key.
 	 */
-	public static void updateDisplay(Canvas canvas) {
+	public static void updateDisplay(Canvas gameCanvas) {
+		if(gameCanvas != null && (gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
+			Main.WIDTH = gameCanvas.getWidth();
+			Main.HEIGHT = gameCanvas.getHeight();
+			if(Main.WIDTH <= 0) {
+				Main.WIDTH = 1;
+			}
+
+			if(Main.HEIGHT <= 0) {
+				Main.HEIGHT = 1;
+			}
+			
+			GL11.glViewport(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+			MasterRenderer.getInstance().updateProjectionMatrix();
+		}
+		
 		updateFPS();
 		Display.update();
 		Display.sync(60);
-		//GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT);
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;
 		lastFrameTime = currentFrameTime;		

@@ -4,6 +4,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector2f;
 
 import net.oikmo.engine.DisplayManager;
+import net.oikmo.toolbox.FastMath;
 
 public class GuiTexture {
 	
@@ -16,11 +17,7 @@ public class GuiTexture {
 	public GuiTexture(int textureID, Vector2f position, Vector2f scale) {
 		this.textureID = textureID;
 		
-		float offset = Display.getWidth() - Display.getHeight();
-		float scaleX =  (scale.x / Display.getWidth()) * offset;
-		float scaleY =  (scale.y / Display.getHeight()) * offset;
-		
-		this.scale = new Vector2f(scaleX, scaleY);
+		this.scale = scale;
 		this.position = position;
 		
 	}
@@ -41,7 +38,12 @@ public class GuiTexture {
 		this.position = position;
 	}
 	
-	public void setPositionRelativeToScreen(int x, int y) {
+	public void setPositionRelativeToScreen() {
+		this.position = DisplayManager.getNormalizedDeviceCoords(position, scale);
+	}
+	
+	public void setPositionRelativeToScreen(float x, float y) {
+		this.position.x = x;this.position.y = y;
 		this.position = DisplayManager.getNormalizedDeviceCoords(position, scale);
 	}
 
@@ -51,8 +53,8 @@ public class GuiTexture {
 
 	public void setScaleRelativeToScreen(Vector2f scale) {
 		float offset = Display.getWidth() - Display.getHeight();
-		float scaleX =  (scale.x / Display.getWidth()) * offset;
-		float scaleY =  (scale.y / Display.getHeight()) * offset;
+		float scaleX = FastMath.abs((scale.x / Display.getWidth()) * offset);
+		float scaleY = FastMath.abs((scale.y / Display.getHeight()) * offset);
 		
 		this.scale = new Vector2f(scaleX, scaleY);
 	}

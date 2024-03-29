@@ -54,4 +54,11 @@ public class EntityRenderer {
 			}
 		}
 	}
+
+	public void updateProjectionMatrix(Matrix4f projectionMatrix) {
+		shader.start();
+		shader.loadProjectionMatrix(projectionMatrix);
+		shader.stop();
+		
+	}
 }

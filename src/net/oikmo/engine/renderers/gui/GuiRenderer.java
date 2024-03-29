@@ -58,4 +58,11 @@ public class GuiRenderer {
 	public void cleanUp() {
 		shader.cleanUp();
 	}
+
+	public void updateProjectionMatrix(Matrix4f projectionMatrix) {
+		shader.start();
+		shader.loadTransformation(projectionMatrix);
+		shader.stop();
+		
+	}
 }

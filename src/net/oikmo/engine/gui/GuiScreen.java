@@ -85,6 +85,8 @@ public class GuiScreen {
 	
 	public void draw(float x, float y, float scaleX, float scaleY, int texture) {
 		GuiTexture ui = new GuiTexture(texture, new Vector2f(x, y), new Vector2f(scaleX, scaleY));
+		ui.setScaleRelativeToScreen(ui.getScale());
+		ui.setPositionRelativeToScreen(x, y);
 		if(!uiList.contains(ui)) {
 			uiList.add(ui);
 		}
