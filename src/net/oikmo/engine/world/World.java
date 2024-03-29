@@ -25,7 +25,7 @@ import net.oikmo.toolbox.PerlinNoiseGenerator;
 public class World {
 
 	public static final int WORLD_HEIGHT = 128;
-	public static final int WORLD_SIZE = 2*8;
+	public static final int WORLD_SIZE = 6*8;
 	
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	public List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
