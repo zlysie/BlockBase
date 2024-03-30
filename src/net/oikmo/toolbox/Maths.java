@@ -88,6 +88,18 @@ public class Maths {
 		return rounded;
 	}
 	
+	public static void roundVector(Vector3f vector) {
+		vector.x = Maths.roundFloat(vector.x);
+		vector.y = Maths.roundFloat(vector.y);
+		vector.z = Maths.roundFloat(vector.z);
+	}
+	
+	public static void roundVector(Vector3f input, Vector3f output) {
+		output.x = Maths.roundFloat(input.x);
+		output.y = Maths.roundFloat(input.y);
+		output.z = Maths.roundFloat(input.z);
+	}
+	
 	/**
 	 * Converts string to long via taking each character of the string and converting it into a number. Then that number is added to string to be parsed to {@link Long#valueOf(String)}
 	 * @param name - {@link String}

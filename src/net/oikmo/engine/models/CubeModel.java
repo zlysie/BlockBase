@@ -3,6 +3,9 @@ package net.oikmo.engine.models;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.Loader;
+import net.oikmo.engine.world.blocks.Block;
+
 public class CubeModel {
 
 	public static Vector3f[] PX_POS = {
@@ -508,7 +511,7 @@ public class CubeModel {
 
     static Vector2f[][] UVS;
     static Vector3f[][] VERTS;
-	public static float[] convert(int is) {
+	public static float[] getUVs(int is) {
 		UVS = UVS == null ? new Vector2f[][]{CubeModel.UV_PX, CubeModel.UV_NX, CubeModel.UV_PY, CubeModel.UV_NY, CubeModel.UV_PZ, CubeModel.UV_NZ} : UVS;
 		int totalLength = UVS.length * 6 * 2; // 5 vectors for each array
 
@@ -543,5 +546,9 @@ public class CubeModel {
 
 			}
 		}
+	}
+	
+	public static RawModel getRawModel(Block block) {
+		return Loader.getInstance().loadToVAO(vertices, getUVs(block.getType()));
 	}
 }

@@ -2,6 +2,7 @@ package net.oikmo.engine.entity;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 
 public class Entity {
@@ -24,6 +25,14 @@ public class Entity {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
+	}
+	
+	public void setRawModel(RawModel model) {
+		this.model.setRawModel(model);
+	}
+	
+	public void setTextureID(int textureID) {
+		this.model.getTexture().setTextureID(textureID);
 	}
 	
 	private float whiteOffset;

@@ -77,7 +77,7 @@ public class Camera {
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
 		this.texturePackTexture = ResourceLoader.loadTexture("textures/defaultPack");
 		this.invisibleTexture = ResourceLoader.loadTexture("textures/transparent");
-		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(texturePackTexture)), position, rotation, 1.002f);
+		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(texturePackTexture)), position, rotation, 1.002f);
 		flyCam = true;
 		startThread1();
 	}
@@ -126,58 +126,50 @@ public class Camera {
 	 * Fly cam
 	 */
 	public void update() {
-		roundedPosition.x = Maths.roundFloat(position.x);
-		roundedPosition.y = Maths.roundFloat(position.y);
-		roundedPosition.z = Maths.roundFloat(position.z);
-		
-		picker.update();
-		Vector3f pos = picker.getPoint();
-		pos.x = Maths.roundFloat(pos.x);
-		pos.y = Maths.roundFloat(pos.y);
-		pos.z = Maths.roundFloat(pos.z);
-		
-		block.setPosition(pos);
-		Block thatBlock =ChunkManager.getBlock(pos, currentChunk);
-		if(thatBlock != null) {
-			block.setWhiteOffset(2f);
-			block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(thatBlock.getType())));
-		} else {
-			block.setWhiteOffset(0.2f);
-			block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())));
-		}
-		
-		MasterRenderer.getInstance().addEntity(block);
-		
-		picker.distance = picker.BASE_DISTANCE;
-		for(int i = 0; i < picker.BASE_DISTANCE; i++) {
-			Block block = ChunkManager.getBlock(picker.getPointRounded(i), currentChunk);
-			if(block != null) {
-				picker.distance = i;
-				break;
-			}			
-		}
-		
-		try {
-			int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
-			
-			if(Block.blocks[index] != null) {
-				if(selectedBlock != Block.blocks[index]) {
-					selectedBlock = Block.blocks[index];
-					blockType.setTextString("selectedBlock: " + selectedBlock.getEnumType().name() + " " + DisplayManager.getFPSCount());
-					block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())));
-				}
-			}
-		} catch(NumberFormatException e) {}
-		
 		if(currentChunk != null) {
-			if(ChunkManager.getBlock(roundedPosition, currentChunk) == null) {
-				if(block.getModel().getTexture().getTextureID() != texturePackTexture) {
-					block.getModel().getTexture().setTextureID(texturePackTexture);
-				}
+			Maths.roundVector(position, roundedPosition);
+			
+			picker.update();
+			
+			picker.distance = picker.BASE_DISTANCE;
+			for(int i = 0; i < picker.BASE_DISTANCE; i++) {
+				Block block = ChunkManager.getBlock(picker.getPointRounded(i), currentChunk);
+				if(block != null) {
+					picker.distance = i;
+					break;
+				}			
+			}
+			
+			Vector3f pos = picker.getPoint();
+			Maths.roundVector(pos);
+			
+			block.setPosition(pos);
+			Block thatBlock =ChunkManager.getBlock(pos, currentChunk);
+			if(thatBlock != null) {
+				block.setWhiteOffset(2f);
+				block.setRawModel(CubeModel.getRawModel(thatBlock));
 			} else {
-				if(block.getModel().getTexture().getTextureID() != invisibleTexture) {
-					block.getModel().getTexture().setTextureID(invisibleTexture);
+				block.setWhiteOffset(0.2f);
+				block.setRawModel(CubeModel.getRawModel(selectedBlock));
+			}
+			
+			MasterRenderer.getInstance().addEntity(block);
+			
+			try {
+				int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
+				
+				if(Block.blocks[index] != null) {
+					if(selectedBlock != Block.blocks[index]) {
+						selectedBlock = Block.blocks[index];
+						blockType.setTextString("selectedBlock: " + selectedBlock.getEnumType().name());
+					}
 				}
+			} catch(NumberFormatException e) {}
+			
+			if(ChunkManager.getBlock(roundedPosition, currentChunk) == null) {
+				block.setTextureID(texturePackTexture);
+			} else {
+				block.setTextureID(invisibleTexture);
 			}
 			
 			if(Mouse.isButtonDown(1)) {
@@ -213,6 +205,10 @@ public class Camera {
 			Logger.log(LogLevel.WARN, "No chunk loaded!");
 		}
 		
+		this.move();
+	}
+	
+	private void move() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			if(!lockInCam) {
 				flyCam = !flyCam;

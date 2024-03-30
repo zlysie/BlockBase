@@ -9,7 +9,9 @@ public class ModelTexture {
 	}
 
 	public void setTextureID(int textureID) {
-		this.textureID = textureID;
+		if(this.textureID != textureID) {
+			this.textureID = textureID;
+		}
 	}
 	
 	public int getTextureID() {
