@@ -8,7 +8,7 @@ import java.util.Map;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.entity.Entity;
-import net.oikmo.toolbox.PerlinNoiseGenerator;
+import prime.PerlinNoise;
 
 public class MasterChunk {
 	private static Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
@@ -20,7 +20,7 @@ public class MasterChunk {
 	private ChunkMesh mesh;
 	private Entity entity;
 	
-	public MasterChunk(PerlinNoiseGenerator noiseGen, Vector3f origin) {
+	public MasterChunk(PerlinNoise noiseGen, Vector3f origin) {
 		setIndex(usedPositions.size());
 		this.origin = origin;
 		this.chunk = new Chunk(noiseGen, origin);

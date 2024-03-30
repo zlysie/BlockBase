@@ -2,10 +2,13 @@ package net.oikmo.engine.entity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.ResourceLoader;
+import net.oikmo.engine.gui.component.slider.GuiText;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
@@ -17,9 +20,9 @@ import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.MousePicker;
-import net.oikmo.toolbox.Logger.LogLevel;
 
 /**
  * Camera class. Allows the player to see the world.
@@ -53,6 +56,8 @@ public class Camera {
 	private Block selectedBlock = Block.cobble;
 	private Entity block;
 	
+	private GuiText blockType;
+	
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -66,10 +71,13 @@ public class Camera {
 		this.roundedPosition = new Vector3f();
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
+		this.blockType = new GuiText("selectedBlock: "+selectedBlock.getEnumType().name(), 1.1f, MasterRenderer.font, new Vector2f(0,0), 1, false, false);
+		this.blockType.setColour(1f, 1f, 1f);
+		this.blockType.setEdge(0.2f);
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
 		this.texturePackTexture = ResourceLoader.loadTexture("defaultPack");
 		this.invisibleTexture = ResourceLoader.loadTexture("transparent");
-		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(texturePackTexture)), position, rotation, 1);
+		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(texturePackTexture)), position, rotation, 1.002f);
 		flyCam = true;
 		startThread1();
 	}
@@ -111,6 +119,9 @@ public class Camera {
 		chunkGetter.start();
 	}
 	
+	float multiplier = 100;
+	boolean mouseClickLeft = false;
+	boolean mouseClickRight = false;
 	/**
 	 * Fly cam
 	 */
@@ -126,8 +137,25 @@ public class Camera {
 		pos.z = Maths.roundFloat(pos.z);
 		
 		block.setPosition(pos);
+		Block thatBlock =ChunkManager.getBlock(pos, currentChunk);
+		if(thatBlock != null) {
+			block.setWhiteOffset(2f);
+			block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(thatBlock.getType())));
+		} else {
+			block.setWhiteOffset(0.2f);
+			block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())));
+		}
 		
 		MasterRenderer.getInstance().addEntity(block);
+		
+		picker.distance = picker.BASE_DISTANCE;
+		for(int i = 0; i < picker.BASE_DISTANCE; i++) {
+			Block block = ChunkManager.getBlock(picker.getPointRounded(i), currentChunk);
+			if(block != null) {
+				picker.distance = i;
+				break;
+			}			
+		}
 		
 		try {
 			int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
@@ -135,10 +163,9 @@ public class Camera {
 			if(Block.blocks[index] != null) {
 				if(selectedBlock != Block.blocks[index]) {
 					selectedBlock = Block.blocks[index];
+					blockType.setTextString("selectedBlock: " + selectedBlock.getEnumType().name() + " " + DisplayManager.getFPSCount());
 					block.getModel().setRawModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())));
 				}
-			} else {
-				
 			}
 		} catch(NumberFormatException e) {}
 		
@@ -154,14 +181,33 @@ public class Camera {
 			}
 			
 			if(Mouse.isButtonDown(1)) {
-				ChunkManager.setBlock(pos, selectedBlock, currentChunk);
-			} else if(Mouse.isButtonDown(0)) {
-				ChunkManager.setBlock(pos, null, currentChunk);
+				if(!mouseClickRight) {
+					Block block1 = ChunkManager.getBlock(picker.getPointRounded(picker.distance), currentChunk);
+					if(block1 == null) {
+						ChunkManager.setBlock(picker.getPointRounded(picker.distance), selectedBlock, currentChunk);
+					} else {
+						ChunkManager.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock, currentChunk);
+					}
+					mouseClickRight = true;
+				}
+			} else {
+				mouseClickRight = false;
+			}
+			
+			if(Mouse.isButtonDown(0)) {
+				if(!mouseClickLeft) {
+					Block block = ChunkManager.getBlock(picker.getPointRounded(), currentChunk);
+					if(block != null) {
+						ChunkManager.setBlock(picker.getPointRounded(), null, currentChunk);
+					}
+					mouseClickLeft = true;
+				}
+			} else {
+				mouseClickLeft = false;
 			}
 			
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
 				ChunkManager.setBlockFromTopLayer((int)roundedPosition.x, (int)roundedPosition.z, selectedBlock, currentChunk);
-				
 			}
 		} else {
 			Logger.log(LogLevel.WARN, "No chunk loaded!");
@@ -189,25 +235,25 @@ public class Camera {
 			}
 
 			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-				position.y += speed * speeds;
+				position.y += (speed * speeds) * DisplayManager.getFrameTimeSeconds() * multiplier;
 			} else if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-				position.y -= speed * speeds;
+				position.y -= (speed * speeds)  * DisplayManager.getFrameTimeSeconds() * multiplier;
 			}
 
 			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				moveAt = -speed * speeds;
+				moveAt = (-speed * speeds)* DisplayManager.getFrameTimeSeconds() * multiplier;
 			} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				moveAt = speed * speeds;
+				moveAt = (speed * speeds)* DisplayManager.getFrameTimeSeconds() * multiplier;
 			} else {
 				moveAt = 0;
 			}
 
 			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				position.x += (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw)));
-				position.z -= (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw)));
+				position.x += (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
+				position.z -= (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
 			} else if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				position.x -= (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw)));
-				position.z += (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw)));
+				position.x -= (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
+				position.z += (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
 			}
 
 			pitch -= Mouse.getDY() * GameSettings.sensitivity*2;
@@ -282,5 +328,9 @@ public class Camera {
 	}
 	public float getRoll() {
 		return roll;
+	}
+
+	public Block getBlockFromCast() {
+		return ChunkManager.getBlock(block.getPosition(), currentChunk);
 	}
 }

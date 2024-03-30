@@ -6,16 +6,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
@@ -23,6 +20,7 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.audio.AudioMaster;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.gui.GuiScreen;
+import net.oikmo.engine.gui.component.slider.GuiText;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
@@ -62,6 +60,7 @@ public class Main {
 				public void windowClosing(WindowEvent e) {
 					displayRequest = true;
 					Logger.saveLog();
+					AudioMaster.cleanUp();
 					System.exit(0);
 					DisplayManager.closeDisplay();
 					
@@ -81,7 +80,7 @@ public class Main {
 			CubeModel.createVertices();
 			AudioMaster.init();
 			MasterRenderer.getInstance();
-
+			
 			theWorld = new World("ballsack!!!");
 			
 			currentScreen = new GuiInGame();
@@ -107,8 +106,11 @@ public class Main {
 			Main.error("Runtime Error!", e);
 		}
 		
-		
-		
+		displayRequest = true;
+		Logger.saveLog();
+		AudioMaster.cleanUp();
+		System.exit(0);
+		DisplayManager.closeDisplay();
 	}
 	
 	static PanelCrashReport report;

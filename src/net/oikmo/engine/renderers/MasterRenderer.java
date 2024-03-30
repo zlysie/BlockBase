@@ -50,15 +50,14 @@ public class MasterRenderer {
 	
 	public MasterRenderer() {
 		createProjectionMatrix();
-		entityRenderer = new EntityRenderer(projectionMatrix);
+		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f, 0.7f, 1.0f);
 		guiRenderer = new GuiRenderer(projectionMatrix);
+		font = new FontType("minecraft");
 		ui_nuhuh = ResourceLoader.loadTexture("ui/ui_nuhuh");
 		ui_button = ResourceLoader.loadTexture("ui/normal/ui_button");
 		ui_hover = ResourceLoader.loadTexture("ui/normal/ui_button_hover");
-
 		ui_smallbutton = ResourceLoader.loadTexture("ui/small/ui_button");
 		ui_smallhover = ResourceLoader.loadTexture("ui/small/ui_button_hover");
-		
 		
 		TextMaster.init();
 	}
@@ -68,7 +67,7 @@ public class MasterRenderer {
 		//GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glClearColor(0.4f, 0.7f, 1.0f, 1);
 		//GL11.glCullFace(GL11.GL_BACK);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT );
 	}
 	
 	public void render(Camera camera) {

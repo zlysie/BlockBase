@@ -20,7 +20,8 @@ import net.oikmo.main.Main;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
-import net.oikmo.toolbox.PerlinNoiseGenerator;
+import net.oikmo.toolbox.Maths;
+import prime.PerlinNoise;
 
 public class World {
 
@@ -30,7 +31,7 @@ public class World {
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	public List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	
-	private PerlinNoiseGenerator noiseGen;
+	private PerlinNoise noiseGen;
 	
 	private ModelTexture tex;
 
@@ -40,7 +41,7 @@ public class World {
 	
 	public World(String seed) {
 		tex = new ModelTexture(ResourceLoader.loadTexture("defaultPack"));
-		this.noiseGen = new PerlinNoiseGenerator(seed);
+		this.noiseGen = new PerlinNoise((int)Maths.getSeedFromName(seed)*266, 1D,0.5D,2D, 7); 
 		init();
 	}
 	

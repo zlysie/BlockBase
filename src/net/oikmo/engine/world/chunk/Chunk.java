@@ -4,15 +4,16 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
-import net.oikmo.toolbox.PerlinNoiseGenerator;
+import net.oikmo.toolbox.FastMath;
+import prime.PerlinNoise;
 
 public class Chunk {
 	
 	public static final byte CHUNK_SIZE = 16;
 	public Block[][][] blocks;
-	private PerlinNoiseGenerator noiseGen;
+	private PerlinNoise noiseGen;
 
-	public Chunk(PerlinNoiseGenerator gen, Vector3f origin) {
+	public Chunk(PerlinNoise gen, Vector3f origin) {
 		blocks = new Block[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		noiseGen = gen;
 		generateChunk(origin);
@@ -24,7 +25,8 @@ public class Chunk {
 	        	int actualX = (int) (origin.x + x);
 	        	int actualZ = (int) (origin.z + z);
 
-	        	int height = (int) noiseGen.generateHeight(actualX, actualZ);
+	        	int height = (int) FastMath.abs((float)noiseGen.getHeight(actualX, actualZ)) + 60;
+	        	//System.out.println(height);
 	            for (int y = 0; y < World.WORLD_HEIGHT; y++) {
 	                if (y < height) {
 	                    // Create a solid block at this position                    
@@ -59,6 +61,8 @@ public class Chunk {
 	        return Block.dirt;
 	    } else if (height >= 40) {
 	        return Block.dirt;
+	    } else if(height == 0) {
+	    	return Block.bedrock;
 	    } else {
 	        return Block.stone;
 	    }

@@ -26,7 +26,7 @@ public class TextMaster {
 	public static void loadText(GuiText text){
 		FontType font = text.getFont();
 		TextMeshData data = font.loadText(text);
-		int vao = Loader.getInstance().loadToVAO(data.getVertexPositions(), data.getTextureCoords()).getVaoID();
+		int vao = Loader.getInstance().loadQuadToVAO(data.getVertexPositions(), data.getTextureCoords());
 		text.setMeshInfo(vao, data.getVertexCount());
 		List<GuiText> textBatch = texts.get(font);
 		if(textBatch == null){

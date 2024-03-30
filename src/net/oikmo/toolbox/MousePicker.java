@@ -7,6 +7,11 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.Chunk;
+import net.oikmo.engine.world.chunk.ChunkManager;
+import net.oikmo.engine.world.chunk.MasterChunk;
 
 public class MousePicker {
 	private Vector3f currentRay;
@@ -34,9 +39,34 @@ public class MousePicker {
 			currentTerrainPoint = null;
 		}*/
 	}
-
+	
+	public final int BASE_DISTANCE = 5;
+	public int distance = BASE_DISTANCE;
+	
 	public Vector3f getPoint() {
-		return binarySearch(0, 10, currentRay);
+		return binarySearch(0, distance, currentRay);
+	}
+	
+	public Vector3f getPointRounded() {
+		Vector3f point =  binarySearch(0, distance, currentRay);
+		point.x = Maths.roundFloat(point.x);
+		point.y = Maths.roundFloat(point.y);
+		point.z = Maths.roundFloat(point.z);
+		
+		return point;
+	}
+	
+	public Vector3f getPointRounded(int distance) {
+		Vector3f point =  binarySearch(0, distance, currentRay);
+		point.x = Maths.roundFloat(point.x);
+		point.y = Maths.roundFloat(point.y);
+		point.z = Maths.roundFloat(point.z);
+		
+		return point;
+	}
+	
+	public Vector3f getPoint(int distance) {
+		return binarySearch(0, distance, currentRay);
 	}
 
 	public Vector3f calculateMouseRay() {
@@ -83,7 +113,7 @@ public class MousePicker {
 	}
 
 	private Vector3f binarySearch(float start, float finish, Vector3f ray) {
-		float half = start + ((finish - start) / 2f);
+		float half = finish;
 		Vector3f endPoint = getPointOnRay(ray, half);
 		return endPoint;
 	}

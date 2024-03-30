@@ -11,20 +11,6 @@ public abstract class Block {
 	public static final Block cobble = new BlockCobble(Type.COBBLE);
 	public static final Block bedrock = new BlockBedrock(Type.BEDROCK);
 	
-	public static void main(String[] args) {	
-		Block.init();
-	}
-	public static void init() {
-		int i = 0;
-		blocks[i] = grass;
-		blocks[i++] = dirt;
-		blocks[i++] = stone;
-		blocks[i++] = treebark;
-		blocks[i++] = treeleaf;
-		blocks[i++] = cobble;
-		blocks[i++] = bedrock;
-	}
-	
 	public static enum Type {
 		GRASS, 
 		DIRT, 
@@ -48,6 +34,10 @@ public abstract class Block {
 
 	public int getType() {
 		return type.ordinal();
+	}
+	
+	public Type getEnumType() {
+		return type;
 	}
 	
 	public abstract float getStrength();

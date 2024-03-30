@@ -6,6 +6,7 @@ import net.oikmo.engine.models.TexturedModel;
 
 public class Entity {
 	
+	public boolean line;
 	private TexturedModel model;
 	private Vector3f position, rotation;
 	private float scale;
@@ -15,6 +16,22 @@ public class Entity {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
+	}
+	
+	public Entity(boolean line, TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
+		this.line = line;
+		this.model = model;
+		this.position = position;
+		this.rotation = rotation;
+		this.scale = scale;
+	}
+	
+	private float whiteOffset;
+	public void setWhiteOffset(float whiteOffset) {
+		this.whiteOffset = whiteOffset;
+	}
+	public float getWhiteOffset() {
+		return whiteOffset;
 	}
 	
 	public TexturedModel getModel() {

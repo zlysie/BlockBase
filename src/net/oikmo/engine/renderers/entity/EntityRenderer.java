@@ -17,10 +17,11 @@ import net.oikmo.toolbox.Maths;
 public class EntityRenderer {
 	
 	private EntityShader shader;
-	public EntityRenderer(Matrix4f projectionMatrix) {
+	public EntityRenderer(Matrix4f projectionMatrix, float r, float g, float b) {
 		shader = new EntityShader();
 		shader.start();
 		shader.loadProjectionMatrix(projectionMatrix);
+		shader.loadSkyColour(r, g, b);
 		shader.stop();
 	}
 	
@@ -40,9 +41,12 @@ public class EntityRenderer {
 				List<Entity> batch = entities.get(model);
 				
 				for(int i = 0; i < batch.size(); i++) {
+					
 					Entity entity = batch.get(i);
+					
 					Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 					shader.loadTransformationMatrix(transformationMatrix);
+					shader.loadWhiteOffset(entity.getWhiteOffset()/10);
 					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
 					
 				}
@@ -51,6 +55,7 @@ public class EntityRenderer {
 				GL20.glDisableVertexAttribArray(1);
 				GL30.glBindVertexArray(0);
 				shader.stop();
+				
 			}
 		}
 	}

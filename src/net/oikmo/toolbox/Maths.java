@@ -25,6 +25,11 @@ public class Maths {
 					result = vec;
 				}
 			}
+			if(result == null) {
+				Vector3f scaleVec = new Vector3f(scale,scale,scale);
+				scaleTable.add(scaleVec);
+				return scaleVec;
+			}
 		} else {
 			scaleTable.add(new Vector3f(scale, scale, scale));
 			result =  scaleTable.get(0);
@@ -81,5 +86,21 @@ public class Maths {
             rounded = Math.round(number);
         }
 		return rounded;
+	}
+	
+	/**
+	 * Converts string to long via taking each character of the string and converting it into a number. Then that number is added to string to be parsed to {@link Long#valueOf(String)}
+	 * @param name - {@link String}
+	 * @return {@link Long}
+	 */
+	public static long getSeedFromName(String name) {
+		String finalString = "";
+		for(int i = 0; i < name.length(); i++) {
+			char ch = (char) name.getBytes()[i];
+			int pos = Math.abs(ch - 'a' + 1);
+			finalString += pos;
+		}
+
+		return Long.valueOf(finalString);
 	}
 }

@@ -8,6 +8,7 @@ import net.oikmo.main.Main;
 
 public class ChunkManager {
 	public static Block getBlock(Vector3f globalOrigin, MasterChunk master) {
+		if(master == null) { return null; }
 		Chunk chunk = master.getChunk();
 		int localX = (int) (globalOrigin.x - master.getOrigin().x);
 		int localY = (int) globalOrigin.y;
