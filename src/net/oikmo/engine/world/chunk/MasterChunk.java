@@ -5,9 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.main.Main;
+import net.oikmo.toolbox.Maths;
 import prime.PerlinNoise;
 
 public class MasterChunk {
@@ -51,6 +56,70 @@ public class MasterChunk {
 			}
 		}
 		return result;
+	}
+	
+	public Block getBlock(Vector3f position) {
+		Chunk chunk = getChunk();
+		int localX = (int) (position.x - getOrigin().x);
+		int localY = (int) position.y;
+		int localZ = (int) (position.z - getOrigin().z);
+
+		Block block = null;
+
+		if (Maths.isWithinChunk(localX, localY, localZ)) {
+			block = chunk.blocks[localX][localY][localZ];
+		}
+		return block;
+	}
+	
+	public void setBlock(Vector3f globalOrigin, Block block) {
+		Chunk chunk = getChunk();
+		int localX = (int) (globalOrigin.x - getOrigin().x);
+		int localY = (int) globalOrigin.y;
+		int localZ = (int) (globalOrigin.z - getOrigin().z);
+
+		if (Maths.isWithinChunk(localX, localY, localZ)) {
+			if (block != null) {
+				if (chunk.blocks[localX][localY][localZ] == null) {
+					if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
+						chunk.blocks[localX][localY][localZ] = block;
+						Main.theWorld.refreshChunk(this);
+					}
+				} else {
+					return;
+				}
+			} else {
+				if(chunk.blocks[localX][localY][localZ] != null) {
+					chunk.blocks[localX][localY][localZ] = null;
+					Main.theWorld.refreshChunk(this);
+				}
+			}
+		}
+	}
+	
+	private Vector2f position;
+	public void setBlockFromTopLayer(int x, int z, Block block) {
+		position = position == null ? new Vector2f(x,z) : position;
+		if((int)position.x != x && (int)position.y != z) {
+			position.x = x;
+			position.y = z;
+			int localX = (int) (x - getOrigin().x);
+			int localZ = (int) (z - getOrigin().z);
+			if(Maths.isWithinChunk(localX, localZ)) {
+				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
+					try {
+						if (getChunk().blocks[localX][y][localZ] != null) {
+							if(getChunk().blocks[localX][y][localZ] != block) {
+								getChunk().blocks[localX][y - 0][localZ] = block;
+								Main.theWorld.refreshChunk(this);
+								break;
+							}
+						}
+					} catch(ArrayIndexOutOfBoundsException e) {}
+				}
+			}
+		}
+		
 	}
 	
 	public Vector3f getOrigin() {

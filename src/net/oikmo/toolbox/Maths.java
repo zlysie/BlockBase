@@ -8,6 +8,8 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.chunk.Chunk;
 
 public class Maths {
 
@@ -114,5 +116,16 @@ public class Maths {
 		}
 
 		return Long.valueOf(finalString);
+	}
+	
+	public static boolean isWithinChunk(int localX, int localY, int localZ) {
+		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
+				localY >= 0 && localY < World.WORLD_HEIGHT &&
+				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
+	}
+
+	public static boolean isWithinChunk(int localX, int localZ) {
+		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
+				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
 	}
 }

@@ -7,11 +7,6 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import net.oikmo.engine.entity.Camera;
-import net.oikmo.engine.world.World;
-import net.oikmo.engine.world.blocks.Block;
-import net.oikmo.engine.world.chunk.Chunk;
-import net.oikmo.engine.world.chunk.ChunkManager;
-import net.oikmo.engine.world.chunk.MasterChunk;
 
 public class MousePicker {
 	private Vector3f currentRay;

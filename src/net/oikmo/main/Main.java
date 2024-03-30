@@ -12,7 +12,6 @@ import java.io.File;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
@@ -20,7 +19,6 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.audio.AudioMaster;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.gui.GuiScreen;
-import net.oikmo.engine.gui.component.slider.GuiText;
 import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;

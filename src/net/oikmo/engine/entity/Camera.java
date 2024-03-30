@@ -6,7 +6,6 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
-import net.oikmo.engine.Loader;
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.component.slider.GuiText;
 import net.oikmo.engine.models.CubeModel;
@@ -15,7 +14,6 @@ import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.Chunk;
-import net.oikmo.engine.world.chunk.ChunkManager;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
@@ -133,7 +131,7 @@ public class Camera {
 			
 			picker.distance = picker.BASE_DISTANCE;
 			for(int i = 0; i < picker.BASE_DISTANCE; i++) {
-				Block block = ChunkManager.getBlock(picker.getPointRounded(i), currentChunk);
+				Block block = currentChunk.getBlock(picker.getPointRounded(i));
 				if(block != null) {
 					picker.distance = i;
 					break;
@@ -144,7 +142,7 @@ public class Camera {
 			Maths.roundVector(pos);
 			
 			block.setPosition(pos);
-			Block thatBlock =ChunkManager.getBlock(pos, currentChunk);
+			Block thatBlock = currentChunk.getBlock(pos);
 			if(thatBlock != null) {
 				block.setWhiteOffset(2f);
 				block.setRawModel(CubeModel.getRawModel(thatBlock));
@@ -166,7 +164,7 @@ public class Camera {
 				}
 			} catch(NumberFormatException e) {}
 			
-			if(ChunkManager.getBlock(roundedPosition, currentChunk) == null) {
+			if(currentChunk.getBlock(roundedPosition) == null) {
 				block.setTextureID(texturePackTexture);
 			} else {
 				block.setTextureID(invisibleTexture);
@@ -174,11 +172,11 @@ public class Camera {
 			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
-					Block block1 = ChunkManager.getBlock(picker.getPointRounded(picker.distance), currentChunk);
+					Block block1 = currentChunk.getBlock(picker.getPointRounded(picker.distance));
 					if(block1 == null) {
-						ChunkManager.setBlock(picker.getPointRounded(picker.distance), selectedBlock, currentChunk);
+						currentChunk.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
 					} else {
-						ChunkManager.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock, currentChunk);
+						currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
 					}
 					mouseClickRight = true;
 				}
@@ -188,9 +186,9 @@ public class Camera {
 			
 			if(Mouse.isButtonDown(0)) {
 				if(!mouseClickLeft) {
-					Block block = ChunkManager.getBlock(picker.getPointRounded(), currentChunk);
+					Block block = currentChunk.getBlock(picker.getPointRounded());
 					if(block != null) {
-						ChunkManager.setBlock(picker.getPointRounded(), null, currentChunk);
+						currentChunk.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;
 				}
@@ -199,10 +197,10 @@ public class Camera {
 			}
 			
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				ChunkManager.setBlockFromTopLayer((int)roundedPosition.x, (int)roundedPosition.z, selectedBlock, currentChunk);
+				currentChunk.setBlockFromTopLayer((int)roundedPosition.x, (int)roundedPosition.z, selectedBlock);
 			}
 		} else {
-			Logger.log(LogLevel.WARN, "No chunk loaded!");
+			Logger.log(LogLevel.WARN, "No chunk detected!");
 		}
 		
 		this.move();
@@ -324,9 +322,5 @@ public class Camera {
 	}
 	public float getRoll() {
 		return roll;
-	}
-
-	public Block getBlockFromCast() {
-		return ChunkManager.getBlock(block.getPosition(), currentChunk);
 	}
 }

@@ -68,8 +68,7 @@ public class Logger {
 	 * returns who ran the function.
 	 * @return class name
 	 */
-	private static ThreadCall getThreadCall() { 
-		ThreadCall call;
+	private static ThreadCall getThreadCall() {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
         for(int i = 1; i < stElements.length; i++) {
             StackTraceElement ste = stElements[i];
