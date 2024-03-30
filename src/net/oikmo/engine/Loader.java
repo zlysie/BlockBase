@@ -138,7 +138,7 @@ public class Loader {
 
 		BufferedImage image = null;
 		try {
-			image = ImageIO.read(Loader.class.getResourceAsStream("/assets/textures/" + name + ".png"));
+			image = ImageIO.read(Loader.class.getResourceAsStream("/assets/" + name + ".png"));
 		} catch (FileNotFoundException e) {
 			try {
 				image = ImageIO.read(Loader.class.getResourceAsStream("missingTexture.png"));

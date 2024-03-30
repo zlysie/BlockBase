@@ -40,7 +40,7 @@ public class World {
 	private Thread chunkCreator;
 	
 	public World(String seed) {
-		tex = new ModelTexture(ResourceLoader.loadTexture("defaultPack"));
+		tex = new ModelTexture(ResourceLoader.loadTexture("textures/defaultPack"));
 		this.noiseGen = new PerlinNoise((int)Maths.getSeedFromName(seed)*266, 1D,0.5D,2D, 7); 
 		init();
 	}

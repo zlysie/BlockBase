@@ -38,7 +38,7 @@ public class FontType {
 	 * 			- Inputted string will pass on to {@link Loader#loadFontTexture(String)}
 	 */
 	public FontType(String name) {
-		this.textureAtlas = Loader.getInstance().loadTexture("../fonts/"+name);
+		this.textureAtlas = Loader.getInstance().loadTexture("fonts/"+name);
 		this.loader = new TextMeshCreator(name);
 	}
 	

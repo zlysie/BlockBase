@@ -75,8 +75,8 @@ public class Camera {
 		this.blockType.setColour(1f, 1f, 1f);
 		this.blockType.setEdge(0.2f);
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
-		this.texturePackTexture = ResourceLoader.loadTexture("defaultPack");
-		this.invisibleTexture = ResourceLoader.loadTexture("transparent");
+		this.texturePackTexture = ResourceLoader.loadTexture("textures/defaultPack");
+		this.invisibleTexture = ResourceLoader.loadTexture("textures/transparent");
 		this.block = new Entity(new TexturedModel(Loader.getInstance().loadToVAO(CubeModel.vertices, CubeModel.convert(selectedBlock.getType())), new ModelTexture(texturePackTexture)), position, rotation, 1.002f);
 		flyCam = true;
 		startThread1();

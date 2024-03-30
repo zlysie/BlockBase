@@ -21,6 +21,7 @@ import net.oikmo.engine.audio.AudioMaster;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slider.GuiText;
+import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
@@ -100,7 +101,6 @@ public class Main {
 						DisplayManager.saveScreenshot();
 					}
 				}
-				
 			}
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
@@ -109,6 +109,7 @@ public class Main {
 		displayRequest = true;
 		Logger.saveLog();
 		AudioMaster.cleanUp();
+		TextMaster.cleanUp();
 		System.exit(0);
 		DisplayManager.closeDisplay();
 	}

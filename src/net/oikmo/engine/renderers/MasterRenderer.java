@@ -53,11 +53,11 @@ public class MasterRenderer {
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f, 0.7f, 1.0f);
 		guiRenderer = new GuiRenderer(projectionMatrix);
 		font = new FontType("minecraft");
-		ui_nuhuh = ResourceLoader.loadTexture("ui/ui_nuhuh");
-		ui_button = ResourceLoader.loadTexture("ui/normal/ui_button");
-		ui_hover = ResourceLoader.loadTexture("ui/normal/ui_button_hover");
-		ui_smallbutton = ResourceLoader.loadTexture("ui/small/ui_button");
-		ui_smallhover = ResourceLoader.loadTexture("ui/small/ui_button_hover");
+		ui_nuhuh = ResourceLoader.loadTexture("textures/ui/ui_nuhuh");
+		ui_button = ResourceLoader.loadTexture("textures/ui/normal/ui_button");
+		ui_hover = ResourceLoader.loadTexture("textures/ui/normal/ui_button_hover");
+		ui_smallbutton = ResourceLoader.loadTexture("textures/ui/small/ui_button");
+		ui_smallhover = ResourceLoader.loadTexture("textures/ui/small/ui_button_hover");
 		
 		TextMaster.init();
 	}
@@ -122,7 +122,7 @@ public class MasterRenderer {
 		
 		projectionMatrix.m00 = x_scale;
 		projectionMatrix.m11 = y_scale;
-		projectionMatrix.m22 = -zp/zm; //literally do not remove the minux sign
+		projectionMatrix.m22 = -zp/zm; //literally do not remove the minus* sign
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 = -(2 * FAR_PLANE * NEAR_PLANE) / zm;
 		projectionMatrix.m33 = 0;
