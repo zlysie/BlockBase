@@ -2,7 +2,11 @@ package net.oikmo.engine.world;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.swing.JOptionPane;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
@@ -15,8 +19,11 @@ import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.textures.ModelTexture;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.main.save.SaveData;
+import net.oikmo.main.save.SaveSystem;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
@@ -57,7 +64,7 @@ public class World {
 							synchronized(MasterChunk.usedPositions) {
 								if(!MasterChunk.isPositionUsed(chunkPos)) {
 									masterChunks.add(new MasterChunk(noiseGen, chunkPos));
-									Logger.log(LogLevel.INFO, "Creating chunk!");
+									//Logger.log(LogLevel.INFO, "Creating chunk!");
 								}
 							}
 						}
@@ -69,14 +76,24 @@ public class World {
 		chunkCreator.start();
 	}
 	
+	private boolean lockInWorldLoad = false;
 	public void update(Camera camera) {
-		if(Keyboard.isKeyDown(Keyboard.KEY_F)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
 			if(!lockInRefresh) {
-				refreshChunks();
+				saveWorld();
 				lockInRefresh = true;
 			}
 		} else {
 			lockInRefresh = false;
+		}
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_T)) {
+			if(!lockInWorldLoad) {
+				loadWorld();
+				lockInWorldLoad = true;
+			}
+		} else {
+			lockInWorldLoad = false;
 		}
 		
 		synchronized(masterChunks) {
@@ -111,6 +128,34 @@ public class World {
 		MasterRenderer.getInstance().render(camera);
 	}
 	
+	public void saveWorld() {
+		Map<Vector3f, Block[][][]> chunks = new HashMap<>();
+		for(MasterChunk master : masterChunks) {
+			chunks.put(master.getOrigin(), master.getChunk().blocks);
+		}
+		
+		SaveSystem.save("world1", new SaveData(chunks));
+	}
+	
+	public void loadWorld() {
+		//JOptionPane.showMessageDialog(null, "World is loading!");
+		
+		SaveData data = SaveSystem.load("world1");
+		MasterChunk.clear();
+		masterChunks.clear();
+		entities.clear();
+		for(Map.Entry<Vector3f, Block[][][]> entry : data.chunks.entrySet()) {
+			masterChunks.add(new MasterChunk(entry.getKey(), entry.getValue()));
+		}
+		new Thread(new Runnable() {
+			public void run() {
+				JOptionPane.showMessageDialog(null, "World has loaded!");
+			}
+		}).start();
+		
+		
+	}
+	
 	public boolean isInValidDistance(Vector3f origin) {
 
 		int distX = (int) FastMath.abs(Main.camPos.x - origin.x);
@@ -130,17 +175,6 @@ public class World {
 			master.createMesh();
 		}
 	}
-	
-	/*public void refreshCertainChunk(Chunk chunk) {
-		if(chunk.hasMesh && chunk.mesh != null) {
-			chunk.hasMesh = false;
-			entities.remove(chunk.mesh.entity);
-			chunkMeshes.remove(chunk.mesh);
-			chunk.mesh = null;
-			chunkMeshes.add(new ChunkMesh(chunk));
-		}
-		
-	}*/
 	
 	public void refreshChunks() {
 		System.out.println("clearing!");

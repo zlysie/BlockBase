@@ -34,6 +34,15 @@ public class MasterChunk {
 		MasterChunk.chunkMap.put(this.origin, this);
 	}
 	
+	public MasterChunk(Vector3f origin, Block[][][] blocks) {
+		setIndex(usedPositions.size());
+		this.origin = origin;
+		this.chunk = new Chunk(origin, blocks);
+		this.mesh = new ChunkMesh(this.chunk);
+		MasterChunk.usedPositions.add(origin);
+		MasterChunk.chunkMap.put(this.origin, this);
+	}
+	
 	public static MasterChunk getChunkFromPosition(Vector3f position) {
 		return chunkMap.get(getPosition(position));
 	}
@@ -156,5 +165,21 @@ public class MasterChunk {
 
 	private void setIndex(int index) {
 		this.index = index;
+	}
+	
+	public static Map<Vector3f, MasterChunk> createSave() {
+		Map<Vector3f, MasterChunk> savedChunks = new HashMap<>();
+	
+		for(Map.Entry<Vector3f, MasterChunk> entry : chunkMap.entrySet()) {
+			entry.getValue().destroyMesh();
+			entry.getValue().setEntity(null);
+			savedChunks.put(entry.getKey(), entry.getValue());
+		}
+		return savedChunks;
+	}
+
+	public static void clear() {
+		chunkMap.clear();
+		usedPositions.clear();
 	}
 }

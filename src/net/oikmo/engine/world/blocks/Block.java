@@ -1,7 +1,10 @@
 package net.oikmo.engine.world.blocks;
 
-public abstract class Block {
-	
+import java.io.Serializable;
+
+public abstract class Block implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	public static final Block[] blocks = new Block[256];
 	public static final Block grass = new BlockGrass(Type.GRASS);
 	public static final Block dirt = new BlockDirt(Type.DIRT);
