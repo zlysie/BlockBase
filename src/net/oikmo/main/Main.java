@@ -11,6 +11,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -23,7 +24,9 @@ import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.gui.GuiInGame;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
@@ -57,11 +60,13 @@ public class Main {
 			frame = new Frame(Main.gameVersion);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
-					displayRequest = true;
+					theWorld.saveWorld();
 					Logger.saveLog();
 					AudioMaster.cleanUp();
 					System.exit(0);
-					DisplayManager.closeDisplay();
+					
+					displayRequest = true;
+					
 					
 				}
 			});
@@ -76,15 +81,20 @@ public class Main {
 			frame.setLocationRelativeTo((Component)null);
 			frame.setVisible(true);
 			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
+			Block.init();
+			CubeModel.setup();
 			CubeModel.createVertices();
 			AudioMaster.init();
 			MasterRenderer.getInstance();
 			
 			theWorld = new World("ballsack!!!");
+			theWorld.loadWorld();
 			
 			currentScreen = new GuiInGame();
 			
-			Camera camera = new Camera(new Vector3f(0,10,0), new Vector3f(0,0,0));
+			int index = 0;
+			
+			Camera camera = new Camera(new Vector3f(0,70,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
@@ -93,6 +103,8 @@ public class Main {
 				theWorld.update(camera);
 				
 				DisplayManager.updateDisplay(gameCanvas);
+				
+				
 				
 				if(Keyboard.next()) {
 					if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
@@ -103,7 +115,7 @@ public class Main {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		
+		theWorld.saveWorld();
 		displayRequest = true;
 		Logger.saveLog();
 		AudioMaster.cleanUp();

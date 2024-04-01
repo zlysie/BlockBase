@@ -69,356 +69,13 @@ public class CubeModel {
 			
 	};
 	
-	public static Vector2f[] UV_PX = {
-
-			// GRASS
-			new Vector2f(1.f / 16.f, 0.f),
-			new Vector2f(1.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f / 16.f),
-			new Vector2f(1.f / 16.f, 0.f),
-
-			// DIRT
-			new Vector2f(2f / 16.f, 0.f),
-			new Vector2f(2f / 16.f, 1.f / 16.f),
-			new Vector2f(3f / 16.f, 1.f / 16.f),
-			new Vector2f(3f / 16.f, 1.f / 16.f),
-			new Vector2f(3f / 16.f, 0.f / 16.f),
-			new Vector2f(2f / 16.f, 0.f),
-
-			// STONE
-			new Vector2f(3.f / 16.f, 0.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f),
-
-			// TREEBARK
-			new Vector2f(4.f / 16.f, 0.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 0.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f),
-
-			// TREELEAF
-			new Vector2f(6.f / 16.f, 0.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f),
-
-			// COBBLESTONE
-			new Vector2f(7.f / 16.f, 0.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f),
-
-			// BEDROCK
-			new Vector2f(8.f / 16.f, 0.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 0.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f)
-
-	};	
-	public static Vector2f[] UV_NX = {
-
-			// GRASS
-			new Vector2f(1.f / 16.f, 0.f),
-			new Vector2f(1.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f / 16.f),
-			new Vector2f(1.f / 16.f, 0.f),
-
-			// DIRT
-			new Vector2f(2.f / 16.f, 0.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f),
-
-			// STONE
-			new Vector2f(3.f / 16.f, 0.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f),
-
-			// TREEBARK
-			new Vector2f(4.f / 16.f, 0.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 0.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f),
-
-			// TREELEAF
-			new Vector2f(6.f / 16.f, 0.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f),
-
-			// COBBLESTONE
-			new Vector2f(7.f / 16.f, 0.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f),
-
-			// BEDROCK
-			new Vector2f(8.f / 16.f, 0.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 0.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f)
-	};
-	public static Vector2f[] UV_PY = {
-
-			// GRASS
-			new Vector2f(0.f, 0.f),
-			new Vector2f(0.f, 1.f / 16.f),
-			new Vector2f(1.f / 16.f, 1.f / 16.f),
-			new Vector2f(1.f / 16.f, 1.f / 16.f),
-			new Vector2f(1.f / 16.f, 0.f),
-			new Vector2f(0.f, 0.f),
-
-			// DIRT
-			new Vector2f(2.f / 16.f, 0.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f),
-
-			// STONE
-			new Vector2f(3.f / 16.f, 0.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f),
-
-			// TREEBARK
-			new Vector2f(5.f / 16.f, 0.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f / 16.f),
-			new Vector2f(5.f / 16.f, 0.f),
-
-			// TREELEAF
-			new Vector2f(6.f / 16.f, 0.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f),
-
-			// COBBLESTONE
-			new Vector2f(7.f / 16.f, 0.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f),
-
-			// BEDROCK
-			new Vector2f(8.f / 16.f, 0.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 0.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f)
-	};
-	public static Vector2f[] UV_NY = {
-
-			// GRASS
-			new Vector2f(2.f / 16.f, 0.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f),
-
-			// DIRT
-			new Vector2f(2.f / 16.f, 0.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f),
-
-			// STONE
-			new Vector2f(3.f / 16.f, 0.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f),
-
-			// TREEBARK
-			new Vector2f(5.f / 16.f, 0.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f / 16.f),
-			new Vector2f(5.f / 16.f, 0.f),
-
-			// TREELEAF
-			new Vector2f(6.f / 16.f, 0.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f),
-
-			// COBBLESTONE
-			new Vector2f(7.f / 16.f, 0.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f),
-
-			// BEDROCK
-			new Vector2f(8.f / 16.f, 0.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 0.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f)
-	};	
-	public static Vector2f[] UV_PZ = {
-
-			// GRASS
-			new Vector2f(1.f / 16.f, 0.f),
-			new Vector2f(1.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f / 16.f),
-			new Vector2f(1.f / 16.f, 0.f),
-
-			// DIRT
-			new Vector2f(2.f / 16.f, 0.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f),
-
-			// STONE
-			new Vector2f(3.f / 16.f, 0.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f),
-
-			// TREEBARK
-			new Vector2f(4.f / 16.f, 0.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 0.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f),
-
-			// TREELEAF
-			new Vector2f(6.f / 16.f, 0.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f),
-
-			// COBBLESTONE
-			new Vector2f(7.f / 16.f, 0.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f),
-
-			// BEDROCK
-			new Vector2f(8.f / 16.f, 0.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 0.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f)
-	};
-	public static Vector2f[] UV_NZ = {
-
-			// GRASS
-			new Vector2f(1.f / 16.f, 0.f),
-			new Vector2f(1.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f / 16.f),
-			new Vector2f(1.f / 16.f, 0.f),
-
-			// DIRT
-			new Vector2f(2.f / 16.f, 0.f),
-			new Vector2f(2.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f / 16.f),
-			new Vector2f(2.f / 16.f, 0.f),
-
-			// STONE
-			new Vector2f(3.f / 16.f, 0.f),
-			new Vector2f(3.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f / 16.f),
-			new Vector2f(3.f / 16.f, 0.f),
-
-			// TREEBARK
-			new Vector2f(4.f / 16.f, 0.f),
-			new Vector2f(4.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 1.f / 16.f),
-			new Vector2f(5.f / 16.f, 0.f / 16.f),
-			new Vector2f(4.f / 16.f, 0.f),
-
-			// TREELEAF
-			new Vector2f(6.f / 16.f, 0.f),
-			new Vector2f(6.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f / 16.f),
-			new Vector2f(6.f / 16.f, 0.f),
-
-			// COBBLESTONE
-			new Vector2f(7.f / 16.f, 0.f),
-			new Vector2f(7.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f / 16.f),
-			new Vector2f(7.f / 16.f, 0.f),
-
-			// BEDROCK
-			new Vector2f(8.f / 16.f, 0.f),
-			new Vector2f(8.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 1.f / 16.f),
-			new Vector2f(9.f / 16.f, 0.f / 16.f),
-			new Vector2f(8.f / 16.f, 0.f)
-	};
-
+	public static Vector2f[] UV_PX;
+	public static Vector2f[] UV_NX;
+	public static Vector2f[] UV_PY;
+	public static Vector2f[] UV_NY;
+	public static Vector2f[] UV_PZ;
+	public static Vector2f[] UV_NZ;
+	
 	public static Vector3f[] NORMALS = {
 			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 1
 			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 2
@@ -428,89 +85,111 @@ public class CubeModel {
 			new Vector3f(1.f, 0.f, 0.f)    // Normal for Vertex 6
 	};
 	
-	public static float[] vertices = {
-            -0.5f,0.5f,-0.5f,
-            -0.5f,-0.5f,-0.5f,
-            0.5f,-0.5f,-0.5f,
-            0.5f,0.5f,-0.5f,
-
-            -0.5f,0.5f,0.5f,
-            -0.5f,-0.5f,0.5f,
-            0.5f,-0.5f,0.5f,
-            0.5f,0.5f,0.5f,
-
-            0.5f,0.5f,-0.5f,
-            0.5f,-0.5f,-0.5f,
-            0.5f,-0.5f,0.5f,
-            0.5f,0.5f,0.5f,
-
-            -0.5f,0.5f,-0.5f,
-            -0.5f,-0.5f,-0.5f,
-            -0.5f,-0.5f,0.5f,
-            -0.5f,0.5f,0.5f,
-
-            -0.5f,0.5f,0.5f,
-            -0.5f,0.5f,-0.5f,
-            0.5f,0.5f,-0.5f,
-            0.5f,0.5f,0.5f,
-
-            -0.5f,-0.5f,0.5f,
-            -0.5f,-0.5f,-0.5f,
-            0.5f,-0.5f,-0.5f,
-            0.5f,-0.5f,0.5f
-
-    };
-
-    public static float[] uv = {
-
-            0,0,
-            0,1,
-            1,1,
-            1,0,
-            0,0,
-            
-            0,1,
-            1,1,
-            1,0,
-            0,0,
-            0,1,
-            
-            1,1,
-            1,0,
-            0,0,
-            0,1,
-            1,1,
-            
-            1,0,
-            0,0,
-            0,1,
-            1,1,
-            
-            1,0,
-            0,0,
-            0,1,
-            1,1,
-            1,0
-    };
-
-    public static int[] indices = {
-            0,1,3,
-            3,1,2,
-            4,5,7,
-            7,5,6,
-            8,9,11,
-            11,9,10,
-            12,13,15,
-            15,13,14,
-            16,17,19,
-            19,17,18,
-            20,21,23,
-            23,21,22
-	};
-    
+	public static float[] vertices;
 
     static Vector2f[][] UVS;
     static Vector3f[][] VERTS;
+    
+    public static void setup() {
+		UV_PX = setupUVPX();
+		UV_NX = setupUVNX();
+		UV_PY = setupUVPY();
+		UV_NY = setupUVNY();
+		UV_PZ = setupUVPX();
+		UV_NZ = setupUVNX();
+	}
+	
+	public static Vector2f[] setupUVPX() {
+        int textureCount = 7; // Number of textures
+        int texturesPerBlock = 6; // Number of UVs per block
+        Vector2f[] uvArray = new Vector2f[textureCount * texturesPerBlock];
+        
+        addTextureFromXY(uvArray, Block.grass.getType(), 1, 0); //grass
+        addTextureFromXY(uvArray, Block.dirt.getType(), 2, 0); //dirt
+        addTextureFromXY(uvArray, Block.stone.getType(), 3, 0); //stone
+        addTextureFromXY(uvArray, Block.treebark.getType(), 1, 1); //treebark
+        addTextureFromXY(uvArray, Block.treeleaf.getType(), 0, 1); //treeleaf
+        addTextureFromXY(uvArray, Block.cobble.getType(), 4, 0); //cobble
+        addTextureFromXY(uvArray, Block.bedrock.getType(), 5, 0); //bedrock
+
+        return uvArray;
+    }	
+	public static Vector2f[] setupUVNX() {
+	    int textureCount = 7; // Number of textures
+        int texturesPerBlock = 6; // Number of UVs per block
+        Vector2f[] uvArray = new Vector2f[textureCount * texturesPerBlock];
+        
+        addTextureFromXY(uvArray, Block.grass.getType(), 1, 0); //grass
+        addTextureFromXY(uvArray, Block.dirt.getType(), 2, 0); //dirt
+        addTextureFromXY(uvArray, Block.stone.getType(), 3, 0); //stone
+        addTextureFromXY(uvArray, Block.treebark.getType(), 1, 1); //treebark
+        addTextureFromXY(uvArray, Block.treeleaf.getType(), 0, 1); //treeleaf
+        addTextureFromXY(uvArray, Block.cobble.getType(), 4, 0); //cobble
+        addTextureFromXY(uvArray, Block.bedrock.getType(), 5, 0); //bedrock
+
+        return uvArray;
+    }
+	public static Vector2f[] setupUVPY() {
+	    int textureCount = 7; // Number of textures
+        int texturesPerBlock = 6; // Number of UVs per block
+        Vector2f[] uvArray = new Vector2f[textureCount * texturesPerBlock];
+        addTextureFromXY(uvArray, Block.grass.getType(), 0, 0); //grass
+        addTextureFromXY(uvArray, Block.dirt.getType(), 2, 0); //dirt
+        addTextureFromXY(uvArray, Block.stone.getType(), 3, 0); //stone
+        addTextureFromXY(uvArray, Block.treebark.getType(), 2, 1); //treebark
+        addTextureFromXY(uvArray, Block.treeleaf.getType(), 0, 1); //treeleaf
+        addTextureFromXY(uvArray, Block.cobble.getType(), 4, 0); //cobble
+        addTextureFromXY(uvArray, Block.bedrock.getType(), 5, 0); //bedrock
+
+        return uvArray;
+    }
+	public static Vector2f[] setupUVNY() {
+	    int textureCount = 7; // Number of textures
+        int texturesPerBlock = 6; // Number of UVs per block
+        Vector2f[] uvArray = new Vector2f[textureCount * texturesPerBlock];
+        
+        addTextureFromXY(uvArray, Block.grass.getType(), 2, 0); //grass
+        addTextureFromXY(uvArray, Block.dirt.getType(), 2, 0); //dirt
+        addTextureFromXY(uvArray, Block.stone.getType(), 3, 0); //stone
+        addTextureFromXY(uvArray, Block.treebark.getType(), 2, 1); //treebark
+        addTextureFromXY(uvArray, Block.treeleaf.getType(), 0, 1); //treeleaf
+        addTextureFromXY(uvArray, Block.cobble.getType(), 4, 0); //cobble
+        addTextureFromXY(uvArray, Block.bedrock.getType(), 5, 0); //bedrock
+
+        return uvArray;
+    }
+	public static Vector2f[] setupUVPZ() {
+        int textureCount = 7; // Number of textures
+        int texturesPerBlock = 6; // Number of UVs per block
+        Vector2f[] uvArray = new Vector2f[textureCount * texturesPerBlock];
+        
+        addTextureFromXY(uvArray, Block.grass.getType(), 1, 0); //grass
+        addTextureFromXY(uvArray, Block.dirt.getType(), 2, 0); //dirt
+        addTextureFromXY(uvArray, Block.stone.getType(), 3, 0); //stone
+        addTextureFromXY(uvArray, Block.treebark.getType(), 1, 1); //treebark
+        addTextureFromXY(uvArray, Block.treeleaf.getType(), 0, 1); //treeleaf
+        addTextureFromXY(uvArray, Block.cobble.getType(), 4, 0); //cobble
+        addTextureFromXY(uvArray, Block.bedrock.getType(), 5, 0); //bedrock
+
+
+        return uvArray;
+    }	
+	public static Vector2f[] setupUVNZ() {
+	    int textureCount = 7; // Number of textures
+        int texturesPerBlock = 6; // Number of UVs per block
+        Vector2f[] uvArray = new Vector2f[textureCount * texturesPerBlock];
+        
+        addTextureFromXY(uvArray, Block.grass.getType(), 1, 0); //grass
+        addTextureFromXY(uvArray, Block.dirt.getType(), 2, 0); //dirt
+        addTextureFromXY(uvArray, Block.stone.getType(), 3, 0); //stone
+        addTextureFromXY(uvArray, Block.treebark.getType(), 1, 1); //treebark
+        addTextureFromXY(uvArray, Block.treeleaf.getType(), 0, 1); //treeleaf
+        addTextureFromXY(uvArray, Block.cobble.getType(), 4, 0); //cobble
+        addTextureFromXY(uvArray, Block.bedrock.getType(), 5, 0); //bedrock
+
+        return uvArray;
+    }
+	
 	public static float[] getUVs(int is) {
 		UVS = UVS == null ? new Vector2f[][]{CubeModel.UV_PX, CubeModel.UV_NX, CubeModel.UV_PY, CubeModel.UV_NY, CubeModel.UV_PZ, CubeModel.UV_NZ} : UVS;
 		int totalLength = UVS.length * 6 * 2; // 5 vectors for each array
@@ -548,7 +227,21 @@ public class CubeModel {
 		}
 	}
 	
+	public static int addTextureFromXY(Vector2f[] uv, int index, int x, int y) {
+        float xOffset = (float) x / 16.f;
+        float yOffset = (float) y / 16.f;
+        int privIndex = new Integer(index*6);
+        uv[privIndex++] = new Vector2f(xOffset, yOffset);
+        uv[privIndex++] = new Vector2f(xOffset, (float) (y + 1) / 16.f);
+        uv[privIndex++] = new Vector2f((float) (x + 1) / 16.f, (float) (y + 1) / 16.f);
+        uv[privIndex++] = new Vector2f((float) (x + 1) / 16.f, (float) (y + 1) / 16.f);
+        uv[privIndex++] = new Vector2f((float) (x + 1) / 16.f, yOffset);
+        uv[privIndex++] = new Vector2f(xOffset, yOffset);
+
+        return index;
+    }
+	
 	public static RawModel getRawModel(Block block) {
-		return Loader.getInstance().loadToVAO(vertices, getUVs(block.getType()));
+		return Loader.getInstance().loadToVAO(vertices, getUVs(block.getByteType()));
 	}
 }

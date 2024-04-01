@@ -17,6 +17,7 @@ import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
@@ -34,28 +35,28 @@ public class Camera {
 	private Vector3f position;
 	private Vector3f chunkPosition;
 	private Vector3f roundedPosition;
-	
+
 	public float pitch = 0;
 	public float yaw = 0;
 	public float roll = 0;
-	
+
 	private float speeds = 0f;
 	private float speed = 0.1f;
 	private float moveAt;
-	
+
 	private boolean flyCam = true;
 	private boolean lockInCam;
-	
+
 	private MasterChunk currentChunk;
 	private MousePicker picker;
-	
+
 	private int texturePackTexture;
 	private int invisibleTexture;
 	private Block selectedBlock = Block.cobble;
 	private Entity block;
-	
+
 	private GuiText blockType;
-	
+
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -104,11 +105,14 @@ public class Camera {
 							chunkPosition.z = (int) ((block.getPosition().z / Chunk.CHUNK_SIZE)-1)*16;
 						}
 					}
-					
-					MasterChunk master = MasterChunk.getChunkFromPosition(chunkPosition);
-					if(master != null) {
-						currentChunk = master;
-					}
+
+					try {
+						MasterChunk master = MasterChunk.getChunkFromPosition(chunkPosition);
+						if(master != null) {
+							currentChunk = master;
+						}
+					} catch(IndexOutOfBoundsException e) {}
+
 				}
 			}
 		});
@@ -116,8 +120,9 @@ public class Camera {
 		chunkGetter.setName("Chunk Grabber");
 		chunkGetter.start();
 	}
-	
+	int index = 0;
 	float multiplier = 100;
+	boolean inventory = false;
 	boolean mouseClickLeft = false;
 	boolean mouseClickRight = false;
 	/**
@@ -126,9 +131,9 @@ public class Camera {
 	public void update() {
 		if(currentChunk != null) {
 			Maths.roundVector(position, roundedPosition);
-			
+
 			picker.update();
-			
+
 			picker.distance = picker.BASE_DISTANCE;
 			for(int i = 0; i < picker.BASE_DISTANCE; i++) {
 				Block block = currentChunk.getBlock(picker.getPointRounded(i));
@@ -137,10 +142,10 @@ public class Camera {
 					break;
 				}			
 			}
-			
+
 			Vector3f pos = picker.getPoint();
 			Maths.roundVector(pos);
-			
+
 			block.setPosition(pos);
 			Block thatBlock = currentChunk.getBlock(pos);
 			if(thatBlock != null) {
@@ -150,12 +155,27 @@ public class Camera {
 				block.setWhiteOffset(0.2f);
 				block.setRawModel(CubeModel.getRawModel(selectedBlock));
 			}
-			
+
 			MasterRenderer.getInstance().addEntity(block);
-			
+
 			try {
-				int index = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 != -1 ? Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1 : 0;
-				
+
+				if(!inventory) {
+					if(Keyboard.isKeyDown(Keyboard.KEY_EQUALS)) {
+						index += 1;
+						index = index > Block.blocks.length-1 ? 0 : index;
+						inventory = true;
+					} else if(Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
+						index -= 1;
+						index = index < 0 ? Block.blocks.length-1 : index;
+						inventory = true;
+					}
+				} else {
+					if(!Keyboard.isKeyDown(Keyboard.KEY_EQUALS) && !Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
+						inventory = false;
+					}
+
+				}
 				if(Block.blocks[index] != null) {
 					if(selectedBlock != Block.blocks[index]) {
 						selectedBlock = Block.blocks[index];
@@ -163,13 +183,14 @@ public class Camera {
 					}
 				}
 			} catch(NumberFormatException e) {}
-			
+			catch(ArithmeticException e) {}
+
 			if(currentChunk.getBlock(roundedPosition) == null) {
 				block.setTextureID(texturePackTexture);
 			} else {
 				block.setTextureID(invisibleTexture);
 			}
-			
+
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
 					Block block1 = currentChunk.getBlock(picker.getPointRounded(picker.distance));
@@ -183,7 +204,7 @@ public class Camera {
 			} else {
 				mouseClickRight = false;
 			}
-			
+
 			if(Mouse.isButtonDown(0)) {
 				if(!mouseClickLeft) {
 					Block block = currentChunk.getBlock(picker.getPointRounded());
@@ -195,17 +216,17 @@ public class Camera {
 			} else {
 				mouseClickLeft = false;
 			}
-			
+
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
 				currentChunk.setBlockFromTopLayer((int)roundedPosition.x, (int)roundedPosition.z, selectedBlock);
 			}
 		} else {
-			Logger.log(LogLevel.WARN, "No chunk detected!");
+			//Logger.log(LogLevel.WARN, "No chunk detected!");
 		}
-		
+
 		this.move();
 	}
-	
+
 	private void move() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			if(!lockInCam) {
@@ -221,7 +242,7 @@ public class Camera {
 		}
 
 		if(flyCam) {
-			
+
 			if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
 				speeds = 6;
 			} else {
@@ -267,7 +288,7 @@ public class Camera {
 			}
 		}
 	}
-	
+
 	/**
 	 * Moves camera based on given values.
 	 * @param dx

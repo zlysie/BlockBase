@@ -50,7 +50,10 @@ public class MasterRenderer {
 	
 	public MasterRenderer() {
 		createProjectionMatrix();
-		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f, 0.7f, 1.0f);
+		
+		float offset = 0.2f;
+		
+		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		guiRenderer = new GuiRenderer(projectionMatrix);
 		font = new FontType("minecraft");
 		ui_nuhuh = ResourceLoader.loadTexture("textures/ui/ui_nuhuh");

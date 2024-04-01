@@ -9,18 +9,18 @@ import prime.PerlinNoise;
 
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
-	public Block[][][] blocks;
+	public byte[][][] blocks;
 	private Vector3f origin;
 	
 	private PerlinNoise noiseGen;
 
 	public Chunk(PerlinNoise gen, Vector3f origin) {
-		blocks = new Block[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		noiseGen = gen;
 		generateChunk(origin);
 	}
 	
-	public Chunk(Vector3f origin, Block[][][] blocks) {
+	public Chunk(Vector3f origin, byte[][][] blocks) {
 		this.blocks = blocks;
 		this.origin = origin;
 	}
@@ -40,10 +40,10 @@ public class Chunk {
 	            for (int y = 0; y < World.WORLD_HEIGHT; y++) {
 	                if (y < height) {
 	                    // Create a solid block at this position                    
-	                	blocks[x][y][z] = calculateBlockType(y);
+	                	blocks[x][y][z] = calculateBlockType(y).getByteType();
 	                } else {
 	                    // Air block above the height limit
-	                    blocks[x][y][z] = null;
+	                    blocks[x][y][z] = -1;
 	                }
 	            }
 	        }
@@ -57,8 +57,8 @@ public class Chunk {
 	    for (byte x = 0; x < CHUNK_SIZE; x++) {
 	        for (byte z = 0; z < CHUNK_SIZE; z++) {
 	            for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-	                if (blocks[x][y][z] != null) {
-	                	blocks[x][y + 1][z] = Block.grass;
+	                if (blocks[x][y][z] != -1) {
+	                	blocks[x][y + 1][z] = Block.grass.getByteType();
 	                    break;
 	                }
 	            }

@@ -18,7 +18,10 @@ public class SaveSystem {
 	    		directory.mkdir();
 	    	}
 	    	
-	    	FileOutputStream fos = new FileOutputStream(directory + "/" + name + ".world");
+	    	File save = new File(directory + "/" + name + ".world");
+	    	save.delete();
+	    	//save.createNewFile();
+	    	FileOutputStream fos = new FileOutputStream(save);
 		    ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(data);
 			oos.close();

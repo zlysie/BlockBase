@@ -1,19 +1,18 @@
 package net.oikmo.main.save;
 
 import java.io.Serializable;
-import java.util.Map;
-
-import org.lwjgl.util.vector.Vector3f;
-
-import net.oikmo.engine.world.blocks.Block;
+import java.util.List;
 
 public class SaveData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public long time;
-	public Map<Vector3f, Block[][][]> chunks;
+	public ChunkSaveData[] chunks;
 	
-	public SaveData(Map<Vector3f, Block[][][]> chunks) {
-		this.chunks = chunks;
+	public SaveData(List<ChunkSaveData> chunks) {
+		this.chunks = new ChunkSaveData[chunks.size()];
+		for(int i = 0; i < chunks.size(); i++) {
+			this.chunks[i] = chunks.get(i);
+		}
 	}
 }

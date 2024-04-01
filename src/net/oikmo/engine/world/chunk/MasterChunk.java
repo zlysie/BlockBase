@@ -34,11 +34,10 @@ public class MasterChunk {
 		MasterChunk.chunkMap.put(this.origin, this);
 	}
 	
-	public MasterChunk(Vector3f origin, Block[][][] blocks) {
+	public MasterChunk(Vector3f origin, byte[][][] blocks) {
 		setIndex(usedPositions.size());
 		this.origin = origin;
 		this.chunk = new Chunk(origin, blocks);
-		this.mesh = new ChunkMesh(this.chunk);
 		MasterChunk.usedPositions.add(origin);
 		MasterChunk.chunkMap.put(this.origin, this);
 	}
@@ -59,9 +58,12 @@ public class MasterChunk {
 		Vector3f result = null;
 		synchronized(usedPositions) {
 			for(int i = 0; i < usedPositions.size(); i++) {
-				if(usedPositions.get(i).x == pos.x && usedPositions.get(i).z == pos.z) {
-					result = usedPositions.get(i);
+				if(usedPositions.get(i) != null) {
+					if((int)usedPositions.get(i).x == (int)pos.x && (int)usedPositions.get(i).z == (int)pos.z) {
+						result = usedPositions.get(i);
+					}
 				}
+				
 			}
 		}
 		return result;
@@ -76,7 +78,7 @@ public class MasterChunk {
 		Block block = null;
 
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
-			block = chunk.blocks[localX][localY][localZ];
+			block = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
 		}
 		return block;
 	}
@@ -89,17 +91,17 @@ public class MasterChunk {
 
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
-				if (chunk.blocks[localX][localY][localZ] == null) {
-					if(chunk.blocks[localX][localY][localZ] != block || chunk.blocks[localX][localY][localZ].getType() != block.getType()) {
-						chunk.blocks[localX][localY][localZ] = block;
+				if (chunk.blocks[localX][localY][localZ] == -1) {
+					if(chunk.blocks[localX][localY][localZ] != block.getByteType()) {
+						chunk.blocks[localX][localY][localZ] = block.getByteType();
 						Main.theWorld.refreshChunk(this);
 					}
 				} else {
 					return;
 				}
 			} else {
-				if(chunk.blocks[localX][localY][localZ] != null) {
-					chunk.blocks[localX][localY][localZ] = null;
+				if(chunk.blocks[localX][localY][localZ] != -1) {
+					chunk.blocks[localX][localY][localZ] = -1;
 					Main.theWorld.refreshChunk(this);
 				}
 			}
@@ -117,9 +119,9 @@ public class MasterChunk {
 			if(Maths.isWithinChunk(localX, localZ)) {
 				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
 					try {
-						if (getChunk().blocks[localX][y][localZ] != null) {
-							if(getChunk().blocks[localX][y][localZ] != block) {
-								getChunk().blocks[localX][y - 0][localZ] = block;
+						if (getChunk().blocks[localX][y][localZ] != -1) {
+							if(getChunk().blocks[localX][y][localZ] != block.getByteType()) {
+								getChunk().blocks[localX][y - 0][localZ] = block.getByteType();
 								Main.theWorld.refreshChunk(this);
 								break;
 							}
