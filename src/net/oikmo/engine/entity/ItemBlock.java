@@ -13,6 +13,7 @@ public class ItemBlock extends ItemEntity {
 
 	public ItemBlock(Block block, Vector3f position) {
 		super(Item.blockToItem(block), new TexturedModel(CubeModel.getRawModel(block), new ModelTexture(MasterRenderer.currentTexturePack.getTextureID())), position);
-		this.setSize(this.getScale(),this.getScale());
+		float scale = this.getScale();
+		this.setSize(scale, scale);
 	}
 }

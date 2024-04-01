@@ -19,6 +19,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Calendar;
 import java.util.Comparator;
 
 import javax.swing.ImageIcon;
@@ -30,15 +31,14 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Timer;
-import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
-import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.gui.GuiInGame;
+import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.UnzipUtility;
@@ -99,6 +99,7 @@ public class Main extends Gui {
 					System.exit(0);
 				}
 			});
+			
 			gameCanvas = new Canvas();
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
@@ -110,7 +111,14 @@ public class Main extends Gui {
 			frame.setLocationRelativeTo((Component)null);
 			frame.removeAll();
 			frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
-			frame.add(new CanvasLogo("iconx128"), "Center");
+			
+			if(Calendar.getInstance().get(Calendar.MONTH) == 3 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+				frame.add(new CanvasLogo("icon_aprilFools"), "Center");
+			} else {
+				frame.add(new CanvasLogo("iconx128"), "Center");
+			}
+			
+			
 			frame.setVisible(true);
 			downloadResources();
 			Thread.sleep(2000);
@@ -119,35 +127,42 @@ public class Main extends Gui {
 			DisplayManager.createDisplay(frame, gameCanvas);
 			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 			CubeModel.setup();
+			
 			SoundMaster.init();
 
 			InputManager im = new InputManager();
-
-			theWorld = new World();
 			
-			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
-			inGameGUI = new GuiInGame();
+			shouldTick = false;
 			
-			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
+			currentScreen = new GuiMainMenu();
 			
-			ItemBlock block = new ItemBlock(Block.bedrock, new Vector3f(0,140,0));
 			
-			theWorld.entities.add(block);
 			
 			while(!Display.isCloseRequested()) {
-				
-				
 				timer.advanceTime();
 				
-				if(shouldTick) {
-					Main.thePlayer.updateCamera();
+				
+				
+				for(int e = 0; e < timer.ticks; ++e) {
+					elapsedTime += 0.1f;
 					
-					for(int e = 0; e < timer.ticks; ++e) {
+					if(shouldTick) {
+						
+						
+						if(thePlayer != null) {
+							Main.thePlayer.updateCamera();
+						}
+						
 						tick();
 					}
 				}
 				
-				theWorld.update(thePlayer.getCamera());
+				
+				
+				if(theWorld != null) {
+					theWorld.update(thePlayer.getCamera());
+				}
+				
 				im.handleInput();
 				
 				if(inGameGUI != null) {				
@@ -166,6 +181,14 @@ public class Main extends Gui {
 		close();
 	}
 	
+	public static void loadWorld(String worldName) {
+		theWorld = new World();
+		inGameGUI = new GuiInGame();
+		
+		thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
+		theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
+	}
+	
 	public static void shouldTick() {
 		Main.shouldTick = !shouldTick;
 		Main.thePlayer.getCamera().setMouseLock(shouldTick);
@@ -176,7 +199,7 @@ public class Main extends Gui {
 	}
 
 	private static void tick() {
-		elapsedTime += 0.1f;
+		
 		theWorld.tick();
 		camPos = new Vector3f(thePlayer.getCamera().getPosition());
 	}

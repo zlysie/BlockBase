@@ -98,7 +98,6 @@ public class GuiPauseMenu extends GuiScreen {
 	
 	public void onUpdate() {
 		if(Main.isPaused()) {
-			//drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 32);
 			drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
 			saveButton.tick();
 			loadButton.tick();

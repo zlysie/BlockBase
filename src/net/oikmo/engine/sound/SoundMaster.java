@@ -30,7 +30,7 @@ public class SoundMaster {
 	private static SoundSystem soundSystem = null;
 
 	private static File customMusic = new File(Main.getResources()+"/custom/music");
-	
+
 	private static Thread musicThread;
 
 	public static void init() {
@@ -69,14 +69,16 @@ public class SoundMaster {
 		} catch (IOException e) {
 			Logger.log(LogLevel.WARN, "Unable to write into README at " + customMusic.getAbsolutePath());
 		}
-		
+
 		registerMusic();
 		registerSFX();
-		
+	}
+
+	public static void doMusic() {
 		soundSystem.activate("music");
 		doRandomMusic();
 	}
-	
+
 	private static void registerMusic() {
 		registerMusicByte("music.minecraft", "calm1.ogg");
 		registerMusicByte("music.clark", "calm2.ogg");
@@ -93,7 +95,12 @@ public class SoundMaster {
 		registerMusicByte("music.dryhands", "piano1.ogg");
 		registerMusicByte("music.wethands", "piano2.ogg");
 		registerMusicByte("music.miceonvenus", "piano3.ogg");
-		
+
+		registerMusicByte("music.mutation", "menu/menu1.ogg");
+		registerMusicByte("music.moogcity", "menu/menu2.ogg");
+		registerMusicByte("music.beginning", "menu/menu3.ogg");
+		registerMusicByte("music.floatingtrees", "menu/menu4.ogg");
+
 		File[] customTracks = customMusic.listFiles();
 		if(customTracks.length != 0) {
 			for(File track : customTracks) {
@@ -109,12 +116,16 @@ public class SoundMaster {
 	private static void registerSFX() {
 		registerSFXByte("ui.button.click","random/click.ogg");
 	}
-	
-	
+
+
 	private static void doRandomMusic() {
 		List<SoundByte> bytes = new ArrayList<>();
 		for(Map.Entry<String, SoundByte> entry : music.entrySet()) {
-			bytes.add(entry.getValue());
+			SoundByte b = entry.getValue();
+			if(!b.getFileName().contains("menu")) {
+				bytes.add(entry.getValue());
+			}
+			
 		}
 		Collections.shuffle(bytes);
 
@@ -128,7 +139,7 @@ public class SoundMaster {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
+
 				synchronized(bytes) {
 					for(SoundByte musicByte : bytes) {
 						soundSystem.backgroundMusic("music", musicByte.getFileLocation(), musicByte.getFileName(), false);
@@ -159,7 +170,7 @@ public class SoundMaster {
 	private static void registerCustomMusicByte(String id, String fileName) {
 		music.put(id, SoundByte.custom(id, fileName));
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static void registerCustomSFXByte(String id, String fileName) {
 		sfx.put(id, SoundByte.custom(id, fileName));
@@ -175,11 +186,25 @@ public class SoundMaster {
 		}	
 	}
 	
+	public static SoundByte getMusicByte(String id) {
+		return music.get(id);
+	}
+	
+	public static void playMusic(String id) {
+		SoundByte musicByte = music.get(id);
+		if(musicByte != null) {
+			soundSystem.backgroundMusic("music", musicByte.getFileLocation(), musicByte.getFileName(), false);
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	public static void cleanUp() {
 		if(soundSystem != null) {
 			soundSystem.cleanup();
 		}
-		musicThread.stop();
+		if(musicThread != null) {
+			musicThread.stop();
+		}
+		
 	}
 }

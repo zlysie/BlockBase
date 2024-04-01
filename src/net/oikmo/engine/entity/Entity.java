@@ -37,9 +37,15 @@ public class Entity {
 		setPos(position.x, position.y, position.z);
 	}
 
-	protected void setSize(float w, float h) {
-		this.bbWidth = w;
-		this.bbHeight = h;
+	protected void setSize(float width, float height) {
+		this.bbWidth = width;
+		this.bbHeight = height;
+		float x = position.x;
+		float y = position.y;
+		float z = position.z;
+		float w = this.bbWidth / 2.0F;
+		float h = this.bbHeight / 2.0F;
+		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 
 	protected void setPos(float x, float y, float z) {

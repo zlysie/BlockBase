@@ -1,7 +1,9 @@
 package net.oikmo.toolbox;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -156,7 +158,7 @@ public class Maths {
 			} else {
 				float x = Maths.roundFloat(input.x+1);
 				output.x = (int) ((x / Chunk.CHUNK_SIZE)-1)*16;
-				
+
 			}
 		}
 
@@ -208,5 +210,25 @@ public class Maths {
 		}
 
 		return length;
+	}
+
+	public static String[] fileToArray(String fileLoc) {
+		try {
+			List<String> listOfStrings = new ArrayList<String>();
+			BufferedReader bf = new BufferedReader(new InputStreamReader(Maths.class.getResourceAsStream("/assets/" + fileLoc)));
+			String line = bf.readLine();
+
+			while (line != null) {
+				listOfStrings.add(line);
+				line = bf.readLine();
+			}
+			
+			bf.close();
+			return listOfStrings.toArray(new String[0]);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }
