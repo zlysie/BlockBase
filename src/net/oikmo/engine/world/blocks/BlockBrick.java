@@ -1,8 +1,8 @@
 package net.oikmo.engine.world.blocks;
 
-public class BlockTreeBark extends Block {
+public class BlockBrick extends Block {
 	
-	public BlockTreeBark(Type type) {
+	public BlockBrick(Type type) {
 		super(type);
 	}
 
@@ -11,7 +11,7 @@ public class BlockTreeBark extends Block {
 	}
 	
 	public float getStrength() {
-		return 0.5f;
+		return 0.6f;
 	}
 	
 	public boolean blocksLight() {

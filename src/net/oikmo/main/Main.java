@@ -11,7 +11,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -24,9 +23,7 @@ import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.World;
-import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.gui.GuiInGame;
-import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
@@ -36,7 +33,7 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 public class Main {
 	
 	public static String gameName = "BlockBase";
-	public static String version = "[a0.0.1]";
+	public static String version = "[a0.0.2]";
 	public static String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -60,14 +57,10 @@ public class Main {
 			frame = new Frame(Main.gameVersion);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
-					theWorld.saveWorld();
 					Logger.saveLog();
 					AudioMaster.cleanUp();
 					System.exit(0);
-					
 					displayRequest = true;
-					
-					
 				}
 			});
 			gameCanvas = new Canvas();
@@ -81,18 +74,12 @@ public class Main {
 			frame.setLocationRelativeTo((Component)null);
 			frame.setVisible(true);
 			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
-			Block.init();
 			CubeModel.setup();
-			CubeModel.createVertices();
 			AudioMaster.init();
 			MasterRenderer.getInstance();
 			
 			theWorld = new World("ballsack!!!");
-			theWorld.loadWorld();
-			
 			currentScreen = new GuiInGame();
-			
-			int index = 0;
 			
 			Camera camera = new Camera(new Vector3f(0,70,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
@@ -104,8 +91,6 @@ public class Main {
 				
 				DisplayManager.updateDisplay(gameCanvas);
 				
-				
-				
 				if(Keyboard.next()) {
 					if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
 						DisplayManager.saveScreenshot();
@@ -115,7 +100,6 @@ public class Main {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		theWorld.saveWorld();
 		displayRequest = true;
 		Logger.saveLog();
 		AudioMaster.cleanUp();

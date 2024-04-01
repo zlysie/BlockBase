@@ -13,7 +13,6 @@ import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
-import prime.PerlinNoise;
 
 public class MasterChunk {
 	private static Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
@@ -25,10 +24,10 @@ public class MasterChunk {
 	private ChunkMesh mesh;
 	private Entity entity;
 	
-	public MasterChunk(PerlinNoise noiseGen, Vector3f origin) {
+	public MasterChunk(long seed, Vector3f origin) {
 		setIndex(usedPositions.size());
 		this.origin = origin;
-		this.chunk = new Chunk(noiseGen, origin);
+		this.chunk = new Chunk(seed, origin);
 		this.mesh = new ChunkMesh(this.chunk);
 		MasterChunk.usedPositions.add(origin);
 		MasterChunk.chunkMap.put(this.origin, this);
@@ -37,7 +36,7 @@ public class MasterChunk {
 	public MasterChunk(Vector3f origin, byte[][][] blocks) {
 		setIndex(usedPositions.size());
 		this.origin = origin;
-		this.chunk = new Chunk(origin, blocks);
+		this.chunk = new Chunk(blocks);
 		MasterChunk.usedPositions.add(origin);
 		MasterChunk.chunkMap.put(this.origin, this);
 	}

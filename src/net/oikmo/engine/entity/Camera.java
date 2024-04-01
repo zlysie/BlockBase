@@ -167,7 +167,7 @@ public class Camera {
 						inventory = true;
 					} else if(Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
 						index -= 1;
-						index = index < 0 ? Block.blocks.length-1 : index;
+						index = index <= -1 ? Block.blocks.length-1 : index;
 						inventory = true;
 					}
 				} else {
@@ -215,10 +215,6 @@ public class Camera {
 				}
 			} else {
 				mouseClickLeft = false;
-			}
-
-			if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				currentChunk.setBlockFromTopLayer((int)roundedPosition.x, (int)roundedPosition.z, selectedBlock);
 			}
 		} else {
 			//Logger.log(LogLevel.WARN, "No chunk detected!");

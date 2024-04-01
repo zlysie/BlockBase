@@ -24,7 +24,7 @@ import net.oikmo.main.save.SaveData;
 import net.oikmo.main.save.SaveSystem;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Maths;
-import prime.PerlinNoise;
+import riven.PerlinNoise;
 
 public class World {
 
@@ -34,7 +34,7 @@ public class World {
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	public List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	
-	private PerlinNoise noiseGen;
+	private long seed;
 	
 	private ModelTexture tex;
 
@@ -44,7 +44,7 @@ public class World {
 	
 	public World(String seed) {
 		tex = new ModelTexture(ResourceLoader.loadTexture("textures/defaultPack"));
-		this.noiseGen = new PerlinNoise((int)Maths.getSeedFromName(seed)*266, 1D,0.5D,2D, 7); 
+		this.seed = Maths.getSeedFromName(seed)*256;
 		init();
 	}
 	
@@ -61,7 +61,7 @@ public class World {
 								Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 								synchronized(MasterChunk.usedPositions) {
 									if(!MasterChunk.isPositionUsed(chunkPos)) {
-										masterChunks.add(new MasterChunk(noiseGen, chunkPos));
+										masterChunks.add(new MasterChunk(seed, chunkPos));
 										//Logger.log(LogLevel.INFO, "Creating chunk!");
 									}
 								}
@@ -173,11 +173,8 @@ public class World {
 		masterChunks.clear();
 		entities.clear();
 		System.out.println(data.chunks.length + " " + masterChunks.size());
-		int i = 0;
 		for(ChunkSaveData s : data.chunks) {
-			
 			masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
-			i++;
 			//System.out.println(i);
 		}
 		new Thread(new Runnable() {
