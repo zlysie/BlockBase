@@ -3,16 +3,17 @@ package net.oikmo.engine.renderers.entity;
 import java.util.List;
 import java.util.Map;
 
+import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.entity.Player;
+import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.toolbox.Maths;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
-
-import net.oikmo.engine.entity.Camera;
-import net.oikmo.engine.entity.Entity;
-import net.oikmo.engine.models.TexturedModel;
-import net.oikmo.toolbox.Maths;
 
 public class EntityRenderer {
 	
@@ -34,7 +35,7 @@ public class EntityRenderer {
 				GL30.glBindVertexArray(model.getRawModel().getVaoID());
 				GL20.glEnableVertexAttribArray(0);
 				GL20.glEnableVertexAttribArray(1);
-				
+				GL20.glEnableVertexAttribArray(2);
 				GL13.glActiveTexture(GL13.GL_TEXTURE0);
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getTextureID());
 				
@@ -47,12 +48,20 @@ public class EntityRenderer {
 					Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 					shader.loadTransformationMatrix(transformationMatrix);
 					shader.loadWhiteOffset(entity.getWhiteOffset()/10);
-					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
+					if(entity instanceof Player) {
+						System.out.println("no..");
+						GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+						
+					} else {
+						GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
+					}
 					
 				}
 				
 				GL20.glDisableVertexAttribArray(0);
 				GL20.glDisableVertexAttribArray(1);
+				GL20.glDisableVertexAttribArray(2);
+				
 				GL30.glBindVertexArray(0);
 				shader.stop();
 				

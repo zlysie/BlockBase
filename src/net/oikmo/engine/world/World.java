@@ -6,11 +6,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.util.vector.Vector3f;
-
 import net.oikmo.engine.Loader;
-import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.models.RawModel;
@@ -23,37 +19,33 @@ import net.oikmo.main.save.ChunkSaveData;
 import net.oikmo.main.save.SaveData;
 import net.oikmo.main.save.SaveSystem;
 import net.oikmo.toolbox.FastMath;
+import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
-import riven.PerlinNoise;
+import net.oikmo.toolbox.PerlinNoiseGenerator;
+
+import org.lwjgl.util.vector.Vector3f;
 
 public class World {
 
 	public static final int WORLD_HEIGHT = 128;
 	public static final int WORLD_SIZE = 4*8;
+	private ModelTexture tex;
+	private PerlinNoiseGenerator noiseGen;
 	
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
-	public List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
-	
-	private long seed;
-	
-	private ModelTexture tex;
-
-	private boolean lockInRefresh = false;
-	
+	private List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	private Thread chunkCreator;
+
+	private boolean canCreateChunks = true;
 	
 	public World(String seed) {
-		tex = new ModelTexture(ResourceLoader.loadTexture("textures/defaultPack"));
-		this.seed = Maths.getSeedFromName(seed)*256;
-		init();
-	}
-	
-	private boolean createChunks = true;
-	public void init() {
-		chunkCreator = new Thread(new Runnable() { 
+		this.tex = ModelTexture.create("textures/defaultPack");
+		this.noiseGen = new PerlinNoiseGenerator(Maths.getSeedFromName(seed));
+		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {
 				while (!Main.displayRequest) {
-					if(createChunks) {
+					if(canCreateChunks) {
 						for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
 							for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
 								int chunkX = x * 16;
@@ -61,8 +53,8 @@ public class World {
 								Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 								synchronized(MasterChunk.usedPositions) {
 									if(!MasterChunk.isPositionUsed(chunkPos)) {
-										masterChunks.add(new MasterChunk(seed, chunkPos));
-										//Logger.log(LogLevel.INFO, "Creating chunk!");
+										masterChunks.add(new MasterChunk(noiseGen, chunkPos));
+										Logger.log(LogLevel.INFO, "Creating chunk at x:"+ chunkX +" z:" + chunkZ + "!");
 									}
 								}
 							}
@@ -71,41 +63,12 @@ public class World {
 				}
 			}
 		});
-		chunkCreator.setName("Chunk Creator");
-		chunkCreator.start();
+		this.chunkCreator.setName("Chunk Creator");
+		this.chunkCreator.start();
 	}
 	
-	private boolean lockInWorldSave = false;
-	private boolean lockInWorldLoad = false;
 	public void update(Camera camera) {
-		if(Keyboard.isKeyDown(Keyboard.KEY_F)) {
-			if(!lockInRefresh) {
-				refreshChunks();
-				lockInRefresh = true;
-			}
-		} else {
-			lockInRefresh = false;
-		}
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			if(!lockInWorldSave) {
-				saveWorld();
-				lockInWorldSave = true;
-			}
-		} else {
-			lockInWorldSave = false;
-		}
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_T)) {
-			if(!lockInWorldLoad) {
-				loadWorld();
-				lockInWorldLoad = true;
-			}
-		} else {
-			lockInWorldLoad = false;
-		}
-		
-		if(createChunks) {
+		if(canCreateChunks) {
 			synchronized(masterChunks) {
 				for(MasterChunk master : masterChunks) {
 					if(master.getEntity() == null) {
@@ -128,8 +91,6 @@ public class World {
 			}
 		}
 		
-		
-
 		for(int i = 0; i < entities.size(); i++) {
 			Vector3f origin = entities.get(i).getPosition();
 			
@@ -141,20 +102,7 @@ public class World {
 		MasterRenderer.getInstance().render(camera);
 	}
 	
-	public boolean isInValidRange(Vector3f origin) {
-		
-		int distX = (int) FastMath.abs(Main.camPos.x - origin.x);
-		int distZ = (int) FastMath.abs(Main.camPos.z - origin.z);
-
-		if((distX <= WORLD_SIZE) && (distZ <= WORLD_SIZE)) {
-			return true;
-		}
-		
-		return false;
-	}
-	
 	public void saveWorld() {
-		
 		List<ChunkSaveData> chunks = new ArrayList<>();
 		for(MasterChunk master : masterChunks) {
 			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
@@ -167,7 +115,7 @@ public class World {
 	
 	public void loadWorld() {
 		//JOptionPane.showMessageDialog(null, "World is loading!");
-		createChunks = false;
+		canCreateChunks = false;
 		SaveData data = SaveSystem.load("world1");
 		MasterChunk.clear();
 		masterChunks.clear();
@@ -182,19 +130,8 @@ public class World {
 				JOptionPane.showMessageDialog(null, "World has loaded!");
 			}
 		}).start();
-		createChunks = true;
+		canCreateChunks = true;
 		
-	}
-	
-	public boolean isInValidDistance(Vector3f origin) {
-
-		int distX = (int) FastMath.abs(Main.camPos.x - origin.x);
-		int distZ = (int) FastMath.abs(Main.camPos.z - origin.z);
-
-		if((distX <= WORLD_SIZE) && (distZ <= WORLD_SIZE)) {
-			return true;
-		}
-		return false;
 	}
 
 	public void refreshChunk(MasterChunk master) {
@@ -211,20 +148,23 @@ public class World {
 		entities.clear();
 		
 		for(MasterChunk master : masterChunks) {
-			Vector3f origin = master.getOrigin();
 			master.destroyMesh();
 			master.setEntity(null);
 			
-			int distX = (int) FastMath.abs(Main.camPos.x - origin.x);
-			int distZ = (int) FastMath.abs(Main.camPos.z - origin.z);
-			
-			if((distX <= WORLD_SIZE) && (distZ <= WORLD_SIZE)) {
+			if(isInValidRange(master.getOrigin())){
 				master.createMesh();
 			}
 		}
 	}
 	
-	public void cleanUp() {
+	public boolean isInValidRange(Vector3f origin) {
+		int distX = (int) FastMath.abs(Main.camPos.x - origin.x);
+		int distZ = (int) FastMath.abs(Main.camPos.z - origin.z);
+
+		if((distX <= WORLD_SIZE) && (distZ <= WORLD_SIZE)) {
+			return true;
+		}
 		
+		return false;
 	}
 }

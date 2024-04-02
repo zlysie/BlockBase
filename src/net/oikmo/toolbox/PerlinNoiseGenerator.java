@@ -9,12 +9,12 @@ public class PerlinNoiseGenerator {
     public static float ROUGHNESS = 0.3f;
  
     private Random random = new Random();
-    private int seed;
+    private long seed;
     private int xOffset = 0;
     private int zOffset = 0;
  
-    public PerlinNoiseGenerator() {
-        this.seed = 0;
+    public PerlinNoiseGenerator(long seed) {
+        this.seed = seed;
     }
      
     //only works with POSITIVE gridX and gridZ values!

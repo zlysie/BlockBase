@@ -92,6 +92,16 @@ public class Loader {
 		return vaoID;
 	}
 	
+	public RawModel loadToVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices) {
+		int vaoID = createVAO();
+		bindIndicesBuffer(indices);
+		storeDataInAttributeList(positions, 0, 3);
+		storeDataInAttributeList(textureCoords, 1, 2);
+		storeDataInAttributeList(normals, 2, 3);
+		unbindVAO();
+		return new RawModel(vaoID, indices.length);
+	}
+	
 	private void unbindVAO() {
 		GL30.glBindVertexArray(0);
 	}

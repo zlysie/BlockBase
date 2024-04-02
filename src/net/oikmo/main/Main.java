@@ -10,14 +10,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.util.vector.Vector3f;
-
 import net.oikmo.engine.DisplayManager;
+import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.audio.AudioMaster;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
@@ -29,6 +27,10 @@ import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
 
 public class Main {
 	
@@ -73,21 +75,28 @@ public class Main {
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
 			frame.setVisible(true);
+			
 			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
+			
 			CubeModel.setup();
 			AudioMaster.init();
 			MasterRenderer.getInstance();
+			InputManager im = new InputManager();
 			
 			theWorld = new World("ballsack!!!");
 			currentScreen = new GuiInGame();
 			
+			Player player = new Player(new Vector3f(0,60,0), new Vector3f(0,0,0));
 			Camera camera = new Camera(new Vector3f(0,70,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
 				camera.update();
 				camPos = new Vector3f(camera.getPosition());
 				
 				currentScreen.update();
+				
+				im.handleInput();
 				theWorld.update(camera);
+				MasterRenderer.getInstance().addEntity(player);
 				
 				DisplayManager.updateDisplay(gameCanvas);
 				

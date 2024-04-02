@@ -1,5 +1,7 @@
 package net.oikmo.engine.world.blocks;
 
+import net.oikmo.engine.AABB;
+
 public abstract class Block {
 	public static final Block[] blocks = new Block[13];
 	public static final Block grass = new BlockGrass(Type.GRASS);
@@ -57,6 +59,10 @@ public abstract class Block {
 	
 	public int getType() {
 		return type.ordinal();
+	}
+	
+	public AABB getAABB(int x, int y, int z) {
+		return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
 	}
 	
 	public abstract float getStrength();
