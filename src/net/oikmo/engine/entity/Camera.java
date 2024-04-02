@@ -232,15 +232,15 @@ public class Camera {
 		}
 
 		if(Mouse.isGrabbed() != flyCam) {
-			Mouse.setGrabbed(flyCam);
+			//Mouse.setGrabbed(flyCam);
 		}
 
 		if(flyCam) {
 
 			if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-				speeds = 6;
-			} else {
 				speeds = 2;
+			} else {
+				speeds = 1;
 			}
 
 			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {

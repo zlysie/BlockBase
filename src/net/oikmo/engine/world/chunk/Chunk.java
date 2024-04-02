@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.oikmo.engine.AABB;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -13,8 +14,11 @@ public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	public byte[][][] blocks;
 	
+	private Vector3f origin;
+	
 	public Chunk(PerlinNoiseGenerator noiseGen, Vector3f origin) {
 		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		this.origin = origin;
 		generateChunk(origin, noiseGen);
 	}
 	
@@ -44,52 +48,38 @@ public class Chunk {
 	    getTopLayer();
 	}
 	
+ 	ArrayList<AABB> aABBs = new ArrayList<>();
  	public ArrayList<AABB> getCubes(AABB aABB) {
-		ArrayList<AABB> aABBs = new ArrayList<>();
+		aABBs.clear();
 		int x0 = (int)aABB.x0;
 		int x1 = (int)(aABB.x1 + 1.0F);
 		int y0 = (int)aABB.y0;
 		int y1 = (int)(aABB.y1 + 1.0F);
 		int z0 = (int)aABB.z0;
 		int z1 = (int)(aABB.z1 + 1.0F);
-		if(x0 < 0) {
-			x0 = 0;
-		}
-
-		if(y0 < 0) {
-			y0 = 0;
-		}
-
-		if(z0 < 0) {
-			z0 = 0;
-		}
-
-		if(x1 > CHUNK_SIZE) {
-			x1 = CHUNK_SIZE;
-		}
-
-		if(y1 > CHUNK_SIZE) {
-			y1 = CHUNK_SIZE;
-		}
-
-		if(z1 > World.WORLD_HEIGHT) {
-			z1 = World.WORLD_HEIGHT;
-		}
-
-		for(int x = x0; x < x1; ++x) {
-			for(int y = y0; y < y1; ++y) {
-				for(int z = z0; z < z1; ++z) {
-					Block tile = Block.getBlockFromOrdinal(blocks[x][y][z]);
-					if(tile != null) {
-						AABB aabb = tile.getAABB(x, y, z);
-						if(aabb != null) {
-							aABBs.add(aabb);
+		
+		int X0 = (int) (x0 - origin.x);
+		int Y0 = (int) y0;
+		int Z0 = (int) (z0 - origin.z);
+		int X1 = (int) (x1 - origin.x);
+		int Y1 = (int) y1;
+		int Z1 = (int) (z1 - origin.z);
+		
+		for(int x = X0; x < X1; ++x) {
+			for(int y = Y0; y < Y1; ++y) {
+				for(int z = Z0; z < Z1; ++z) {
+					try {
+						if(blocks[x][y][z] != -1) {
+							aABBs.add(new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1)));
 						}
+					} catch(ArrayIndexOutOfBoundsException e) {
+						
 					}
+					
 				}
 			}
 		}
-
+		System.out.println(aABBs.size());
 		return aABBs;
 	}
  	

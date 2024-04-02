@@ -2,14 +2,15 @@ package net.oikmo.engine.entity;
 
 import java.util.List;
 
+import org.lwjgl.util.vector.Vector3f;
+
 import net.oikmo.engine.AABB;
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.toolbox.Maths;
-
-import org.lwjgl.util.vector.Vector3f;
 
 public class Entity {
 	private TexturedModel model;
@@ -27,7 +28,7 @@ public class Entity {
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
-		setPos(position.x,position.y,position.z);
+		this.bb = new AABB(position.x - bbWidth, position.y - bbHeight, position.z - bbWidth, position.x + bbWidth, position.y + bbHeight, position.z + bbWidth);
 		this.distance = new Vector3f();
 		this.rotation = rotation;
 		this.scale = scale;
@@ -47,29 +48,47 @@ public class Entity {
 		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 	
+	protected void set(float width, float height,float x, float y, float z) {
+		this.position.x = x;
+		this.position.y = y;
+		this.position.z = z;
+		float w = this.bbWidth = width;
+		float h = this.bbHeight = height;
+		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
+	}
+	
 	public void move(float xa, float ya, float za) {
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
 		List<AABB> aABBs = null;
 		if(getCurrentChunk() != null) {
+			//System.out.println(getCurrentChunk() + " " + getCurrentChunk().getOrigin());
 			aABBs = getCurrentChunk().getChunk().getCubes(this.bb.expand(xa, ya, za));
 		}
 		if(aABBs == null) { return; }
 		
-		for(int i = 0; i < aABBs.size(); i++) {
-			ya = aABBs.get(i).clipYCollide(this.bb, ya);
-			
-			xa = aABBs.get(i).clipXCollide(this.bb, xa);
-			
-			za = aABBs.get(i).clipZCollide(this.bb, za);
-			
+		int i;
+		for(i = 0; i < aABBs.size(); ++i) {
+			ya = ((AABB)aABBs.get(i)).clipYCollide(this.bb, ya);
 		}
+
 		this.bb.move(0.0F, ya, 0.0F);
+
+		for(i = 0; i < aABBs.size(); ++i) {
+			xa = ((AABB)aABBs.get(i)).clipXCollide(this.bb, xa);
+		}
+
 		this.bb.move(xa, 0.0F, 0.0F);
+
+		for(i = 0; i < aABBs.size(); ++i) {
+			za = ((AABB)aABBs.get(i)).clipZCollide(this.bb, za);
+		}
+
 		this.bb.move(0.0F, 0.0F, za);
-		
+
 		this.onGround = yaOrg != ya && yaOrg < 0.0F;
+		
 		if(xaOrg != xa) {
 			this.distance.x = 0.0F;
 		}
@@ -95,11 +114,11 @@ public class Entity {
 			za *= dist;
 			float sin = (float)Math.sin((double)this.rotation.y * Math.PI / 180.0D);
 			float cos = (float)Math.cos((double)this.rotation.y * Math.PI / 180.0D);
-			this.distance.x += (xa * cos - za * sin) * DisplayManager.getFrameTimeSeconds();
-			this.distance.z += (za * cos + xa * sin) * DisplayManager.getFrameTimeSeconds();
+			this.distance.x += ((xa * cos - za * sin) * DisplayManager.getFrameTimeSeconds() * 10);
+		    this.distance.z += ((za * cos + xa * sin) * DisplayManager.getFrameTimeSeconds() * 10);
 		}
 	}
-	
+
 	
 	public void setRawModel(RawModel model) {
 		this.model.setRawModel(model);
@@ -157,6 +176,7 @@ public class Entity {
 	public MasterChunk getCurrentChunk() {
 		if(chunkPos == null) { chunkPos = new Vector3f(); }
 		Maths.calculateChunkPosition(getPosition(), chunkPos);
+		
 		return MasterChunk.getChunkFromPosition(chunkPos);
 	}
 }

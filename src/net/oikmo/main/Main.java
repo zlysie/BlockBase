@@ -10,6 +10,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
+
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Loader;
@@ -27,35 +31,39 @@ import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
-
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.util.vector.Vector3f;
+import paulscode.sound.SoundSystem;
+import paulscode.sound.SoundSystemConfig;
+import paulscode.sound.SoundSystemException;
+import paulscode.sound.codecs.CodecJOrbis;
+import paulscode.sound.codecs.CodecWav;
+import paulscode.sound.libraries.LibraryJavaSound;
+import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 
 public class Main {
-	
+
 	public static String gameName = "BlockBase";
 	public static String version = "[a0.0.2]";
 	public static String gameVersion = gameName + " " + version;
-	
+
 	public static boolean displayRequest = false;
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
-	
+
 	public static World theWorld;
-	
+
 	public static Vector3f camPos = new Vector3f(0,0,0);
-	
+
 	static Frame frame;
 	static Canvas gameCanvas;
-	
+
 	private static GuiScreen currentScreen;
-	
+
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
+		SoundSystem soundSystem = null;
 		try {
-			
+
 			frame = new Frame(Main.gameVersion);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
@@ -75,32 +83,44 @@ public class Main {
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
 			frame.setVisible(true);
-			
+
 			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
-			
+
 			CubeModel.setup();
-			AudioMaster.init();
+			//AudioMaster.init();
+			try {
+				SoundSystemConfig.addLibrary( LibraryLWJGLOpenAL.class );
+				SoundSystemConfig.addLibrary( LibraryJavaSound.class );
+				SoundSystemConfig.setCodec( "wav", CodecWav.class );
+				SoundSystemConfig.setCodec( "ogg", CodecJOrbis.class );
+			} catch( SoundSystemException e ) {
+				System.err.println("error linking with the plug-ins" );
+			} 
 			MasterRenderer.getInstance();
 			InputManager im = new InputManager();
-			
+
+			soundSystem = new SoundSystem();
+			soundSystem.setVolume("ogg music", 0.5f);
+			soundSystem.backgroundMusic("ogg music", Main.class.getResource("/assets/sounds/piano1.ogg"), "testing.ogg", false);
+
 			theWorld = new World("ballsack!!!");
 			currentScreen = new GuiInGame();
-			
+
 			Player player = new Player(new Vector3f(0,60,0), new Vector3f(0,0,0));
-			Camera camera = new Camera(new Vector3f(0,70,0), new Vector3f(0,0,0));
+			Camera camera = new Camera(new Vector3f(0,100,0), new Vector3f(90,0,0));
 			while(!Display.isCloseRequested()) {
 				camera.update();
 				player.update();
 				camPos = new Vector3f(camera.getPosition());
-				
+
 				currentScreen.update();
-				
+
 				im.handleInput();
 				theWorld.update(camera);
 				MasterRenderer.getInstance().addEntity(player);
-				
+
 				DisplayManager.updateDisplay(gameCanvas);
-				
+
 				if(Keyboard.next()) {
 					if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
 						DisplayManager.saveScreenshot();
@@ -110,6 +130,7 @@ public class Main {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
+		soundSystem.cleanup();
 		displayRequest = true;
 		Logger.saveLog();
 		AudioMaster.cleanUp();
@@ -117,7 +138,7 @@ public class Main {
 		System.exit(0);
 		DisplayManager.closeDisplay();
 	}
-	
+
 	static PanelCrashReport report;
 	static boolean balls = false;
 	/**
@@ -130,11 +151,11 @@ public class Main {
 		if(!balls) {
 			frame = new Frame();
 			frame.addWindowListener(new WindowAdapter(){  
-	            public void windowClosing(WindowEvent e) {  
-	            	frame.dispose(); 
-	                System.exit(0);
-	            }  
-	        });
+				public void windowClosing(WindowEvent e) {  
+					frame.dispose(); 
+					System.exit(0);
+				}  
+			});
 			frame.setTitle(Main.gameName + " Error!");
 			frame.setSize(WIDTH, HEIGHT);
 			frame.setVisible(true);
@@ -146,7 +167,7 @@ public class Main {
 			}
 			frame.add(report, "Center");
 			frame.validate();
-			
+
 			balls = true;
 		}	
 	}
@@ -161,7 +182,7 @@ public class Main {
 			}
 		}
 	}
-	
+
 	/**
 	 * Retrieves data directory of .blockbase/ using {@code Main.getAppDir(String)}
 	 * @return Directory (File)

@@ -20,5 +20,8 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="libraries/jar/PNGDecoder.jar"/>
 	<classpathentry kind="lib" path="libraries/jar/noise.jar"/>
+	<classpathentry kind="lib" path="libraries/jar/codecs.jar"/>
+	<classpathentry kind="lib" path="libraries/jar/libraries.jar"/>
+	<classpathentry kind="lib" path="libraries/jar/soundsystem.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -155,4 +155,9 @@ public class AABB {
 		this.y1 += ya;
 		this.z1 += za;
 	}
+	
+	@Override
+	public String toString() {
+		return "AABB["+x0 +", " + y0 + ", " + z0 + ", " + x1 + ", " + y1 + ", " + z1 + "]"; 
+	}
 }
