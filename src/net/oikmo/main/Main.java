@@ -90,6 +90,7 @@ public class Main {
 			Camera camera = new Camera(new Vector3f(0,70,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
 				camera.update();
+				player.update();
 				camPos = new Vector3f(camera.getPosition());
 				
 				currentScreen.update();

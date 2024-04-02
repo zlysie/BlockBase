@@ -29,8 +29,6 @@ import net.oikmo.toolbox.MousePicker;
  * @author <i>Oikmo</i>
  */
 public class Camera {
-
-
 	private int maxVerticalTurn = 90;
 	private Vector3f position;
 	private Vector3f chunkPosition;

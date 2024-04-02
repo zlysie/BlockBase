@@ -7,6 +7,7 @@ import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.toolbox.Maths;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -46,7 +47,6 @@ public class Entity {
 		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 	
-	@SuppressWarnings("unused")
 	public void move(float xa, float ya, float za) {
 		float xaOrg = xa;
 		float yaOrg = ya;
@@ -59,13 +59,16 @@ public class Entity {
 		
 		for(int i = 0; i < aABBs.size(); i++) {
 			ya = aABBs.get(i).clipYCollide(this.bb, ya);
-			this.bb.move(0.0F, ya, 0.0F);
-			xa = ((AABB)aABBs.get(i)).clipXCollide(this.bb, xa);
-			this.bb.move(xa, 0.0F, 0.0F);
-			za = ((AABB)aABBs.get(i)).clipZCollide(this.bb, za);
-			this.bb.move(0.0F, 0.0F, za);
+			
+			xa = aABBs.get(i).clipXCollide(this.bb, xa);
+			
+			za = aABBs.get(i).clipZCollide(this.bb, za);
+			
 		}
-
+		this.bb.move(0.0F, ya, 0.0F);
+		this.bb.move(xa, 0.0F, 0.0F);
+		this.bb.move(0.0F, 0.0F, za);
+		
 		this.onGround = yaOrg != ya && yaOrg < 0.0F;
 		if(xaOrg != xa) {
 			this.distance.x = 0.0F;
@@ -149,8 +152,11 @@ public class Entity {
 	public float getScale() {
 		return scale;
 	}
-
-	public MasterChunk getCurrentChunk() { 
-		return MasterChunk.getChunkFromPosition(getPosition());
+	
+	Vector3f chunkPos;
+	public MasterChunk getCurrentChunk() {
+		if(chunkPos == null) { chunkPos = new Vector3f(); }
+		Maths.calculateChunkPosition(getPosition(), chunkPos);
+		return MasterChunk.getChunkFromPosition(chunkPos);
 	}
 }

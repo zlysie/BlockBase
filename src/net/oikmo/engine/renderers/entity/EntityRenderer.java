@@ -35,7 +35,6 @@ public class EntityRenderer {
 				GL30.glBindVertexArray(model.getRawModel().getVaoID());
 				GL20.glEnableVertexAttribArray(0);
 				GL20.glEnableVertexAttribArray(1);
-				GL20.glEnableVertexAttribArray(2);
 				GL13.glActiveTexture(GL13.GL_TEXTURE0);
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getTextureID());
 				
@@ -48,20 +47,12 @@ public class EntityRenderer {
 					Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 					shader.loadTransformationMatrix(transformationMatrix);
 					shader.loadWhiteOffset(entity.getWhiteOffset()/10);
-					if(entity instanceof Player) {
-						System.out.println("no..");
-						GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-						
-					} else {
-						GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
-					}
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
 					
 				}
 				
 				GL20.glDisableVertexAttribArray(0);
 				GL20.glDisableVertexAttribArray(1);
-				GL20.glDisableVertexAttribArray(2);
-				
 				GL30.glBindVertexArray(0);
 				shader.stop();
 				

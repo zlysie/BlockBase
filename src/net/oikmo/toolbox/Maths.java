@@ -10,6 +10,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
+import net.oikmo.engine.world.chunk.MasterChunk;
 
 public class Maths {
 
@@ -127,5 +128,27 @@ public class Maths {
 	public static boolean isWithinChunk(int localX, int localZ) {
 		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
 				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
+	}
+	
+	public static void calculateChunkPosition(Vector3f input, Vector3f output) {
+		if(input.x >= 0) {
+			output.x = (int) (input.x / Chunk.CHUNK_SIZE)*16;
+		} else {
+			if(input.x > -16) {
+				output.x = (int)-1*16;
+			} else {
+				output.x = (int) ((input.x / Chunk.CHUNK_SIZE)-1)*16;
+			}
+		}
+
+		if(input.z >= 0) {
+			output.z = (int) (input.z / Chunk.CHUNK_SIZE) * 16;
+		} else {
+			if(input.z > -16) {
+				output.z = (int)-1 * 16;
+			} else {
+				output.z = (int) ((input.z / Chunk.CHUNK_SIZE)-1)*16;
+			}
+		}
 	}
 }
