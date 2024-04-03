@@ -3,8 +3,11 @@ package net.oikmo.engine.world;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JOptionPane;
+
+import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.entity.Camera;
@@ -24,13 +27,12 @@ import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
 
-import org.lwjgl.util.vector.Vector3f;
-
 public class World {
 
 	public static final int WORLD_HEIGHT = 128;
 	public static final int WORLD_SIZE = 4*8;
 	private ModelTexture tex;
+	private long seed;
 	private PerlinNoiseGenerator noiseGen;
 	
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
@@ -40,8 +42,21 @@ public class World {
 	private boolean canCreateChunks = true;
 	
 	public World(String seed) {
+		init(Maths.getSeedFromName(seed));
+	}
+	
+	public World(long seed) {
+		init(seed);
+	}
+	
+	public World() {
+		init(new Random().nextLong());
+	}
+	
+	private void init(long seed) {
+		this.seed = seed;
 		this.tex = ModelTexture.create("textures/defaultPack");
-		this.noiseGen = new PerlinNoiseGenerator(Maths.getSeedFromName(seed));
+		this.noiseGen = new PerlinNoiseGenerator(seed);
 		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {
 				while (!Main.displayRequest) {
@@ -104,40 +119,38 @@ public class World {
 	
 	public void saveWorld() {
 		List<ChunkSaveData> chunks = new ArrayList<>();
+		
 		for(MasterChunk master : masterChunks) {
 			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
 		}
-		//System.out.println(chunks.size());
-		SaveSystem.save("world1", new SaveData(chunks));
-		chunks.clear();
 		
+		SaveSystem.save("world1", new SaveData(seed, chunks));
+		chunks.clear();
 	}
 	
 	public void loadWorld() {
-		//JOptionPane.showMessageDialog(null, "World is loading!");
-		canCreateChunks = false;
+		this.canCreateChunks = false;
 		SaveData data = SaveSystem.load("world1");
 		MasterChunk.clear();
-		masterChunks.clear();
-		entities.clear();
-		System.out.println(data.chunks.length + " " + masterChunks.size());
+		this.masterChunks.clear();
+		this.entities.clear();
 		for(ChunkSaveData s : data.chunks) {
 			masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
-			//System.out.println(i);
 		}
+		
 		new Thread(new Runnable() {
 			public void run() {
 				JOptionPane.showMessageDialog(null, "World has loaded!");
 			}
 		}).start();
-		canCreateChunks = true;
-		
+		this.noiseGen = new PerlinNoiseGenerator(data.seed);
+		this.canCreateChunks = true;
 	}
 
 	public void refreshChunk(MasterChunk master) {
 		if(master.getMesh() != null) {
 			master.destroyMesh();
-			entities.remove(master.getEntity());
+			this.entities.remove(master.getEntity());
 			master.setEntity(null);
 			master.createMesh();
 		}
@@ -145,7 +158,7 @@ public class World {
 	
 	public void refreshChunks() {
 		System.out.println("clearing!");
-		entities.clear();
+		this.entities.clear();
 		
 		for(MasterChunk master : masterChunks) {
 			master.destroyMesh();

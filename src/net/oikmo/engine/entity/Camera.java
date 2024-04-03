@@ -74,7 +74,7 @@ public class Camera {
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
 		this.texturePackTexture = ResourceLoader.loadTexture("textures/defaultPack");
 		this.invisibleTexture = ResourceLoader.loadTexture("textures/transparent");
-		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(texturePackTexture)), position, rotation, 1.002f);
+		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(texturePackTexture)), position, new Vector3f(0,0,0), 1.002f);
 		flyCam = true;
 		startThread1();
 	}
@@ -126,7 +126,8 @@ public class Camera {
 	/**
 	 * Fly cam
 	 */
-	public void update() {
+	public void update(Vector3f position) {
+		this.position = position;
 		if(currentChunk != null) {
 			Maths.roundVector(position, roundedPosition);
 
@@ -177,7 +178,7 @@ public class Camera {
 				if(Block.blocks[index] != null) {
 					if(selectedBlock != Block.blocks[index]) {
 						selectedBlock = Block.blocks[index];
-						blockType.setTextString("selectedBlock: " + selectedBlock.getEnumType().name());
+						blockType.setTextString(selectedBlock.getEnumType().name());
 					}
 				}
 			} catch(NumberFormatException e) {}
@@ -220,8 +221,34 @@ public class Camera {
 
 		this.move();
 	}
-
+	
 	private void move() {
+		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+			if(!lockInCam) {
+				flyCam = !flyCam;
+				lockInCam = true;
+			}
+		} else {
+			lockInCam = false;
+		}
+
+		if(Mouse.isGrabbed() != flyCam) {
+			Mouse.setGrabbed(flyCam);
+		}
+
+		if(flyCam) {
+			pitch -= Mouse.getDY() * GameSettings.sensitivity*2;
+			if(pitch < -maxVerticalTurn){
+				pitch = -maxVerticalTurn;
+			}else if(pitch > maxVerticalTurn){
+				pitch = maxVerticalTurn;
+			}
+			yaw += Mouse.getDX() * GameSettings.sensitivity;
+
+		}
+	}
+
+	private void flyCam() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			if(!lockInCam) {
 				flyCam = !flyCam;

@@ -9,14 +9,19 @@ import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
 
 public class Player extends Entity {
-
+	
+	private Camera camera;
+	
 	public Player(Vector3f position, Vector3f rotation) {
-		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/defaultPack")), position, rotation,1f);
-		this.heightOffset = 0; //1.62f
-		set(1,1,0,60,0);
+		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
+		this.heightOffset = 1.62f; //1.62f
+		this.camera = new Camera(position, rotation);
+		setPos(0,70,0);
+		//set(bbWidth,1,0,60,0);
 	}
 	
 	public void update() {
+		camera.update(getPosition());
 		float xa = 0.0F;
 		float ya = 0.0F;
 		
@@ -37,12 +42,14 @@ public class Player extends Entity {
 		}
 		
 		if((Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LMETA)) && this.onGround) {
-			this.distance.y = 0.5F;
+			this.distance.y = 0.2F;
 		}
 		if(this.getPosition().y <= 0 || getCurrentChunk() == null) {
 			this.set(bbWidth, bbHeight, 1, 70, 1);
 		}
-		this.moveRelative(xa, ya, this.onGround ? 0.02F : 0.2F);
+		
+		this.setRotation(0.0f, camera.yaw, 0.0f);
+		this.moveRelative(xa, ya, this.onGround ? 0.2F : 0.1F);
 		this.distance.y = (float)((double)this.distance.y - 0.005D);
 		this.move(this.distance.x, this.distance.y, this.distance.z);
 		this.distance.x *= 0.91F;
@@ -53,4 +60,9 @@ public class Player extends Entity {
 			this.distance.z *= 0.8F;
 		}
 	}
+
+	public Camera getCamera() {
+		return camera;
+	}
+
 }

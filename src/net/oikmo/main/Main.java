@@ -17,8 +17,6 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Loader;
-import net.oikmo.engine.audio.AudioMaster;
-import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.font.renderer.TextMaster;
@@ -68,7 +66,6 @@ public class Main {
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
 					Logger.saveLog();
-					AudioMaster.cleanUp();
 					System.exit(0);
 					displayRequest = true;
 				}
@@ -85,38 +82,38 @@ public class Main {
 			frame.setVisible(true);
 
 			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
-
 			CubeModel.setup();
-			//AudioMaster.init();
-			try {
-				SoundSystemConfig.addLibrary( LibraryLWJGLOpenAL.class );
-				SoundSystemConfig.addLibrary( LibraryJavaSound.class );
-				SoundSystemConfig.setCodec( "wav", CodecWav.class );
-				SoundSystemConfig.setCodec( "ogg", CodecJOrbis.class );
-			} catch( SoundSystemException e ) {
-				System.err.println("error linking with the plug-ins" );
-			} 
 			MasterRenderer.getInstance();
+			
+			//Initalises soundsystem
+			try {
+				SoundSystemConfig.addLibrary(LibraryLWJGLOpenAL.class);
+				SoundSystemConfig.addLibrary(LibraryJavaSound.class);
+				SoundSystemConfig.setCodec("wav", CodecWav.class);
+				SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
+			} catch( SoundSystemException e ) {
+				System.err.println("error linking with the plug-ins");
+			} 
+			
+			
 			InputManager im = new InputManager();
 
 			soundSystem = new SoundSystem();
 			soundSystem.setVolume("ogg music", 0.5f);
-			soundSystem.backgroundMusic("ogg music", Main.class.getResource("/assets/sounds/piano1.ogg"), "testing.ogg", false);
+			soundSystem.backgroundMusic("music", Main.class.getResource("assets/sounds/piano1.ogg"), "dryhands", false);
 
-			theWorld = new World("ballsack!!!");
+			theWorld = new World();
 			currentScreen = new GuiInGame();
 
 			Player player = new Player(new Vector3f(0,60,0), new Vector3f(0,0,0));
-			Camera camera = new Camera(new Vector3f(0,100,0), new Vector3f(90,0,0));
 			while(!Display.isCloseRequested()) {
-				camera.update();
 				player.update();
-				camPos = new Vector3f(camera.getPosition());
+				camPos = new Vector3f(player.getCamera().getPosition());
 
 				currentScreen.update();
 
 				im.handleInput();
-				theWorld.update(camera);
+				theWorld.update(player.getCamera());
 				MasterRenderer.getInstance().addEntity(player);
 
 				DisplayManager.updateDisplay(gameCanvas);
@@ -133,7 +130,6 @@ public class Main {
 		soundSystem.cleanup();
 		displayRequest = true;
 		Logger.saveLog();
-		AudioMaster.cleanUp();
 		TextMaster.cleanUp();
 		System.exit(0);
 		DisplayManager.closeDisplay();
