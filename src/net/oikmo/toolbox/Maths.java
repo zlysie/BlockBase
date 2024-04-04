@@ -10,7 +10,6 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
-import net.oikmo.engine.world.chunk.MasterChunk;
 
 public class Maths {
 
