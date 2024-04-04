@@ -1,15 +1,14 @@
 package net.oikmo.engine.world.chunk;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.AABB;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 public class Chunk {
@@ -53,38 +52,6 @@ public class Chunk {
 		getTopLayer();
 	}
 
-	public ArrayList<AABB> getCubes(AABB aABB) {
-		ArrayList<AABB> aABBs = new ArrayList<>();
-		int x0 = (int)aABB.x0;
-		int x1 = (int)(aABB.x1 + 1.0F);
-		int y0 = (int)aABB.y0;
-		int y1 = (int)(aABB.y1 + 1.0F);
-		int z0 = (int)aABB.z0;
-		int z1 = (int)(aABB.z1 + 1.0F);
-
-		for(int x = x0; x < x1; ++x) {
-			for(int y = y0; y < y1; ++y) {
-				for(int z = z0; z < z1; ++z) {
-					try {
-						if(blocks[x][y][z] != -1) {
-							Block block = Block.getBlockFromOrdinal(blocks[x][y][z]);
-
-							AABB toCompare = block.getCollisionBoundingBoxFromPool(x,y,z);
-							if(aABB.intersects(toCompare)) {
-								aABBs.add(toCompare);
-							}
-						}
-					} catch(ArrayIndexOutOfBoundsException e) {
-						return null;
-					}
-
-				}
-			}
-		}
-		//System.out.println(aABBs.size());
-		return aABBs;
-	}
-
 	private void getTopLayer() {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
@@ -120,41 +87,27 @@ public class Chunk {
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * Creates an AABB from. each. block.
+	 * This isn't bad is it?
+	 * 
+	 * @return aabbs - {@link List}
+	 */
 	public List<AABB> getAABBs() {
 		List<AABB> aabbs = new ArrayList<>();
-
-		byte blockSize = Block.blockSize;
-
-		for (byte x = 0; x < CHUNK_SIZE; x++) {
-			for (int y = 0; y < World.WORLD_HEIGHT; y++) {
-				for (byte z = 0; z < CHUNK_SIZE; z++) {
-					byte blockType = blocks[x][y][z];
-					if (blockType != -1) {
-						float blockX0 = origin.x + x * blockSize;
-						float blockY0 = origin.y + y * blockSize;
-						float blockZ0 = origin.z + z * blockSize;
-						float blockX1 = blockX0 + blockSize;
-						float blockY1 = blockY0 + blockSize;
-						float blockZ1 = blockZ0 + blockSize;
+		
+		for(int x = 0; x < CHUNK_SIZE; ++x) {
+			for(int y = 0; y < World.WORLD_HEIGHT; ++y) {
+				for(int z = 0; z < CHUNK_SIZE; ++z) {
+					if(blocks[x][y][z] != -1) {
+						int blockX = Maths.roundFloat(x + origin.x);
+						int blockY = y;
+						int blockZ = Maths.roundFloat(z + origin.z);
 						
-						//offsets block if the origin is negative (weird shit happens if this isn't applied)
-						if (origin.x < 0) {
-							blockX0 -= blockSize;
-							blockX1 -= blockSize;
-						}
-						if (origin.y < 0) {
-							blockY0 -= blockSize;
-							blockY1 -= blockSize;
-						}
-						if (origin.z < 0) {
-							blockZ0 -= blockSize;
-							blockZ1 -= blockSize;
-						}
-
-						AABB aabb = new AABB(blockX0, blockY0, blockZ0, blockX1, blockY1, blockZ1);
-						aabbs.add(aabb);
-
+						AABB other = new AABB(blockX, blockY, blockZ, blockX, blockY+1, blockZ);
+						
+						aabbs.add(other);
 					}
 				}
 			}

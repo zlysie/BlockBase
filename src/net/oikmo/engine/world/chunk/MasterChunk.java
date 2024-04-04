@@ -16,7 +16,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 public class MasterChunk {
-	private static Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
+	public static Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
 	public static List<Vector3f> usedPositions = new ArrayList<>();
 	private int index;
 	

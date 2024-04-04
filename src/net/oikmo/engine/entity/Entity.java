@@ -57,12 +57,15 @@ public class Entity {
 		float h = this.bbHeight = height;
 		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
-
+	
 	/**
-	 * Checks neighbouring chunks and collects the AABBs from each.
+	 * Checks neighbouring chunks and collects the AABBs from each. one.
+	 * @param za 
+	 * @param ya 
+	 * @param xa 
 	 * @return
 	 */
-	public List<AABB> getSurroundingAABBs() {
+	public List<AABB> getSurroundingAABBs(float xa, float ya, float za) {
 		List<AABB> surroundingAABBs = new ArrayList<>();
 		MasterChunk currentChunk = getCurrentChunk();
 		
@@ -98,10 +101,8 @@ public class Entity {
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
-		List<AABB> aABBs = getSurroundingAABBs();
-
-		if(aABBs == null) { return; }
-
+		List<AABB> aABBs = getSurroundingAABBs(xa, ya, za);
+		
 		int i;
 		for(i = 0; i < aABBs.size(); ++i) {
 			ya = ((AABB)aABBs.get(i)).clipYCollide(this.bb, ya);
@@ -135,9 +136,9 @@ public class Entity {
 			this.distance.z = 0.0F;
 		}
 
-		this.position.x = (this.bb.x0 + this.bb.x1) / 2.0F;
-		this.position.y = this.bb.y0 + this.heightOffset;
-		this.position.z = (this.bb.z0 + this.bb.z1) / 2.0F;
+		this.position.x = (this.bb.minX + this.bb.maxX) / 2.0F;
+		this.position.y = this.bb.minY + this.heightOffset;
+		this.position.z = (this.bb.minZ + this.bb.maxZ) / 2.0F;
 	}
 	
 	/**
@@ -223,13 +224,18 @@ public class Entity {
 	public float getScale() {
 		return scale;
 	}
-	
-	
 
+	public Vector3f getCurrentChunkPosition() {
+		return chunkPos;
+	}
+	
 	Vector3f chunkPos;
 	public MasterChunk getCurrentChunk() {
-		if(chunkPos == null) { chunkPos = new Vector3f(); }
-		Maths.calculateChunkPosition(getPosition(), chunkPos);
-		return MasterChunk.getChunkFromPosition(chunkPos);
+		synchronized(MasterChunk.chunkMap) {
+			if(chunkPos == null) { chunkPos = new Vector3f(); }
+			Maths.calculateChunkPosition(getPosition(), chunkPos);
+			return MasterChunk.getChunkFromPosition(chunkPos);
+		}
+		
 	}
 }

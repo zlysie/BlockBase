@@ -65,6 +65,10 @@ public class World {
 							for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
 								int chunkX = x * 16;
 								int chunkZ = z * 16;
+								
+								if(chunkX < 0 || chunkZ < 0) {
+									//continue;
+								}
 								Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 								synchronized(MasterChunk.usedPositions) {
 									if(!MasterChunk.isPositionUsed(chunkPos)) {

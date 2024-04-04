@@ -82,8 +82,8 @@ public abstract class Block {
 		return new AABB((float)var1 + this.minX, (float)var2 + this.minY, (float)var3 + this.minZ, (float)var1 + this.maxX, (float)var2 + this.maxY, (float)var3 + this.maxZ);
 	}
 
-	public AABB getCollisionBoundingBoxFromPool(int var1, int var2, int var3) {
-		return new AABB((float)var1 + this.minX, (float)var2 + this.minY, (float)var3 + this.minZ, (float)var1 + this.maxX, (float)var2 + this.maxY, (float)var3 + this.maxZ);
+	public AABB getAABB(int x, int y, int z) {
+		return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
 	}
 	
 	public abstract float getStrength();

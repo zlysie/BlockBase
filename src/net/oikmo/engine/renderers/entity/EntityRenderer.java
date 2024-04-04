@@ -3,17 +3,16 @@ package net.oikmo.engine.renderers.entity;
 import java.util.List;
 import java.util.Map;
 
-import net.oikmo.engine.entity.Camera;
-import net.oikmo.engine.entity.Entity;
-import net.oikmo.engine.entity.Player;
-import net.oikmo.engine.models.TexturedModel;
-import net.oikmo.toolbox.Maths;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
+
+import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.toolbox.Maths;
 
 public class EntityRenderer {
 	

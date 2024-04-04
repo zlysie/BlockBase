@@ -2,12 +2,9 @@ package net.oikmo.engine.entity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.ResourceLoader;
-import net.oikmo.engine.gui.component.slider.GuiText;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
@@ -17,9 +14,6 @@ import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
-import net.oikmo.toolbox.FastMath;
-import net.oikmo.toolbox.Logger;
-import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.MousePicker;
 
@@ -38,11 +32,7 @@ public class Camera {
 	public float yaw = 0;
 	public float roll = 0;
 
-	private float speeds = 0f;
-	private float speed = 0.1f;
-	private float moveAt;
-
-	private boolean flyCam = true;
+	private boolean mouseLocked = true;
 	private boolean lockInCam;
 
 	private MasterChunk currentChunk;
@@ -52,9 +42,7 @@ public class Camera {
 	private int invisibleTexture;
 	private Block selectedBlock = Block.cobble;
 	private Entity block;
-
-	private GuiText blockType;
-
+	
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -68,14 +56,11 @@ public class Camera {
 		this.roundedPosition = new Vector3f();
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
-		this.blockType = new GuiText("selectedBlock: "+selectedBlock.getEnumType().name(), 1.1f, MasterRenderer.font, new Vector2f(0,0), 1, false, false);
-		this.blockType.setColour(1f, 1f, 1f);
-		this.blockType.setEdge(0.2f);
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
 		this.texturePackTexture = ResourceLoader.loadTexture("textures/defaultPack");
 		this.invisibleTexture = ResourceLoader.loadTexture("textures/transparent");
 		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(texturePackTexture)), position, new Vector3f(0,0,0), 1.002f);
-		flyCam = true;
+		mouseLocked = true;
 		startThread1();
 	}
 
@@ -128,7 +113,7 @@ public class Camera {
 	 */
 	public void update(Vector3f position) {
 		this.position = position;
-		if(currentChunk != null) {
+		if(currentChunk != null && mouseLocked) {
 			Maths.roundVector(position, roundedPosition);
 
 			picker.update();
@@ -178,7 +163,7 @@ public class Camera {
 				if(Block.blocks[index] != null) {
 					if(selectedBlock != Block.blocks[index]) {
 						selectedBlock = Block.blocks[index];
-						blockType.setTextString(selectedBlock.getEnumType().name());
+						
 					}
 				}
 			} catch(NumberFormatException e) {}
@@ -215,28 +200,30 @@ public class Camera {
 			} else {
 				mouseClickLeft = false;
 			}
-		} else {
-			//Logger.log(LogLevel.WARN, "No chunk detected!");
 		}
 
 		this.move();
 	}
 	
+	public Block getCurrentlySelectedBlock() {
+		return selectedBlock;
+	}
+	
 	private void move() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			if(!lockInCam) {
-				flyCam = !flyCam;
+				mouseLocked = !mouseLocked;
 				lockInCam = true;
 			}
 		} else {
 			lockInCam = false;
 		}
 
-		if(Mouse.isGrabbed() != flyCam) {
-			Mouse.setGrabbed(flyCam);
+		if(Mouse.isGrabbed() != mouseLocked) {
+			Mouse.setGrabbed(mouseLocked);
 		}
 
-		if(flyCam) {
+		if(mouseLocked) {
 			pitch -= Mouse.getDY() * GameSettings.sensitivity*2;
 			if(pitch < -maxVerticalTurn){
 				pitch = -maxVerticalTurn;
@@ -244,72 +231,9 @@ public class Camera {
 				pitch = maxVerticalTurn;
 			}
 			yaw += Mouse.getDX() * GameSettings.sensitivity;
-
 		}
 	}
-
-	private void flyCam() {
-		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-			if(!lockInCam) {
-				flyCam = !flyCam;
-				lockInCam = true;
-			}
-		} else {
-			lockInCam = false;
-		}
-
-		if(Mouse.isGrabbed() != flyCam) {
-			//Mouse.setGrabbed(flyCam);
-		}
-
-		if(flyCam) {
-
-			if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-				speeds = 2;
-			} else {
-				speeds = 1;
-			}
-
-			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-				position.y += (speed * speeds) * DisplayManager.getFrameTimeSeconds() * multiplier;
-			} else if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-				position.y -= (speed * speeds)  * DisplayManager.getFrameTimeSeconds() * multiplier;
-			}
-
-			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				moveAt = (-speed * speeds)* DisplayManager.getFrameTimeSeconds() * multiplier;
-			} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				moveAt = (speed * speeds)* DisplayManager.getFrameTimeSeconds() * multiplier;
-			} else {
-				moveAt = 0;
-			}
-
-			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				position.x += (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
-				position.z -= (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
-			} else if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				position.x -= (float) -((speed * speeds) * Math.cos(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
-				position.z += (float) ((speed * speeds) * Math.sin(Math.toRadians(yaw))) * DisplayManager.getFrameTimeSeconds() * multiplier;
-			}
-
-			pitch -= Mouse.getDY() * GameSettings.sensitivity*2;
-			if(pitch < -maxVerticalTurn){
-				pitch = -maxVerticalTurn;
-			}else if(pitch > maxVerticalTurn){
-				pitch = maxVerticalTurn;
-			}
-			yaw += Mouse.getDX() * GameSettings.sensitivity;
-
-			position.x += (float) -(moveAt * Math.sin(Math.toRadians(yaw)));
-			position.y += (float) (moveAt * Math.sin(Math.toRadians(pitch)));
-			position.z += (float) (moveAt * Math.cos(Math.toRadians(yaw)));
-		} else {
-			if(Mouse.isGrabbed()) {
-				Mouse.setGrabbed(false);
-			}
-		}
-	}
-
+	
 	/**
 	 * Moves camera based on given values.
 	 * @param dx

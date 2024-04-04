@@ -48,6 +48,7 @@ public class Main {
 	public static int HEIGHT = 480;																
 
 	public static World theWorld;
+	public static Player thePlayer;
 
 	public static Vector3f camPos = new Vector3f(0,0,0);
 
@@ -105,16 +106,16 @@ public class Main {
 			theWorld = new World();
 			currentScreen = new GuiInGame();
 
-			Player player = new Player(new Vector3f(0,60,0), new Vector3f(0,0,0));
+			thePlayer = new Player(new Vector3f(0,100,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
-				player.update();
-				camPos = new Vector3f(player.getCamera().getPosition());
+				thePlayer.update();
+				camPos = new Vector3f(thePlayer.getCamera().getPosition());
 
 				currentScreen.update();
 
 				im.handleInput();
-				theWorld.update(player.getCamera());
-				MasterRenderer.getInstance().addEntity(player);
+				theWorld.update(thePlayer.getCamera());
+				MasterRenderer.getInstance().addEntity(thePlayer);
 
 				DisplayManager.updateDisplay(gameCanvas);
 
