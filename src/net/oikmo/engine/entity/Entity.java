@@ -25,11 +25,14 @@ public class Entity {
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
 
-
+	/*
+	 * https://www.gamedev.net/tutorials/_/technical/game-programming/swept-aabb-collision-detection-and-response-r3084/
+	 */
+	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
-		this.bb = new AABB(position.x - bbWidth, position.y - bbHeight, position.z - bbWidth, position.x + bbWidth, position.y + bbHeight, position.z + bbWidth);
+		this.bb = new AABB(position.x - bbWidth/2, position.y - bbHeight/2, position.z - bbWidth/2, position.x + bbWidth/2, position.y + bbHeight/2, position.z + bbWidth/2);
 		this.distance = new Vector3f();
 		this.rotation = rotation;
 		this.scale = scale;
@@ -73,14 +76,14 @@ public class Entity {
 			for (int xOffset = 0; xOffset <= 1; xOffset++) {
 				for (int zOffset = 0; zOffset <= 1; zOffset++) {
 					
-					int chunkX = (int) (currentChunk.getOrigin().x + xOffset * Chunk.CHUNK_SIZE);
-					int chunkZ = (int) (currentChunk.getOrigin().z + zOffset * Chunk.CHUNK_SIZE);
+					float chunkX = (int) (currentChunk.getOrigin().x + xOffset * Chunk.CHUNK_SIZE);
+					float chunkZ = (int) (currentChunk.getOrigin().z + zOffset * Chunk.CHUNK_SIZE);
 					
 					Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 					MasterChunk neighborChunk = MasterChunk.getChunkFromPosition(chunkPos);
 
 					if (neighborChunk != null) {
-						for (AABB aabb : neighborChunk.getChunk().getAABBs()) {
+						for (AABB aabb : neighborChunk.getChunk().getAABBs(neighborChunk.getOrigin())) {
 							surroundingAABBs.add(aabb);
 						}
 					}
@@ -101,26 +104,27 @@ public class Entity {
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
-		List<AABB> aABBs = getSurroundingAABBs(xa, ya, za);
+		//List<AABB> aABBs = getSurroundingAABBs(xa, ya, za);
 		
-		int i;
+		/*int i;
+		
 		for(i = 0; i < aABBs.size(); ++i) {
-			ya = ((AABB)aABBs.get(i)).clipYCollide(this.bb, ya);
+			xa = aABBs.get(i).clipXCollide(this.bb, xa);
+		}
+
+		this.bb.move(xa, 0.0F, 0.0F);
+		
+		for(i = 0; i < aABBs.size(); ++i) {
+			ya = aABBs.get(i).clipYCollide(this.bb, ya);
 		}
 
 		this.bb.move(0.0F, ya, 0.0F);
 
 		for(i = 0; i < aABBs.size(); ++i) {
-			xa = ((AABB)aABBs.get(i)).clipXCollide(this.bb, xa);
+			za = aABBs.get(i).clipZCollide(this.bb, za);
 		}
 
-		this.bb.move(xa, 0.0F, 0.0F);
-
-		for(i = 0; i < aABBs.size(); ++i) {
-			za = ((AABB)aABBs.get(i)).clipZCollide(this.bb, za);
-		}
-
-		this.bb.move(0.0F, 0.0F, za);
+		this.bb.move(0.0F, 0.0F, za);*/
 
 		this.onGround = yaOrg != ya && yaOrg < 0.0F;
 
@@ -231,10 +235,13 @@ public class Entity {
 	
 	Vector3f chunkPos;
 	public MasterChunk getCurrentChunk() {
+		if(chunkPos == null) { chunkPos = new Vector3f(); }
+		Maths.calculateChunkPosition(getPosition(), chunkPos);
 		synchronized(MasterChunk.chunkMap) {
-			if(chunkPos == null) { chunkPos = new Vector3f(); }
-			Maths.calculateChunkPosition(getPosition(), chunkPos);
-			return MasterChunk.getChunkFromPosition(chunkPos);
+			synchronized(MasterChunk.usedPositions) {
+				return MasterChunk.getChunkFromPosition(chunkPos);
+			}
+			
 		}
 		
 	}

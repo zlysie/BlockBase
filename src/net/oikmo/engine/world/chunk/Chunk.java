@@ -8,25 +8,21 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.AABB;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
-import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	public byte[][][] blocks;
-
-	private Vector3f origin;
-
+	
 	public Chunk(PerlinNoiseGenerator noiseGen, Vector3f origin) {
 		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		this.origin = origin;
 		generateChunk(origin, noiseGen);
 	}
 
 	public Chunk(byte[][][] blocks) {
 		this.blocks = blocks;
 	}
-	
+
 	/**
 	 * Creates blocks from the top layer (given by {@link PerlinNoiseGenerator}) and is extended down to YLevel 0 in which it is refactored via {@link #calculateBlockType(int)}
 	 * @param origin
@@ -64,7 +60,7 @@ public class Chunk {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns block based on height.<br>
 	 * 
@@ -86,7 +82,7 @@ public class Chunk {
 			return Block.stone;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * Creates an AABB from. each. block.
@@ -94,25 +90,25 @@ public class Chunk {
 	 * 
 	 * @return aabbs - {@link List}
 	 */
-	public List<AABB> getAABBs() {
+	public List<AABB> getAABBs(Vector3f origin) {
 		List<AABB> aabbs = new ArrayList<>();
-		
+
 		for(int x = 0; x < CHUNK_SIZE; ++x) {
 			for(int y = 0; y < World.WORLD_HEIGHT; ++y) {
 				for(int z = 0; z < CHUNK_SIZE; ++z) {
 					if(blocks[x][y][z] != -1) {
-						int blockX = Maths.roundFloat(x + origin.x);
-						int blockY = y;
-						int blockZ = Maths.roundFloat(z + origin.z);
-						
-						AABB other = new AABB(blockX, blockY, blockZ, blockX, blockY+1, blockZ);
-						
+						float blockX = x + origin.x;
+						float blockY = y;
+						float blockZ = z + origin.z;
+
+						AABB other = new AABB(blockX, blockY, blockZ, blockX, blockY+1f, blockZ);
+
 						aabbs.add(other);
+
 					}
 				}
 			}
 		}
-
 		return aabbs;
 	}
 }

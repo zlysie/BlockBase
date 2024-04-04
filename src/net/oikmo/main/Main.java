@@ -101,7 +101,7 @@ public class Main {
 
 			soundSystem = new SoundSystem();
 			soundSystem.setVolume("ogg music", 0.5f);
-			soundSystem.backgroundMusic("music", Main.class.getResource("assets/sounds/piano1.ogg"), "dryhands", false);
+			soundSystem.backgroundMusic("music", Main.class.getResource("/assets/sounds/piano1.ogg"), "piano1", false);
 
 			theWorld = new World();
 			currentScreen = new GuiInGame();

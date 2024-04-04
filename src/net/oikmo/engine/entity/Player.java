@@ -16,18 +16,12 @@ public class Player extends Entity {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
 		this.heightOffset = 1.62f; //1.62f
 		this.camera = new Camera(position, rotation);
-		//setPos(0,120,0);
-		//set(bbWidth,bbHeight,0,60,0);
 	}
 	
 	public void update() {
 		camera.update(getPosition());
 		float xa = 0.0F;
 		float ya = 0.0F;
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_F)) {
-			this.setPos(0,120,0);
-		}
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W)) {
 			--ya;
@@ -47,9 +41,6 @@ public class Player extends Entity {
 		
 		if((Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LMETA)) && this.onGround) {
 			this.distance.y = 0.2F;
-		}
-		if(this.getPosition().y <= 0 || getCurrentChunk() == null) {
-			this.setPos(0, 120, 0);
 		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);

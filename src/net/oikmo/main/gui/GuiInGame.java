@@ -14,7 +14,6 @@ public class GuiInGame extends GuiScreen {
 	}
 	private GuiText fps;
 	private GuiText blockType;
-	private GuiText stupidThingToMakeAABBWork;
 	
 	public void onInit() {
 		fps = new GuiText("FPS: " + DisplayManager.getFPSCount(), 1.1f, MasterRenderer.font, new Vector2f(0,0), 1, false, false);
@@ -23,14 +22,9 @@ public class GuiInGame extends GuiScreen {
 		blockType = new GuiText("", 1.1f, MasterRenderer.font, new Vector2f(0,0.03f), 1, false, false);
 		blockType.setColour(1, 1, 1);
 		blockType.setEdge(0.2f);
-		
-		stupidThingToMakeAABBWork = new GuiText("", 1.1f, MasterRenderer.font, new Vector2f(0,1), 1, false, false);
 	}
 	
 	public void onUpdate() {
-		if(Main.thePlayer.getCurrentChunkPosition() != null) {
-			stupidThingToMakeAABBWork.setTextString(Main.thePlayer.getCurrentChunk() + " " + Main.thePlayer.getCurrentChunkPosition().toString());
-		}
 		fps.setTextString("FPS: " + DisplayManager.getFPSCount());
 		blockType.setTextString(Main.thePlayer.getCamera().getCurrentlySelectedBlock().getEnumType().name());
 	}
