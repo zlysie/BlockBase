@@ -14,12 +14,12 @@ public class Player extends Entity {
 	
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
-		this.heightOffset = 1.62f; //1.62f
+		this.heightOffset = 0.5f; //1.62f
 		this.camera = new Camera(position, rotation);
 	}
 	
 	public void update() {
-		camera.update(getPosition());
+		camera.update(new Vector3f(getPosition()), heightOffset);
 		float xa = 0.0F;
 		float ya = 0.0F;
 		
@@ -40,19 +40,23 @@ public class Player extends Entity {
 		}
 		
 		if((Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LMETA)) && this.onGround) {
-			this.distance.y = 0.2F;
+			this.motion.y = 0.2F;
 		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
-		this.moveRelative(xa, ya, this.onGround ? 0.2F : 0.1F);
-		this.distance.y = (float)((double)this.distance.y - 0.005D);
-		this.move(this.distance.x, this.distance.y, this.distance.z);
-		this.distance.x *= 0.91F;
-		this.distance.y *= 0.98F;
-		this.distance.z *= 0.91F;
+		this.moveRelative(xa, ya, this.onGround ? 1F : 0.5F);
+		this.motion.y = (float)((double)this.motion.y - 0.005D);
+		this.move();
+		if(this.getPosition().y < 0) {
+			this.setPos(getPosition().x, 120, getPosition().z);
+		}
+		
+		this.motion.x *= 0.91F;
+		this.motion.y *= 0.98F;
+		this.motion.z *= 0.91F;
 		if(this.onGround) {
-			this.distance.x *= 0.8F;
-			this.distance.z *= 0.8F;
+			this.motion.x *= 0.8F;
+			this.motion.z *= 0.8F;
 		}
 	}
 

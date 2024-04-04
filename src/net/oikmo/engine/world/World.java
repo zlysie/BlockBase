@@ -128,27 +128,35 @@ public class World {
 			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
 		}
 		
-		SaveSystem.save("world1", new SaveData(seed, chunks));
+		SaveSystem.save("world1", new SaveData(seed, chunks, Main.thePlayer));
 		chunks.clear();
 	}
 	
 	public void loadWorld() {
-		this.canCreateChunks = false;
-		SaveData data = SaveSystem.load("world1");
-		MasterChunk.clear();
-		this.masterChunks.clear();
-		this.entities.clear();
-		for(ChunkSaveData s : data.chunks) {
-			masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
-		}
-		
-		new Thread(new Runnable() {
-			public void run() {
-				JOptionPane.showMessageDialog(null, "World has loaded!");
+		if(canCreateChunks) {
+			System.out.println("sabing!");
+			Main.thePlayer.resetMotion();
+			this.canCreateChunks = false;
+			SaveData data = SaveSystem.load("world1");
+			MasterChunk.clear();
+			this.masterChunks.clear();
+			this.entities.clear();
+			for(ChunkSaveData s : data.chunks) {
+				masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
 			}
-		}).start();
-		this.noiseGen = new PerlinNoiseGenerator(data.seed);
-		this.canCreateChunks = true;
+			
+			new Thread(new Runnable() {
+				public void run() {
+					JOptionPane.showMessageDialog(null, "World has loaded!");
+				}
+			}).start();
+			this.noiseGen = null;
+			this.noiseGen = new PerlinNoiseGenerator(data.seed);
+			
+			Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
+			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
+			this.canCreateChunks = true;
+		}
 	}
 
 	public void refreshChunk(MasterChunk master) {

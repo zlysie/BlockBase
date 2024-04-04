@@ -15,22 +15,31 @@ public class InputManager {
 	private boolean lockInWorldLoad = false;
 	
 	public void handleInput() {
-		if(Keyboard.isKeyDown(refreshKey) && !lockInRefresh) {
-			Main.theWorld.refreshChunks();
+		if(Keyboard.isKeyDown(refreshKey)) {
+			if(!lockInRefresh) {
+				Main.theWorld.refreshChunks();
+			}
+			
 			lockInRefresh = true;
 		} else {
 			lockInRefresh = false;
 		}
 		
-		if(Keyboard.isKeyDown(saveKey) && !lockInWorldSave) {
-			Main.theWorld.saveWorld();
+		if(Keyboard.isKeyDown(saveKey)) {
+			if(!lockInWorldSave) {
+				Main.theWorld.saveWorld();
+			}
+			
 			lockInWorldSave = true;
 		} else {
 			lockInWorldSave = false;
 		}
 		
-		if(Keyboard.isKeyDown(loadKey) && !lockInWorldLoad) {
-			Main.theWorld.loadWorld();
+		if(Keyboard.isKeyDown(loadKey)) {
+			if(!lockInWorldLoad) {
+				Main.theWorld.loadWorld();
+			}
+			
 			lockInWorldLoad = true;
 		} else {
 			lockInWorldLoad = false;

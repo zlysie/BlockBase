@@ -5,7 +5,8 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.AABB;
+import com.github.matthewdawsey.collisionres.AABB;
+
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
@@ -54,6 +55,7 @@ public class Chunk {
 				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
 					if (blocks[x][y][z] != -1) {
 						blocks[x][y + 1][z] = Block.grass.getByteType();
+						
 						break;
 					}
 				}
@@ -92,7 +94,7 @@ public class Chunk {
 	 */
 	public List<AABB> getAABBs(Vector3f origin) {
 		List<AABB> aabbs = new ArrayList<>();
-
+		
 		for(int x = 0; x < CHUNK_SIZE; ++x) {
 			for(int y = 0; y < World.WORLD_HEIGHT; ++y) {
 				for(int z = 0; z < CHUNK_SIZE; ++z) {
@@ -100,11 +102,9 @@ public class Chunk {
 						float blockX = x + origin.x;
 						float blockY = y;
 						float blockZ = z + origin.z;
-
-						AABB other = new AABB(blockX, blockY, blockZ, blockX, blockY+1f, blockZ);
-
+						AABB other = new AABB(new Vector3f(blockX-0.5f, blockY, blockZ-0.5f),
+								new Vector3f(blockX+0.5f, blockY+1f, blockZ+0.5f));
 						aabbs.add(other);
-
 					}
 				}
 			}

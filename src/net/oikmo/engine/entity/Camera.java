@@ -110,9 +110,11 @@ public class Camera {
 	boolean mouseClickRight = false;
 	/**
 	 * Fly cam
+	 * @param heightOffset 
 	 */
-	public void update(Vector3f position) {
+	public void update(Vector3f position, float heightOffset) {
 		this.position = position;
+		this.position.y = position.y + heightOffset;
 		if(currentChunk != null && mouseLocked) {
 			Maths.roundVector(position, roundedPosition);
 
