@@ -40,11 +40,11 @@ public class Player extends Entity {
 		}
 		
 		if((Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LMETA)) && this.onGround) {
-			this.motion.y = 0.2F;
+			this.motion.y = 0.15F;
 		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
-		this.moveRelative(xa, ya, this.onGround ? 1F : 0.5F);
+		this.moveRelative(xa, ya, this.onGround ? 0.9F : 0.5F);
 		this.motion.y = (float)((double)this.motion.y - 0.005D);
 		this.move();
 		if(this.getPosition().y < 0) {

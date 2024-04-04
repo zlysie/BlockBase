@@ -1,4 +1,4 @@
-package net.oikmo.main.save;
+package net.oikmo.engine.save;
 
 import java.io.Serializable;
 

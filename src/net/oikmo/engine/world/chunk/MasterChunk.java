@@ -94,6 +94,9 @@ public class MasterChunk {
 				if (chunk.blocks[localX][localY][localZ] == -1) {
 					if(chunk.blocks[localX][localY][localZ] != block.getByteType()) {
 						chunk.blocks[localX][localY][localZ] = block.getByteType();
+						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
+							chunk.recalculateHeight(localX, localZ);
+						}
 						Main.theWorld.refreshChunk(this);
 					}
 				} else {

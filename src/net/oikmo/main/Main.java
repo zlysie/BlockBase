@@ -47,6 +47,8 @@ public class Main {
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
 
+	private static SoundSystem soundSystem = null;
+	
 	public static World theWorld;
 	public static Player thePlayer;
 
@@ -60,7 +62,7 @@ public class Main {
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
-		SoundSystem soundSystem = null;
+		
 		try {
 
 			frame = new Frame(Main.gameVersion);
@@ -101,7 +103,7 @@ public class Main {
 
 			soundSystem = new SoundSystem();
 			soundSystem.setVolume("ogg music", 0.5f);
-			soundSystem.backgroundMusic("music", Main.class.getResource("/assets/sounds/piano1.ogg"), "piano1.ogg", false);
+			soundSystem.backgroundMusic("music", Main.class.getResource("/assets/sounds/piano1.ogg"), "piano1.ogg", true);
 
 			theWorld = new World();
 			currentScreen = new GuiInGame();
@@ -117,13 +119,7 @@ public class Main {
 				theWorld.update(thePlayer.getCamera());
 				MasterRenderer.getInstance().addEntity(thePlayer);
 
-				DisplayManager.updateDisplay(gameCanvas);
-
-				if(Keyboard.next()) {
-					if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
-						DisplayManager.saveScreenshot();
-					}
-				}
+				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
@@ -146,7 +142,11 @@ public class Main {
 	 */
 	public static void error(String id, Throwable throwable) {
 		if(!balls) {
-			frame = new Frame();
+			soundSystem.cleanup();
+			displayRequest = true;
+			Logger.saveLog();
+			DisplayManager.closeDisplay();
+			frame.removeAll();
 			frame.addWindowListener(new WindowAdapter(){  
 				public void windowClosing(WindowEvent e) {  
 					frame.dispose(); 

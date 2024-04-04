@@ -21,15 +21,15 @@ public class Entity {
 	private Vector3f rotation;
 	private float scale;
 	private AABB aabb;
+	private Vector3f roundPos;
+	private Vector3f chunkPos;
+	
 	protected boolean onGround;
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
-
-	/*
-	 * https://www.gamedev.net/tutorials/_/technical/game-programming/swept-aabb-collision-detection-and-response-r3084/
-	 */
-
+	
+	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
@@ -74,8 +74,10 @@ public class Entity {
 		MasterChunk currentChunk = getCurrentChunk();
 
 		if(currentChunk != null) {
-			for (int xOffset = 0; xOffset <= 1; xOffset++) {
-				for (int zOffset = 0; zOffset <= 1; zOffset++) {
+			//surroundingAABBs = currentChunk.getChunk().getAABBs(currentChunk.getOrigin(), aabb);
+			
+			for (int xOffset = -1; xOffset <= 1; xOffset++) {
+				for (int zOffset = -1; zOffset <= 1; zOffset++) {
 
 					float chunkX = (int) (currentChunk.getOrigin().x + xOffset * Chunk.CHUNK_SIZE);
 					float chunkZ = (int) (currentChunk.getOrigin().z + zOffset * Chunk.CHUNK_SIZE);
@@ -84,7 +86,7 @@ public class Entity {
 					MasterChunk neighborChunk = MasterChunk.getChunkFromPosition(chunkPos);
 
 					if (neighborChunk != null) {
-						for (AABB aabb : neighborChunk.getChunk().getAABBs(neighborChunk.getOrigin())) {
+						for (AABB aabb : neighborChunk.getChunk().getAABBs(neighborChunk.getOrigin(), aabb)) {
 							surroundingAABBs.add(aabb);
 						}
 					}
@@ -286,8 +288,13 @@ public class Entity {
 		this.motion.y = 0;
 		this.motion.z = 0;
 	}
-
-	Vector3f chunkPos;
+	
+	public Vector3f getRoundedPosition() {
+		if(roundPos == null) { roundPos = new Vector3f(); }
+		Maths.roundVector(getPosition(), roundPos);
+		return roundPos;
+	}
+	
 	public MasterChunk getCurrentChunk() {
 		if(chunkPos == null) { chunkPos = new Vector3f(); }
 		Maths.calculateChunkPosition(getPosition(), chunkPos);

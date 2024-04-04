@@ -14,9 +14,11 @@ import net.oikmo.toolbox.PerlinNoiseGenerator;
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	public byte[][][] blocks;
+	private int[][] heights;
 	
 	public Chunk(PerlinNoiseGenerator noiseGen, Vector3f origin) {
 		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		generateChunk(origin, noiseGen);
 	}
 
@@ -55,12 +57,25 @@ public class Chunk {
 				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
 					if (blocks[x][y][z] != -1) {
 						blocks[x][y + 1][z] = Block.grass.getByteType();
-						
+						heights[x][z] = y;
 						break;
 					}
 				}
 			}
 		}
+	}
+	
+	public void recalculateHeight(int x, int z) {
+		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
+			if (blocks[x][y][z] != -1) {
+				heights[x][z] = y;
+				break;
+			}
+		}
+	}
+	
+	public int getHeightFromPosition(int x, int z) {
+		return heights[x][z];
 	}
 
 	/**
@@ -92,20 +107,32 @@ public class Chunk {
 	 * 
 	 * @return aabbs - {@link List}
 	 */
-	public List<AABB> getAABBs(Vector3f origin) {
+	public List<AABB> getAABBs(Vector3f origin, AABB aabb) {
 		List<AABB> aabbs = new ArrayList<>();
 		
+		int minY = (int)(aabb.center.y - 2);
+		int maxY = (int)(aabb.center.y + 2);
+		
+		if(minY > 0) {
+			minY = 0;
+		}
+		
+		if(maxY < World.WORLD_HEIGHT-1) {
+			maxY = World.WORLD_HEIGHT-1;
+		}
+		
 		for(int x = 0; x < CHUNK_SIZE; ++x) {
-			for(int y = 0; y < World.WORLD_HEIGHT; ++y) {
-				for(int z = 0; z < CHUNK_SIZE; ++z) {
-					if(blocks[x][y][z] != -1) {
-						float blockX = x + origin.x;
-						float blockY = y;
-						float blockZ = z + origin.z;
-						AABB other = new AABB(new Vector3f(blockX-0.5f, blockY, blockZ-0.5f),
-								new Vector3f(blockX+0.5f, blockY+1f, blockZ+0.5f));
-						aabbs.add(other);
+			for(int z = 0; z < CHUNK_SIZE; ++z) {
+				for(int y = minY; y < maxY; ++y) {
+					if(blocks[x][y][z] == -1) {
+						continue;
 					}
+					float blockX = (x + origin.x);
+					float blockY = y;
+					float blockZ = (z + origin.z);
+					AABB other = new AABB(new Vector3f(blockX-0.5f, blockY, blockZ-0.5f), new Vector3f(blockX+0.5f, blockY+1f, blockZ+0.5f));
+					aabbs.add(other);
+					
 				}
 			}
 		}

@@ -44,6 +44,12 @@ public class InputManager {
 		} else {
 			lockInWorldLoad = false;
 		}
+		
+		if(Keyboard.next()) {
+			if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+				DisplayManager.saveScreenshot();
+			}
+		}
 	}
 	
 }
