@@ -10,6 +10,7 @@ public class InputManager {
 	private final int saveKey = Keyboard.KEY_R;
 	private final int loadKey = Keyboard.KEY_T;
 	
+	private boolean lockInScreenshot = false;
 	private boolean lockInRefresh = false;
 	private boolean lockInWorldSave = false;
 	private boolean lockInWorldLoad = false;
@@ -45,10 +46,13 @@ public class InputManager {
 			lockInWorldLoad = false;
 		}
 		
-		if(Keyboard.next()) {
-			if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+			if(!lockInScreenshot) {
 				DisplayManager.saveScreenshot();
 			}
+			lockInScreenshot = true;
+		} else {
+			lockInScreenshot = false;
 		}
 	}
 	

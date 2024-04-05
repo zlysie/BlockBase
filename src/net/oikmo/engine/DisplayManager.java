@@ -59,6 +59,8 @@ public class DisplayManager {
 		lastFPS = getCurrentTime();
 	}
 
+	int prevW, prevH;
+	
 	/**
 	 * Updates the display to show a new frame and calculates the last frame time.
 	 * <br>
@@ -67,7 +69,7 @@ public class DisplayManager {
 	 * Handles fullscreen and taking screenshots on the press of a key.
 	 */
 	public static void updateDisplay(Canvas gameCanvas) {
-		if(gameCanvas != null && (gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
+		if((gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
 			Main.WIDTH = gameCanvas.getWidth();
 			Main.HEIGHT = gameCanvas.getHeight();
 			if(Main.WIDTH <= 0) {

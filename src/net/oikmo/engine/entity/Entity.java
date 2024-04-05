@@ -76,8 +76,8 @@ public class Entity {
 		if(currentChunk != null) {
 			//surroundingAABBs = currentChunk.getChunk().getAABBs(currentChunk.getOrigin(), aabb);
 			
-			for (int xOffset = -1; xOffset <= 1; xOffset++) {
-				for (int zOffset = -1; zOffset <= 1; zOffset++) {
+			for (int xOffset = 0; xOffset <= 1; xOffset++) {
+				for (int zOffset = 0; zOffset <= 1; zOffset++) {
 
 					float chunkX = (int) (currentChunk.getOrigin().x + xOffset * Chunk.CHUNK_SIZE);
 					float chunkZ = (int) (currentChunk.getOrigin().z + zOffset * Chunk.CHUNK_SIZE);
@@ -85,7 +85,7 @@ public class Entity {
 					Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 					MasterChunk neighborChunk = MasterChunk.getChunkFromPosition(chunkPos);
 
-					if (neighborChunk != null) {
+					if (neighborChunk != null && neighborChunk.getEntity() != null) {
 						for (AABB aabb : neighborChunk.getChunk().getAABBs(neighborChunk.getOrigin(), aabb)) {
 							surroundingAABBs.add(aabb);
 						}

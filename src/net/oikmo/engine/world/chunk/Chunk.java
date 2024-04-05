@@ -113,12 +113,12 @@ public class Chunk {
 		int minY = (int)(aabb.center.y - 2);
 		int maxY = (int)(aabb.center.y + 2);
 		
-		if(minY > 0) {
+		if(minY < 0) {
 			minY = 0;
 		}
 		
-		if(maxY < World.WORLD_HEIGHT-1) {
-			maxY = World.WORLD_HEIGHT-1;
+		if(maxY > World.WORLD_HEIGHT) {
+			maxY = World.WORLD_HEIGHT;
 		}
 		
 		for(int x = 0; x < CHUNK_SIZE; ++x) {

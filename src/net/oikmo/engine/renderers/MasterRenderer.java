@@ -61,7 +61,6 @@ public class MasterRenderer {
 		ui_hover = ResourceLoader.loadTexture("textures/ui/normal/ui_button_hover");
 		ui_smallbutton = ResourceLoader.loadTexture("textures/ui/small/ui_button");
 		ui_smallhover = ResourceLoader.loadTexture("textures/ui/small/ui_button_hover");
-		
 		TextMaster.init();
 	}
 	

@@ -21,7 +21,13 @@ public class EntityShader extends ShaderProgram {
 	public EntityShader() {
 		super(vertexFile, fragmentFile);	
 	}
-
+	
+	@Override
+	protected void bindAttributes() {
+		super.bindAttribute(0, "position");
+		super.bindAttribute(1, "textureCoords");
+	}
+	
 	@Override
 	protected void getAllUniformLocations() {
 		location_transformationMatrix = super.getUniformLocation("transformationMatrix");
@@ -29,12 +35,6 @@ public class EntityShader extends ShaderProgram {
 		location_viewMatrix = super.getUniformLocation("viewMatrix");
 		location_whiteOffset = super.getUniformLocation("whiteOffset");
 		location_skyColour = super.getUniformLocation("skyColour");
-	}
-
-	@Override
-	protected void bindAttributes() {
-		super.bindAttribute(0, "position");
-		super.bindAttribute(1, "textureCoords");
 	}
 	
 	public void loadSkyColour(float r, float g, float b) {

@@ -3,6 +3,7 @@ package net.oikmo.engine.entity;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.textures.ModelTexture;
@@ -45,7 +46,7 @@ public class Player extends Entity {
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
 		this.moveRelative(xa, ya, this.onGround ? 0.9F : 0.5F);
-		this.motion.y = (float)((double)this.motion.y - 0.005D);
+		this.motion.y = (float)((double)this.motion.y - 0.005D * DisplayManager.getFrameTimeSeconds()*50);
 		this.move();
 		if(this.getPosition().y < 0) {
 			this.setPos(getPosition().x, 120, getPosition().z);

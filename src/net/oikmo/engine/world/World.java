@@ -90,6 +90,8 @@ public class World {
 		if(canCreateChunks) {
 			synchronized(masterChunks) {
 				for(MasterChunk master : masterChunks) {
+					
+					
 					if(master.getEntity() == null) {
 						if(master.getMesh() != null) {
 							if(master.getMesh().hasMeshInfo()) {
@@ -105,16 +107,19 @@ public class World {
 								master.createMesh();
 							}
 						}
+					} else {
+						if(!isInValidRange(master.getOrigin())) {
+							master.destroyMesh();
+						}
 					}
+					
 				}
 			}
 		}
 		
-		for(int i = 0; i < entities.size(); i++) {
-			Vector3f origin = entities.get(i).getPosition();
-			
-			if(isInValidRange(origin)) {
-				MasterRenderer.getInstance().addEntity(entities.get(i));
+		for(Entity entity : entities) {
+			if(isInValidRange(entity.getPosition())) {
+				MasterRenderer.getInstance().addEntity(entity);
 			}
 		}
 		
@@ -162,7 +167,7 @@ public class World {
 	public void refreshChunk(MasterChunk master) {
 		if(master.getMesh() != null) {
 			master.destroyMesh();
-			this.entities.remove(master.getEntity());
+			entities.remove(master.getEntity());
 			master.setEntity(null);
 			master.createMesh();
 		}

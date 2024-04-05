@@ -171,17 +171,6 @@ public class MasterChunk {
 	private void setIndex(int index) {
 		this.index = index;
 	}
-	
-	public static Map<Vector3f, MasterChunk> createSave() {
-		Map<Vector3f, MasterChunk> savedChunks = new HashMap<>();
-	
-		for(Map.Entry<Vector3f, MasterChunk> entry : chunkMap.entrySet()) {
-			entry.getValue().destroyMesh();
-			entry.getValue().setEntity(null);
-			savedChunks.put(entry.getKey(), entry.getValue());
-		}
-		return savedChunks;
-	}
 
 	public static void clear() {
 		chunkMap.clear();
