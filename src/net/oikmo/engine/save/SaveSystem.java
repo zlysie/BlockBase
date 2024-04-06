@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import net.oikmo.main.Main;
 
@@ -22,7 +24,8 @@ public class SaveSystem {
 	    	save.delete();
 	    	//save.createNewFile();
 	    	FileOutputStream fos = new FileOutputStream(save);
-		    ObjectOutputStream oos = new ObjectOutputStream(fos);
+	    	GZIPOutputStream gzip = new GZIPOutputStream(fos);
+		    ObjectOutputStream oos = new ObjectOutputStream(gzip);
 			oos.writeObject(data);
 			oos.close();
 		} catch (IOException e) {
@@ -40,7 +43,8 @@ public class SaveSystem {
 				ObjectInputStream obj;
 				try {
 					FileInputStream fis = new FileInputStream(save);
-					obj = new ObjectInputStream(fis);
+					GZIPInputStream gzip = new GZIPInputStream(fis);
+					obj = new ObjectInputStream(gzip);
 					SaveData data = (SaveData) obj.readObject();
 					obj.close();
 					return data;

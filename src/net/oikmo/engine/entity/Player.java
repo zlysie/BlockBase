@@ -3,11 +3,13 @@ package net.oikmo.engine.entity;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.DisplayManager;
+import com.github.matthewdawsey.collisionres.AABB;
+
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.MasterChunk;
 
 public class Player extends Entity {
 	
@@ -15,15 +17,20 @@ public class Player extends Entity {
 	
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
-		this.heightOffset = 0.5f; //1.62f
+		resetPos();
+		this.heightOffset = 0.3f; //1.62f
 		this.camera = new Camera(position, rotation);
 	}
 	
-	public void update() {
+	public void tick() {
 		camera.update(new Vector3f(getPosition()), heightOffset);
 		float xa = 0.0F;
 		float ya = 0.0F;
 		
+		if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
+			resetPos();
+		}
+  		
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W)) {
 			--ya;
 		}
@@ -41,15 +48,15 @@ public class Player extends Entity {
 		}
 		
 		if((Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LMETA)) && this.onGround) {
-			this.motion.y = 0.15F;
+			this.motion.y = 0.12F;
 		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
-		this.moveRelative(xa, ya, this.onGround ? 0.9F : 0.5F);
-		this.motion.y = (float)((double)this.motion.y - 0.005D * DisplayManager.getFrameTimeSeconds()*50);
+		this.moveRelative(xa, ya, this.onGround ? 0.02F : 0.005F);
+		this.motion.y = (float)((double)this.motion.y - 0.005D);
 		this.move();
 		if(this.getPosition().y < 0) {
-			this.setPos(getPosition().x, 120, getPosition().z);
+			resetPos();
 		}
 		
 		this.motion.x *= 0.91F;
@@ -60,9 +67,21 @@ public class Player extends Entity {
 			this.motion.z *= 0.8F;
 		}
 	}
+	
+	private void resetPos() {
+		MasterChunk currentChunk = getCurrentChunk();
+		if(currentChunk != null) {
+			this.setPos(getPosition().x, currentChunk.getChunk().getHeightFromPosition(currentChunk.getOrigin(), getPosition()), getPosition().z);
+		}
+		
+	}
 
 	public Camera getCamera() {
 		return camera;
+	}
+
+	public AABB getAABB() {
+		return aabb;
 	}
 
 }

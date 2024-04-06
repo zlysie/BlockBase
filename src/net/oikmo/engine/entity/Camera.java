@@ -42,7 +42,7 @@ public class Camera {
 	private int invisibleTexture;
 	private Block selectedBlock = Block.cobble;
 	private Entity block;
-	
+
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -114,6 +114,9 @@ public class Camera {
 	 */
 	public void update(Vector3f position, float heightOffset) {
 		this.position = position;
+		this.position.x = position.x;
+		this.position.z = position.z;
+		
 		this.position.y = position.y + heightOffset;
 		if(currentChunk != null && mouseLocked) {
 			Maths.roundVector(position, roundedPosition);
@@ -142,8 +145,6 @@ public class Camera {
 				block.setRawModel(CubeModel.getRawModel(selectedBlock));
 			}
 
-			MasterRenderer.getInstance().addEntity(block);
-
 			try {
 
 				if(!inventory) {
@@ -160,15 +161,14 @@ public class Camera {
 					if(!Keyboard.isKeyDown(Keyboard.KEY_EQUALS) && !Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
 						inventory = false;
 					}
-
 				}
 				if(Block.blocks[index] != null) {
 					if(selectedBlock != Block.blocks[index]) {
 						selectedBlock = Block.blocks[index];
-						
 					}
 				}
-			} catch(NumberFormatException e) {}
+			} 
+			catch(NumberFormatException e) {}
 			catch(ArithmeticException e) {}
 
 			if(currentChunk.getBlock(roundedPosition) == null) {
@@ -177,11 +177,18 @@ public class Camera {
 				block.setTextureID(invisibleTexture);
 			}
 
+			if(!currentChunk.blockHasNeighbours(block.getPosition())) {
+				block.setTextureID(invisibleTexture);
+			}
+			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
 					Block block1 = currentChunk.getBlock(picker.getPointRounded(picker.distance));
 					if(block1 == null) {
-						currentChunk.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
+						if(currentChunk.blockHasNeighbours(picker.getPointRounded(picker.distance))) {
+							currentChunk.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
+						}
+
 					} else {
 						currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
 					}
@@ -206,17 +213,29 @@ public class Camera {
 
 		this.move();
 	}
-	
+
 	public Block getCurrentlySelectedBlock() {
 		return selectedBlock;
+	}
+
+	public Entity getSelectedBlock() {
+		return block;
+	}
+	
+	public void toggleMouseLock() {
+		if(!lockInCam) {
+			mouseLocked = !mouseLocked;
+			lockInCam = true;
+		}
+	}
+	
+	public void setMouseLock(boolean mouseLocked) {
+		this.mouseLocked = mouseLocked;
 	}
 	
 	private void move() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-			if(!lockInCam) {
-				mouseLocked = !mouseLocked;
-				lockInCam = true;
-			}
+			toggleMouseLock();
 		} else {
 			lockInCam = false;
 		}
@@ -235,7 +254,7 @@ public class Camera {
 			yaw += Mouse.getDX() * GameSettings.sensitivity;
 		}
 	}
-	
+
 	/**
 	 * Moves camera based on given values.
 	 * @param dx

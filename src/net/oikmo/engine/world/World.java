@@ -73,7 +73,6 @@ public class World {
 								synchronized(MasterChunk.usedPositions) {
 									if(!MasterChunk.isPositionUsed(chunkPos)) {
 										masterChunks.add(new MasterChunk(noiseGen, chunkPos));
-										Logger.log(LogLevel.INFO, "Creating chunk at x:"+ chunkX +" z:" + chunkZ + "!");
 									}
 								}
 							}
@@ -139,7 +138,7 @@ public class World {
 	
 	public void loadWorld() {
 		if(canCreateChunks) {
-			System.out.println("sabing!");
+			Main.thePlayer.getCamera().setMouseLock(false);
 			Main.thePlayer.resetMotion();
 			this.canCreateChunks = false;
 			SaveData data = SaveSystem.load("world1");
@@ -160,6 +159,7 @@ public class World {
 			
 			Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
 			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
+			Main.thePlayer.getCamera().setMouseLock(true);
 			this.canCreateChunks = true;
 		}
 	}
@@ -174,7 +174,7 @@ public class World {
 	}
 	
 	public void refreshChunks() {
-		System.out.println("clearing!");
+		Logger.log(LogLevel.INFO, "Clearing " + masterChunks.size() + " chunks!");
 		this.entities.clear();
 		
 		for(MasterChunk master : masterChunks) {

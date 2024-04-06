@@ -9,6 +9,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
+import com.github.matthewdawsey.collisionres.AABB;
+
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
@@ -70,6 +72,8 @@ public class MasterRenderer {
 		GL11.glClearColor(0.4f, 0.7f, 1.0f, 1);
 		//GL11.glCullFace(GL11.GL_BACK);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT );
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
 	}
 	
 	public void render(Camera camera) {
@@ -111,6 +115,37 @@ public class MasterRenderer {
 			newBatch.add(entity);
 			entities.put(model, newBatch);
 		}
+	}
+	
+	public void renderAABB(AABB aabb) {
+		float wb2 = aabb.width / 2, hb2 = aabb.height / 2, lb2 = aabb.length / 2;
+		GL11.glColor3f(1, 1, 1);
+		GL11.glTranslatef(aabb.center.x, aabb.center.y, aabb.center.z);
+		GL11.glBegin(GL11.GL_LINE_STRIP);
+		GL11.glVertex3f(-wb2, -hb2, -lb2);
+		GL11.glVertex3f(-wb2, -hb2, lb2);
+		GL11.glVertex3f(wb2, -hb2, lb2);
+		GL11.glVertex3f(wb2, -hb2, -lb2);
+		GL11.glVertex3f(-wb2, -hb2, -lb2);
+		GL11.glEnd();
+		GL11.glBegin(GL11.GL_LINES);
+		GL11.glVertex3f(-wb2, -hb2, -lb2);
+		GL11.glVertex3f(-wb2, hb2, -lb2);
+		GL11.glVertex3f(wb2, -hb2, -lb2);
+		GL11.glVertex3f(wb2, hb2, -lb2);
+		GL11.glVertex3f(-wb2, -hb2, lb2);
+		GL11.glVertex3f(-wb2, hb2, lb2);
+		GL11.glVertex3f(wb2, -hb2, lb2);
+		GL11.glVertex3f(wb2, hb2, lb2);
+		GL11.glEnd();
+		GL11.glBegin(GL11.GL_LINE_STRIP);
+		GL11.glVertex3f(-wb2, hb2, -lb2);
+		GL11.glVertex3f(-wb2, hb2, lb2);
+		GL11.glVertex3f(wb2, hb2, lb2);
+		GL11.glVertex3f(wb2, hb2, -lb2);
+		GL11.glVertex3f(-wb2, hb2, -lb2);
+		GL11.glEnd();
+		GL11.glTranslatef(-aabb.center.x, -aabb.center.y, -aabb.center.z);
 	}
 	
 	public void createProjectionMatrix() {

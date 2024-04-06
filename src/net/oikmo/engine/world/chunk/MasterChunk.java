@@ -68,6 +68,33 @@ public class MasterChunk {
 		}
 		return result;
 	}
+	public boolean blockHasNeighbours(Vector3f position) {
+		int localX = (int) (position.x - getOrigin().x);
+		int localY = (int) position.y;
+		int localZ = (int) (position.z - getOrigin().z);
+		
+		boolean result = false;
+		
+		for(int dx = -1; dx <= 1; dx++) {
+			for(int dy = -1; dy <= 1; dy++) {
+				for(int dz= -1; dz <= 1; dz++) {
+					
+					int x = localX + dx;
+					int y = localY + dy;
+					int z = localZ + dz;
+					if(x < 0 || x > 15) { continue; }
+					if(y < 0 || y > World.WORLD_HEIGHT-1) { continue; }
+					if(z < 0 || z > 15) { continue; }
+					
+					if(chunk.blocks[x][y][z] != -1) {
+						result = true;
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
 	
 	public Block getBlock(Vector3f position) {
 		Chunk chunk = getChunk();

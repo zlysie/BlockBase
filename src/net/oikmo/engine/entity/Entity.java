@@ -7,7 +7,6 @@ import org.lwjgl.util.vector.Vector3f;
 
 import com.github.matthewdawsey.collisionres.AABB;
 
-import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.world.chunk.Chunk;
@@ -20,20 +19,21 @@ public class Entity {
 	protected Vector3f motion;
 	private Vector3f rotation;
 	private float scale;
-	private AABB aabb;
 	private Vector3f roundPos;
 	private Vector3f chunkPos;
 	
+	protected AABB aabb;
 	protected boolean onGround;
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
-	protected float bbHeight = 1.8F;
-	
+	protected float bbHeight = 2F;
 	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
-		this.aabb = new AABB(new Vector3f(position.x - bbWidth/2, position.y - bbHeight/2, position.z - bbWidth/2), new Vector3f(position.x + bbWidth/2, position.y + bbHeight/2, position.z + bbWidth/2));
+		this.aabb = new AABB(
+				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
+				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
 		this.motion = new Vector3f();
 		this.rotation = rotation;
 		this.scale = scale;
@@ -48,18 +48,18 @@ public class Entity {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;
-		float w = this.bbWidth / 2.0F;
-		float h = this.bbHeight / 2.0F;
-		this.aabb = new AABB(new Vector3f(x - w, y - h, z - w), new Vector3f(x + w, y + h, z + w));
+		this.aabb = new AABB(
+				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
+				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
 	}
 
 	protected void set(float width, float height,float x, float y, float z) {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;
-		float w = this.bbWidth = width;
-		float h = this.bbHeight = height;
-		this.aabb = new AABB(new Vector3f(x - w, y - h, z - w), new Vector3f(x + w, y + h, z + w));
+		this.aabb = new AABB(
+				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
+				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
 	}
 
 	/**
@@ -76,8 +76,8 @@ public class Entity {
 		if(currentChunk != null) {
 			//surroundingAABBs = currentChunk.getChunk().getAABBs(currentChunk.getOrigin(), aabb);
 			
-			for (int xOffset = 0; xOffset <= 1; xOffset++) {
-				for (int zOffset = 0; zOffset <= 1; zOffset++) {
+			for (int xOffset = -1; xOffset <= 1; xOffset++) {
+				for (int zOffset = -1; zOffset <= 1; zOffset++) {
 
 					float chunkX = (int) (currentChunk.getOrigin().x + xOffset * Chunk.CHUNK_SIZE);
 					float chunkZ = (int) (currentChunk.getOrigin().z + zOffset * Chunk.CHUNK_SIZE);
@@ -104,13 +104,7 @@ public class Entity {
 	 * @param za - ({@link Float})
 	 */
 	public void move() {
-		// horizontal motion damping
-		this.motion.x /= 2;
-		this.motion.z /= 2;
 		
-		// apply Y axis velocity
-		this.position.y += this.motion.y;
-		this.aabb.updatePosition(new Vector3f(this.position));
 
 		// separate colliders with a height value of 0.01
 		// on the top and bottom to detect Y axis collisions
@@ -122,12 +116,16 @@ public class Entity {
 				new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2),
 				new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
 
+		// apply Y axis velocity
+				this.position.y += this.motion.y;
+				this.aabb.updatePosition(this.position);
+		
 		floorCheckAABB.updatePosition(new Vector3f(this.position));
 		floorCheckAABB.offset(0, this.bbHeight / -2, 0);
 		ceilingCheckAABB.updatePosition(new Vector3f(this.position));
 		ceilingCheckAABB.offset(0, this.bbHeight / 2, 0);
-		//
-
+		
+		
 		// assume falling if not standing on a collider
 		this.onGround = false;
 
@@ -210,8 +208,8 @@ public class Entity {
 			za *= dist;
 			float sin = (float)Math.sin((double)this.rotation.y * Math.PI / 180.0D);
 			float cos = (float)Math.cos((double)this.rotation.y * Math.PI / 180.0D);
-			this.motion.x += ((xa * cos - za * sin) * DisplayManager.getFrameTimeSeconds() * 10);
-			this.motion.z += ((za * cos + xa * sin) * DisplayManager.getFrameTimeSeconds() * 10);
+			this.motion.x += xa * cos - za * sin;
+			this.motion.z += za * cos + xa * sin;
 		}
 	}
 

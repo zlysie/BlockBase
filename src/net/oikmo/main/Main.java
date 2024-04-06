@@ -9,19 +9,23 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.net.URL;
 
-import org.lwjgl.input.Keyboard;
+import javax.swing.ImageIcon;
+
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Loader;
+import net.oikmo.engine.Timer;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.toolbox.Logger;
@@ -29,13 +33,6 @@ import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
-import paulscode.sound.SoundSystem;
-import paulscode.sound.SoundSystemConfig;
-import paulscode.sound.SoundSystemException;
-import paulscode.sound.codecs.CodecJOrbis;
-import paulscode.sound.codecs.CodecWav;
-import paulscode.sound.libraries.LibraryJavaSound;
-import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 
 public class Main {
 
@@ -47,7 +44,7 @@ public class Main {
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
 
-	private static SoundSystem soundSystem = null;
+	
 	
 	public static World theWorld;
 	public static Player thePlayer;
@@ -62,7 +59,7 @@ public class Main {
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
-		
+		Timer timer = new Timer(60f);
 		try {
 
 			frame = new Frame(Main.gameVersion);
@@ -74,6 +71,9 @@ public class Main {
 				}
 			});
 			gameCanvas = new Canvas();
+			URL iconURL = Main.class.getResource("/assets/icon.png");
+			ImageIcon icon = new ImageIcon(iconURL);
+			frame.setIconImage(icon.getImage());
 			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 			gameCanvas.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 
@@ -88,48 +88,47 @@ public class Main {
 			CubeModel.setup();
 			MasterRenderer.getInstance();
 			
-			//Initalises soundsystem
-			try {
-				SoundSystemConfig.addLibrary(LibraryLWJGLOpenAL.class);
-				SoundSystemConfig.addLibrary(LibraryJavaSound.class);
-				SoundSystemConfig.setCodec("wav", CodecWav.class);
-				SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
-			} catch( SoundSystemException e ) {
-				System.err.println("error linking with the plug-ins");
-			} 
+			SoundMaster.init();
+			
 			
 			
 			InputManager im = new InputManager();
-
-			soundSystem = new SoundSystem();
-			soundSystem.setVolume("ogg music", 0.5f);
-			soundSystem.backgroundMusic("music", Main.class.getResource("/assets/sounds/piano1.ogg"), "piano1.ogg", true);
-
+			
 			theWorld = new World();
 			currentScreen = new GuiInGame();
 
-			thePlayer = new Player(new Vector3f(0,100,0), new Vector3f(0,0,0));
+			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
-				thePlayer.update();
-				camPos = new Vector3f(thePlayer.getCamera().getPosition());
+				timer.advanceTime();
+				
+				for(int e = 0; e < timer.ticks; ++e) {
+					tick();
+				}
 
 				currentScreen.update();
 
 				im.handleInput();
+				MasterRenderer.getInstance().renderAABB(thePlayer.getAABB());
 				theWorld.update(thePlayer.getCamera());
-				MasterRenderer.getInstance().addEntity(thePlayer);
+				
+				MasterRenderer.getInstance().addEntity(thePlayer.getCamera().getSelectedBlock());
 
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		soundSystem.cleanup();
+		//soundSystem.cleanup();
 		displayRequest = true;
 		Logger.saveLog();
 		TextMaster.cleanUp();
 		System.exit(0);
 		DisplayManager.closeDisplay();
+	}
+	
+	private static void tick() {
+		thePlayer.tick();
+		camPos = new Vector3f(thePlayer.getCamera().getPosition());
 	}
 
 	static PanelCrashReport report;
@@ -142,7 +141,7 @@ public class Main {
 	 */
 	public static void error(String id, Throwable throwable) {
 		if(!balls) {
-			soundSystem.cleanup();
+			//soundSystem.cleanup();
 			displayRequest = true;
 			Logger.saveLog();
 			DisplayManager.closeDisplay();

@@ -9,6 +9,7 @@ import com.github.matthewdawsey.collisionres.AABB;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.PerlinNoiseGenerator;
 
 public class Chunk {
@@ -38,27 +39,16 @@ public class Chunk {
 				int actualZ = (int) (origin.z + z);
 
 				int height = (int) noiseGen.generateHeight(actualX, actualZ)+60;
+				blocks[x][height][z] = Block.grass.getByteType();
+				heights[x][z] = height+1;
 				for (int y = 0; y < World.WORLD_HEIGHT; y++) {
-					if (y < height) {             
+					if (y < height) {
 						blocks[x][y][z] = calculateBlockType(y).getByteType();
 					} else {
-						blocks[x][y][z] = -1;
-					}
-				}
-			}
-		}
-
-		getTopLayer();
-	}
-
-	private void getTopLayer() {
-		for (byte x = 0; x < CHUNK_SIZE; x++) {
-			for (byte z = 0; z < CHUNK_SIZE; z++) {
-				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-					if (blocks[x][y][z] != -1) {
-						blocks[x][y + 1][z] = Block.grass.getByteType();
-						heights[x][z] = y;
-						break;
+						if(y != height) {
+							blocks[x][y][z] = -1;
+						}
+						
 					}
 				}
 			}
@@ -72,6 +62,17 @@ public class Chunk {
 				break;
 			}
 		}
+	}
+	
+	public int getHeightFromPosition(Vector3f origin, Vector3f position) {
+		Vector3f rounded = Maths.roundVectorTo(position);
+		int x = (int) (rounded.x - origin.x);
+		if(x < 0) {x = 0;}
+		if(x > 15) {x = 15;}
+		int z = (int) (rounded.z - origin.z);
+		if(z < 0) {z = 0;}
+		if(z > 15) {z = 15;}
+		return heights[x][z] + 2;
 	}
 	
 	public int getHeightFromPosition(int x, int z) {
@@ -101,7 +102,6 @@ public class Chunk {
 	}
 
 	/**
-	 * 
 	 * Creates an AABB from. each. block.
 	 * This isn't bad is it?
 	 * 
@@ -110,32 +110,37 @@ public class Chunk {
 	public List<AABB> getAABBs(Vector3f origin, AABB aabb) {
 		List<AABB> aabbs = new ArrayList<>();
 		
-		int minY = (int)(aabb.center.y - 2);
-		int maxY = (int)(aabb.center.y + 2);
+		int roundedY = (int)(aabb.center.y - aabb.height/2);
+		int offset = 2;
+		int minY = roundedY-offset;
+		int maxY = roundedY+offset;
 		
 		if(minY < 0) {
 			minY = 0;
 		}
-		
 		if(maxY > World.WORLD_HEIGHT) {
 			maxY = World.WORLD_HEIGHT;
 		}
-		
-		for(int x = 0; x < CHUNK_SIZE; ++x) {
-			for(int z = 0; z < CHUNK_SIZE; ++z) {
-				for(int y = minY; y < maxY; ++y) {
-					if(blocks[x][y][z] == -1) {
-						continue;
+		synchronized(blocks) {
+			for(int x = 0; x < CHUNK_SIZE; x++) {
+				for(int z = 0; z < CHUNK_SIZE; z++) {
+					for(int y = minY; y < maxY; y++) {
+						if(blocks[x][y][z] == -1) {
+							continue;
+						}
+						float blockX = (x + origin.x);
+						float blockY = y;
+						float blockZ = (z + origin.z);
+						
+						AABB other = new AABB(new Vector3f(blockX-0.5f, blockY-0.5f, blockZ-0.5f), new Vector3f(blockX+0.5f, blockY+1f, blockZ+0.5f));
+						//other.updatePosition(new Vector3f(blockX,blockY,blockZ));
+						aabbs.add(other);
+						
 					}
-					float blockX = (x + origin.x);
-					float blockY = y;
-					float blockZ = (z + origin.z);
-					AABB other = new AABB(new Vector3f(blockX-0.5f, blockY, blockZ-0.5f), new Vector3f(blockX+0.5f, blockY+1f, blockZ+0.5f));
-					aabbs.add(other);
-					
 				}
 			}
 		}
+		
 		return aabbs;
 	}
 }

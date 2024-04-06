@@ -28,11 +28,6 @@ public class MousePicker {
 	public void update() {
 		viewMatrix = Maths.createViewMatrix(camera);
 		currentRay = calculateMouseRay();
-		/*if (intersectionInRange(0, RAY_RANGE, currentRay)) {
-			currentTerrainPoint = binarySearch(0, 0, RAY_RANGE, currentRay);
-		} else {
-			currentTerrainPoint = null;
-		}*/
 	}
 	
 	public final int BASE_DISTANCE = 5;

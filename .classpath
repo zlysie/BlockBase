@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="libraries/jar/soundsystem.jar"/>
 	<classpathentry kind="lib" path="libraries/jar/ss-codecs.jar"/>
 	<classpathentry kind="lib" path="libraries/jar/ss-libraries.jar"/>
+	<classpathentry kind="lib" path="libraries/jar/jaudiotagger-3.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
