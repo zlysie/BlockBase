@@ -25,6 +25,14 @@ public class ResourceLoader {
 
 		return textures.get(name);
 	}
+	
+	public static int loadCustomTexture(String name) {
+		if(textures.get(name) == null) {
+			textures.put(name, Loader.getInstance().loadCustomTexture(name));
+		}
+
+		return textures.get(name);
+	}
 
 	/**
 	 * Loads file into program, if the file hasn't been loaded before then it will be added to a static list. If it has then it retrieves a current instance of the file from the static list.

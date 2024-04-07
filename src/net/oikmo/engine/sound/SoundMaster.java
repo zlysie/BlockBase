@@ -60,9 +60,9 @@ public class SoundMaster {
 		try {
 			fw = new FileWriter(readme);
 			fw.write("### --- Created at "+ Logger.getCurrentTime() +  " --- ###");
-			fw.write("\nHello! This is the custom music folder! In here you can put in custom music that gets added to the game at start! (not during runtime.)");
-			fw.write("\nPlease note that music files must be .ogg to be loaded (otherwise it is ignored)");
-			fw.write("\n- Oikmo :D");
+			fw.write("\r\nHello! This is the custom music folder! In here you can put in custom music that gets added to the game at start! (not during runtime.)");
+			fw.write("\r\nPlease note that music files must be .ogg to be loaded (otherwise it is ignored)");
+			fw.write("\r\n- Oikmo :D");
 			fw.close();
 		} catch (IOException e) {
 			Logger.log(LogLevel.WARN, "Unable to write into README at " + customMusic.getAbsolutePath());

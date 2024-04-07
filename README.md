@@ -11,3 +11,4 @@
 - R - save world
 - T - load world
 - E - reset position
+- F1 - switch texture pack to custom (if created)

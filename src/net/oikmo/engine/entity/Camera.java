@@ -59,13 +59,13 @@ public class Camera {
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
-		this.texturePackTexture = ResourceLoader.loadTexture("textures/defaultPack");
+		this.texturePackTexture = MasterRenderer.currentTexturePack.getTextureID();
 		this.invisibleTexture = ResourceLoader.loadTexture("textures/transparent");
-		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(texturePackTexture)), position, new Vector3f(0,0,0), 1.002f);
+		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(MasterRenderer.currentTexturePack.getTextureID())), position, new Vector3f(0,0,0), 1.002f);
 		mouseLocked = true;
 		startThread1();
 	}
-
+	
 	private void startThread1() {
 
 		Thread chunkGetter = new Thread(new Runnable() {
@@ -174,6 +174,7 @@ public class Camera {
 			catch(ArithmeticException e) {}
 
 			if(currentChunk.getBlock(roundedPosition) == null) {
+				this.texturePackTexture = MasterRenderer.currentTexturePack.getTextureID();
 				block.setTextureID(texturePackTexture);
 			} else {
 				block.setTextureID(invisibleTexture);

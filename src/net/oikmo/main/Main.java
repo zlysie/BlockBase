@@ -113,8 +113,6 @@ public class Main {
 
 			Thread.sleep(2000);
 
-
-
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom music to the game via the .blockbase/resources/custom/music folder!");
 
 			DisplayManager.createDisplay(frame, gameCanvas);
@@ -241,7 +239,6 @@ public class Main {
 
 				myWriter.write(Integer.toString(resourceVersion));
 				myWriter.close();
-
 
 			} else {
 				System.out.println("File already exists.");

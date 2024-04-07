@@ -96,31 +96,7 @@ public class DisplayManager {
 	 * @see getImage()
 	 */
 	public static void saveScreenshot() {
-		Calendar cal = Calendar.getInstance();
-		int dy = cal.get(Calendar.DAY_OF_MONTH);
-		int mon = cal.get(Calendar.MONTH) + 1;
-		int yr = cal.get(Calendar.YEAR);
-
-		int hr = cal.get(Calendar.HOUR_OF_DAY);
-		int min = cal.get(Calendar.MINUTE);
-		int sec = cal.get(Calendar.SECOND);
-
-		String day = "" + dy;
-		String month = "" + mon;
-		String year = String.valueOf(yr).substring(2);
-
-		String hour = "" + hr;
-		String minute = "" + min;
-		String second = "" + sec;
-
-		if(dy < 10) { day = "0" + dy; }
-		if(mon < 10) { month = "0" + mon; }
-
-		if(hr < 10) { hour = "0" + hr; } 
-		if(min < 10) { minute = "0" + min; }
-		if(sec < 10) { second = "0" + sec; }
-
-		String name = day + "-" + month + "-" + year + "_" + hour + "." + minute + "." + second;
+		
 		File saveDirectory =  new File(Main.getDir().getPath()+"/screenshots/");
 
 		if (!saveDirectory.exists()) {
@@ -131,6 +107,8 @@ public class DisplayManager {
 			}
 		}
 
+		String name = Logger.getCurrentTimeFile();
+		
 		File file = new File(saveDirectory + "/" + name + ".png"); // The file to save the pixels too.
 		String format = "png";
 		try {

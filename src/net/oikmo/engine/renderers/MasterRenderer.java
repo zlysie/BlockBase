@@ -1,9 +1,15 @@
 package net.oikmo.engine.renderers;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -20,6 +26,10 @@ import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
 import net.oikmo.engine.renderers.gui.GuiRenderer;
 import net.oikmo.engine.textures.GuiTexture;
+import net.oikmo.engine.textures.ModelTexture;
+import net.oikmo.main.Main;
+import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 public class MasterRenderer {
 	
@@ -40,6 +50,9 @@ public class MasterRenderer {
 	private GuiRenderer guiRenderer;
 	
 	public static FontType font;
+	public static ModelTexture currentTexturePack;
+	public static int defaultTexturePack;
+	public static int customTexturePack;
 	public int ui_nuhuh;
 	public int ui_button;
 	public int ui_smallbutton;
@@ -57,6 +70,57 @@ public class MasterRenderer {
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		guiRenderer = new GuiRenderer(projectionMatrix);
 		font = new FontType("minecraft");
+		defaultTexturePack = ResourceLoader.loadTexture("textures/defaultPack");
+		
+		File dir = new File(Main.getResources() + "/custom/textures/");
+		if(!dir.exists()) {
+			dir.mkdirs();
+			
+			
+			
+			
+			
+		} else {
+			File customPack = new File(dir + "/customPack.png");
+			if(customPack.exists()) {
+				customTexturePack = ResourceLoader.loadCustomTexture("customPack");
+			} else {
+				customTexturePack = defaultTexturePack;
+				Logger.log(LogLevel.WARN, "customPack.png was not found! Defaulting to defaultPack.png");
+			}
+		}
+		
+		File readme = new File(dir+"/README.TXT");
+		if(!readme.exists()) {
+			try {
+				readme.createNewFile();
+				try {
+					BufferedImage example = ImageIO.read(MasterRenderer.class.getResourceAsStream("/assets/textures/defaultPack.png"));
+					File examplePng = new File(dir+"/examplePack.png");
+					ImageIO.write(example, "png", examplePng);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (IOException e) {
+				Logger.log(LogLevel.WARN, "Unable to create README at " + dir.getAbsolutePath());
+			}
+		}
+
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(readme);
+			fw.write("### --- Created at "+ Logger.getCurrentTime() +  " --- ###");
+			fw.write("\r\nHello! This is the custom textures folder! In here you can put in custom textures that gets added to the game at start! (not during runtime.)");
+			fw.write("\r\nPlease note that music files must be .png and have a specific name to be loaded (otherwise it is ignored)");
+			fw.write("\r\nCustom textures = customPack.png (example is examplePack.png)");
+			fw.write("\r\n- Oikmo :D");
+			fw.close();
+		} catch (IOException e) {
+			Logger.log(LogLevel.WARN, "Unable to write into README at " + dir.getAbsolutePath());
+		}
+		
+		currentTexturePack = new ModelTexture(defaultTexturePack);
 		ui_nuhuh = ResourceLoader.loadTexture("textures/ui/ui_nuhuh");
 		ui_button = ResourceLoader.loadTexture("textures/ui/normal/ui_button");
 		ui_hover = ResourceLoader.loadTexture("textures/ui/normal/ui_button_hover");
@@ -65,14 +129,16 @@ public class MasterRenderer {
 		TextMaster.init();
 	}
 	
+	public void setTexturePack(int texture) {
+		currentTexturePack.setTextureID(texture);
+	}
+	
 	public void prepare() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		//GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glClearColor(0.4f, 0.7f, 1.0f, 1);
 		//GL11.glCullFace(GL11.GL_BACK);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT );
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glLoadIdentity();
 	}
 	
 	public void render(Camera camera) {

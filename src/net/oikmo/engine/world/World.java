@@ -55,7 +55,7 @@ public class World {
 	
 	private void init(long seed) {
 		this.seed = seed;
-		this.tex = ModelTexture.create("textures/defaultPack");
+		this.tex = MasterRenderer.currentTexturePack;
 		this.noiseGen = new PerlinNoiseGenerator(seed);
 		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {

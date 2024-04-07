@@ -1,5 +1,6 @@
 package net.oikmo.engine;
 
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
 
 import org.lwjgl.input.Keyboard;
@@ -12,6 +13,7 @@ public class InputManager {
 	
 	private boolean lockInScreenshot = false;
 	private boolean lockInRefresh = false;
+	private boolean lockInChangeTexture = false;
 	private boolean lockInWorldSave = false;
 	private boolean lockInWorldLoad = false;
 	
@@ -53,6 +55,21 @@ public class InputManager {
 			lockInScreenshot = true;
 		} else {
 			lockInScreenshot = false;
+		}
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_F1)) {
+			if(!lockInChangeTexture) {
+				int texture = MasterRenderer.currentTexturePack.getTextureID();
+				if(texture == MasterRenderer.defaultTexturePack) {
+					MasterRenderer.getInstance().setTexturePack(MasterRenderer.customTexturePack);
+				} else {
+					MasterRenderer.getInstance().setTexturePack(MasterRenderer.defaultTexturePack);
+				}
+			}
+			lockInChangeTexture = true;
+			
+		} else {
+			lockInChangeTexture = false;
 		}
 	}
 	

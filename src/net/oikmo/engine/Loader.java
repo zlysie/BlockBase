@@ -1,6 +1,7 @@
 package net.oikmo.engine;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,6 +19,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import net.oikmo.engine.models.RawModel;
+import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 
@@ -148,6 +150,78 @@ public class Loader {
 		BufferedImage image = null;
 		try {
 			image = ImageIO.read(Loader.class.getResourceAsStream("/assets/" + name + ".png"));
+		} catch (FileNotFoundException e) {
+			try {
+				image = ImageIO.read(Loader.class.getResourceAsStream("missingTexture.png"));
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			Logger.log(LogLevel.ERROR, "Texture name \"" + name + "\" could not be found! Loading placeholder!");
+		} catch (IOException e) {
+			try {
+				image = ImageIO.read(Loader.class.getResourceAsStream("missingTexture.png"));
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
+		} catch(IllegalArgumentException e) {
+			Logger.log(LogLevel.ERROR, "Texture name \"" + name + "\" could not be found! Loading placeholder!");
+			try {
+				image = ImageIO.read(Loader.class.getResourceAsStream("missingTexture.png"));
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+
+		int[] pixels = new int[image.getWidth() * image.getHeight()];
+		image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+
+		ByteBuffer buffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * BYTES_PER_PIXEL); //4 for RGBA, 3 for RGB
+
+		for(int y = 0; y < image.getHeight(); y++){
+			for(int x = 0; x < image.getWidth(); x++){
+				int pixel = pixels[y * image.getWidth() + x];
+				buffer.put((byte) ((pixel >> 16) & 0xFF));     // Red component
+				buffer.put((byte) ((pixel >> 8) & 0xFF));      // Green component
+				buffer.put((byte) (pixel & 0xFF));               // Blue component
+				buffer.put((byte) ((pixel >> 24) & 0xFF));    // Alpha component. Only for RGBA
+			}
+		}
+
+		buffer.flip(); //DONT FORGET THIS OMG
+
+		int textureID = GL11.glGenTextures(); //Generate texture ID
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID); //Bind texture ID
+		GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+		//Setup wrap mode
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+
+		//Setup texture scaling filtering
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST); //sharp
+
+		//Send texel data to OpenGL
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+		//GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+		//GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -1f);
+
+		textures.add(textureID);
+		//Return the texture ID so we can bind it later again
+		return textureID;
+	}
+	
+	public int loadCustomTexture(String name) {
+
+		BufferedImage image = null;
+		try {
+			image = ImageIO.read(new File(Main.getResources()+"/custom/textures/"+name+".png"));
 		} catch (FileNotFoundException e) {
 			try {
 				image = ImageIO.read(Loader.class.getResourceAsStream("missingTexture.png"));
