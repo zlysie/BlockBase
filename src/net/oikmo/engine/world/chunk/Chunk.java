@@ -10,14 +10,14 @@ import com.github.matthewdawsey.collisionres.AABB;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.toolbox.Maths;
-import net.oikmo.toolbox.PerlinNoiseGenerator;
+import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	public byte[][][] blocks;
 	private int[][] heights;
 	
-	public Chunk(PerlinNoiseGenerator noiseGen, Vector3f origin) {
+	public Chunk(OpenSimplexNoise noiseGen, Vector3f origin) {
 		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		generateChunk(origin, noiseGen);
@@ -25,6 +25,8 @@ public class Chunk {
 
 	public Chunk(byte[][][] blocks) {
 		this.blocks = blocks;
+		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
+		calculateHeights();
 	}
 
 	/**
@@ -32,13 +34,13 @@ public class Chunk {
 	 * @param origin
 	 * @param noiseGen
 	 */
-	private void generateChunk(Vector3f origin, PerlinNoiseGenerator noiseGen) {
+	private void generateChunk(Vector3f origin, OpenSimplexNoise noiseGen) {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
 				int actualX = (int) (origin.x + x);
 				int actualZ = (int) (origin.z + z);
 
-				int height = (int) noiseGen.generateHeight(actualX, actualZ)+60;
+				int height = (int) (noiseGen.noise(actualX/16f, actualZ/16f)*15f)+60;
 				blocks[x][height][z] = Block.grass.getByteType();
 				heights[x][z] = height+1;
 				for (int y = 0; y < World.WORLD_HEIGHT; y++) {
@@ -49,6 +51,19 @@ public class Chunk {
 							blocks[x][y][z] = -1;
 						}
 						
+					}
+				}
+			}
+		}
+	}
+	
+	private void calculateHeights() {
+		for (byte x = 0; x < CHUNK_SIZE; x++) {
+			for (byte z = 0; z < CHUNK_SIZE; z++) {
+				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
+					if (blocks[x][y][z] != -1) {
+						heights[x][z] = y;
+						break;
 					}
 				}
 			}

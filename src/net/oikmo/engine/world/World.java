@@ -25,7 +25,7 @@ import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
-import net.oikmo.toolbox.PerlinNoiseGenerator;
+import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class World {
 
@@ -33,7 +33,7 @@ public class World {
 	public static final int WORLD_SIZE = 4*8;
 	private ModelTexture tex;
 	private long seed;
-	private PerlinNoiseGenerator noiseGen;
+	private OpenSimplexNoise noise;
 	
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	private List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
@@ -56,7 +56,8 @@ public class World {
 	private void init(long seed) {
 		this.seed = seed;
 		this.tex = MasterRenderer.currentTexturePack;
-		this.noiseGen = new PerlinNoiseGenerator(seed);
+		//this.noiseGen = new PerlinNoiseGenerator(seed);
+		this.noise = new OpenSimplexNoise(seed);
 		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {
 				while (!Main.displayRequest) {
@@ -72,7 +73,7 @@ public class World {
 								Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 								synchronized(MasterChunk.usedPositions) {
 									if(!MasterChunk.isPositionUsed(chunkPos)) {
-										masterChunks.add(new MasterChunk(noiseGen, chunkPos));
+										masterChunks.add(new MasterChunk(noise, chunkPos));
 									}
 								}
 							}
@@ -154,8 +155,8 @@ public class World {
 					JOptionPane.showMessageDialog(null, "World has loaded!");
 				}
 			}).start();
-			this.noiseGen = null;
-			this.noiseGen = new PerlinNoiseGenerator(data.seed);
+			this.noise = null;
+			this.noise = new OpenSimplexNoise(data.seed);
 			
 			Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
 			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);

@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
+
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
-import net.oikmo.toolbox.PerlinNoiseGenerator;
-
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
+import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class MasterChunk {
 	public static Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
@@ -25,7 +25,7 @@ public class MasterChunk {
 	private ChunkMesh mesh;
 	private Entity entity;
 	
-	public MasterChunk(PerlinNoiseGenerator noiseGen, Vector3f origin) {
+	public MasterChunk(OpenSimplexNoise noiseGen, Vector3f origin) {
 		setIndex(usedPositions.size());
 		this.origin = origin;
 		this.chunk = new Chunk(noiseGen, origin);
