@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
@@ -108,6 +109,8 @@ public class PanelCrashReport extends Panel {
 		} catch (IOException e) {}
 		try {
 			FileWriter fw = new FileWriter(logFile);
+			fw.write("---- BlockBase Crash Report ----");
+			fw.write("\n// "+phrases[new Random().nextInt(phrases.length)]+"\n");
 			fw.write(textArea.getText());
 			fw.close();
 		} catch (IOException e) {
@@ -132,4 +135,12 @@ public class PanelCrashReport extends Panel {
 			this.main += wantToApply;
 		}
 	}
+	
+	private String[] phrases = {
+			"How could you?",
+			"Man.",
+			"Seriously?!?!",
+			"I hope this wasn't you!",
+			"Do I have to fix this?!?"
+	};
 }
