@@ -6,8 +6,9 @@
 - Right Click - Place block
 - (+ or -) keys - Blocks to select
 - WASD - move
-- Space - jump
+- Left Shift - Increase speed
+- Left Control - Go down
+- Space - Go up
 - F - Refresh all chunks
 - R - save world
 - T - load world
-- E - reset position
