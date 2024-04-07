@@ -108,6 +108,10 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.glass.getType(), 0, 3);
 		addTextureFromXY(uvArray, Block.smoothstone.getType(), 1, 3);
 		addTextureFromXY(uvArray, Block.brick.getType(), 3, 3);
+		addTextureFromXY(uvArray, Block.ironBlock.getType(), 14, 0);
+		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
+		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
+		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
 
 		return uvArray;
 	}	
@@ -127,6 +131,10 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.glass.getType(), 0, 3);
 		addTextureFromXY(uvArray, Block.smoothstone.getType(), 1, 3);
 		addTextureFromXY(uvArray, Block.brick.getType(), 3, 3);
+		addTextureFromXY(uvArray, Block.ironBlock.getType(), 14, 0);
+		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
+		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
+		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
 		
 		return uvArray;
 	}
@@ -145,6 +153,10 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.glass.getType(), 0, 3);
 		addTextureFromXY(uvArray, Block.smoothstone.getType(), 2, 3);
 		addTextureFromXY(uvArray, Block.brick.getType(), 3, 3);
+		addTextureFromXY(uvArray, Block.ironBlock.getType(), 13, 0);
+		addTextureFromXY(uvArray, Block.goldBlock.getType(), 13, 1);
+		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 13, 2);
+		addTextureFromXY(uvArray, Block.tnt.getType(), 1, 4);
 		
 		return uvArray;
 	}
@@ -163,6 +175,10 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.glass.getType(), 0, 3);
 		addTextureFromXY(uvArray, Block.smoothstone.getType(), 2, 3);
 		addTextureFromXY(uvArray, Block.brick.getType(), 3, 3);
+		addTextureFromXY(uvArray, Block.ironBlock.getType(), 15, 0);
+		addTextureFromXY(uvArray, Block.goldBlock.getType(), 15, 1);
+		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 15, 2);
+		addTextureFromXY(uvArray, Block.tnt.getType(), 2, 4);
 		
 		return uvArray;
 	}
@@ -182,6 +198,10 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.glass.getType(), 0, 3);
 		addTextureFromXY(uvArray, Block.smoothstone.getType(), 1, 3);
 		addTextureFromXY(uvArray, Block.brick.getType(), 3, 3);
+		addTextureFromXY(uvArray, Block.ironBlock.getType(), 14, 0);
+		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
+		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
+		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
 		
 		return uvArray;
 	}	
@@ -201,6 +221,10 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.glass.getType(), 0, 3);
 		addTextureFromXY(uvArray, Block.smoothstone.getType(), 1, 3);
 		addTextureFromXY(uvArray, Block.brick.getType(), 3, 3);
+		addTextureFromXY(uvArray, Block.ironBlock.getType(), 14, 0);
+		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
+		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
+		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
 		
 		return uvArray;
 	}

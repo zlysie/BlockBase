@@ -193,21 +193,12 @@ public class Camera {
 						Block block1 = currentChunk.getBlock(picker.getPointRounded(picker.distance));
 						if(block1 == null) {
 							if(currentChunk.blockHasNeighbours(picker.getPointRounded(picker.distance))) {
-								Vector3f v1 = new Vector3f(picker.getPointRounded(picker.distance));
-								AABB toCheck1 = new AABB(v1,new Vector3f(v1.x+1.f,v1.y+0.5f,v1.z+1.f));
-								if(!Main.thePlayer.getAABB().intersects(toCheck1)) {
-									currentChunk.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
-								}
-								
+								currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
 							}
 
 						} else {
 							if(currentChunk.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) { 
-								Vector3f v1 = new Vector3f(picker.getPointRounded(picker.distance-1));
-								AABB toCheck1 = new AABB(v1,new Vector3f(v1.x+1.f,v1.y+0.5f,v1.z+1.f));
-								if(!Main.thePlayer.getAABB().intersects(toCheck1)) {
-									currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
-								}
+								currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
 							}
 							
 						}

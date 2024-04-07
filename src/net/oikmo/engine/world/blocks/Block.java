@@ -1,11 +1,7 @@
 package net.oikmo.engine.world.blocks;
 
-import org.lwjgl.util.vector.Vector3f;
-
-import com.github.matthewdawsey.collisionres.AABB;
-
 public abstract class Block {
-	public static final Block[] blocks = new Block[13];
+	public static final Block[] blocks = new Block[17];
 	public static final Block grass = new BlockGrass(Type.GRASS);
 	public static final Block dirt = new BlockDirt(Type.DIRT);
 	public static final Block stone = new BlockStone(Type.STONE);
@@ -19,9 +15,10 @@ public abstract class Block {
 	public static final Block glass = new BlockGlass(Type.GLASS);
 	public static final Block smoothstone = new BlockSmoothStone(Type.SMOOTHSTONE);
 	public static final Block brick = new BlockBrick(Type.BRICK);
-	public static final Block ironBlock = new BlockBrick(Type.BRICK);
-	public static final Block goldBlock = new BlockBrick(Type.BRICK);
-	public static final Block diamondBlock = new BlockBrick(Type.BRICK);
+	public static final Block ironBlock = new BlockIronBlock(Type.IRONBLOCK);
+	public static final Block goldBlock = new BlockGoldBlock(Type.GOLDBLOCK);
+	public static final Block diamondBlock = new BlockDiamondBlock(Type.DIAMONDBLOCK);
+	public static final Block tnt = new BlockTNT(Type.TNT);
 	
 	public static enum Type {
 		GRASS, 
@@ -36,14 +33,17 @@ public abstract class Block {
 		OAKPLANKS,
 		GLASS,
 		SMOOTHSTONE,
-		BRICK
+		BRICK,
+		IRONBLOCK,
+		GOLDBLOCK,
+		DIAMONDBLOCK,
+		TNT,
 	};
 	
 	public Type type;
 	
 	public Block(Type type) {
 		blocks[type.ordinal()] = this;
-		//this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
 		this.type = type;
 	}
 	
@@ -65,10 +65,6 @@ public abstract class Block {
 	
 	public int getType() {
 		return type.ordinal();
-	}
-
-	public AABB getAABB(int x, int y, int z) {
-		return new AABB(new Vector3f((float)x, (float)y, (float)z), new Vector3f((float)(x + 1), (float)(y + 1), (float)(z + 1)));
 	}
 	
 	public abstract float getStrength();

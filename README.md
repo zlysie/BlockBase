@@ -11,4 +11,8 @@
 - R - save world
 - T - load world
 - E - reset position
-- F1 - switch texture pack to custom (if created)
+
+- F1 - toggle UI
+- F2 - take screenshot
+- F3 - switch texture pack to custom (if created)
+- F11 - toggle fullscreen
