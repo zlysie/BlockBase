@@ -1,6 +1,7 @@
 package net.oikmo.engine;
 
 import java.awt.Canvas;
+import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -14,14 +15,12 @@ import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
-import net.oikmo.toolbox.IconUtils;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 
@@ -40,26 +39,25 @@ public class DisplayManager {
 	 * Creates window by size (loads cursor and window icon) and sets OpenGL version.
 	 * 
 	 * @author <i>Oikmo</i>
+	 * @param frame 
 	 */
-	public static void createDisplay(Canvas canvas, int width, int height) {
-		DisplayMode mode = new DisplayMode(width, height);
+	public static void createDisplay(Frame frame, Canvas gameCanvas) {
+			frame.removeAll();
+		frame.add(gameCanvas, "Center");
 		try {
+			Display.setParent(gameCanvas);
 			Display.create();
-			Display.setParent(canvas);
-			Display.setDisplayMode(mode);
-			Display.setTitle("VoxelEngine");
-			Display.setIcon(IconUtils.getFavicon());
 			Keyboard.create();
+			GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT);
+			lastFrameTime = getCurrentTime();
+			lastFPS = getCurrentTime();
+			MasterRenderer.getInstance();
+			Loader.getInstance();
 		} catch (LWJGLException e) {
-			Main.error("Failed to create Display!", e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT);
-		lastFrameTime = getCurrentTime();
-		lastFPS = getCurrentTime();
 	}
-
-	int prevW, prevH;
 	
 	/**
 	 * Updates the display to show a new frame and calculates the last frame time.
@@ -79,11 +77,11 @@ public class DisplayManager {
 			if(Main.HEIGHT <= 0) {
 				Main.HEIGHT = 1;
 			}
-			
+
 			GL11.glViewport(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 			MasterRenderer.getInstance().updateProjectionMatrix();
 		}
-		
+
 		updateFPS();
 		Display.update();
 		//Display.sync(60);
@@ -228,7 +226,7 @@ public class DisplayManager {
 		float normalisedY = 1.0f - 2.0f * (float) Mouse.getY() / (float) Display.getHeight();
 		return new Vector2f(normalisedX, normalisedY);
 	}
-	
+
 	/**
 	 * Returns Window size as OpenGL coordinates.
 	 * @param position - ({@link Vector2f})

@@ -38,6 +38,7 @@ public class Logger {
 	}
 	
 	public static void saveLog() {
+		if(completeLog.isEmpty()) { return; }
 		File saveDirectory =  new File(Main.getDir() + "/logs/");
 		if (!saveDirectory.exists()) {
 	        try {
@@ -100,7 +101,7 @@ public class Logger {
 	 * returns currentTime in the form of [YYYY-MM-DD HH:MM:SS]
 	 * @return string
 	 */
-	private static String getCurrentTime() {
+	public static String getCurrentTime() {
 		Calendar cal = Calendar.getInstance();
 		
 		int dy = cal.get(Calendar.DAY_OF_MONTH);
@@ -133,7 +134,7 @@ public class Logger {
 	 * returns currentTime in the form of YYYY-MM-DD_HH.MM.SS
 	 * @return
 	 */
-	private static String getCurrentTimeFile() {
+	public static String getCurrentTimeFile() {
 		Calendar cal = Calendar.getInstance();
 		
 		int dy = cal.get(Calendar.DAY_OF_MONTH);

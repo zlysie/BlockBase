@@ -8,10 +8,21 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Comparator;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
@@ -22,13 +33,15 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.Timer;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.GuiScreen;
-import net.oikmo.engine.gui.font.renderer.TextMaster;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
+import net.oikmo.toolbox.UnzipUtility;
+import net.oikmo.toolbox.error.CanvasLogo;
 import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
@@ -36,23 +49,25 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main {
 
-	public static String gameName = "BlockBase";
-	public static String version = "[a0.0.2]";
-	public static String gameVersion = gameName + " " + version;
+	private static final int resourceVersion = 00;
+	public static final String gameName = "BlockBase";
+	public static final String version = "[a0.0.2]";
+	public static final String gameVersion = gameName + " " + version;
 
 	public static boolean displayRequest = false;
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
 
-	
-	
+	private static PanelCrashReport report;
+	private static boolean hasErrored = false;
+
 	public static World theWorld;
 	public static Player thePlayer;
 
 	public static Vector3f camPos = new Vector3f(0,0,0);
 
-	static Frame frame;
-	static Canvas gameCanvas;
+	private static Frame frame;
+	private static Canvas gameCanvas;
 
 	private static GuiScreen currentScreen;
 
@@ -62,45 +77,60 @@ public class Main {
 		Timer timer = new Timer(60f);
 		try {
 
+			if(!new File(getDir()+"/resources/custom").exists()) {
+				new File(getDir()+"/resources/custom").mkdirs();
+			}
+
+			if(!new File(getResources() + "/music").exists()) {
+				new File(getResources() + "/music").mkdirs();
+			}
+
+
 			frame = new Frame(Main.gameVersion);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
-					Logger.saveLog();
+					close();
 					System.exit(0);
-					displayRequest = true;
 				}
 			});
 			gameCanvas = new Canvas();
-			URL iconURL = Main.class.getResource("/assets/icon.png");
+			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
 			frame.setIconImage(icon.getImage());
-			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
-			gameCanvas.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
-
+			//frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 			frame.setLayout(new BorderLayout());
 			frame.add(gameCanvas, "Center");
 			gameCanvas.setPreferredSize(new Dimension(WIDTH, HEIGHT)); //480
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
+			frame.removeAll();
+			frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
+			frame.add(new CanvasLogo("iconx128"), "Center");
+
 			frame.setVisible(true);
 
-			DisplayManager.createDisplay(gameCanvas,WIDTH, HEIGHT);
+			downloadResources();
+
+			Thread.sleep(2000);
+
+
+
+			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom music to the game via the .blockbase/resources/custom/music folder!");
+
+			DisplayManager.createDisplay(frame, gameCanvas);
 			CubeModel.setup();
-			MasterRenderer.getInstance();
-			
+
 			SoundMaster.init();
-			
-			
-			
+
 			InputManager im = new InputManager();
-			
+
 			theWorld = new World();
 			currentScreen = new GuiInGame();
 
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
 				timer.advanceTime();
-				
+
 				for(int e = 0; e < timer.ticks; ++e) {
 					tick();
 				}
@@ -108,9 +138,8 @@ public class Main {
 				currentScreen.update();
 
 				im.handleInput();
-				MasterRenderer.getInstance().renderAABB(thePlayer.getAABB());
 				theWorld.update(thePlayer.getCamera());
-				
+
 				MasterRenderer.getInstance().addEntity(thePlayer.getCamera().getSelectedBlock());
 
 				DisplayManager.updateDisplay(gameCanvas);				
@@ -118,21 +147,22 @@ public class Main {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		//soundSystem.cleanup();
-		displayRequest = true;
 		Logger.saveLog();
-		TextMaster.cleanUp();
-		System.exit(0);
+		close();
+		Loader.cleanUp();
 		DisplayManager.closeDisplay();
 	}
-	
+
 	private static void tick() {
 		thePlayer.tick();
 		camPos = new Vector3f(thePlayer.getCamera().getPosition());
 	}
 
-	static PanelCrashReport report;
-	static boolean balls = false;
+	private static void close() {
+		SoundMaster.cleanUp();
+		displayRequest = true;
+	}
+
 	/**
 	 * Creates a frame with the error log embedded inside.
 	 * 
@@ -140,8 +170,7 @@ public class Main {
 	 * @param throwable (Throwable)
 	 */
 	public static void error(String id, Throwable throwable) {
-		if(!balls) {
-			//soundSystem.cleanup();
+		if(!hasErrored) {
 			displayRequest = true;
 			Logger.saveLog();
 			DisplayManager.closeDisplay();
@@ -164,7 +193,7 @@ public class Main {
 			frame.add(report, "Center");
 			frame.validate();
 
-			balls = true;
+			hasErrored = true;
 		}	
 	}
 
@@ -177,6 +206,118 @@ public class Main {
 				file.delete();
 			}
 		}
+	}
+
+	private static void downloadResources() throws IOException {
+		File dir = getResources();
+		File tmp = new File(getDir() + "/tmp");
+		File txt = new File(getResources() + "/resourcesVersion.txt");
+
+
+		tmp.mkdir();
+		if(!txt.exists()) {
+
+			FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
+
+			myWriter.write(Integer.toString(resourceVersion));
+			myWriter.close();
+
+			int options = JOptionPane.showConfirmDialog(frame, "Going to download resources based on resourceVersion: " + resourceVersion +  ".\nJust saying this will take a while depending on your connection or disk speeds.", "Resource Downloader Reminder", JOptionPane.PLAIN_MESSAGE);
+
+			if(options == -1) {
+				System.exit(0);
+			}
+			download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
+			UnzipUtility unzipper = new UnzipUtility();
+
+			unzipper.unzip(tmp + "/resources.zip", getResources()+"");
+		}
+
+		try {
+			File versionTXT = new File(getResources() + "/resourcesVersion.txt");
+			if (versionTXT.createNewFile()) {
+				System.out.println("File created: " + versionTXT.getName());
+				FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
+
+				myWriter.write(Integer.toString(resourceVersion));
+				myWriter.close();
+
+
+			} else {
+				System.out.println("File already exists.");
+
+				BufferedReader brr = new BufferedReader(new FileReader(getResources() + "/resourcesVersion.txt"));     
+				String temp = brr.readLine();
+				if (temp == null) {
+					FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
+					myWriter.write(Integer.toString(resourceVersion));
+					myWriter.close();
+				} else {
+					if(!temp.contentEquals(Integer.toString(resourceVersion))) {
+						int tempInt = Integer.parseInt(temp.trim());
+						if(tempInt < resourceVersion || tempInt > resourceVersion) {
+							if(dir.exists()) {
+								Files.walk(Paths.get(new File(getResources()+"/").getPath())).sorted(Comparator.reverseOrder()) .forEach(path -> {
+									try {
+										if(!path.toString().contains("custom")) {
+											Files.delete(path);  //delete each file or directory
+										}
+
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								});
+							}
+
+
+
+							int options = JOptionPane.showConfirmDialog(frame, "Going to download resources based on resourceVersion: " + resourceVersion +  ".\nJust saying this will take a while depending on your connection or disk speeds.", "Resource Downloader Reminder", JOptionPane.PLAIN_MESSAGE);
+
+							if(options == -1) {
+								System.exit(0);
+							}
+
+							if(new File(getResources()+"/music").list().length == 0) {
+								download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
+								UnzipUtility unzipper = new UnzipUtility();
+								unzipper.unzip(tmp+"/resources.zip", getResources()+"/");
+							}
+
+							download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
+							UnzipUtility unzipper = new UnzipUtility();
+							unzipper.unzip(tmp+"/resources.zip", getResources()+"/");
+
+							FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
+							myWriter.write(Integer.toString(resourceVersion));
+							myWriter.close();
+						}
+					}
+
+				}
+
+				if(new File(getResources()+"/music/").list().length == 0) {
+					download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
+					UnzipUtility unzipper = new UnzipUtility();
+					unzipper.unzip(tmp+"/resources.zip", getResources()+"/");
+				}
+
+				brr.close();
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("[ERROR] Version could NOT be verified!");
+		}
+
+		File zipFile = tmp;
+		if(zipFile.exists()) {
+			new File(zipFile + "/resources.zip").delete();
+			zipFile.delete();
+		}
+	}
+
+	public static File getResources() {
+		return new File(getDir()+"/resources");
 	}
 
 	/**
@@ -224,10 +365,12 @@ public class Main {
 		}
 	}
 
-	public void cleanUp() {
-		Loader.cleanUp();
-		DisplayManager.closeDisplay();
-		Logger.saveLog();
-		System.exit(0);
+	private static void download(String urlStr, String file) throws IOException {
+		URL url = new URL(urlStr);
+		ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+		FileOutputStream fos = new FileOutputStream(file);
+		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+		fos.close();
+		rbc.close();
 	}
 }

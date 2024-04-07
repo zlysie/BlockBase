@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 
 public final class IconUtils {
     public static ByteBuffer[] getFavicon() {
-        return loadIcon("icon");
+        return loadIcon("iconx32");
     }
     
     public static ByteBuffer[] loadIcon(String filepath)

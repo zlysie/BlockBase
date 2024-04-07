@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Panel;
 import java.awt.TextArea;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -14,6 +17,7 @@ import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.Logger;
 
 public class PanelCrashReport extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -86,13 +90,31 @@ public class PanelCrashReport extends Panel {
 		logN(0, report);
 		log(0, "--------- END ERROR REPORT ---------");
 		
-		TextArea textarea = new TextArea(main, 0, 0, 1);
-		textarea.setFont(new Font("Monospaced", Font.BOLD, 11));
+		TextArea textArea = new TextArea(main, 0, 0, 1);
+		textArea.setFont(new Font("Monospaced", Font.BOLD, 11));
 		add(new CanvasLogo(), "North");
 		add(new CanvasCrashReport(80), "East");
 		add(new CanvasCrashReport(80), "West");
 		add(new CanvasLogo("SHUTUP", 1, (byte)85), "South");
-		add(textarea, "Center");
+		add(textArea, "Center");
+		
+		File crashLogs = new File(Main.getDir()+"/crash-logs");
+		if(!crashLogs.exists()) {
+			crashLogs.mkdir();
+		}
+		File logFile = new File(crashLogs +"/"+Logger.getCurrentTimeFile()+".log");
+		try {
+			logFile.createNewFile();
+		} catch (IOException e) {}
+		try {
+			FileWriter fw = new FileWriter(logFile);
+			fw.write(textArea.getText());
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		//System.out.println(textarea.getText());
 	}
 	

@@ -110,10 +110,10 @@ public class Chunk {
 	public List<AABB> getAABBs(Vector3f origin, AABB aabb) {
 		List<AABB> aabbs = new ArrayList<>();
 		
-		int roundedY = (int)(aabb.center.y - aabb.height/2);
+		int roundedY = (int)(aabb.start.y);
 		int offset = 2;
 		int minY = roundedY-offset;
-		int maxY = roundedY+offset;
+		int maxY = roundedY+offset+2;
 		
 		if(minY < 0) {
 			minY = 0;
@@ -121,26 +121,23 @@ public class Chunk {
 		if(maxY > World.WORLD_HEIGHT) {
 			maxY = World.WORLD_HEIGHT;
 		}
-		synchronized(blocks) {
-			for(int x = 0; x < CHUNK_SIZE; x++) {
-				for(int z = 0; z < CHUNK_SIZE; z++) {
-					for(int y = minY; y < maxY; y++) {
-						if(blocks[x][y][z] == -1) {
-							continue;
-						}
-						float blockX = (x + origin.x);
-						float blockY = y;
-						float blockZ = (z + origin.z);
-						
-						AABB other = new AABB(new Vector3f(blockX-0.5f, blockY-0.5f, blockZ-0.5f), new Vector3f(blockX+0.5f, blockY+1f, blockZ+0.5f));
-						//other.updatePosition(new Vector3f(blockX,blockY,blockZ));
-						aabbs.add(other);
-						
+		for(int x = 0; x < CHUNK_SIZE; x++) {
+			for(int z = 0; z < CHUNK_SIZE; z++) {
+				for(int y = minY; y < maxY; y++) {
+					if(blocks[x][y][z] == -1) {
+						continue;
 					}
+					float blockX = (x + origin.x);
+					float blockY = y;
+					float blockZ = (z + origin.z);
+					AABB other = new AABB(new Vector3f(-0.5f, -0.5f, -0.5f), new Vector3f(0.5f, 0.5f, 0.5f));
+					other.updatePosition(new Vector3f(blockX, blockY, blockZ));
+					aabbs.add(other);
+					
+					
 				}
 			}
 		}
-		
 		return aabbs;
 	}
 }

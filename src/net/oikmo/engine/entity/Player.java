@@ -18,7 +18,7 @@ public class Player extends Entity {
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
 		resetPos();
-		this.heightOffset = 0.3f; //1.62f
+		this.heightOffset = 0.8f; //1.62f
 		this.camera = new Camera(position, rotation);
 	}
 	

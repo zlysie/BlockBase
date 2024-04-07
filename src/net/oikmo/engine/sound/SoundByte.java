@@ -15,6 +15,12 @@ public class SoundByte {
 		this.location = ResourceLoader.loadAudioFile(name);
 	}
 	
+	public static SoundByte custom(String id, String name) {
+		SoundByte bit = new SoundByte(id, name);
+		bit.setFileLocation(ResourceLoader.loadCustomAudioFile(name));
+		return bit;
+	}
+	
 	public String getID() {
 		return id;
 	}
@@ -25,5 +31,9 @@ public class SoundByte {
 
 	public URL getFileLocation() {
 		return location;
+	}
+	
+	private void setFileLocation(URL url) {
+		this.location = url;
 	}
 }

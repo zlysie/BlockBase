@@ -31,7 +31,6 @@ public class MasterRenderer {
 		return instance;
 	}
 	
-	
 	private float FOV = 60f;
 	private final float NEAR_PLANE = 0.1f, FAR_PLANE = 10000f;
 	

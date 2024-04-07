@@ -19,12 +19,12 @@ public class CanvasLogo extends Canvas {
 	private byte size = 100;
 
 	public CanvasLogo() {
-		loadImage("logo");
+		loadImage("iconx64");
 	}
 
 	public CanvasLogo(boolean isIn) {
 		this.isIn = isIn;
-		loadImage("logo");
+		loadImage("iconx64");
 	}
 
 	public CanvasLogo(String credits) {

@@ -4,6 +4,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.github.matthewdawsey.collisionres.AABB;
+
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
@@ -183,16 +185,22 @@ public class Camera {
 			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
-					Block block1 = currentChunk.getBlock(picker.getPointRounded(picker.distance));
-					if(block1 == null) {
-						if(currentChunk.blockHasNeighbours(picker.getPointRounded(picker.distance))) {
-							currentChunk.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
-						}
+					Vector3f v = new Vector3f(block.getRoundedPosition());
+					v.y += 1;
+					AABB toCheck = new AABB(v,new Vector3f(v.x+1.f,v.y+.5f,v.z+1.f));
+					if(!Main.thePlayer.getAABB().intersects(toCheck)) {
+						Block block1 = currentChunk.getBlock(picker.getPointRounded(picker.distance));
+						if(block1 == null) {
+							if(currentChunk.blockHasNeighbours(picker.getPointRounded(picker.distance))) {
+								currentChunk.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
+							}
 
-					} else {
-						currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
+						} else {
+							currentChunk.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
+						}
+						mouseClickRight = true;
 					}
-					mouseClickRight = true;
+					
 				}
 			} else {
 				mouseClickRight = false;
@@ -274,7 +282,7 @@ public class Camera {
 	 */
 	public void increaseRotation(float dx, float dy, float dz) {
 		this.pitch += dx;
-		this.yaw += dy;
+		this.yaw += dy; 
 		this.roll += dz;
 	}
 	/**

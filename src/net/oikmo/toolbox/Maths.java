@@ -2,6 +2,8 @@ package net.oikmo.toolbox;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -174,21 +176,19 @@ public class Maths {
 		return one.x == two.x && one.y == two.y && one.z == two.z;
 	}
 	
-	@SuppressWarnings("null")
-	public static long getDurationOfOGG(URL url) {
+	public static long getDurationOfOGG(URL file) {
 		long length = -1;
-		if (url != null) {
-            try {
-                AudioFile audioFile = AudioFileIO.read(new File(url.getFile()));
-                
-                // Extract the length of the OGG file in milliseconds
-                length = audioFile.getAudioHeader().getTrackLength()*1000;
-            } catch (IOException | CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Logger.log(LogLevel.ERROR, "Resource : " + FilenameUtils.getName(url.getPath()) + " was not found!");
-        }
+		try {
+            AudioFile audioFile = AudioFileIO.read(new File(file.toURI()));
+            
+            // Extract the length of the OGG file in milliseconds
+            length = audioFile.getAudioHeader().getTrackLength()*1000;
+        } catch (IOException | CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return length;
 	}
