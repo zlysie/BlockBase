@@ -23,7 +23,7 @@ public class Player extends Entity {
 	}
 	
 	public void tick() {
-		camera.update(new Vector3f(getPosition()), heightOffset);
+		//
 		float xa = 0.0F;
 		float ya = 0.0F;
 		
@@ -68,6 +68,10 @@ public class Player extends Entity {
 		}
 	}
 	
+	public void updateCamera() {
+		camera.update(new Vector3f(getPosition()), heightOffset);
+	}
+	
 	private void resetPos() {
 		MasterChunk currentChunk = getCurrentChunk();
 		if(currentChunk != null) {
@@ -82,6 +86,10 @@ public class Player extends Entity {
 
 	public AABB getAABB() {
 		return aabb;
+	}
+
+	public float getHeightOffset() {
+		return heightOffset;
 	}
 
 }

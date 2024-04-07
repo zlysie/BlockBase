@@ -7,66 +7,63 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.world.blocks.Block;
 
 public class CubeModel {
+	
+	private static int blockCount = Block.blocks.length;
+	private static int texturesPerBlock = 6;
+	private static float sizeOfAtlas = 16f;
 
+	public static float[] vertices;
+
+	static Vector2f[][] UVS;
+	static Vector3f[][] VERTS;
+	
 	public static Vector3f[] PX_POS = {
-
 			new Vector3f(0.5f,0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,0.5f),
 			new Vector3f(0.5f,-0.5f,0.5f),
 			new Vector3f(0.5f,0.5f,0.5f),
 			new Vector3f(0.5f,0.5f,-0.5f)
-
 	};
 	public static Vector3f[] NX_POS = {
-
 			new Vector3f(-0.5f,0.5f,-0.5f),
 			new Vector3f(-0.5f,-0.5f,-0.5f),
 			new Vector3f(-0.5f,-0.5f,0.5f),
 			new Vector3f(-0.5f,-0.5f,0.5f),
 			new Vector3f(-0.5f,0.5f,0.5f),
 			new Vector3f(-0.5f,0.5f,-0.5f)
-
 	};
 	public static Vector3f[] PY_POS = {
-
 			new Vector3f(-0.5f,0.5f,0.5f),
 			new Vector3f(-0.5f,0.5f,-0.5f),
 			new Vector3f(0.5f,0.5f,-0.5f),
 			new Vector3f(0.5f,0.5f,-0.5f),
 			new Vector3f(0.5f,0.5f,0.5f),
 			new Vector3f(-0.5f,0.5f,0.5f)
-
 	};
 	public static Vector3f[] NY_POS = {
-
 			new Vector3f(-0.5f,-0.5f,0.5f),
 			new Vector3f(-0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,0.5f),
 			new Vector3f(-0.5f,-0.5f,0.5f)
-
 	};
 	public static Vector3f[] PZ_POS = {
-
 			new Vector3f(-0.5f,0.5f,0.5f),
 			new Vector3f(-0.5f,-0.5f,0.5f),
 			new Vector3f(0.5f,-0.5f,0.5f),
 			new Vector3f(0.5f,-0.5f,0.5f),
 			new Vector3f(0.5f,0.5f,0.5f),
 			new Vector3f(-0.5f,0.5f,0.5f)
-
 	};
 	public static Vector3f[] NZ_POS = {
-
 			new Vector3f(-0.5f,0.5f,-0.5f),
 			new Vector3f(-0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,-0.5f,-0.5f),
 			new Vector3f(0.5f,0.5f,-0.5f),
 			new Vector3f(-0.5f,0.5f,-0.5f)
-
 	};
 
 	public static Vector2f[] UV_PX;
@@ -85,10 +82,6 @@ public class CubeModel {
 			new Vector3f(1.f, 0.f, 0.f)    // Normal for Vertex 6
 	};
 
-	public static float[] vertices;
-
-	static Vector2f[][] UVS;
-	static Vector3f[][] VERTS;
 
 	public static void setup() {
 		UV_PX = setupUVPX(); //side
@@ -100,8 +93,7 @@ public class CubeModel {
 		createVertices();
 	}
 
-	private static int blockCount = Block.blocks.length; // Number of textures
-	private static int texturesPerBlock = 6; // Number of UVs per block
+	
 	public static Vector2f[] setupUVPX() {
 		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
 
@@ -256,10 +248,10 @@ public class CubeModel {
 		float yOffset = (float) y / 16.f;
 		int privIndex = new Integer(index*6);
 		uv[privIndex++] = new Vector2f(xOffset, yOffset);
-		uv[privIndex++] = new Vector2f(xOffset, (float) (y + 1) / 16.f);
-		uv[privIndex++] = new Vector2f((float) (x + 1) / 16.f, (float) (y + 1) / 16.f);
-		uv[privIndex++] = new Vector2f((float) (x + 1) / 16.f, (float) (y + 1) / 16.f);
-		uv[privIndex++] = new Vector2f((float) (x + 1) / 16.f, yOffset);
+		uv[privIndex++] = new Vector2f(xOffset, (float) (y + 1) / sizeOfAtlas);
+		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, (float) (y + 1) / sizeOfAtlas);
+		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, (float) (y + 1) / sizeOfAtlas);
+		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, yOffset);
 		uv[privIndex++] = new Vector2f(xOffset, yOffset);
 
 		return index;

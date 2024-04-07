@@ -51,7 +51,7 @@ public class Main {
 
 	private static final int resourceVersion = 00;
 	public static final String gameName = "BlockBase";
-	public static final String version = "[a0.0.2]";
+	public static final String version = "[a0.0.3]";
 	public static final String gameVersion = gameName + " " + version;
 
 	public static boolean displayRequest = false;
@@ -127,6 +127,8 @@ public class Main {
 
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
 			while(!Display.isCloseRequested()) {
+				Main.thePlayer.updateCamera();
+				
 				timer.advanceTime();
 
 				for(int e = 0; e < timer.ticks; ++e) {
