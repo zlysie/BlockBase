@@ -19,7 +19,9 @@ public abstract class Block {
 	public static final Block glass = new BlockGlass(Type.GLASS);
 	public static final Block smoothstone = new BlockSmoothStone(Type.SMOOTHSTONE);
 	public static final Block brick = new BlockBrick(Type.BRICK);
-	public static final byte blockSize = 1;
+	public static final Block ironBlock = new BlockBrick(Type.BRICK);
+	public static final Block goldBlock = new BlockBrick(Type.BRICK);
+	public static final Block diamondBlock = new BlockBrick(Type.BRICK);
 	
 	public static enum Type {
 		GRASS, 

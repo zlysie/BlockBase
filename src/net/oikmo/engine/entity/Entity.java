@@ -223,6 +223,7 @@ public class Entity {
 	}
 
 	private float whiteOffset;
+	public boolean elements = false;
 	public void setWhiteOffset(float whiteOffset) {
 		this.whiteOffset = whiteOffset;
 	}

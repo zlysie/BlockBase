@@ -182,37 +182,6 @@ public class MasterRenderer {
 		}
 	}
 	
-	public void renderAABB(AABB aabb) {
-		float wb2 = aabb.width / 2, hb2 = aabb.height / 2, lb2 = aabb.length / 2;
-		GL11.glColor3f(1, 1, 1);
-		GL11.glTranslatef(aabb.center.x, aabb.center.y, aabb.center.z);
-		GL11.glBegin(GL11.GL_LINE_STRIP);
-		GL11.glVertex3f(-wb2, -hb2, -lb2);
-		GL11.glVertex3f(-wb2, -hb2, lb2);
-		GL11.glVertex3f(wb2, -hb2, lb2);
-		GL11.glVertex3f(wb2, -hb2, -lb2);
-		GL11.glVertex3f(-wb2, -hb2, -lb2);
-		GL11.glEnd();
-		GL11.glBegin(GL11.GL_LINES);
-		GL11.glVertex3f(-wb2, -hb2, -lb2);
-		GL11.glVertex3f(-wb2, hb2, -lb2);
-		GL11.glVertex3f(wb2, -hb2, -lb2);
-		GL11.glVertex3f(wb2, hb2, -lb2);
-		GL11.glVertex3f(-wb2, -hb2, lb2);
-		GL11.glVertex3f(-wb2, hb2, lb2);
-		GL11.glVertex3f(wb2, -hb2, lb2);
-		GL11.glVertex3f(wb2, hb2, lb2);
-		GL11.glEnd();
-		GL11.glBegin(GL11.GL_LINE_STRIP);
-		GL11.glVertex3f(-wb2, hb2, -lb2);
-		GL11.glVertex3f(-wb2, hb2, lb2);
-		GL11.glVertex3f(wb2, hb2, lb2);
-		GL11.glVertex3f(wb2, hb2, -lb2);
-		GL11.glVertex3f(-wb2, hb2, -lb2);
-		GL11.glEnd();
-		GL11.glTranslatef(-aabb.center.x, -aabb.center.y, -aabb.center.z);
-	}
-	
 	public void createProjectionMatrix() {
 		projectionMatrix = new Matrix4f();
 		

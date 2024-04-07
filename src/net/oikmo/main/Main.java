@@ -31,11 +31,15 @@ import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.Timer;
+import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
+import net.oikmo.engine.models.PlantModel;
+import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.sound.SoundMaster;
+import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.World;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.toolbox.Logger;
@@ -126,6 +130,7 @@ public class Main {
 			currentScreen = new GuiInGame();
 
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
+			
 			while(!Display.isCloseRequested()) {
 				Main.thePlayer.updateCamera();
 				
@@ -141,7 +146,7 @@ public class Main {
 				theWorld.update(thePlayer.getCamera());
 
 				MasterRenderer.getInstance().addEntity(thePlayer.getCamera().getSelectedBlock());
-
+				
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {

@@ -82,7 +82,6 @@ public class CubeModel {
 			new Vector3f(1.f, 0.f, 0.f)    // Normal for Vertex 6
 	};
 
-
 	public static void setup() {
 		UV_PX = setupUVPX(); //side
 		UV_NX = setupUVNX(); //side
@@ -92,7 +91,6 @@ public class CubeModel {
 		UV_NZ = setupUVNZ(); //side
 		createVertices();
 	}
-
 	
 	public static Vector2f[] setupUVPX() {
 		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
