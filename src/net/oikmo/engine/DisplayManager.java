@@ -5,7 +5,6 @@ import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 
@@ -67,21 +66,36 @@ public class DisplayManager {
 	 * Handles fullscreen and taking screenshots on the press of a key.
 	 */
 	public static void updateDisplay(Canvas gameCanvas) {
-		if((gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
-			Main.WIDTH = gameCanvas.getWidth();
-			Main.HEIGHT = gameCanvas.getHeight();
-			if(Main.WIDTH <= 0) {
-				Main.WIDTH = 1;
+		if(Keyboard.isKeyDown(Keyboard.KEY_F11)) {
+			try {
+				Display.setFullscreen(!Display.isFullscreen());
+			} catch (LWJGLException e) {
+				Main.error("Display Error!", e);
 			}
-
-			if(Main.HEIGHT <= 0) {
-				Main.HEIGHT = 1;
+			if(Display.isFullscreen()) {
+				Main.WIDTH  = Display.getDisplayMode().getWidth();
+				Main.HEIGHT = Display.getDisplayMode().getHeight();
+				GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT );
 			}
-
-			GL11.glViewport(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
-			MasterRenderer.getInstance().updateProjectionMatrix();
 		}
+		
+		if(!Display.isFullscreen()) {
+			if((gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
+				Main.WIDTH = gameCanvas.getWidth();
+				Main.HEIGHT = gameCanvas.getHeight();
+				if(Main.WIDTH <= 0) {
+					Main.WIDTH = 1;
+				}
 
+				if(Main.HEIGHT <= 0) {
+					Main.HEIGHT = 1;
+				}
+
+				GL11.glViewport(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+				MasterRenderer.getInstance().updateProjectionMatrix();
+			}
+		}
+		
 		updateFPS();
 		Display.update();
 		//Display.sync(60);

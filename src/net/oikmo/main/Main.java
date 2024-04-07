@@ -69,7 +69,7 @@ public class Main {
 	private static Frame frame;
 	private static Canvas gameCanvas;
 
-	private static GuiScreen currentScreen;
+	public static GuiScreen currentScreen;
 
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");

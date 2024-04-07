@@ -51,6 +51,10 @@ public class GuiScreen {
 		onInit();
 	}
 	
+	public void init() {
+		onInit();
+	}
+	
 	public void update() {
 		if(!dontUpdate) {
 			for(GuiTexture ui : uiList) {
@@ -133,11 +137,11 @@ public class GuiScreen {
 			keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
 		}
 	}
-
+	
 	protected void keyTyped(char c, int i) {
 		if(i == 1) {}
 	}
-
+	
 	protected void mouseMovedOrUp(int k) {
 		if(selectedButton != null && k == 0) {
 			if(!selectedButton.isHovering() && !selectedButton.isHidden()) {
