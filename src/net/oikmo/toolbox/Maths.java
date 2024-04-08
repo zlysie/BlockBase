@@ -138,7 +138,7 @@ public class Maths {
 
 	public static boolean isWithinChunk(int localX, int localY, int localZ) {
 		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
-				localY >= 0 && localY < World.WORLD_HEIGHT &&
+				localY >= 0 && localY < World.WORLD_HEIGHT-1 &&
 				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
 	}
 

@@ -7,14 +7,14 @@ out vec4 out_colour;
 uniform vec3 colour;
 uniform sampler2D fontAtlas;
 
-uniform float width = 0.5;
-uniform float edge = 0.1;
+uniform float width;
+uniform float edge;
 
-uniform float borderWidth = 0.5;
-uniform float borderEdge = 0.1;
+uniform float borderWidth;
+uniform float borderEdge;
 
-uniform vec3 outlineColour = vec3(1.0,0.0,0.0);
-uniform vec2 offset = vec2(0.006,0.006);
+uniform vec3 outlineColour;
+uniform vec2 offset;
 
 float smoothStep(float edge0, float edge1, float x){
     float t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);

@@ -5,7 +5,6 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.gui.font.meshcreator.FontType;
 import net.oikmo.engine.gui.font.renderer.TextMaster;
-import net.oikmo.main.Main;
 
 /**
  * Represents a piece of text in the game.
@@ -71,10 +70,7 @@ public class GuiText {
 		this.fontSize = fontSize;
 		this.font = font;
 		this.position = position;
-		this.lineMaxSize = maxLineLength;
-		if(this.lineMaxSize <= 0) {
-			Main.error("GUI Error LMAO!", new Throwable("You can't put 0 (or lower) as a maxLineLength for GUITexts!"));
-		}
+		this.lineMaxSize = (maxLineLength != 0 && !(maxLineLength >= 0)) ? maxLineLength : 1;
 		this.centerText = centered;
 		this.inButton = inButton;
 		
@@ -87,9 +83,7 @@ public class GuiText {
 		this.font = font;
 		this.position = position;
 		this.lineMaxSize = maxLineLength;
-		if(this.lineMaxSize <= 0) {
-			Main.error("GUI Error LMAO!", new Throwable("You can't put 0 (or lower) as a maxLineLength for GUITexts!"));
-		}
+		this.lineMaxSize = (maxLineLength != 0 && !(maxLineLength >= 0)) ? maxLineLength : 1;
 		this.width = width;
 		this.edge = edge;
 		this.borderWidth = borderWidth;
@@ -102,6 +96,15 @@ public class GuiText {
 		TextMaster.loadText(this);
 	}
 	
+	public void setOffset(Vector2f offset) {
+		this.offset = offset;
+	}
+	
+	public void setOffset(float x, float y) {
+		this.offset.x = x;
+		this.offset.y = y;
+	}
+
 	public void setFontSize(float fontSize) {
 		this.fontSize = fontSize;
 	}

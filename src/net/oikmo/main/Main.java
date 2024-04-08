@@ -51,7 +51,7 @@ public class Main {
 	
 	private static final int resourceVersion = 00;
 	public static final String gameName = "BlockBase";
-	public static final String version = "[a0.0.5]";
+	public static final String version = "a0.0.5";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -86,7 +86,7 @@ public class Main {
 			}
 
 
-			frame = new Frame(Main.gameVersion);
+			frame = new Frame(Main.gameName);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
 					close();
