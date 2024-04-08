@@ -18,12 +18,11 @@ public class Player extends Entity {
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
 		resetPos();
-		this.heightOffset = 0.8f; //1.62f
+		this.heightOffset = 0.81f; //1.62f
 		this.camera = new Camera(position, rotation);
 	}
 	
 	public void tick() {
-		//
 		float xa = 0.0F;
 		float ya = 0.0F;
 		

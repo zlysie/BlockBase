@@ -16,7 +16,6 @@ public class GuiInGame extends GuiScreen {
 	private GuiText fps;
 	private GuiText blockType;
 	private GuiText position;
-	private GuiText chunkblockpos;
 	private boolean literallyUpdate = true;
 	
 	public void onInit() {
@@ -29,17 +28,19 @@ public class GuiInGame extends GuiScreen {
 		blockType = new GuiText("", 1.1f, MasterRenderer.font, new Vector2f(0,0.06f), 1, false, false);
 		blockType.setColour(1, 1, 1);
 		blockType.setEdge(0.2f);
-		chunkblockpos = new GuiText("", 1.1f, MasterRenderer.font, new Vector2f(0,0.09f), 1, false, false);
-		chunkblockpos.setColour(1, 1, 1);
-		chunkblockpos.setEdge(0.2f);
 	}
 	
 	public void onUpdate() {
 		if(literallyUpdate) {
 			fps.setTextString("FPS: " + DisplayManager.getFPSCount());
 			Vector3f v = Main.thePlayer.getRoundedPosition();
-			Vector3f vv = Main.thePlayer.getCurrentChunkPosition();
-			position.setTextString("X: "+ (int)v.x + " Y: "+ (int)v.y + " Z: "+ (int)v.z +" | " + "X: "+ (int)vv.x + " Y: "+ (int)vv.y + " Z: "+ (int)vv.z);
+			Vector3f vv = Main.thePlayer.getCamera().getSelectedBlock().getRoundedPosition();
+			if(vv != null) {
+				position.setTextString("X: "+ (int)v.x + " Y: "+ (int)v.y + " Z: "+ (int)v.z +" | " + "X: "+ (int)vv.x + " Y: "+ (int)vv.y + " Z: "+ (int)vv.z);
+			} else {
+				position.setTextString("X: "+ (int)v.x + " Y: "+ (int)v.y + " Z: "+ (int)v.z +" ");
+			}
+			
 			blockType.setTextString("Selected block: " + Main.thePlayer.getCamera().getCurrentlySelectedBlock().getEnumType().name());
 		}
 	}
@@ -54,11 +55,6 @@ public class GuiInGame extends GuiScreen {
 			Vector3f v = Main.thePlayer.getRoundedPosition();
 			position.setTextString("X: "+ (int)v.x + " Y: "+ (int)v.y + " Z: "+ (int)v.z +" ");
 			blockType.setTextString("Selected block: " + Main.thePlayer.getCamera().getCurrentlySelectedBlock().getEnumType().name() +" ");
-			
 		}
-	}
-	
-	public void updatechunkpos(int localX, int localZ) {
-		chunkblockpos.setTextString("" + localX + " " + localZ);
 	}
 }

@@ -2,13 +2,11 @@ package net.oikmo.toolbox;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -22,7 +20,6 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
-import net.oikmo.toolbox.Logger.LogLevel;
 
 public class Maths {
 
@@ -154,20 +151,23 @@ public class Maths {
 		if(input.x >= 0) {
 			output.x = (int) (input.x / Chunk.CHUNK_SIZE)*16;
 		} else {
-			if(input.x > -16) {
+			if(input.x >= -16) {
 				output.x = (int)-1*16;
 			} else {
-				output.x = (int) ((input.x / Chunk.CHUNK_SIZE)-1)*16;
+				float x = Maths.roundFloat(input.x+1);
+				output.x = (int) ((x / Chunk.CHUNK_SIZE)-1)*16;
+				
 			}
 		}
 
 		if(input.z >= 0) {
 			output.z = (int) (input.z / Chunk.CHUNK_SIZE) * 16;
 		} else {
-			if(input.z > -16) {
+			if(input.z >= -16) {
 				output.z = (int)-1 * 16;
 			} else {
-				output.z = (int) ((input.z / Chunk.CHUNK_SIZE)-1)*16;
+				float z = Maths.roundFloat(input.z+1);
+				output.z = (int) ((z / Chunk.CHUNK_SIZE)-1)*16;
 			}
 		}
 	}

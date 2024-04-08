@@ -19,6 +19,7 @@ import net.oikmo.engine.save.ChunkSaveData;
 import net.oikmo.engine.save.SaveData;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.textures.ModelTexture;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.FastMath;
@@ -124,6 +125,63 @@ public class World {
 		}
 		
 		MasterRenderer.getInstance().render(camera);
+	}
+	
+	public Block getBlock(Vector3f position) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(position, chunkPos);
+		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
+		if(m != null) {
+			return m.getBlock(position);
+		}
+		
+		return null;
+	}
+	
+	public void setBlock(Vector3f position, Block block) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(position, chunkPos);
+		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
+		if(m != null) {
+			m.setBlock(position, block);
+		}
+	}
+	
+	public boolean blockHasNeighbours(Vector3f position) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(position, chunkPos);
+		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
+		
+		if(m != null) {
+			int localX = (int)(position.x + m.getOrigin().x)%16;
+			int localY = (int) position.y;
+			int localZ = (int)(position.z + m.getOrigin().z)%16;
+			
+			if(localX < 0) {
+				localX = localX+16;
+			}
+			if(localZ < 0) {
+				localZ = localZ+16;
+			}
+			
+			for(int dx = -1; dx <= 1; dx++) {
+				for(int dy = -1; dy <= 1; dy++) {
+					for(int dz= -1; dz <= 1; dz++) {
+						
+						int x = localX + dx;
+						int y = localY + dy;
+						int z = localZ + dz;
+						
+						if(Maths.isWithinChunk(x, y, z)) {
+							if(m.getChunk().blocks[x][y][z] != -1) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 	
 	public void saveWorld() {

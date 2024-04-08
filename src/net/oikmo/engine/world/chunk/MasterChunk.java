@@ -12,8 +12,6 @@ import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
-import net.oikmo.main.gui.GuiInGame;
-import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -70,71 +68,20 @@ public class MasterChunk {
 		}
 		return result;
 	}
-	public boolean blockHasNeighbours(Vector3f position) {
-		int localX = (int) (position.x - getOrigin().x);
-		int localY = (int) position.y;
-		int localZ = (int) (position.z - getOrigin().z);
-		
-		for(int dx = -1; dx <= 1; dx++) {
-			for(int dy = -1; dy <= 1; dy++) {
-				for(int dz= -1; dz <= 1; dz++) {
-					
-					int x = localX + dx;
-					int y = localY + dy;
-					int z = localZ + dz;
-					if(x < 0) { continue; }
-					if(y < 0 || y > World.WORLD_HEIGHT-1) { continue; }
-					if(z < 0) { continue; }
-					
-					if(x > Chunk.CHUNK_SIZE-1) {
-						x = Chunk.CHUNK_SIZE-1;
-					}
-					if(z > Chunk.CHUNK_SIZE-1) {
-						z = Chunk.CHUNK_SIZE-1;
-					}
-					
-					if(x == 16 || z == 16) {
-						return true;
-					}
-					
-					if(chunk.blocks[x][y][z] != -1) {
-						return true;
-					}
-				}
-			}
-		}
-		
-		return false;
-	}
-	
 	
 	int prevX, prevY, prevZ;
 	public Block getBlock(Vector3f position) {
 		Chunk chunk = getChunk();
-		int localX = Maths.roundFloat((Maths.roundFloat(position.x - getOrigin().x)));
+		int localX = (int)(position.x + getOrigin().x)%16;
 		int localY = (int) position.y;
-		int localZ = Maths.roundFloat((Maths.roundFloat(position.z - getOrigin().z)));
+		int localZ = (int)(position.z + getOrigin().z)%16;
 		
-		int ceilX = (int) FastMath.ceil(position.x/16);
-		if((int)position.x/16 == ceilX && ceilX != 0) {
-			//System.out.println("x: " + ceilX);
-			if(position.x < 0) {
-				localX = localX;
-			}
+		if(localX < 0) {
+			localX = localX+16;
 		}
-		
-		int ceilZ = (int) FastMath.ceil(position.z/16);
-		if((int)position.z/16 == ceilZ && ceilZ != 0) {
-			//System.out.println("z: " + ceilZ);
-			if(position.z < 0) {
-				localZ = localZ;
-			}
+		if(localZ < 0) {
+			localZ = localZ+16;
 		}
-		
-		if(Main.currentScreen instanceof GuiInGame) {
-			((GuiInGame)Main.currentScreen).updatechunkpos(localX, localZ);
-		}
-		
 		
 		if(Maths.isWithinChunk(localX, localY, localZ)) {
 			Block block = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
@@ -145,26 +92,16 @@ public class MasterChunk {
 	
 	public void setBlock(Vector3f position, Block block) {
 		Chunk chunk = getChunk();
-		int localX = Maths.roundFloat((Maths.roundFloat(position.x - getOrigin().x)));
+		int localX = (int)(position.x + getOrigin().x)%16;
 		int localY = (int) position.y;
-		int localZ = Maths.roundFloat((Maths.roundFloat(position.z - getOrigin().z)));
+		int localZ = (int)(position.z + getOrigin().z)%16;
 		
-		int ceilX = (int) FastMath.ceil(position.x/16);
-		if((int)position.x/16 == ceilX && ceilX != 0) {
-			System.out.println(localX + " x: " + ceilX + " " + getOrigin());
+		if(localX < 0) {
+			localX = localX+16;
 		}
-		
-		int ceilZ = (int) FastMath.ceil(position.z/16);
-		if((int)position.z/16 == ceilZ && ceilZ != 0) {
-			System.out.println(localZ + " z: " + ceilZ + " " + getOrigin());
+		if(localZ < 0) {
+			localZ = localZ+16;
 		}
-		
-		
-		if(Main.currentScreen instanceof GuiInGame) {
-			((GuiInGame)Main.currentScreen).updatechunkpos(localX, localZ);
-		}
-		
-		//System.out.println(localX + " " + localY + " " + localZ);
 		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
@@ -174,7 +111,7 @@ public class MasterChunk {
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
-						Main.theWorld.refreshChunk(this);
+						
 					}
 				} else {
 					return;
@@ -182,10 +119,10 @@ public class MasterChunk {
 			} else {
 				if(chunk.blocks[localX][localY][localZ] != -1) {
 					chunk.blocks[localX][localY][localZ] = -1;
-					Main.theWorld.refreshChunk(this);
 				}
 			}
 		}
+		Main.theWorld.refreshChunk(this);
 	}
 	
 	private Vector2f position;

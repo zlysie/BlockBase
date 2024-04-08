@@ -40,17 +40,22 @@ public class Chunk {
 				int actualX = (int) (origin.x + x);
 				int actualZ = (int) (origin.z + z);
 
-				int height = (int) (noiseGen.noise(actualX/16f, actualZ/16f)*15f)+60;
+				int height = (int) ((noiseGen.noise(actualX/14f, actualZ/14f)*7f) + (noiseGen.noise((-actualZ)/16f,(-actualX)/16f)*12f) + (noiseGen.noise((actualZ)/6f,(actualX)/6f)*4f))+60;
 				blocks[x][height][z] = Block.grass.getByteType();
 				heights[x][z] = height+1;
 				for (int y = 0; y < World.WORLD_HEIGHT; y++) {
-					if (y < height) {
-						blocks[x][y][z] = calculateBlockType(y).getByteType();
+					if(y < height) {
+						if(y > height - 4) {
+							blocks[x][y][z] = Block.dirt.getByteType();
+						}  else if(y == 0) {
+							blocks[x][y][z] = Block.bedrock.getByteType();
+						} else {
+							blocks[x][y][z] = Block.stone.getByteType();
+						}
 					} else {
 						if(y != height) {
 							blocks[x][y][z] = -1;
 						}
-						
 					}
 				}
 			}
@@ -95,28 +100,6 @@ public class Chunk {
 	}
 
 	/**
-	 * Returns block based on height.<br>
-	 * 
-	 * <br>60 to 40 and higher - {@link Block#dirt}
-	 * <br>0 - {@link Block#bedrock}
-	 * <br>else - {@link Block#stone}
-	 * 
-	 * @param height
-	 * @return {@link Block}
-	 */
-	private Block calculateBlockType(int height) {
-		if (height >= 60) {
-			return Block.dirt;
-		} else if (height >= 40) {
-			return Block.dirt;
-		} else if(height == 0) {
-			return Block.bedrock;
-		} else {
-			return Block.stone;
-		}
-	}
-
-	/**
 	 * Creates an AABB from. each. block.
 	 * This isn't bad is it?
 	 * 
@@ -127,7 +110,7 @@ public class Chunk {
 		
 		int roundedY = (int)(aabb.start.y);
 		int offset = 2;
-		int minY = roundedY-offset;
+		int minY = (roundedY-offset)-1;
 		int maxY = roundedY+offset+2;
 		
 		if(minY < 0) {
