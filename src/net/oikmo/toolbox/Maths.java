@@ -175,21 +175,38 @@ public class Maths {
 	public static boolean isVectorEqualTo(Vector3f one, Vector3f two) {
 		return one.x == two.x && one.y == two.y && one.z == two.z;
 	}
-	
+
+	/**
+	 * Lerp, allows you to transition numbers<br><br>
+	 * 
+	 * {@code public static float lerp(float start, float end, float amount)} 
+	 * 
+	 * @param start - starting number to interpolate from <i>[float]</i>
+	 * @param end - end number to interpolate to <i>[float]</i>
+	 * @param amount - amount to interpolate to and from <i>[float]</i>
+	 * 
+	 * @return <b>result</b> <i>[float]</i>
+	 * 
+	 * @author <i>Oikmo</i>
+	 */
+	public static float lerp(float start, float end, float amount) {
+		return start + (amount)* (end - start);
+	}
+
 	public static long getDurationOfOGG(URL file) {
 		long length = -1;
 		try {
-            AudioFile audioFile = AudioFileIO.read(new File(file.toURI()));
-            
-            // Extract the length of the OGG file in milliseconds
-            length = audioFile.getAudioHeader().getTrackLength()*1000;
-        } catch (IOException | CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
+			AudioFile audioFile = AudioFileIO.read(new File(file.toURI()));
+
+			// Extract the length of the OGG file in milliseconds
+			length = audioFile.getAudioHeader().getTrackLength()*1000;
+		} catch (IOException | CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return length;
 	}
 }

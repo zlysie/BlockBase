@@ -12,6 +12,8 @@ import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiInGame;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -73,8 +75,6 @@ public class MasterChunk {
 		int localY = (int) position.y;
 		int localZ = (int) (position.z - getOrigin().z);
 		
-		boolean result = false;
-		
 		for(int dx = -1; dx <= 1; dx++) {
 			for(int dy = -1; dy <= 1; dy++) {
 				for(int dz= -1; dz <= 1; dz++) {
@@ -82,40 +82,90 @@ public class MasterChunk {
 					int x = localX + dx;
 					int y = localY + dy;
 					int z = localZ + dz;
-					if(x < 0 || x > 15) { continue; }
+					if(x < 0) { continue; }
 					if(y < 0 || y > World.WORLD_HEIGHT-1) { continue; }
-					if(z < 0 || z > 15) { continue; }
+					if(z < 0) { continue; }
+					
+					if(x > Chunk.CHUNK_SIZE-1) {
+						x = Chunk.CHUNK_SIZE-1;
+					}
+					if(z > Chunk.CHUNK_SIZE-1) {
+						z = Chunk.CHUNK_SIZE-1;
+					}
+					
+					if(x == 16 || z == 16) {
+						return true;
+					}
 					
 					if(chunk.blocks[x][y][z] != -1) {
-						result = true;
+						return true;
 					}
 				}
 			}
 		}
 		
-		return result;
+		return false;
 	}
 	
+	
+	int prevX, prevY, prevZ;
 	public Block getBlock(Vector3f position) {
 		Chunk chunk = getChunk();
-		int localX = (int) (position.x - getOrigin().x);
+		int localX = Maths.roundFloat((Maths.roundFloat(position.x - getOrigin().x)));
 		int localY = (int) position.y;
-		int localZ = (int) (position.z - getOrigin().z);
-
-		Block block = null;
-
-		if (Maths.isWithinChunk(localX, localY, localZ)) {
-			block = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
+		int localZ = Maths.roundFloat((Maths.roundFloat(position.z - getOrigin().z)));
+		
+		int ceilX = (int) FastMath.ceil(position.x/16);
+		if((int)position.x/16 == ceilX && ceilX != 0) {
+			//System.out.println("x: " + ceilX);
+			if(position.x < 0) {
+				localX = localX;
+			}
 		}
-		return block;
+		
+		int ceilZ = (int) FastMath.ceil(position.z/16);
+		if((int)position.z/16 == ceilZ && ceilZ != 0) {
+			//System.out.println("z: " + ceilZ);
+			if(position.z < 0) {
+				localZ = localZ;
+			}
+		}
+		
+		if(Main.currentScreen instanceof GuiInGame) {
+			((GuiInGame)Main.currentScreen).updatechunkpos(localX, localZ);
+		}
+		
+		
+		if(Maths.isWithinChunk(localX, localY, localZ)) {
+			Block block = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
+			return block;
+		}
+		return null;
 	}
 	
-	public void setBlock(Vector3f globalOrigin, Block block) {
+	public void setBlock(Vector3f position, Block block) {
 		Chunk chunk = getChunk();
-		int localX = (int) (globalOrigin.x - getOrigin().x);
-		int localY = (int) globalOrigin.y;
-		int localZ = (int) (globalOrigin.z - getOrigin().z);
-
+		int localX = Maths.roundFloat((Maths.roundFloat(position.x - getOrigin().x)));
+		int localY = (int) position.y;
+		int localZ = Maths.roundFloat((Maths.roundFloat(position.z - getOrigin().z)));
+		
+		int ceilX = (int) FastMath.ceil(position.x/16);
+		if((int)position.x/16 == ceilX && ceilX != 0) {
+			System.out.println(localX + " x: " + ceilX + " " + getOrigin());
+		}
+		
+		int ceilZ = (int) FastMath.ceil(position.z/16);
+		if((int)position.z/16 == ceilZ && ceilZ != 0) {
+			System.out.println(localZ + " z: " + ceilZ + " " + getOrigin());
+		}
+		
+		
+		if(Main.currentScreen instanceof GuiInGame) {
+			((GuiInGame)Main.currentScreen).updatechunkpos(localX, localZ);
+		}
+		
+		//System.out.println(localX + " " + localY + " " + localZ);
+		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
 				if (chunk.blocks[localX][localY][localZ] == -1) {

@@ -116,10 +116,10 @@ public class Camera {
 	 */
 	public void update(Vector3f position, float heightOffset) {
 		this.position = position;
-		this.position.x = position.x;
-		this.position.z = position.z;
+		this.position.x = Maths.lerp(this.position.x, position.x, 0.1f);
+		this.position.z = Maths.lerp(this.position.z, position.z, 0.1f);
 		
-		this.position.y = position.y + heightOffset;
+		this.position.y = Maths.lerp(position.y, this.position.y + heightOffset, 0.1f);
 		if(currentChunk != null && mouseLocked) {
 			Maths.roundVector(position, roundedPosition);
 
@@ -172,7 +172,7 @@ public class Camera {
 			} 
 			catch(NumberFormatException e) {}
 			catch(ArithmeticException e) {}
-
+			
 			if(currentChunk.getBlock(roundedPosition) == null) {
 				this.texturePackTexture = MasterRenderer.currentTexturePack.getTextureID();
 				block.setTextureID(texturePackTexture);
@@ -181,7 +181,7 @@ public class Camera {
 			}
 
 			if(!currentChunk.blockHasNeighbours(block.getPosition())) {
-				block.setTextureID(invisibleTexture);
+				//block.setTextureID(invisibleTexture);
 			}
 			
 			if(Mouse.isButtonDown(1)) {

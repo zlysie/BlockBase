@@ -48,28 +48,28 @@ import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main {
-
+	
 	private static final int resourceVersion = 00;
 	public static final String gameName = "BlockBase";
 	public static final String version = "[a0.0.4]";
 	public static final String gameVersion = gameName + " " + version;
-
+	
 	public static boolean displayRequest = false;
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
-
-	private static PanelCrashReport report;
-	private static boolean hasErrored = false;
-
-	public static World theWorld;
-	public static Player thePlayer;
-
-	public static Vector3f camPos = new Vector3f(0,0,0);
-
+	
 	private static Frame frame;
 	private static Canvas gameCanvas;
-
+	
+	private static PanelCrashReport report;
+	private static boolean hasErrored = false;
+	
 	public static GuiScreen currentScreen;
+	
+	public static World theWorld;
+	public static Player thePlayer;
+	
+	public static Vector3f camPos = new Vector3f(0,0,0);
 
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
@@ -113,7 +113,7 @@ public class Main {
 
 			Thread.sleep(2000);
 
-			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom music to the game via the .blockbase/resources/custom/music folder!");
+			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
 
 			DisplayManager.createDisplay(frame, gameCanvas);
 			CubeModel.setup();
