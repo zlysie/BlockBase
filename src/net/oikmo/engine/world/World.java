@@ -12,6 +12,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.entity.ItemEntity;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
@@ -36,7 +37,8 @@ public class World {
 	private long seed;
 	private OpenSimplexNoise noise;
 
-	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
+	private List<Entity> chunkEntities = Collections.synchronizedList(new ArrayList<Entity>());
+	public List<Entity> entities = new ArrayList<Entity>();
 	private List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	private Thread chunkCreator;
 
@@ -98,7 +100,7 @@ public class World {
 								TexturedModel texModel = new TexturedModel(raw, tex);
 								Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
 								master.setEntity(entity);
-								entities.add(entity);
+								chunkEntities.add(entity);
 								master.getMesh().removeMeshInfo();
 							}
 						} else {
@@ -116,6 +118,12 @@ public class World {
 			}
 		}
 
+		for(Entity entity : chunkEntities) {
+			if(isInValidRange(entity.getPosition())) {
+				MasterRenderer.getInstance().addEntity(entity);
+			}
+		}
+
 		for(Entity entity : entities) {
 			if(isInValidRange(entity.getPosition())) {
 				MasterRenderer.getInstance().addEntity(entity);
@@ -123,6 +131,31 @@ public class World {
 		}
 
 		MasterRenderer.getInstance().render(camera);
+	}
+
+	public void tick() {
+		Main.thePlayer.tick();
+		synchronized(entities) {
+			for(int i = 0; i < entities.size(); i++) {
+				Entity entity = entities.get(i);
+				if(entity != null) {
+					if(isInValidRange(entity.getPosition())) {
+						if(entity instanceof ItemEntity) {
+							if(!((ItemEntity)entity).dontTick) {
+								entity.tick();
+							} else {
+								entities.remove(entity);
+								System.out.println("associating with player!");
+								continue;
+							}
+						} else {
+							entity.tick();
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 	public Block getBlock(Vector3f position) {
@@ -209,7 +242,7 @@ public class World {
 			SaveData data = SaveSystem.load("world1");
 			MasterChunk.clear();
 			this.masterChunks.clear();
-			this.entities.clear();
+			this.chunkEntities.clear();
 			for(ChunkSaveData s : data.chunks) {
 				masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
 			}
@@ -232,7 +265,7 @@ public class World {
 	public void refreshChunk(MasterChunk master) {
 		if(master.getMesh() != null) {
 			master.destroyMesh();
-			entities.remove(master.getEntity());
+			chunkEntities.remove(master.getEntity());
 			master.setEntity(null);
 			master.createMesh();
 		}
@@ -240,7 +273,7 @@ public class World {
 
 	public void refreshChunks() {
 		Logger.log(LogLevel.INFO, "Clearing " + masterChunks.size() + " chunks!");
-		this.entities.clear();
+		this.chunkEntities.clear();
 
 		for(MasterChunk master : masterChunks) {
 			master.destroyMesh();

@@ -143,11 +143,9 @@ public class Camera {
 							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) { 
 								Main.theWorld.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
 							}
-							
 						}
 						mouseClickRight = true;
 					}
-					
 				}
 			} else {
 				mouseClickRight = false;
@@ -157,6 +155,9 @@ public class Camera {
 				if(!mouseClickLeft) {
 					Block block = Main.theWorld.getBlock(picker.getPointRounded());
 					if(block != null) {
+						Vector3f v = new Vector3f(picker.getPointRounded());
+						ItemBlock item = new ItemBlock(block, v, true);
+						Main.theWorld.entities.add(item);
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;

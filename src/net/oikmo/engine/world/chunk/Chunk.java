@@ -67,6 +67,7 @@ public class Chunk {
 			}
 		}
 		generateTrees(noiseGen.getSeed());
+		calculateHeights();
 	}
 	
 	private void generateTrees(long seed) {

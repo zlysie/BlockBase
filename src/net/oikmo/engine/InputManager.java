@@ -1,8 +1,11 @@
 package net.oikmo.engine;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.renderers.MasterRenderer;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 
 public class InputManager {
@@ -13,6 +16,7 @@ public class InputManager {
 	private final int refreshKey = Keyboard.KEY_F;
 	private final int saveKey = Keyboard.KEY_R;
 	private final int loadKey = Keyboard.KEY_T;
+	private final int itemKey = Keyboard.KEY_Y;
 	
 	private boolean lockInScreenshot = false;
 	private boolean lockInChangeTexture = false;
@@ -20,6 +24,7 @@ public class InputManager {
 	private boolean lockInRefresh = false;
 	private boolean lockInWorldSave = false;
 	private boolean lockInWorldLoad = false;
+	private boolean lockInItem = false;
 	
 	public void handleInput() {
 		if(Keyboard.isKeyDown(refreshKey)) {
@@ -82,6 +87,20 @@ public class InputManager {
 			lockInChangeTexture = true;
 		} else {
 			lockInChangeTexture = false;
+		}
+		
+		if(Keyboard.isKeyDown(itemKey)) {
+			if(!lockInItem) {
+				System.out.println("creating");
+				ItemBlock block = new ItemBlock(Block.bedrock, new Vector3f(Main.thePlayer.getCamera().getPosition()), true);
+				block.setRotation(0.0f, Main.thePlayer.getCamera().getYaw()-90, 0.0f);
+				block.moveRelative(1, 0, 0.1f);
+				block.setPosition(block.getRoundedPosition());
+				Main.theWorld.entities.add(block);
+			}
+			lockInItem = true;
+		} else {
+			lockInItem = false;
 		}
 	}
 	

@@ -2,6 +2,8 @@ package com.github.matthewdawsey.collisionres;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.entity.Entity;
+
 /**
  * 
  * AABB.class
@@ -67,5 +69,4 @@ public class AABB {
 		this.height = this.end.y - this.start.y;
 		this.length = this.end.z - this.start.z;
 	}
-	
 }

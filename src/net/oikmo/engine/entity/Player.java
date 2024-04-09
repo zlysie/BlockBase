@@ -46,7 +46,7 @@ public class Player extends Entity {
 			++xa;
 		}
 		
-		if((Keyboard.isKeyDown(Keyboard.KEY_SPACE) || Keyboard.isKeyDown(Keyboard.KEY_LMETA)) && this.onGround) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && this.onGround) {
 			this.motion.y = 0.12F;
 		}
 		

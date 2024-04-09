@@ -19,6 +19,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 public class PanelCrashReport extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -110,12 +111,11 @@ public class PanelCrashReport extends Panel {
 		try {
 			FileWriter fw = new FileWriter(logFile);
 			fw.write("---- BlockBase Crash Report ----");
-			fw.write("\n// "+phrases[new Random().nextInt(phrases.length)]+"\n");
+			fw.write("\r\n// "+phrases[new Random().nextInt(phrases.length)]+"\r\n");
 			fw.write(textArea.getText());
 			fw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(LogLevel.WARN, "Unable to write crash log!");
 		}
 		
 		//System.out.println(textarea.getText());
@@ -141,6 +141,8 @@ public class PanelCrashReport extends Panel {
 			"Man.",
 			"Seriously?!?!",
 			"I hope this wasn't you!",
-			"Do I have to fix this?!?"
+			"Do I have to fix this?!?",
+			"You better pay.",
+			"That was mean :("
 	};
 }

@@ -41,20 +41,17 @@ public class GuiScreen {
 	private boolean dontUpdate = false;
 	private boolean isUnableToExit = false;
 	private static Font awtFont = null;
-	private static Graphics g;
+	protected static int fontSize = 18;
 
 	@SuppressWarnings("unchecked")
 	public static void initFont() {
 		
 		try {
 			awtFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/assets/fonts/minecraft.ttf"));
-		} catch (FontFormatException | IOException e) {
-		}
-		
-		g = new Graphics();
+		} catch (FontFormatException | IOException e) {}
 		
 		ColorEffect effect = new ColorEffect();
-		font = new UnicodeFont(awtFont.deriveFont(Font.PLAIN, 14f));
+		font = new UnicodeFont(awtFont.deriveFont(Font.PLAIN, fontSize));
 		font.getEffects().add(effect);
 		font.addAsciiGlyphs();
 		try {

@@ -263,7 +263,7 @@ public class Entity {
 		this.rotation.z += z;	
 	}	
 
-	protected void setRotation(float pitch, float yaw, float roll) {
+	public void setRotation(float pitch, float yaw, float roll) {
 		this.rotation.x = pitch;
 		this.rotation.y = yaw;
 		this.rotation.z = roll;
@@ -303,6 +303,7 @@ public class Entity {
 			}
 
 		}
-
 	}
+	
+	public void tick() {}
 }

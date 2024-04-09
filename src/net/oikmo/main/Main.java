@@ -31,12 +31,13 @@ import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.Timer;
+import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
-import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
@@ -51,7 +52,7 @@ public class Main {
 	
 	private static final int resourceVersion = 00;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.0.6";
+	public static final String version = "a0.0.7";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -68,6 +69,8 @@ public class Main {
 	
 	public static World theWorld;
 	public static Player thePlayer;
+	
+	public static float elapsedTime = 0;
 	
 	public static Vector3f camPos = new Vector3f(0,0,0);
 
@@ -124,6 +127,13 @@ public class Main {
 
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
 			
+			//theWorld.entities.add(thePlayer);
+			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
+			
+			ItemBlock block = new ItemBlock(Block.bedrock, new Vector3f(0,100,0), false);
+			
+			theWorld.entities.add(block);
+			
 			while(!Display.isCloseRequested()) {
 				Main.thePlayer.updateCamera();
 				
@@ -137,8 +147,6 @@ public class Main {
 				
 				theWorld.update(thePlayer.getCamera());
 				
-				MasterRenderer.getInstance().addEntity(thePlayer.getCamera().getSelectedBlock());
-				
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {
@@ -151,7 +159,8 @@ public class Main {
 	}
 
 	private static void tick() {
-		thePlayer.tick();
+		elapsedTime += 0.1f;
+		theWorld.tick();
 		camPos = new Vector3f(thePlayer.getCamera().getPosition());
 	}
 
