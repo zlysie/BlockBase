@@ -129,7 +129,7 @@ public class Camera {
 			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
-					Vector3f v = new Vector3f(block.getRoundedPosition());
+					Vector3f v = new Vector3f(picker.getPointRounded(picker.distance));
 					v.y += 1;
 					AABB toCheck = new AABB(v,new Vector3f(v.x+1.f,v.y+.5f,v.z+1.f));
 					if(!Main.thePlayer.getAABB().intersects(toCheck)) {

@@ -16,9 +16,8 @@ public class OpenSimplexNoise {
 
 	private OpenSimplexNoiseKS generator;
 
-	public final static String VERSION = "##library.prettyVersion##";
-
-
+	private long seed;
+	
 	/**
 	 * Constructs a new OpenSimplexNoise object,
 	 * using the system's current time as the noise seed.
@@ -33,6 +32,7 @@ public class OpenSimplexNoise {
 	 */
 	public OpenSimplexNoise(long seed) {
 		generator = new OpenSimplexNoiseKS(seed);
+		this.seed = seed;
 	}
 
 	private double remap(double val) {
@@ -54,14 +54,8 @@ public class OpenSimplexNoise {
 	public float noise (float xoff, float yoff, float zoff, float uoff) {
 		return (float) remap(generator.eval(xoff, yoff, zoff, uoff));
 	}
-
-
-	/**
-	 * return the version of the Library.
-	 * 
-	 * @return String
-	 */
-	public static String version() {
-		return VERSION;
+	
+	public long getSeed() {
+		return seed;
 	}
 }

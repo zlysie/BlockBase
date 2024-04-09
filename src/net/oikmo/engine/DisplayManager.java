@@ -58,29 +58,50 @@ public class DisplayManager {
 		}
 	}
 	
+	private static boolean setFullScreen;
 	/**
 	 * Updates the display to show a new frame and calculates the last frame time.
-	 * <br>
-	 * Currently capped at <b>60 FPS.</b>
 	 * <br>
 	 * Handles fullscreen and taking screenshots on the press of a key.
 	 */
 	public static void updateDisplay(Canvas gameCanvas) {
+		updateFPS();
+		Display.update();
+		
 		if(Keyboard.isKeyDown(Keyboard.KEY_F11)) {
-			try {
-				Display.setFullscreen(!Display.isFullscreen());
-			} catch (LWJGLException e) {
-				Main.error("Display Error!", e);
+			if(!setFullScreen) {
+				try {
+					Display.setFullscreen(!Display.isFullscreen());
+					
+				} catch (LWJGLException e) {
+					Main.error("Display Error!", e);
+				}
+				if(Display.isFullscreen()) {
+					try {
+						Display.setParent(null);
+					} catch (LWJGLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Main.WIDTH  = Display.getDisplayMode().getWidth();
+					Main.HEIGHT = Display.getDisplayMode().getHeight();
+					GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT );
+					MasterRenderer.getInstance().updateProjectionMatrix();
+				}
 			}
-			if(Display.isFullscreen()) {
-				Main.WIDTH  = Display.getDisplayMode().getWidth();
-				Main.HEIGHT = Display.getDisplayMode().getHeight();
-				GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT );
-			}
+			setFullScreen = true;
+		} else {
+			setFullScreen = false;
 		}
 		
 		if(!Display.isFullscreen()) {
 			if((gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
+				try {
+					Display.setParent(gameCanvas);
+				} catch (LWJGLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Main.WIDTH = gameCanvas.getWidth();
 				Main.HEIGHT = gameCanvas.getHeight();
 				if(Main.WIDTH <= 0) {
@@ -95,9 +116,6 @@ public class DisplayManager {
 				MasterRenderer.getInstance().updateProjectionMatrix();
 			}
 		}
-		
-		updateFPS();
-		Display.update();
 		//Display.sync(60);
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;

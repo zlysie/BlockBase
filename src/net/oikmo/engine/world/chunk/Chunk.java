@@ -2,6 +2,7 @@ package net.oikmo.engine.world.chunk;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -12,6 +13,11 @@ import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
+/**
+ * Generates chunk and holds blocks along with height maps
+ * 
+ * @author Oikmo
+ */
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	public byte[][][] blocks;
@@ -60,6 +66,144 @@ public class Chunk {
 				}
 			}
 		}
+		generateTrees(noiseGen.getSeed());
+	}
+	
+	private void generateTrees(long seed) {
+		Random rand = new Random(seed);
+		
+		for(int i = 0; i < rand.nextInt(6);i++) {
+			int x = new Random().nextInt(CHUNK_SIZE);
+			int z = new Random().nextInt(CHUNK_SIZE);
+			
+			checkForTree(x, z);
+		}
+		
+	}
+	
+	private void checkForTree(int x, int z) {
+		if(x > 2 && x < CHUNK_SIZE-2 && z > 2 && z < CHUNK_SIZE-2) {
+			int height = heights[x][z];
+			if(!blockHasSpecificNeighbours(Block.oaklog, x,height,z)) {
+				blocks[x][height++][z] = Block.oaklog.getByteType();
+				blocks[x][height++][z] = Block.oaklog.getByteType();
+				blocks[x][height++][z] = Block.oaklog.getByteType();
+				blocks[x][height++][z] = Block.oaklog.getByteType();
+				for(int j = 0; j < new Random().nextInt(2);j++) {
+					blocks[x][height++][z] = Block.oaklog.getByteType();
+				}
+				int index = height;
+				setBlock(Block.oakleaf, x, index, z);
+				setBlock(Block.oakleaf, x-1, index, z);
+				setBlock(Block.oakleaf, x+1, index, z);
+				setBlock(Block.oakleaf, x, index, z-1);
+				setBlock(Block.oakleaf, x, index, z+1);
+				
+				index--;
+				setBlock(Block.oakleaf, x-1, index, z);
+				setBlock(Block.oakleaf, x+1, index, z);
+				setBlock(Block.oakleaf, x,index, z-1);
+				setBlock(Block.oakleaf, x, index, z+1);
+				index--;
+				setBlock(Block.oakleaf, x-1, index, z);
+				setBlock(Block.oakleaf, x+1, index, z);
+				setBlock(Block.oakleaf, x, index, z-1);
+				setBlock(Block.oakleaf, x, index, z+1);
+				setBlock(Block.oakleaf, x-1, index, z);
+				setBlock(Block.oakleaf, x+1, index, z);
+				setBlock(Block.oakleaf, x-1, index, z-1);
+				setBlock(Block.oakleaf, x+1, index, z+1);
+				setBlock(Block.oakleaf, x+1, index, z-1);
+				setBlock(Block.oakleaf, x-1, index, z+1);
+				setBlock(Block.oakleaf, x, index, z-1);
+				setBlock(Block.oakleaf, x, index, z+1);
+				
+				setBlock(Block.oakleaf, x-2, index, z);
+				setBlock(Block.oakleaf, x+2, index, z);
+				setBlock(Block.oakleaf, x, index, z-2);
+				setBlock(Block.oakleaf, x, index, z+2);
+				setBlock(Block.oakleaf, x-2, index, z);
+				setBlock(Block.oakleaf, x+2, index, z);
+				setBlock(Block.oakleaf, x-2, index, z-2);
+				setBlock(Block.oakleaf, x-1, index, z-2);
+				setBlock(Block.oakleaf, x-2, index, z-1);
+				setBlock(Block.oakleaf, x+2, index, z+2);
+				setBlock(Block.oakleaf, x+1, index, z+2);
+				setBlock(Block.oakleaf, x+2, index, z+1);
+				setBlock(Block.oakleaf, x+2, index, z-2);
+				setBlock(Block.oakleaf, x+1, index, z-2);
+				setBlock(Block.oakleaf, x+2, index, z-1);
+				setBlock(Block.oakleaf, x-2, index, z+2);
+				setBlock(Block.oakleaf, x-1, index, z+2);
+				setBlock(Block.oakleaf, x-2, index, z+1);
+				setBlock(Block.oakleaf, x, index, z-2);
+				setBlock(Block.oakleaf, x, index, z+2);
+				
+				index--;
+				setBlock(Block.oakleaf, x-1, index, z);
+				setBlock(Block.oakleaf, x+1, index, z);
+				setBlock(Block.oakleaf, x, index, z-1);
+				setBlock(Block.oakleaf, x, index, z+1);
+				setBlock(Block.oakleaf, x-1, index, z);
+				setBlock(Block.oakleaf, x+1, index, z);
+				setBlock(Block.oakleaf, x-1, index, z-1);
+				setBlock(Block.oakleaf, x+1, index, z+1);
+				setBlock(Block.oakleaf, x+1, index, z-1);
+				setBlock(Block.oakleaf, x-1, index, z+1);
+				setBlock(Block.oakleaf, x, index, z-1);
+				setBlock(Block.oakleaf, x, index, z+1);
+				
+				setBlock(Block.oakleaf, x-2, index, z);
+				setBlock(Block.oakleaf, x+2, index, z);
+				setBlock(Block.oakleaf, x, index, z-2);
+				setBlock(Block.oakleaf, x, index, z+2);
+				setBlock(Block.oakleaf, x-2, index, z);
+				setBlock(Block.oakleaf, x+2, index, z);
+				setBlock(Block.oakleaf, x-2, index, z-2);
+				setBlock(Block.oakleaf, x-1, index, z-2);
+				setBlock(Block.oakleaf, x-2, index, z-1);
+				setBlock(Block.oakleaf, x+2, index, z+2);
+				setBlock(Block.oakleaf, x+1, index, z+2);
+				setBlock(Block.oakleaf, x+2, index, z+1);
+				setBlock(Block.oakleaf, x+2, index, z-2);
+				setBlock(Block.oakleaf, x+1, index, z-2);
+				setBlock(Block.oakleaf, x+2, index, z-1);
+				setBlock(Block.oakleaf, x-2, index, z+2);
+				setBlock(Block.oakleaf, x-1, index, z+2);
+				setBlock(Block.oakleaf, x-2, index, z+1);
+				setBlock(Block.oakleaf, x, index, z-2);
+				setBlock(Block.oakleaf, x, index, z+2);
+			}
+		
+		} else {
+			x = new Random().nextInt(CHUNK_SIZE);
+			z = new Random().nextInt(CHUNK_SIZE);
+			checkForTree(x, z);
+		}
+	}
+	
+	private void setBlock(Block block, int x, int y, int z) {
+		if(blocks[x][y][z] == -1) {
+			blocks[x][y][z] = block.getByteType();
+		}
+	}
+
+	public boolean blockHasSpecificNeighbours(Block block, int x, int y, int z) {		
+		for(int dx = -1; dx <= 1; dx++) {
+			for(int dy = -1; dy <= 1; dy++) {
+				for(int dz= -1; dz <= 1; dz++) {
+					
+					int checkerX = x + dx;
+					int checkerY = y + dy;
+					int checkerZ = z + dz;
+					
+					if(blocks[checkerX][checkerY][checkerZ] == block.getByteType()) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 	
 	private void calculateHeights() {

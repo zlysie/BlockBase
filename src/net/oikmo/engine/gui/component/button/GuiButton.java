@@ -2,16 +2,11 @@ package net.oikmo.engine.gui.component.button;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import net.oikmo.engine.gui.component.slider.GuiText;
-import net.oikmo.engine.gui.font.renderer.TextMaster;
-import net.oikmo.engine.renderers.MasterRenderer;
-
 public class GuiButton extends AbstractButton {
 
 	public int controlID;
 	private Vector2f scale;
-    private Vector2f position;
-    GuiText text;
+    private Vector2f position;	
 	
     /**
      * 
@@ -25,40 +20,10 @@ public class GuiButton extends AbstractButton {
 		this.controlID = controlID;
 		this.position = position;
 		this.scale = scale;
-		float x = Math.abs((1+position.x)/2);
-		float y = Math.abs((1-position.y)/2);
-		this.text = new GuiText(text, 1.3f, MasterRenderer.font, new Vector2f(x,y), 1, false, true);
-		this.text.setColour(1, 1, 1);
+		//float x = Math.abs((1+position.x)/2);
+		//float y = Math.abs((1-position.y)/2);
 		show();
 	} 
-	
-	/**
-     * 
-     * @param controlID
-     * @param position
-     * @param scale
-     * @param text
-     * @param fontSize
-     */
-	public GuiButton(int controlID, Vector2f position, Vector2f scale, String text, float fontSize) {
-		super(position, scale);
-		this.controlID = controlID;
-		this.position = position;
-		this.scale = scale;
-		float x = Math.abs((1+position.x)/2);
-		float y = Math.abs((1-position.y)/2);
-		this.text = new GuiText(text, fontSize, MasterRenderer.font, new Vector2f(x,y), 1, false, true);
-		this.text.setColour(1, 1, 1);
-		show();
-	}
-	
-	public void setText(String text) {
-		if(this.text.getTextString().contentEquals(text)) { return; }
-		float x = Math.abs((1+position.x)/2);
-		float y = Math.abs((1-position.y)/2);
-		this.text.setPosition(x, y);
-		this.text.setTextString(text);
-	}
 	
 	public Vector2f getScale() {
 		return scale;
@@ -80,10 +45,6 @@ public class GuiButton extends AbstractButton {
 		return controlID;
 	}
 	
-	public String getDisplayString() {
-		return text.getTextString();
-	}
-	
 	@Override
 	public void onStartHover(IButton button) {}
 	
@@ -95,16 +56,10 @@ public class GuiButton extends AbstractButton {
 	
 	@Override
 	public void cleanUp() {
-		TextMaster.removeText(text);
 	}
 	
 	@Override
 	public void restore() {
-		float x = Math.abs((position.x+1)/2);
-		float y = Math.abs((position.y-1)/2);
-		text.setPosition(x,y);
-		TextMaster.loadText(text);
-		
 	}
 
 }

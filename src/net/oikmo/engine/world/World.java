@@ -35,25 +35,25 @@ public class World {
 	private ModelTexture tex;
 	private long seed;
 	private OpenSimplexNoise noise;
-	
+
 	private List<Entity> entities = Collections.synchronizedList(new ArrayList<Entity>());
 	private List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	private Thread chunkCreator;
 
 	private boolean canCreateChunks = true;
-	
+
 	public World(String seed) {
 		init(Maths.getSeedFromName(seed));
 	}
-	
+
 	public World(long seed) {
 		init(seed);
 	}
-	
+
 	public World() {
 		init(new Random().nextLong());
 	}
-	
+
 	private void init(long seed) {
 		this.seed = seed;
 		this.tex = MasterRenderer.currentTexturePack;
@@ -67,7 +67,7 @@ public class World {
 							for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
 								int chunkX = x * 16;
 								int chunkZ = z * 16;
-								
+
 								if(chunkX < 0 || chunkZ < 0) {
 									//continue;
 								}
@@ -86,13 +86,11 @@ public class World {
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
 	}
-	
+
 	public void update(Camera camera) {
 		if(canCreateChunks) {
 			synchronized(masterChunks) {
 				for(MasterChunk master : masterChunks) {
-					
-					
 					if(master.getEntity() == null) {
 						if(master.getMesh() != null) {
 							if(master.getMesh().hasMeshInfo()) {
@@ -113,20 +111,20 @@ public class World {
 							master.destroyMesh();
 						}
 					}
-					
+
 				}
 			}
 		}
-		
+
 		for(Entity entity : entities) {
 			if(isInValidRange(entity.getPosition())) {
 				MasterRenderer.getInstance().addEntity(entity);
 			}
 		}
-		
+
 		MasterRenderer.getInstance().render(camera);
 	}
-	
+
 	public Block getBlock(Vector3f position) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
@@ -134,10 +132,10 @@ public class World {
 		if(m != null) {
 			return m.getBlock(position);
 		}
-		
+
 		return null;
 	}
-	
+
 	public void setBlock(Vector3f position, Block block) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
@@ -146,32 +144,40 @@ public class World {
 			m.setBlock(position, block);
 		}
 	}
-	
+
 	public boolean blockHasNeighbours(Vector3f position) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
 		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
-		
+
 		if(m != null) {
 			int localX = (int)(position.x + m.getOrigin().x)%16;
 			int localY = (int) position.y;
 			int localZ = (int)(position.z + m.getOrigin().z)%16;
-			
+
 			if(localX < 0) {
 				localX = localX+16;
 			}
 			if(localZ < 0) {
 				localZ = localZ+16;
 			}
-			
+
+
+
 			for(int dx = -1; dx <= 1; dx++) {
 				for(int dy = -1; dy <= 1; dy++) {
 					for(int dz= -1; dz <= 1; dz++) {
-						
+						if (dx == 0 && dy == 0 && dz == 0) {
+							//continue;
+						}
 						int x = localX + dx;
 						int y = localY + dy;
 						int z = localZ + dz;
-						
+
+						if((x != localX && y != localY && z != localZ) && (x != localX || y != localY || z != localZ)) {
+							//continue;
+						}
+
 						if(Maths.isWithinChunk(x, y, z)) {
 							if(m.getChunk().blocks[x][y][z] != -1) {
 								return true;
@@ -183,18 +189,18 @@ public class World {
 		}
 		return false;
 	}
-	
+
 	public void saveWorld() {
 		List<ChunkSaveData> chunks = new ArrayList<>();
-		
+
 		for(MasterChunk master : masterChunks) {
 			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
 		}
-		
+
 		SaveSystem.save("world1", new SaveData(seed, chunks, Main.thePlayer));
 		chunks.clear();
 	}
-	
+
 	public void loadWorld() {
 		if(canCreateChunks) {
 			Main.thePlayer.getCamera().setMouseLock(false);
@@ -207,7 +213,7 @@ public class World {
 			for(ChunkSaveData s : data.chunks) {
 				masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
 			}
-			
+
 			new Thread(new Runnable() {
 				public void run() {
 					JOptionPane.showMessageDialog(null, "World has loaded!");
@@ -215,7 +221,7 @@ public class World {
 			}).start();
 			this.noise = null;
 			this.noise = new OpenSimplexNoise(data.seed);
-			
+
 			Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
 			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
 			Main.thePlayer.getCamera().setMouseLock(true);
@@ -231,21 +237,21 @@ public class World {
 			master.createMesh();
 		}
 	}
-	
+
 	public void refreshChunks() {
 		Logger.log(LogLevel.INFO, "Clearing " + masterChunks.size() + " chunks!");
 		this.entities.clear();
-		
+
 		for(MasterChunk master : masterChunks) {
 			master.destroyMesh();
 			master.setEntity(null);
-			
+
 			if(isInValidRange(master.getOrigin())){
 				master.createMesh();
 			}
 		}
 	}
-	
+
 	public boolean isInValidRange(Vector3f origin) {
 		int distX = (int) FastMath.abs(Main.camPos.x - origin.x);
 		int distZ = (int) FastMath.abs(Main.camPos.z - origin.z);
@@ -253,7 +259,7 @@ public class World {
 		if((distX <= WORLD_SIZE) && (distZ <= WORLD_SIZE)) {
 			return true;
 		}
-		
+
 		return false;
 	}
 }

@@ -3,15 +3,12 @@ package net.oikmo.engine.gui.component.slider;
 import org.lwjgl.util.vector.Vector2f;
 
 import net.oikmo.engine.gui.component.button.IButton;
-import net.oikmo.engine.gui.font.renderer.TextMaster;
-import net.oikmo.engine.renderers.MasterRenderer;
 
 public class GuiSlider  extends AbstractSlider  {
 	public int controlID;
 	private Vector2f scale;
     private Vector2f position;
     public String displayString;
-    GuiText text;
 	
 	public GuiSlider(int controlID, float defaultValue, Vector2f position, Vector2f scale, String text) {
 		
@@ -19,27 +16,17 @@ public class GuiSlider  extends AbstractSlider  {
 		this.controlID = controlID;
 		this.position = position;
 		this.scale = scale;
-		float x = Math.abs((position.x+1)/2);
-		float y = Math.abs((position.y-1)/2);
-		this.text = new GuiText(text, 1.3f, MasterRenderer.font, new Vector2f(x,y), 1, false, true);
-		this.text.setColour(1, 1, 1);
+		//float x = Math.abs((position.x+1)/2);
+		//float y = Math.abs((position.y-1)/2);
 		show();
-	} 
-	
-	public void setText(String text) {
-		if(this.text.getTextString().contentEquals(text)) { return; }
-		float x = Math.abs((1+position.x)/2);
-		float y = Math.abs((1-position.y)/2);
-		this.text.setPosition(x, y);
-		this.text.setTextString(text);
 	}
 	
 	@Override
 	public void update2() {
 		if(this.isLocked() || this.isHovering()) {
-			this.text.setColour(0.75f, 0.75f, 0);
+			//this.text.setColour(0.75f, 0.75f, 0);
 		} else {
-			this.text.setColour(1, 1, 1);
+			//this.text.setColour(1, 1, 1);
 		}
 	}
 	
@@ -77,17 +64,9 @@ public class GuiSlider  extends AbstractSlider  {
 	public void whileHovering(IButton button) {}
 	
 	@Override
-	public void cleanUp() {
-		TextMaster.removeText(text);
-	}
+	public void cleanUp() {}
 	
 	@Override
-	public void restore() {
-		float x = Math.abs((position.x-1)/2);
-		float y = Math.abs((position.y-1)/2);
-		text.setPosition(x,y);
-		TextMaster.loadText(text);
-		
-	}
+	public void restore() {}
 
 }

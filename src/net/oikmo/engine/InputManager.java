@@ -1,9 +1,9 @@
 package net.oikmo.engine;
 
+import org.lwjgl.input.Keyboard;
+
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
-
-import org.lwjgl.input.Keyboard;
 
 public class InputManager {
 	

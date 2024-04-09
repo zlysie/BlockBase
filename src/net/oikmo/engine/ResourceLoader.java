@@ -1,16 +1,23 @@
 package net.oikmo.engine;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
+
 import net.oikmo.main.Main;
 
 public class ResourceLoader {
 	private static Map<String, Integer> textures = new HashMap<>();
+	private static Map<String, Texture> uiTextures = new HashMap<>();
 	private static Map<String, URL> audioFiles = new HashMap<>();
 
 	/**
@@ -25,7 +32,7 @@ public class ResourceLoader {
 
 		return textures.get(name);
 	}
-	
+
 	public static int loadCustomTexture(String name) {
 		if(textures.get(name) == null) {
 			textures.put(name, Loader.getInstance().loadCustomTexture(name));
@@ -44,8 +51,8 @@ public class ResourceLoader {
 		if(audioFiles.get(file) == null) {
 			try {
 				String path = Paths.get(Main.getResources() + "/music/"+ file).toString();
-                URL url = new File(path).toURI().toURL();
-                audioFiles.put(file, url);
+				URL url = new File(path).toURI().toURL();
+				audioFiles.put(file, url);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -69,4 +76,15 @@ public class ResourceLoader {
 	}
 
 
+	public static Texture loadUITexture(String name) {
+		if(uiTextures.get(name) == null) {
+			try {
+				uiTextures.put(name, TextureLoader.getTexture("PNG",ResourceLoader.class.getResourceAsStream("/assets/textures/" + name + ".png")));
+			} catch (IOException e) {
+				System.out.println("silly");
+			}
+		}
+		
+		return uiTextures.get(name);
+	}
 }

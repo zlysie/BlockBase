@@ -53,7 +53,7 @@ public class ChunkMesh {
 		                            neighborZ >= 0 && neighborZ < Chunk.CHUNK_SIZE) {
 		                            byte blockJ = chunk.blocks[neighborX][neighborY][neighborZ];
 		                            
-		                            if(blockJ == -1 || (blockI != Block.glass.getByteType() && blockJ == Block.glass.getByteType())) { continue; } //skip it
+		                            if(blockJ == -1 || (blockI != Block.glass.getByteType() && blockJ == Block.glass.getByteType()) || (blockI == Block.oakleaf.getByteType() || blockJ == Block.oakleaf.getByteType())) { continue; } //skip it
 		                            
 		                            //PX
 		            				if(((x + 1) == (neighborX)) && ((y) == (neighborY)) && ((z) == (neighborZ))) {

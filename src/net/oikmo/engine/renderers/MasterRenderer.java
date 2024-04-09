@@ -14,12 +14,14 @@ import javax.imageio.ImageIO;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.UnicodeFont;
+import org.newdawn.slick.font.effects.ColorEffect;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
-import net.oikmo.engine.gui.font.meshcreator.FontType;
-import net.oikmo.engine.gui.font.renderer.TextMaster;
+import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
 import net.oikmo.engine.renderers.gui.GuiRenderer;
@@ -47,7 +49,6 @@ public class MasterRenderer {
 	private EntityRenderer entityRenderer;
 	private GuiRenderer guiRenderer;
 	
-	public static FontType font;
 	public static ModelTexture currentTexturePack;
 	public static int defaultTexturePack;
 	public static int customTexturePack;
@@ -60,6 +61,7 @@ public class MasterRenderer {
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
 	private List<GuiTexture> guis = new ArrayList<>();
 	
+	@SuppressWarnings("unchecked")
 	public MasterRenderer() {
 		createProjectionMatrix();
 		
@@ -67,17 +69,11 @@ public class MasterRenderer {
 		
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		guiRenderer = new GuiRenderer(projectionMatrix);
-		font = new FontType("minecraft");
 		defaultTexturePack = ResourceLoader.loadTexture("textures/defaultPack");
 		
 		File dir = new File(Main.getResources() + "/custom/textures/");
 		if(!dir.exists()) {
 			dir.mkdirs();
-			
-			
-			
-			
-			
 		} else {
 			File customPack = new File(dir + "/customPack.png");
 			if(customPack.exists()) {
@@ -124,7 +120,8 @@ public class MasterRenderer {
 		ui_hover = ResourceLoader.loadTexture("textures/ui/normal/ui_button_hover");
 		ui_smallbutton = ResourceLoader.loadTexture("textures/ui/small/ui_button");
 		ui_smallhover = ResourceLoader.loadTexture("textures/ui/small/ui_button_hover");
-		TextMaster.init();
+		
+		GuiScreen.initFont();
 	}
 	
 	public void setTexturePack(int texture) {
@@ -133,17 +130,16 @@ public class MasterRenderer {
 	
 	public void prepare() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		//GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glClearColor(0.4f, 0.7f, 1.0f, 1);
-		//GL11.glCullFace(GL11.GL_BACK);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT );
 	}
 	
 	public void render(Camera camera) {
 		prepare();
 		entityRenderer.render(entities, camera);
+		Main.currentScreen.update();
 		guiRenderer.render(guis);
-		TextMaster.render();
+		
 		entities.clear();
 		guis.clear();
 	}

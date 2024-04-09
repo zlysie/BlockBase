@@ -51,7 +51,7 @@ public class Main {
 	
 	private static final int resourceVersion = 00;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.0.5";
+	public static final String version = "a0.0.6";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -76,16 +76,13 @@ public class Main {
 		removeHSPIDERR();
 		Timer timer = new Timer(60f);
 		try {
-
 			if(!new File(getDir()+"/resources/custom").exists()) {
 				new File(getDir()+"/resources/custom").mkdirs();
 			}
-
 			if(!new File(getResources() + "/music").exists()) {
 				new File(getResources() + "/music").mkdirs();
 			}
-
-
+			
 			frame = new Frame(Main.gameName);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
@@ -135,12 +132,11 @@ public class Main {
 				for(int e = 0; e < timer.ticks; ++e) {
 					tick();
 				}
-
-				currentScreen.update();
-
+				
 				im.handleInput();
+				
 				theWorld.update(thePlayer.getCamera());
-
+				
 				MasterRenderer.getInstance().addEntity(thePlayer.getCamera().getSelectedBlock());
 				
 				DisplayManager.updateDisplay(gameCanvas);				
