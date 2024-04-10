@@ -1,8 +1,6 @@
 package net.oikmo.engine;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,6 +12,8 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 public class ResourceLoader {
 	private static Map<String, Integer> textures = new HashMap<>();
@@ -81,7 +81,7 @@ public class ResourceLoader {
 			try {
 				uiTextures.put(name, TextureLoader.getTexture("PNG",ResourceLoader.class.getResourceAsStream("/assets/textures/" + name + ".png")));
 			} catch (IOException e) {
-				System.out.println("silly");
+				Logger.log(LogLevel.WARN, "Texture (Slick) could not be loaded! (" + name + ")");
 			}
 		}
 		

@@ -4,7 +4,6 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.main.Main;
-import net.oikmo.toolbox.FastMath;
 
 public class ItemEntity extends Entity {
 	

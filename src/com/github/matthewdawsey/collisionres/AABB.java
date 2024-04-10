@@ -2,8 +2,6 @@ package com.github.matthewdawsey.collisionres;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.entity.Entity;
-
 /**
  * 
  * AABB.class

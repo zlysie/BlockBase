@@ -14,9 +14,6 @@ import javax.imageio.ImageIO;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.UnicodeFont;
-import org.newdawn.slick.font.effects.ColorEffect;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
@@ -61,7 +58,6 @@ public class MasterRenderer {
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
 	private List<GuiTexture> guis = new ArrayList<>();
 	
-	@SuppressWarnings("unchecked")
 	public MasterRenderer() {
 		createProjectionMatrix();
 		
