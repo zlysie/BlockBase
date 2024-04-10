@@ -135,6 +135,7 @@ public class World {
 
 	public void tick() {
 		Main.thePlayer.tick();
+		ItemEntity.updateOscillation();
 		synchronized(entities) {
 			for(int i = 0; i < entities.size(); i++) {
 				Entity entity = entities.get(i);
@@ -167,6 +168,10 @@ public class World {
 		}
 
 		return null;
+	}
+	
+	public boolean anyBlockInSpecificLocation(int x, int y, int z) {
+		return getBlock(new Vector3f(x,y,z)) != null;
 	}
 
 	public void setBlock(Vector3f position, Block block) {

@@ -27,6 +27,7 @@ public class Entity {
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
+	private static ArrayList<AABB> aabbsToUseAroundPlayer = new ArrayList<>();
 	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
@@ -70,7 +71,8 @@ public class Entity {
 	 * @return
 	 */
 	public List<AABB> getSurroundingAABBs() {
-		List<AABB> surroundingAABBs = new ArrayList<>();
+		aabbsToUseAroundPlayer.clear();
+		List<AABB> surroundingAABBs = aabbsToUseAroundPlayer;
 		MasterChunk currentChunk = getCurrentChunk();
 
 		if(currentChunk != null) {
@@ -105,6 +107,101 @@ public class Entity {
 		
 
 		this.position.y += this.motion.y;
+		this.aabb.updatePosition(this.position);
+		
+		// separate colliders with a height value of 0.01
+		// on the top and bottom to detect Y axis collisions
+		
+		// separate colliders with a height value of 0.01
+		// on the top and bottom to detect Y axis collisions
+		AABB floorCheckAABB = new AABB(
+				new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2),
+				new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
+		
+		AABB ceilingCheckAABB = new AABB(
+				new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2),
+				new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
+		
+		floorCheckAABB.updatePosition(this.position);
+		floorCheckAABB.offset(0, bbHeight / -2, 0);
+		ceilingCheckAABB.updatePosition(this.position);
+		ceilingCheckAABB.offset(0, this.bbHeight / 2, 0);
+		//
+		// assume falling if not standing on a collider
+		this.onGround = false;
+		List<AABB> aabbList = new ArrayList<>();
+		// get the list of colliders
+		if(this instanceof Player) {
+			aabbList = getSurroundingAABBs();
+		} else {
+			aabbList = aabbsToUseAroundPlayer;
+		}
+		
+		// check for Y axis collisions
+		for (AABB aabb : aabbList) {
+			if (floorCheckAABB.intersects(aabb)) {
+				float dy = this.aabb.center.y - aabb.center.y;
+				if (dy > 0) { // colliding with +Y face (standing on floor)
+					this.onGround = true;
+					this.position.y = aabb.end.y + this.bbHeight / 2;
+					this.motion.y = 0;
+				}
+			}
+			
+			if (ceilingCheckAABB.intersects(aabb)) {
+				float dy = this.aabb.center.y - aabb.center.y;
+				if (dy < 0) { // colliding with -Y face (bump head on ceiling)
+					this.onGround = false;
+					this.position.y = aabb.start.y - this.bbHeight / 2;
+					this.motion.y = 0;
+				}
+			}
+		}
+
+		// apply X axis velocity
+		this.position.x += this.motion.x;
+		this.aabb.updatePosition(this.position);
+
+		// check for X axis collisions
+		for (AABB aabb : aabbList) {
+			if (this.aabb.intersects(aabb)) {
+				float dx = this.aabb.center.x - aabb.center.x;
+				if (dx > 0) { // colliding with +X face
+					this.position.x = aabb.end.x + this.bbWidth / 2;
+				} else if (dx < 0) { // colliding with -X face
+					this.position.x = aabb.start.x - this.bbWidth / 2;
+				}
+
+				this.motion.x = 0;
+			}
+		}
+
+		// apply Z axis velocity
+		this.position.z += this.motion.z;
+		this.aabb.updatePosition(this.position);
+
+		// check for Z axis collisions
+		for (AABB aabb : aabbList) {
+			if (this.aabb.intersects(aabb)) {
+				float dz = this.aabb.center.z - aabb.center.z;
+				if (dz > 0) { // colliding with +Z face
+					this.position.z = aabb.end.z + this.bbWidth / 2;
+				} else if (dz < 0) { // colliding with -Z face
+					this.position.z = aabb.start.z - this.bbWidth / 2;
+				}
+
+				this.motion.z = 0;
+			}
+		}
+
+		// one final realignment so collider doesnt lag behind when being drawn
+		//this.aabb.updatePosition(this.position);
+	}
+	
+	public void move(float percievedY) {
+		
+
+		this.position.y = percievedY + motion.y;
 		this.aabb.updatePosition(this.position);
 		
 		// separate colliders with a height value of 0.01
