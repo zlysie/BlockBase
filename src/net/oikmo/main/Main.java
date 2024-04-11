@@ -33,6 +33,7 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.Timer;
 import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.entity.Player;
+import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.sound.SoundMaster;
@@ -48,7 +49,7 @@ import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
-public class Main {
+public class Main extends Gui {
 	
 	private static final int resourceVersion = 00;
 	public static final String gameName = "BlockBase";
@@ -89,15 +90,16 @@ public class Main {
 			frame = new Frame(Main.gameName);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
-					close();
+					Logger.saveLog();
 					System.exit(0);
+					
 				}
 			});
 			gameCanvas = new Canvas();
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
 			frame.setIconImage(icon.getImage());
-			//frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
+			//
 			frame.setLayout(new BorderLayout());
 			frame.add(gameCanvas, "Center");
 			gameCanvas.setPreferredSize(new Dimension(WIDTH, HEIGHT)); //480
@@ -106,18 +108,14 @@ public class Main {
 			frame.removeAll();
 			frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
 			frame.add(new CanvasLogo("iconx128"), "Center");
-
 			frame.setVisible(true);
-
 			downloadResources();
-
 			Thread.sleep(2000);
 
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
-
 			DisplayManager.createDisplay(frame, gameCanvas);
+			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 			CubeModel.setup();
-
 			SoundMaster.init();
 
 			InputManager im = new InputManager();
@@ -127,7 +125,6 @@ public class Main {
 
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
 			
-			//theWorld.entities.add(thePlayer);
 			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
 			
 			ItemBlock block = new ItemBlock(Block.bedrock, new Vector3f(0,100,0), false);
@@ -147,15 +144,14 @@ public class Main {
 				
 				theWorld.update(thePlayer.getCamera());
 				
+				Main.currentScreen.update();
+				
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		Logger.saveLog();
 		close();
-		Loader.cleanUp();
-		DisplayManager.closeDisplay();
 	}
 
 	private static void tick() {
@@ -164,9 +160,12 @@ public class Main {
 		camPos = new Vector3f(thePlayer.getCamera().getPosition());
 	}
 
-	private static void close() {
-		SoundMaster.cleanUp();
+	public static void close() {
+		Logger.saveLog();
 		displayRequest = true;
+		DisplayManager.closeDisplay();
+		SoundMaster.cleanUp();
+		System.exit(0);
 	}
 
 	/**

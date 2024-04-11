@@ -142,11 +142,11 @@ public class World {
 				if(entity != null) {
 					if(isInValidRange(entity.getPosition())) {
 						if(entity instanceof ItemEntity) {
-							if(!((ItemEntity)entity).dontTick) {
+							if(!((ItemEntity)entity).dontTick && entity.getPosition().y > 0) {
 								entity.tick();
 							} else {
 								entities.remove(entity);
-								System.out.println("associating with player!");
+								System.out.println("removing item from world!");
 								continue;
 							}
 						} else {

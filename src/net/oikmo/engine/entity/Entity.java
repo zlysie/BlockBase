@@ -11,6 +11,7 @@ import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
 
 public class Entity {
@@ -27,6 +28,8 @@ public class Entity {
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
+	AABB floorCheckAABB;
+	AABB ceilingCheckAABB;
 	private static ArrayList<AABB> aabbsToUseAroundPlayer = new ArrayList<>();
 	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
@@ -35,6 +38,8 @@ public class Entity {
 		this.aabb = new AABB(
 				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
 				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
+		ceilingCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
+		floorCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
 		this.motion = new Vector3f();
 		this.rotation = rotation;
 		this.scale = scale;
@@ -52,6 +57,9 @@ public class Entity {
 		this.aabb = new AABB(
 				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
 				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
+		ceilingCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
+		floorCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
+		
 	}
 
 	protected void set(float width, float height,float x, float y, float z) {
@@ -61,6 +69,9 @@ public class Entity {
 		this.aabb = new AABB(
 				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
 				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
+		ceilingCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
+		floorCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
+		
 	}
 
 	/**
@@ -104,24 +115,11 @@ public class Entity {
 	 * @param za - ({@link Float})
 	 */
 	public void move() {
-		
-
 		this.position.y += this.motion.y;
 		this.aabb.updatePosition(this.position);
 		
 		// separate colliders with a height value of 0.01
 		// on the top and bottom to detect Y axis collisions
-		
-		// separate colliders with a height value of 0.01
-		// on the top and bottom to detect Y axis collisions
-		AABB floorCheckAABB = new AABB(
-				new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
-		
-		AABB ceilingCheckAABB = new AABB(
-				new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
-		
 		floorCheckAABB.updatePosition(this.position);
 		floorCheckAABB.offset(0, bbHeight / -2, 0);
 		ceilingCheckAABB.updatePosition(this.position);
@@ -198,38 +196,24 @@ public class Entity {
 		//this.aabb.updatePosition(this.position);
 	}
 	
-	public void move(float percievedY) {
+	public void moveY() {
 		
-
-		this.position.y = percievedY + motion.y;
+		this.position.y += motion.y;
 		this.aabb.updatePosition(this.position);
-		
-		// separate colliders with a height value of 0.01
-		// on the top and bottom to detect Y axis collisions
-		
-		// separate colliders with a height value of 0.01
-		// on the top and bottom to detect Y axis collisions
-		AABB floorCheckAABB = new AABB(
-				new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
-		
-		AABB ceilingCheckAABB = new AABB(
-				new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
 		
 		floorCheckAABB.updatePosition(this.position);
 		floorCheckAABB.offset(0, bbHeight / -2, 0);
 		ceilingCheckAABB.updatePosition(this.position);
 		ceilingCheckAABB.offset(0, this.bbHeight / 2, 0);
-		//
 		// assume falling if not standing on a collider
 		this.onGround = false;
-
 		// get the list of colliders
-		List<AABB> aabbList = getSurroundingAABBs();
-		
-		// check for Y axis collisions
-		for (AABB aabb : aabbList) {
+		Vector3f v = new Vector3f(this.getRoundedPosition());
+		v.y = getRoundedPosition().y;
+		if(Main.theWorld.getBlock(v) != null) {
+			AABB aabb = new AABB(new Vector3f(-0.5f, -0.5f, -0.5f), new Vector3f(0.5f, 0.5f, 0.5f));
+			aabb.updatePosition(new Vector3f(v));
+			
 			if (floorCheckAABB.intersects(aabb)) {
 				float dy = this.aabb.center.y - aabb.center.y;
 				if (dy > 0) { // colliding with +Y face (standing on floor)
@@ -248,45 +232,6 @@ public class Entity {
 				}
 			}
 		}
-
-		// apply X axis velocity
-		this.position.x += this.motion.x;
-		this.aabb.updatePosition(this.position);
-
-		// check for X axis collisions
-		for (AABB aabb : aabbList) {
-			if (this.aabb.intersects(aabb)) {
-				float dx = this.aabb.center.x - aabb.center.x;
-				if (dx > 0) { // colliding with +X face
-					this.position.x = aabb.end.x + this.bbWidth / 2;
-				} else if (dx < 0) { // colliding with -X face
-					this.position.x = aabb.start.x - this.bbWidth / 2;
-				}
-
-				this.motion.x = 0;
-			}
-		}
-
-		// apply Z axis velocity
-		this.position.z += this.motion.z;
-		this.aabb.updatePosition(this.position);
-
-		// check for Z axis collisions
-		for (AABB aabb : aabbList) {
-			if (this.aabb.intersects(aabb)) {
-				float dz = this.aabb.center.z - aabb.center.z;
-				if (dz > 0) { // colliding with +Z face
-					this.position.z = aabb.end.z + this.bbWidth / 2;
-				} else if (dz < 0) { // colliding with -Z face
-					this.position.z = aabb.start.z - this.bbWidth / 2;
-				}
-
-				this.motion.z = 0;
-			}
-		}
-
-		// one final realignment so collider doesnt lag behind when being drawn
-		//this.aabb.updatePosition(this.position);
 	}
 
 	/**

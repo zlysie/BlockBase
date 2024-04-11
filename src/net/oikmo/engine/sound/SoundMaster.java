@@ -29,6 +29,8 @@ public class SoundMaster {
 	private static SoundSystem soundSystem = null;
 
 	private static File customMusic = new File(Main.getResources()+"/custom/music");
+	
+	private static Thread musicThread;
 
 	public static void init() {
 		//Initalises soundsystem
@@ -105,7 +107,7 @@ public class SoundMaster {
 		}
 		Collections.shuffle(bytes);
 
-		Thread musicThread = new Thread(new Runnable(){
+		musicThread = new Thread(new Runnable(){
 			public void run() {
 				synchronized(bytes) {
 					for(SoundByte musicByte : bytes) {
@@ -148,9 +150,11 @@ public class SoundMaster {
 		music.put(id, new SoundByte(id, fileName));
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void cleanUp() {
 		if(soundSystem != null) {
 			soundSystem.cleanup();
 		}
+		musicThread.stop();
 	}
 }

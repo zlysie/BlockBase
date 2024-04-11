@@ -10,9 +10,8 @@ import net.oikmo.engine.world.blocks.Block;
 
 public class ItemBlock extends ItemEntity {
 
-	public ItemBlock(Block block, Vector3f position, boolean bool) {
+	public ItemBlock(Block block, Vector3f position, boolean came) {
 		super(new TexturedModel(CubeModel.getRawModel(block), new ModelTexture(MasterRenderer.currentTexturePack.getTextureID())), position);
-		this.setSize(this.getScale(),this.getScale()/6);
+		this.setSize(this.getScale(),this.getScale());
 	}
-	
 }

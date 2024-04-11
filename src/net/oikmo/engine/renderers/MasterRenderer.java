@@ -18,10 +18,9 @@ import org.lwjgl.util.vector.Matrix4f;
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
-import net.oikmo.engine.gui.GuiScreen;
+import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
-import net.oikmo.engine.renderers.gui.GuiRenderer;
 import net.oikmo.engine.textures.GuiTexture;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.main.Main;
@@ -44,7 +43,6 @@ public class MasterRenderer {
 	private Matrix4f projectionMatrix;
 	
 	private EntityRenderer entityRenderer;
-	private GuiRenderer guiRenderer;
 	
 	public static ModelTexture currentTexturePack;
 	public static int defaultTexturePack;
@@ -64,7 +62,6 @@ public class MasterRenderer {
 		float offset = 0.2f;
 		
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
-		guiRenderer = new GuiRenderer(projectionMatrix);
 		defaultTexturePack = ResourceLoader.loadTexture("textures/defaultPack");
 		
 		File dir = new File(Main.getResources() + "/custom/textures/");
@@ -117,7 +114,7 @@ public class MasterRenderer {
 		ui_smallbutton = ResourceLoader.loadTexture("textures/ui/small/ui_button");
 		ui_smallhover = ResourceLoader.loadTexture("textures/ui/small/ui_button_hover");
 		
-		GuiScreen.initFont();
+		Gui.initFont();
 	}
 	
 	public void setTexturePack(int texture) {
@@ -133,11 +130,8 @@ public class MasterRenderer {
 	public void render(Camera camera) {
 		prepare();
 		entityRenderer.render(entities, camera);
-		Main.currentScreen.update();
-		guiRenderer.render(guis);
 		
 		entities.clear();
-		guis.clear();
 	}
 	
 	public List<GuiTexture> getGUIList() {

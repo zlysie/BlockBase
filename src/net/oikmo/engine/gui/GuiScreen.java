@@ -1,22 +1,11 @@
 package net.oikmo.engine.gui;
 
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.UnicodeFont;
-import org.newdawn.slick.font.effects.ColorEffect;
-import org.newdawn.slick.opengl.Texture;
 
 import net.oikmo.engine.gui.component.button.GuiButton;
 import net.oikmo.engine.gui.component.slider.GuiSlider;
@@ -24,9 +13,9 @@ import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.textures.GuiTexture;
 import net.oikmo.main.Main;
 
-public class GuiScreen {
+public class GuiScreen extends Gui {
 
-	private static UnicodeFont font;
+	
 	
 	protected String screenID;
 	protected GuiTexture background;
@@ -39,26 +28,6 @@ public class GuiScreen {
 	private boolean lockInput = false;
 	private boolean dontUpdate = false;
 	private boolean isUnableToExit = false;
-	private static Font awtFont = null;
-	protected static int fontSize = 18;
-
-	@SuppressWarnings("unchecked")
-	public static void initFont() {
-		
-		try {
-			awtFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/assets/fonts/minecraft.ttf"));
-		} catch (FontFormatException | IOException e) {}
-		
-		ColorEffect effect = new ColorEffect();
-		font = new UnicodeFont(awtFont.deriveFont(Font.PLAIN, fontSize));
-		font.getEffects().add(effect);
-		font.addAsciiGlyphs();
-		try {
-			font.loadGlyphs();
-		} catch (SlickException e1) {
-			e1.printStackTrace();
-		}
-	}
 
 	public GuiScreen(String screenID) {
 		init(screenID);
@@ -84,11 +53,7 @@ public class GuiScreen {
 		this.uiList = new ArrayList<>();
 		onInit();
 	}
-
-	public void init() {
-		onInit();
-	}
-
+	
 	public void update() {
 		if(!dontUpdate) {
 			for(GuiTexture ui : uiList) {
@@ -122,39 +87,8 @@ public class GuiScreen {
 	}	
 	
 	
-	private void setupGL() {
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GL11.glOrtho(0,Display.getWidth(), Display.getHeight(), 0, -1, 1);
-
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-	}
 	
-	private void dropGL() {
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-	}
  	
-	protected void drawString(float x, float y, String text) {
-		setupGL();
-		font.drawString(x, y, text);
-		dropGL();	
-	}
-	
-	protected void drawShadowString(float x, float y, String text) {
-		setupGL();
-		font.drawString(x+2, y+2, text, Color.gray);
-		font.drawString(x, y, text,  Color.white);
-		dropGL();
-	}
-	
-	protected void drawImage(Texture texture, float x, float y, float width, float height) {
-		setupGL();
-		new Image(texture).draw(x-width, y-height, width, height);
-		dropGL();
-	}
 	
 	public void draw(float x, float y, float scaleX, float scaleY, int texture) {
 		GuiTexture ui = new GuiTexture(texture, new Vector2f(x, y), new Vector2f(scaleX, scaleY));

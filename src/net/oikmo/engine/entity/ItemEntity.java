@@ -38,14 +38,14 @@ public class ItemEntity extends Entity {
 			
 			if(!Main.theWorld.anyBlockInSpecificLocation((int)getRoundedPosition().x, (int)getRoundedPosition().y-1, (int)getRoundedPosition().z)) {
 				this.motion.y = (float)((double)this.motion.y - 0.005D);
-				this.move();
+				this.moveY();
 			}
 			
 		} else {
 			doThatOnce = false;
 			lastY = getPosition().y;
 			this.motion.y = (float)((double)this.motion.y - 0.005D);
-			this.move();
+			this.moveY();
 		}
 		
 		if(aabb.intersects(Main.thePlayer.aabb)) {
