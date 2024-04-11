@@ -13,7 +13,6 @@ import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
 import org.newdawn.slick.opengl.Texture;
 
-import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.main.Main;
 
 public class Gui {
@@ -39,8 +38,6 @@ public class Gui {
 		} catch (SlickException e1) {
 			e1.printStackTrace();
 		}
-		
-		GuiComponent.init();
 	}
 	
 	protected static void init() {}
@@ -66,10 +63,23 @@ public class Gui {
 		dropGL();	
 	}
 	
+	protected void drawString(Color c, float x, float y, String text) {
+		setupGL();
+		font.drawString(x, y, text, c);
+		dropGL();	
+	}
+	
 	protected void drawShadowString(float x, float y, String text) {
 		setupGL();
 		font.drawString(x+2, y+2, text, Color.gray);
 		font.drawString(x, y, text,  Color.white);
+		dropGL();
+	}
+	
+	protected void drawShadowString(Color c, float x, float y, String text) {
+		setupGL();
+		font.drawString(x+2, y+2, text, Color.gray);
+		font.drawString(x, y, text, c);
 		dropGL();
 	}
 	
@@ -86,6 +96,4 @@ public class Gui {
 		new Image(texture).draw(x, y, width, height);
 		dropGL();
 	}
-	
-	
 }

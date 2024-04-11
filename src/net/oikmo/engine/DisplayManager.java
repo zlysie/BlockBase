@@ -18,6 +18,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
@@ -87,6 +88,9 @@ public class DisplayManager {
 					Main.HEIGHT = Display.getDisplayMode().getHeight();
 					GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT );
 					MasterRenderer.getInstance().updateProjectionMatrix();
+					for(GuiComponent comp : GuiComponent.components) {
+						comp.updateComponent();
+					}
 				}
 			}
 			setFullScreen = true;
@@ -114,6 +118,9 @@ public class DisplayManager {
 
 				GL11.glViewport(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 				MasterRenderer.getInstance().updateProjectionMatrix();
+				for(GuiComponent comp : GuiComponent.components) {
+					comp.updateComponent();
+				}
 			}
 		}
 		//Display.sync(60);

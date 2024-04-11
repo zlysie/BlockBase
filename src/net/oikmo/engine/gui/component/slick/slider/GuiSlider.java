@@ -1,36 +1,42 @@
-package net.oikmo.engine.gui.component.slick.button;
+package net.oikmo.engine.gui.component.slick.slider;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
-import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.opengl.Texture;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
 
-public class GuiButton extends Gui implements GuiComponent {
+public class GuiSlider  extends Gui implements GuiComponent {
 
+	private Texture backgroundTexture;
 	private Texture texture;
+
 	private static Texture normalTexture;
 	private static Texture hoveredTexture;
 	private String text;
 	private GuiCommand command;
 
-	private float x, y, width, height;
-	private boolean lockButton = false;
+	private float x, y, width, height, x2, width2;
+
+	private float sliderValue;
 
 	private void onInit() {
+		if(backgroundTexture == null) {
+			backgroundTexture = ResourceLoader.loadUITexture("ui/ui_button_background");
+		}
 		if(normalTexture == null) {
-			normalTexture = ResourceLoader.loadUITexture("ui/normal/ui_button");
+			normalTexture = ResourceLoader.loadUITexture("ui/small/ui_button");
 		}
 		if(hoveredTexture == null) {
-			hoveredTexture = ResourceLoader.loadUITexture("ui/normal/ui_button_hover");
+			hoveredTexture = ResourceLoader.loadUITexture("ui/small/ui_button_hover");
 		}
 	}
 
-	public GuiButton(float x, float y, float width, float height, String text, GuiCommand command) {
+	public GuiSlider(float x, float y, float width, float height, String text, GuiCommand command) {
 		onInit();
 		this.text = text;
 		this.command = command;
@@ -38,53 +44,77 @@ public class GuiButton extends Gui implements GuiComponent {
 		this.y = y;
 		this.width = width;
 		this.height = height;
+
+		this.width2 = 8;
+		this.x2 = x-(width/2)+width2/2;
 		components.add(this);
 	}
 
-	public GuiButton(float x, float y, float width, float height, String text) {
+	public GuiSlider(float x, float y, float width, float height, String text) {
 		onInit();
 		this.text = text;
 		this.x = x;
 		this.y = y;
+
 		this.width = width;
 		this.height = height;
+
+		this.width2 = 8;
+		this.x2 = x-(width/2)+width2/2;
+		
 		components.add(this);
 	}
 
 	private boolean isHovering = false;
+	private boolean grabbing = false;
 
 	@Override
 	public void tick() {
 		float mouseX = Mouse.getX();
 		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
 
-		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
-			texture = hoveredTexture;
-
+		if(y + height/2 > mouseY && y-height/2 < mouseY && x2 + width2/2 > mouseX && x2-width2/2 < mouseX) {
 			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
 				if(command != null) {
-					if(!lockButton) {
-						command.invoke();
-						lockButton = true;
-					}
+					grabbing = true; 
+					command.invoke(sliderValue);
 				}
-			} else {
-				lockButton = false;
 			}
 		} else {
 			isHovering = false;
 			texture = normalTexture;
 		}
 
-		drawImage(texture, x, y, width, height);
+		if (grabbing && Mouse.isButtonDown(0)) {
+			isHovering = true;
+			
+			float handleHalfWidth = width2 / 2;
+			float minSliderX = x - (width / 2) + handleHalfWidth;
+			
+			x2 = Math.max(minSliderX, Math.min(x + (width / 2) - handleHalfWidth, mouseX));
+			sliderValue = (x2 - (x - width / 2) - handleHalfWidth) / (width - width2);
+			sliderValue = Math.max(0, Math.min(1, sliderValue));
+		} else {
+			grabbing = false;
+		}
+
+		if(isHovering) {
+			texture = hoveredTexture;
+		} else {
+			texture = normalTexture;
+		}
+		
+		drawImage(backgroundTexture, x, y, width, height);
+		drawImage(texture, x2, y, width2, height);
+
 		int textWidth = (font.getWidth(text));
 		int textHeight = font.getHeight(text);
 		float width2 =  (width - textWidth);
 		float height2 = ((height - textHeight)+fontSize)/2;
 		float textX = x - (width2/2);
 		float textY = y - height2/2;
-		
+
 		Color c = isHovering ? Color.yellow : Color.white;
 		drawShadowString(c, textX, textY, text);
 	}
@@ -103,7 +133,7 @@ public class GuiButton extends Gui implements GuiComponent {
 	public boolean isHovering() {
 		return isHovering;
 	}
-	
+
 	public void setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;

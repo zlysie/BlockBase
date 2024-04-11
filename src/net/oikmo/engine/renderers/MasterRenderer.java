@@ -47,11 +47,6 @@ public class MasterRenderer {
 	public static ModelTexture currentTexturePack;
 	public static int defaultTexturePack;
 	public static int customTexturePack;
-	public int ui_nuhuh;
-	public int ui_button;
-	public int ui_smallbutton;
-	public int ui_hover;
-	public int ui_smallhover;
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
 	private List<GuiTexture> guis = new ArrayList<>();
@@ -108,11 +103,6 @@ public class MasterRenderer {
 		}
 		
 		currentTexturePack = new ModelTexture(defaultTexturePack);
-		ui_nuhuh = ResourceLoader.loadTexture("textures/ui/ui_nuhuh");
-		ui_button = ResourceLoader.loadTexture("textures/ui/normal/ui_button");
-		ui_hover = ResourceLoader.loadTexture("textures/ui/normal/ui_button_hover");
-		ui_smallbutton = ResourceLoader.loadTexture("textures/ui/small/ui_button");
-		ui_smallhover = ResourceLoader.loadTexture("textures/ui/small/ui_button_hover");
 		
 		Gui.initFont();
 	}
@@ -130,7 +120,6 @@ public class MasterRenderer {
 	public void render(Camera camera) {
 		prepare();
 		entityRenderer.render(entities, camera);
-		
 		entities.clear();
 	}
 	

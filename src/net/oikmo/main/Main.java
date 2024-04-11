@@ -29,7 +29,6 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
-import net.oikmo.engine.Loader;
 import net.oikmo.engine.Timer;
 import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.entity.Player;
@@ -74,6 +73,8 @@ public class Main extends Gui {
 	public static float elapsedTime = 0;
 	
 	public static Vector3f camPos = new Vector3f(0,0,0);
+	
+	private static boolean shouldTick = true;
 
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
@@ -132,17 +133,19 @@ public class Main extends Gui {
 			theWorld.entities.add(block);
 			
 			while(!Display.isCloseRequested()) {
-				Main.thePlayer.updateCamera();
 				
 				timer.advanceTime();
-
-				for(int e = 0; e < timer.ticks; ++e) {
-					tick();
+				
+				if(shouldTick) {
+					Main.thePlayer.updateCamera();
+					
+					for(int e = 0; e < timer.ticks; ++e) {
+						tick();
+					}
 				}
 				
-				im.handleInput();
-				
 				theWorld.update(thePlayer.getCamera());
+				im.handleInput();
 				
 				Main.currentScreen.update();
 				
@@ -152,6 +155,15 @@ public class Main extends Gui {
 			Main.error("Runtime Error!", e);
 		}
 		close();
+	}
+	
+	public static void shouldTick() {
+		Main.shouldTick = !shouldTick;
+		Main.thePlayer.getCamera().setMouseLock(shouldTick);
+	}
+	
+	public static boolean isPaused() {
+		return shouldTick == false;
 	}
 
 	private static void tick() {
