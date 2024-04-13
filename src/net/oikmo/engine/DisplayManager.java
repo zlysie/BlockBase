@@ -42,7 +42,7 @@ public class DisplayManager {
 	 * @param frame 
 	 */
 	public static void createDisplay(Frame frame, Canvas gameCanvas) {
-			frame.removeAll();
+		frame.removeAll();
 		frame.add(gameCanvas, "Center");
 		try {
 			Display.setParent(gameCanvas);
@@ -58,7 +58,7 @@ public class DisplayManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static boolean setFullScreen;
 	/**
 	 * Updates the display to show a new frame and calculates the last frame time.
@@ -68,12 +68,12 @@ public class DisplayManager {
 	public static void updateDisplay(Canvas gameCanvas) {
 		updateFPS();
 		Display.update();
-		
+
 		if(Keyboard.isKeyDown(Keyboard.KEY_F11)) {
 			if(!setFullScreen) {
 				try {
 					Display.setFullscreen(!Display.isFullscreen());
-					
+
 				} catch (LWJGLException e) {
 					Main.error("Display Error!", e);
 				}
@@ -97,7 +97,7 @@ public class DisplayManager {
 		} else {
 			setFullScreen = false;
 		}
-		
+
 		if(!Display.isFullscreen()) {
 			if((gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
 				try {
@@ -135,7 +135,7 @@ public class DisplayManager {
 	 * @see getImage()
 	 */
 	public static void saveScreenshot() {
-		
+
 		File saveDirectory =  new File(Main.getDir().getPath()+"/screenshots/");
 
 		if (!saveDirectory.exists()) {
@@ -145,14 +145,18 @@ public class DisplayManager {
 				return;
 			}
 		}
-
-		String name = Logger.getCurrentTimeFile();
 		
+		String name = Logger.getCurrentTimeFile();
+
 		File file = new File(saveDirectory + "/" + name + ".png"); // The file to save the pixels too.
 		String format = "png";
 		try {
-			ImageIO.write(getImage(null, null), format, file);
+			// Save the BufferedImage object to a file using the ImageIO.write() method
+			ImageIO.write(getImage(null,null), format, file);
+			
+			// Print a message indicating that the screenshot has been saved
 			Logger.log(LogLevel.INFO, "Saved screenshot!");
+			
 		} catch (Exception e) {
 			Main.error("Failed to save screenshot! : " + name+".png", e);
 		}

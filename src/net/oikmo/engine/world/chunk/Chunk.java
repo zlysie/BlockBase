@@ -1,12 +1,8 @@
 package net.oikmo.engine.world.chunk;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
-
-import com.github.matthewdawsey.collisionres.AABB;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
@@ -242,45 +238,5 @@ public class Chunk {
 	
 	public int getHeightFromPosition(int x, int z) {
 		return heights[x][z];
-	}
-
-	/**
-	 * Creates an AABB from. each. block.
-	 * This isn't bad is it?
-	 * 
-	 * @return aabbs - {@link List}
-	 */
-	public List<AABB> getAABBs(Vector3f origin, AABB aabb) {
-		List<AABB> aabbs = new ArrayList<>();
-		
-		int roundedY = (int)(aabb.start.y);
-		int offset = 2;
-		int minY = (roundedY-offset)-1;
-		int maxY = roundedY+offset+2;
-		
-		if(minY < 0) {
-			minY = 0;
-		}
-		if(maxY > World.WORLD_HEIGHT) {
-			maxY = World.WORLD_HEIGHT;
-		}
-		for(int x = 0; x < CHUNK_SIZE; x++) {
-			for(int z = 0; z < CHUNK_SIZE; z++) {
-				for(int y = minY; y < maxY; y++) {
-					if(blocks[x][y][z] == -1) {
-						continue;
-					}
-					float blockX = (x + origin.x);
-					float blockY = y;
-					float blockZ = (z + origin.z);
-					AABB other = new AABB(new Vector3f(-0.5f, -0.5f, -0.5f), new Vector3f(0.5f, 0.5f, 0.5f));
-					other.updatePosition(new Vector3f(blockX, blockY, blockZ));
-					aabbs.add(other);
-					
-					
-				}
-			}
-		}
-		return aabbs;
 	}
 }

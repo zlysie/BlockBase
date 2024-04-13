@@ -9,6 +9,7 @@ import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
+import net.oikmo.engine.sound.SoundMaster;
 
 public class GuiSlider  extends Gui implements GuiComponent {
 
@@ -22,6 +23,12 @@ public class GuiSlider  extends Gui implements GuiComponent {
 
 	private float x, y, width, height, x2, width2;
 
+	private boolean lockButton = false;
+	
+	private boolean isHovering = false;
+	private boolean grabbing = false;
+
+	
 	private float sliderValue;
 
 	private void onInit() {
@@ -64,10 +71,7 @@ public class GuiSlider  extends Gui implements GuiComponent {
 		
 		components.add(this);
 	}
-
-	private boolean isHovering = false;
-	private boolean grabbing = false;
-
+	
 	@Override
 	public void tick() {
 		float mouseX = Mouse.getX();
@@ -78,12 +82,25 @@ public class GuiSlider  extends Gui implements GuiComponent {
 			if(Mouse.isButtonDown(0)) {
 				if(command != null) {
 					grabbing = true; 
+					if(!lockButton) {
+						if(!lockedRightNow && current != this) {
+							Gui.lockedRightNow = true;
+							SoundMaster.playSFX("ui.button.click");
+							command.invoke();
+							lockButton = true;
+							current = this;
+						}
+						
+					}
 					command.invoke(sliderValue);
 				}
+			} else {
+				lockButton = false;
 			}
 		} else {
 			isHovering = false;
 			texture = normalTexture;
+			
 		}
 
 		if (grabbing && Mouse.isButtonDown(0)) {
@@ -97,6 +114,10 @@ public class GuiSlider  extends Gui implements GuiComponent {
 			sliderValue = Math.max(0, Math.min(1, sliderValue));
 		} else {
 			grabbing = false;
+			if(lockedRightNow && current == this) {
+				current = null;
+				lockedRightNow = false;
+			}
 		}
 
 		if(isHovering) {

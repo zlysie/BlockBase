@@ -50,7 +50,7 @@ public class ResourceLoader {
 
 		if(audioFiles.get(file) == null) {
 			try {
-				String path = Paths.get(Main.getResources() + "/music/"+ file).toString();
+				String path = Paths.get(Main.getResources() + file).toString();
 				URL url = new File(path).toURI().toURL();
 				audioFiles.put(file, url);
 			} catch (MalformedURLException e) {

@@ -13,10 +13,14 @@ import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
 import org.newdawn.slick.opengl.Texture;
 
+import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.main.Main;
 
 public class Gui {
 
+	public static GuiComponent current = null;
+	public static boolean lockedRightNow = false;
+	
 	protected static UnicodeFont font;
 	
 	private static Font awtFont = null;

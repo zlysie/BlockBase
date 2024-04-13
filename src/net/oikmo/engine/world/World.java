@@ -117,7 +117,7 @@ public class World {
 				}
 			}
 		}
-
+		
 		for(Entity entity : chunkEntities) {
 			if(isInValidRange(entity.getPosition())) {
 				MasterRenderer.getInstance().addEntity(entity);
@@ -129,7 +129,6 @@ public class World {
 				MasterRenderer.getInstance().addEntity(entity);
 			}
 		}
-
 		MasterRenderer.getInstance().render(camera);
 	}
 
@@ -145,8 +144,14 @@ public class World {
 							if(!((ItemEntity)entity).dontTick && entity.getPosition().y > 0) {
 								entity.tick();
 							} else {
-								entities.remove(entity);
-								System.out.println("removing item from world!");
+								if(Main.thePlayer.getInventory().addItem(((ItemEntity)entity).getItem())) {
+									entities.remove(entity);
+									System.out.println("removing item from world!");
+								} else {
+									((ItemEntity)entity).dontTick = false;
+								}
+								
+								
 								continue;
 							}
 						} else {

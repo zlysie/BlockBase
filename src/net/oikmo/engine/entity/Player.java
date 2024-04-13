@@ -3,8 +3,7 @@ package net.oikmo.engine.entity;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.github.matthewdawsey.collisionres.AABB;
-
+import net.oikmo.engine.inventory.Container;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.textures.ModelTexture;
@@ -14,12 +13,14 @@ import net.oikmo.engine.world.chunk.MasterChunk;
 public class Player extends Entity {
 	
 	private Camera camera;
+	private Container inventory;
 	
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
 		resetPos();
-		this.heightOffset = 0.81f; //1.62f
+		this.heightOffset = 1.62f; //1.62f
 		this.camera = new Camera(position, rotation);
+		this.inventory = new Container(9,4);
 	}
 	
 	public void tick() {
@@ -53,7 +54,8 @@ public class Player extends Entity {
 		this.setRotation(0.0f, camera.yaw, 0.0f);
 		this.moveRelative(xa, ya, this.onGround ? 0.02F : 0.005F);
 		this.motion.y = (float)((double)this.motion.y - 0.005D);
-		this.move();
+		//moveThis();
+		this.move(this.motion.x, this.motion.y, this.motion.z);
 		if(this.getPosition().y < 0) {
 			resetPos();
 		}
@@ -67,8 +69,12 @@ public class Player extends Entity {
 		}
 	}
 	
+	public Container getInventory() {
+		return inventory;
+	}
+
 	public void updateCamera() {
-		camera.update(new Vector3f(getPosition()), heightOffset);
+		camera.update(new Vector3f(getPosition()), heightOffset/6);
 	}
 	
 	private void resetPos() {
@@ -82,13 +88,4 @@ public class Player extends Entity {
 	public Camera getCamera() {
 		return camera;
 	}
-
-	public AABB getAABB() {
-		return aabb;
-	}
-
-	public float getHeightOffset() {
-		return heightOffset;
-	}
-
 }

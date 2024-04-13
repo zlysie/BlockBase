@@ -9,6 +9,7 @@ import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
+import net.oikmo.engine.sound.SoundMaster;
 
 public class GuiButton extends Gui implements GuiComponent {
 
@@ -20,6 +21,8 @@ public class GuiButton extends Gui implements GuiComponent {
 
 	private float x, y, width, height;
 	private boolean lockButton = false;
+	
+	private boolean isHovering = false;
 
 	private void onInit() {
 		if(normalTexture == null) {
@@ -50,9 +53,7 @@ public class GuiButton extends Gui implements GuiComponent {
 		this.height = height;
 		components.add(this);
 	}
-
-	private boolean isHovering = false;
-
+	
 	@Override
 	public void tick() {
 		float mouseX = Mouse.getX();
@@ -65,8 +66,14 @@ public class GuiButton extends Gui implements GuiComponent {
 			if(Mouse.isButtonDown(0)) {
 				if(command != null) {
 					if(!lockButton) {
-						command.invoke();
-						lockButton = true;
+						if(!lockedRightNow && current != this) {
+							Gui.lockedRightNow = true;
+							SoundMaster.playSFX("ui.button.click");
+							command.invoke();
+							lockButton = true;
+							current = this;
+						}
+						
 					}
 				}
 			} else {
@@ -75,8 +82,13 @@ public class GuiButton extends Gui implements GuiComponent {
 		} else {
 			isHovering = false;
 			texture = normalTexture;
+			if(lockedRightNow && current == this) {
+				lockedRightNow = false;
+				current = null;
+				
+			}
 		}
-
+		
 		drawImage(texture, x, y, width, height);
 		int textWidth = (font.getWidth(text));
 		int textHeight = font.getHeight(text);

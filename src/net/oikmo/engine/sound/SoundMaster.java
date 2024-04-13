@@ -26,6 +26,7 @@ import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 public class SoundMaster {
 
 	private static Map<String, SoundByte> music = new HashMap<>();
+	private static Map<String, SoundByte> sfx = new HashMap<>();
 	private static SoundSystem soundSystem = null;
 
 	private static File customMusic = new File(Main.getResources()+"/custom/music");
@@ -69,38 +70,48 @@ public class SoundMaster {
 			Logger.log(LogLevel.WARN, "Unable to write into README at " + customMusic.getAbsolutePath());
 		}
 		
-		addMusicByte("music.minecraft", "calm1.ogg");
-		addMusicByte("music.clark", "calm2.ogg");
-		addMusicByte("music.sweden", "calm3.ogg");
+		registerMusic();
+		registerSFX();
+		
+		soundSystem.activate("music");
+		doRandomMusic();
+	}
+	
+	private static void registerMusic() {
+		registerMusicByte("music.minecraft", "calm1.ogg");
+		registerMusicByte("music.clark", "calm2.ogg");
+		registerMusicByte("music.sweden", "calm3.ogg");
 
-		addMusicByte("music.subwooferlullaby", "hal1.ogg");
-		addMusicByte("music.livingmice", "hal2.ogg");
-		addMusicByte("music.haggstrom", "hal3.ogg");
-		addMusicByte("music.danny", "hal4.ogg");
+		registerMusicByte("music.subwooferlullaby", "hal1.ogg");
+		registerMusicByte("music.livingmice", "hal2.ogg");
+		registerMusicByte("music.haggstrom", "hal3.ogg");
+		registerMusicByte("music.danny", "hal4.ogg");
 
-		addMusicByte("music.key", "nuance1.ogg");
-		addMusicByte("music.oxygene", "nuance2.ogg");
+		registerMusicByte("music.key", "nuance1.ogg");
+		registerMusicByte("music.oxygene", "nuance2.ogg");
 
-		addMusicByte("music.dryhands", "piano1.ogg");
-		addMusicByte("music.wethands", "piano2.ogg");
-		addMusicByte("music.miceonvenus", "piano3.ogg");
+		registerMusicByte("music.dryhands", "piano1.ogg");
+		registerMusicByte("music.wethands", "piano2.ogg");
+		registerMusicByte("music.miceonvenus", "piano3.ogg");
 		
 		File[] customTracks = customMusic.listFiles();
 		if(customTracks.length != 0) {
 			for(File track : customTracks) {
 				String name = track.getName();
 				if(name.endsWith(".ogg")) {
-					addCustomMusicByte("custom."+ name.replace(".ogg", ""), name);
+					registerCustomMusicByte("custom."+ name.replace(".ogg", ""), name);
 					Logger.log(LogLevel.INFO, "Adding custom track: " + name + " ("+"custom."+ name.replace(".ogg", "")+")");
 				}
 			}
 		}
 
-		soundSystem.activate("music");
-		doRandomMusic();
 	}
-
-	public static void doRandomMusic() {
+	private static void registerSFX() {
+		registerSFXByte("ui.button.click","random/click.ogg");
+	}
+	
+	
+	private static void doRandomMusic() {
 		List<SoundByte> bytes = new ArrayList<>();
 		for(Map.Entry<String, SoundByte> entry : music.entrySet()) {
 			bytes.add(entry.getValue());
@@ -109,6 +120,15 @@ public class SoundMaster {
 
 		musicThread = new Thread(new Runnable(){
 			public void run() {
+				try {
+					long thing = new Random().nextInt(48000);
+					Thread.sleep(thing);
+					System.out.println("waiting for " + thing + "ms");
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 				synchronized(bytes) {
 					for(SoundByte musicByte : bytes) {
 						soundSystem.backgroundMusic("music", musicByte.getFileLocation(), musicByte.getFileName(), false);
@@ -133,23 +153,27 @@ public class SoundMaster {
 
 	}
 
-	public static void playMusic(SoundByte musicByte) {
-		soundSystem.queueSound("music", musicByte.getFileLocation(), musicByte.getFileName());
+	private static void registerMusicByte(String id, String fileName) {
+		music.put(id, new SoundByte(id, "/music/"+fileName));
 	}
-
-	public static void playMusic(String id) {
-		SoundByte musicByte = music.get(id);
-		soundSystem.queueSound("music", musicByte.getFileLocation(), musicByte.getFileName());
-	}
-
-	private static void addCustomMusicByte(String id, String fileName) {
+	private static void registerCustomMusicByte(String id, String fileName) {
 		music.put(id, SoundByte.custom(id, fileName));
 	}
-
-	private static void addMusicByte(String id, String fileName) {
-		music.put(id, new SoundByte(id, fileName));
+	
+	private static void registerCustomSFXByte(String id, String fileName) {
+		sfx.put(id, SoundByte.custom(id, fileName));
+	}
+	private static void registerSFXByte(String id, String fileName) {
+		sfx.put(id, new SoundByte(id, "/sfx/"+fileName));
 	}
 
+	public static void playSFX(String id) {
+		SoundByte sbyte = sfx.get(id);
+		if(sbyte != null) {
+			soundSystem.quickPlay(false, sbyte.getFileLocation(), sbyte.getFileName(), false, 0, 0, 0, 0, 0);
+		}	
+	}
+	
 	@SuppressWarnings("deprecation")
 	public static void cleanUp() {
 		if(soundSystem != null) {

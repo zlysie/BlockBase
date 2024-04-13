@@ -59,8 +59,8 @@ public class Main extends Gui {
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
 	
-	private static Frame frame;
-	private static Canvas gameCanvas;
+	public static Frame frame;
+	public static Canvas gameCanvas;
 	
 	private static PanelCrashReport report;
 	private static boolean hasErrored = false;
@@ -93,17 +93,15 @@ public class Main extends Gui {
 				public void windowClosing(WindowEvent e) {
 					Logger.saveLog();
 					System.exit(0);
-					
 				}
 			});
 			gameCanvas = new Canvas();
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
 			frame.setIconImage(icon.getImage());
-			//
 			frame.setLayout(new BorderLayout());
 			frame.add(gameCanvas, "Center");
-			gameCanvas.setPreferredSize(new Dimension(WIDTH, HEIGHT)); //480
+			gameCanvas.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
 			frame.removeAll();
@@ -128,11 +126,12 @@ public class Main extends Gui {
 			
 			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
 			
-			ItemBlock block = new ItemBlock(Block.bedrock, new Vector3f(0,100,0), false);
+			ItemBlock block = new ItemBlock(Block.bedrock, new Vector3f(0,140,0));
 			
 			theWorld.entities.add(block);
 			
 			while(!Display.isCloseRequested()) {
+				
 				
 				timer.advanceTime();
 				

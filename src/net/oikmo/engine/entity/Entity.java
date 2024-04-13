@@ -5,11 +5,10 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import com.github.matthewdawsey.collisionres.AABB;
+import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
-import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
@@ -23,26 +22,19 @@ public class Entity {
 	private Vector3f roundPos;
 	private Vector3f chunkPos;
 	
-	protected AABB aabb;
+	protected AABB bb;
 	protected boolean onGround;
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
-	AABB floorCheckAABB;
-	AABB ceilingCheckAABB;
-	private static ArrayList<AABB> aabbsToUseAroundPlayer = new ArrayList<>();
 	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
-		this.aabb = new AABB(
-				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
-		ceilingCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
-		floorCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
 		this.motion = new Vector3f();
 		this.rotation = rotation;
 		this.scale = scale;
+		setPos(position.x, position.y, position.z);
 	}
 
 	protected void setSize(float w, float h) {
@@ -54,59 +46,50 @@ public class Entity {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;
-		this.aabb = new AABB(
-				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
-		ceilingCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
-		floorCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
-		
+		float w = this.bbWidth / 2.0F;
+		float h = this.bbHeight / 2.0F;
+		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 
 	protected void set(float width, float height,float x, float y, float z) {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;
-		this.aabb = new AABB(
-				new Vector3f(this.bbWidth / -2, this.bbHeight / -2, this.bbWidth / -2),
-				new Vector3f(this.bbWidth / 2, this.bbHeight / 2, this.bbWidth / 2));
-		ceilingCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, 0, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0.01f, this.bbWidth / 2));
-		floorCheckAABB = new AABB(new Vector3f(this.bbWidth / -2, -0.01f, this.bbWidth / -2), new Vector3f(this.bbWidth / 2, 0, this.bbWidth / 2));
-		
+		float w = this.bbWidth / 2.0F;
+		float h = this.bbHeight / 2.0F;
+		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
-
-	/**
-	 * Checks neighbouring chunks and collects the AABBs from each. one.
-	 * @param za 
-	 * @param ya 
-	 * @param xa 
-	 * @return
-	 */
-	public List<AABB> getSurroundingAABBs() {
-		aabbsToUseAroundPlayer.clear();
-		List<AABB> surroundingAABBs = aabbsToUseAroundPlayer;
-		MasterChunk currentChunk = getCurrentChunk();
-
-		if(currentChunk != null) {
-			for (int xOffset = -1; xOffset <= 1; xOffset++) {
-				for (int zOffset = -1; zOffset <= 1; zOffset++) {
-
-					float chunkX = (int) (currentChunk.getOrigin().x + xOffset * Chunk.CHUNK_SIZE);
-					float chunkZ = (int) (currentChunk.getOrigin().z + zOffset * Chunk.CHUNK_SIZE);
-
-					Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
-					MasterChunk neighborChunk = MasterChunk.getChunkFromPosition(chunkPos);
-
-					if (neighborChunk != null && neighborChunk.getEntity() != null) {
-						for (AABB aabb : neighborChunk.getChunk().getAABBs(neighborChunk.getOrigin(), aabb)) {
-							surroundingAABBs.add(aabb);
-						}
+	
+	public List<AABB> getSurroundingAABBsPhys() {
+		
+		List<AABB> surroundingAABBs = new ArrayList<>();
+		
+		float aabbOffset = 2.0F;
+		
+		int x0 = Maths.roundFloat(bb.x0 - aabbOffset);
+		int x1 = Maths.roundFloat(bb.x1 + aabbOffset);
+		int y0 = Maths.roundFloat(bb.y0 - aabbOffset);
+		int y1 = Maths.roundFloat(bb.y1 + aabbOffset);
+		int z0 = Maths.roundFloat(bb.z0 - aabbOffset);
+		int z1 = Maths.roundFloat(bb.z1 + aabbOffset);
+		
+		for(int x = x0; x < x1; ++x) {
+			for(int y = y0; y < y1; ++y) {
+				for(int z = z0; z < z1; ++z) {
+					if(Main.theWorld.getBlock(new Vector3f(x,y,z)) != null) {
+						AABB other = new AABB(x-0.5f, y-0.5f, z-0.5f, x+0.5f, y+0.5f, z+0.5f);
+						//System.out.println(x + " " + y + " " + z);
+						surroundingAABBs.add(other);
 					}
+					
 				}
 			}
 		}
+	
+		
 		return surroundingAABBs;
 	}
-
+	
 	/**
 	 * handles aabb collision
 	 * 
@@ -114,124 +97,46 @@ public class Entity {
 	 * @param ya - ({@link Float})
 	 * @param za - ({@link Float})
 	 */
-	public void move() {
-		this.position.y += this.motion.y;
-		this.aabb.updatePosition(this.position);
-		
-		// separate colliders with a height value of 0.01
-		// on the top and bottom to detect Y axis collisions
-		floorCheckAABB.updatePosition(this.position);
-		floorCheckAABB.offset(0, bbHeight / -2, 0);
-		ceilingCheckAABB.updatePosition(this.position);
-		ceilingCheckAABB.offset(0, this.bbHeight / 2, 0);
-		//
-		// assume falling if not standing on a collider
-		this.onGround = false;
-		List<AABB> aabbList = new ArrayList<>();
-		// get the list of colliders
-		if(this instanceof Player) {
-			aabbList = getSurroundingAABBs();
-		} else {
-			aabbList = aabbsToUseAroundPlayer;
+	public void move(float xa, float ya, float za) {
+		float xaOrg = xa;
+		float yaOrg = ya;
+		float zaOrg = za;
+		List<AABB> aABBs = this.getSurroundingAABBsPhys();
+
+		int i;
+		for(i = 0; i < aABBs.size(); ++i) {
+			ya = ((AABB)aABBs.get(i)).clipYCollide(this.bb, ya);
+		}
+
+		this.bb.move(0.0F, ya, 0.0F);
+
+		for(i = 0; i < aABBs.size(); ++i) {
+			xa = ((AABB)aABBs.get(i)).clipXCollide(this.bb, xa);
+		}
+
+		this.bb.move(xa, 0.0F, 0.0F);
+
+		for(i = 0; i < aABBs.size(); ++i) {
+			za = ((AABB)aABBs.get(i)).clipZCollide(this.bb, za);
+		}
+
+		this.bb.move(0.0F, 0.0F, za);
+		this.onGround = yaOrg != ya && yaOrg < 0.0F;
+		if(xaOrg != xa) {
+			this.motion.x = 0.0F;
+		}
+
+		if(yaOrg != ya) {
+			this.motion.y = 0.0F;
+		}
+
+		if(zaOrg != za) {
+			this.motion.z = 0.0F;
 		}
 		
-		// check for Y axis collisions
-		for (AABB aabb : aabbList) {
-			if (floorCheckAABB.intersects(aabb)) {
-				float dy = this.aabb.center.y - aabb.center.y;
-				if (dy > 0) { // colliding with +Y face (standing on floor)
-					this.onGround = true;
-					this.position.y = aabb.end.y + this.bbHeight / 2;
-					this.motion.y = 0;
-				}
-			}
-			
-			if (ceilingCheckAABB.intersects(aabb)) {
-				float dy = this.aabb.center.y - aabb.center.y;
-				if (dy < 0) { // colliding with -Y face (bump head on ceiling)
-					this.onGround = false;
-					this.position.y = aabb.start.y - this.bbHeight / 2;
-					this.motion.y = 0;
-				}
-			}
-		}
-
-		// apply X axis velocity
-		this.position.x += this.motion.x;
-		this.aabb.updatePosition(this.position);
-
-		// check for X axis collisions
-		for (AABB aabb : aabbList) {
-			if (this.aabb.intersects(aabb)) {
-				float dx = this.aabb.center.x - aabb.center.x;
-				if (dx > 0) { // colliding with +X face
-					this.position.x = aabb.end.x + this.bbWidth / 2;
-				} else if (dx < 0) { // colliding with -X face
-					this.position.x = aabb.start.x - this.bbWidth / 2;
-				}
-
-				this.motion.x = 0;
-			}
-		}
-
-		// apply Z axis velocity
-		this.position.z += this.motion.z;
-		this.aabb.updatePosition(this.position);
-
-		// check for Z axis collisions
-		for (AABB aabb : aabbList) {
-			if (this.aabb.intersects(aabb)) {
-				float dz = this.aabb.center.z - aabb.center.z;
-				if (dz > 0) { // colliding with +Z face
-					this.position.z = aabb.end.z + this.bbWidth / 2;
-				} else if (dz < 0) { // colliding with -Z face
-					this.position.z = aabb.start.z - this.bbWidth / 2;
-				}
-
-				this.motion.z = 0;
-			}
-		}
-
-		// one final realignment so collider doesnt lag behind when being drawn
-		//this.aabb.updatePosition(this.position);
-	}
-	
-	public void moveY() {
-		
-		this.position.y += motion.y;
-		this.aabb.updatePosition(this.position);
-		
-		floorCheckAABB.updatePosition(this.position);
-		floorCheckAABB.offset(0, bbHeight / -2, 0);
-		ceilingCheckAABB.updatePosition(this.position);
-		ceilingCheckAABB.offset(0, this.bbHeight / 2, 0);
-		// assume falling if not standing on a collider
-		this.onGround = false;
-		// get the list of colliders
-		Vector3f v = new Vector3f(this.getRoundedPosition());
-		v.y = getRoundedPosition().y;
-		if(Main.theWorld.getBlock(v) != null) {
-			AABB aabb = new AABB(new Vector3f(-0.5f, -0.5f, -0.5f), new Vector3f(0.5f, 0.5f, 0.5f));
-			aabb.updatePosition(new Vector3f(v));
-			
-			if (floorCheckAABB.intersects(aabb)) {
-				float dy = this.aabb.center.y - aabb.center.y;
-				if (dy > 0) { // colliding with +Y face (standing on floor)
-					this.onGround = true;
-					this.position.y = aabb.end.y + this.bbHeight / 2;
-					this.motion.y = 0;
-				}
-			}
-			
-			if (ceilingCheckAABB.intersects(aabb)) {
-				float dy = this.aabb.center.y - aabb.center.y;
-				if (dy < 0) { // colliding with -Y face (bump head on ceiling)
-					this.onGround = false;
-					this.position.y = aabb.start.y - this.bbHeight / 2;
-					this.motion.y = 0;
-				}
-			}
-		}
+		this.position.x = (this.bb.x0 + this.bb.x1) / 2.0F;
+		this.position.y = this.bb.y0 + this.heightOffset;
+		this.position.z = (this.bb.z0 + this.bb.z1) / 2.0F;
 	}
 
 	/**
@@ -345,6 +250,14 @@ public class Entity {
 			}
 
 		}
+	}
+	
+	public AABB getAABB() {
+		return bb;
+	}
+
+	public float getHeightOffset() {
+		return heightOffset;
 	}
 	
 	public void tick() {}

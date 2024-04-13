@@ -4,7 +4,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.github.matthewdawsey.collisionres.AABB;
+import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.models.CubeModel;
@@ -131,7 +131,7 @@ public class Camera {
 				if(!mouseClickRight) {
 					Vector3f v = new Vector3f(picker.getPointRounded(picker.distance));
 					v.y += 1;
-					AABB toCheck = new AABB(v,new Vector3f(v.x+1.f,v.y+.5f,v.z+1.f));
+					AABB toCheck = new AABB(v.x-0.5f, v.y, v.z-0.5f, v.x+0.5f, v.y+1f, v.z+0.5f);
 					if(!Main.thePlayer.getAABB().intersects(toCheck)) {
 						Block block1 = Main.theWorld.getBlock(picker.getPointRounded(picker.distance));
 						if(block1 == null) {
@@ -156,7 +156,8 @@ public class Camera {
 					Block block = Main.theWorld.getBlock(picker.getPointRounded());
 					if(block != null) {
 						Vector3f v = new Vector3f(picker.getPointRounded());
-						ItemBlock item = new ItemBlock(block, v, false);
+						v.y += 1f;
+						ItemBlock item = new ItemBlock(block, v);
 						Main.theWorld.entities.add(item);
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}

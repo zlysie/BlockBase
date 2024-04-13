@@ -34,10 +34,10 @@ public abstract class Block {
 		GLASS,
 		SMOOTHSTONE,
 		BRICK,
+		TNT,
 		IRONBLOCK,
 		GOLDBLOCK,
 		DIAMONDBLOCK,
-		TNT,
 	};
 	
 	public Type type;
