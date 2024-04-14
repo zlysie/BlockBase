@@ -50,28 +50,17 @@ public class Entity {
 		float h = this.bbHeight / 2.0F;
 		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
-
-	protected void set(float width, float height,float x, float y, float z) {
-		this.position.x = x;
-		this.position.y = y;
-		this.position.z = z;
-		float w = this.bbWidth / 2.0F;
-		float h = this.bbHeight / 2.0F;
-		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
-	}
 	
-	public List<AABB> getSurroundingAABBsPhys() {
+	public List<AABB> getSurroundingAABBsPhys(int aabbOffset) {
 		
 		List<AABB> surroundingAABBs = new ArrayList<>();
 		
-		float aabbOffset = 2.0F;
-		
-		int x0 = Maths.roundFloat(bb.x0 - aabbOffset);
-		int x1 = Maths.roundFloat(bb.x1 + aabbOffset);
-		int y0 = Maths.roundFloat(bb.y0 - aabbOffset);
-		int y1 = Maths.roundFloat(bb.y1 + aabbOffset);
-		int z0 = Maths.roundFloat(bb.z0 - aabbOffset);
-		int z1 = Maths.roundFloat(bb.z1 + aabbOffset);
+		int x0 = Maths.roundFloat(bb.minX - aabbOffset);
+		int x1 = Maths.roundFloat(bb.maxX + aabbOffset);
+		int y0 = Maths.roundFloat(bb.minY - aabbOffset);
+		int y1 = Maths.roundFloat(bb.maxY + aabbOffset);
+		int z0 = Maths.roundFloat(bb.minZ - aabbOffset);
+		int z1 = Maths.roundFloat(bb.maxZ + aabbOffset);
 		
 		for(int x = x0; x < x1; ++x) {
 			for(int y = y0; y < y1; ++y) {
@@ -97,27 +86,27 @@ public class Entity {
 	 * @param ya - ({@link Float})
 	 * @param za - ({@link Float})
 	 */
-	public void move(float xa, float ya, float za) {
+	public void move(float xa, float ya, float za, int size) {
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
-		List<AABB> aABBs = this.getSurroundingAABBsPhys();
+		List<AABB> aabbs = this.getSurroundingAABBsPhys(size);
 
 		int i;
-		for(i = 0; i < aABBs.size(); ++i) {
-			ya = ((AABB)aABBs.get(i)).clipYCollide(this.bb, ya);
+		for(i = 0; i < aabbs.size(); ++i) {
+			ya = aabbs.get(i).clipYCollide(this.bb, ya);
 		}
 
 		this.bb.move(0.0F, ya, 0.0F);
 
-		for(i = 0; i < aABBs.size(); ++i) {
-			xa = ((AABB)aABBs.get(i)).clipXCollide(this.bb, xa);
+		for(i = 0; i < aabbs.size(); ++i) {
+			xa = aabbs.get(i).clipXCollide(this.bb, xa);
 		}
 
 		this.bb.move(xa, 0.0F, 0.0F);
 
-		for(i = 0; i < aABBs.size(); ++i) {
-			za = ((AABB)aABBs.get(i)).clipZCollide(this.bb, za);
+		for(i = 0; i < aabbs.size(); ++i) {
+			za = aabbs.get(i).clipZCollide(this.bb, za);
 		}
 
 		this.bb.move(0.0F, 0.0F, za);
@@ -134,9 +123,20 @@ public class Entity {
 			this.motion.z = 0.0F;
 		}
 		
-		this.position.x = (this.bb.x0 + this.bb.x1) / 2.0F;
-		this.position.y = this.bb.y0 + this.heightOffset;
-		this.position.z = (this.bb.z0 + this.bb.z1) / 2.0F;
+		this.position.x = (this.bb.minX + this.bb.maxX) / 2.0F;
+		this.position.y = this.bb.minY + this.heightOffset;
+		this.position.z = (this.bb.minZ + this.bb.maxZ) / 2.0F;
+	}
+	
+	/**
+	 * handles aabb collision
+	 * 
+	 * @param xa - ({@link Float})
+	 * @param ya - ({@link Float})
+	 * @param za - ({@link Float})
+	 */
+	public void move(float xa, float ya, float za) {
+		move(xa,ya,za,2);
 	}
 
 	/**

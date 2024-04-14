@@ -21,6 +21,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiInventory;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 
@@ -91,6 +92,9 @@ public class DisplayManager {
 					for(GuiComponent comp : GuiComponent.components) {
 						comp.updateComponent();
 					}
+					if(Main.currentScreen instanceof GuiInventory) {
+						((GuiInventory)Main.currentScreen).updateInventory();
+					}
 				}
 			}
 			setFullScreen = true;
@@ -120,6 +124,9 @@ public class DisplayManager {
 				MasterRenderer.getInstance().updateProjectionMatrix();
 				for(GuiComponent comp : GuiComponent.components) {
 					comp.updateComponent();
+				}
+				if(Main.currentScreen instanceof GuiInventory) {
+					((GuiInventory)Main.currentScreen).updateInventory();
 				}
 			}
 		}

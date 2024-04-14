@@ -160,6 +160,7 @@ public class SoundMaster {
 		music.put(id, SoundByte.custom(id, fileName));
 	}
 	
+	@SuppressWarnings("unused")
 	private static void registerCustomSFXByte(String id, String fileName) {
 		sfx.put(id, SoundByte.custom(id, fileName));
 	}

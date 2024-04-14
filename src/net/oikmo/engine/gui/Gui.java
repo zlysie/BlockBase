@@ -7,12 +7,15 @@ import java.io.IOException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.opengl.Texture;
 
+import net.oikmo.engine.gui.component.slick.Cursor;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.main.Main;
 
@@ -21,10 +24,13 @@ public class Gui {
 	public static GuiComponent current = null;
 	public static boolean lockedRightNow = false;
 	
+	protected static Graphics g = new Graphics();
 	protected static UnicodeFont font;
 	
 	private static Font awtFont = null;
 	protected static int fontSize = 18;
+	
+	protected static Cursor cursor;
 	
 	@SuppressWarnings("unchecked")
 	public static void initFont() {
@@ -42,6 +48,8 @@ public class Gui {
 		} catch (SlickException e1) {
 			e1.printStackTrace();
 		}
+		
+		cursor = new Cursor();
 	}
 	
 	protected static void init() {}
@@ -61,10 +69,36 @@ public class Gui {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 	
-	protected void drawString(float x, float y, String text) {
+	protected void drawBackground(Texture texture) {
 		setupGL();
-		font.drawString(x, y, text);
-		dropGL();	
+		Image img = new Image(texture);
+		img.setFilter(Image.FILTER_NEAREST);
+		img.draw(0, 0, Display.getWidth(), Display.getHeight());
+		dropGL();
+	}
+	
+	protected void drawTiledBackground(Texture texture, int size) {
+		setupGL();
+		for(int x = 0; x < (Display.getWidth()+size)/size; x++) {
+			for(int y = 0; y < (Display.getHeight()+size)/size; y++) {
+				Image img = new Image(texture);
+				img.setFilter(Image.FILTER_NEAREST);
+				img.draw(x*size, y*size, size, size);
+			}
+		}
+		dropGL();
+	}
+	
+	protected void drawStringCentered(Color c, float x, float y, String text) {
+		drawString(c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+	}
+	
+	protected void drawStringCentered(float x, float y, String text) {
+		drawString(Color.white, x-font.getWidth(text), y-font.getHeight(text)/2, text);
+	}
+	
+	protected void drawString(float x, float y, String text) {
+		drawString(Color.white, x, y, text);
 	}
 	
 	protected void drawString(Color c, float x, float y, String text) {
@@ -73,11 +107,16 @@ public class Gui {
 		dropGL();	
 	}
 	
+	protected void drawShadowStringCentered(Color c, float x, float y, String text) {
+		drawShadowString(c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+	}
+	
+	protected void drawShadowStringCentered(float x, float y, String text) {
+		drawShadowString(Color.white, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+	}
+	
 	protected void drawShadowString(float x, float y, String text) {
-		setupGL();
-		font.drawString(x+2, y+2, text, Color.gray);
-		font.drawString(x, y, text,  Color.white);
-		dropGL();
+		drawShadowString(Color.white, x, y, text);
 	}
 	
 	protected void drawShadowString(Color c, float x, float y, String text) {
@@ -88,16 +127,41 @@ public class Gui {
 	}
 	
 	protected void drawImage(Texture texture, float x, float y, float width, float height) {
-		setupGL();
-		Image img = new Image(texture);
-		img.setFilter(Image.FILTER_NEAREST);
-		img.draw(x-width/2, y-height/2, width, height);
-		dropGL();
+		drawImageRaw(texture, x-width/2, y-height/2, width, height);
+	}
+	
+	protected void drawImg(Image image, float x, float y, float width, float height) {
+		image.draw(x-width/2, y-height/2, width, height);
 	}
 	
 	protected void drawImageRaw(Texture texture, float x, float y, float width, float height) {
 		setupGL();
-		new Image(texture).draw(x, y, width, height);
+		Image img = new Image(texture);
+		img.setFilter(Image.FILTER_NEAREST);
+		img.draw(x, y, width, height);
+		dropGL();
+	}
+	
+	protected void drawSquare(float x, float y, float width, float height) {
+		drawSquare(Color.darkGray, 1f, x, y, width, height);
+	}
+	
+	protected void drawSquare(Color c, float lineWidth, float x, float y, float width, float height) {
+		setupGL();
+		g.setColor(c);
+		g.setLineWidth(lineWidth);
+		g.draw(new Rectangle(x, y, width, height));
+		dropGL();
+	}
+	
+	protected void drawSquareFilled(float x, float y, float width, float height) {
+		drawSquareFilled(Color.darkGray, x, y, width, height);
+	}
+	
+	protected void drawSquareFilled(Color c, float x, float y, float width, float height) {
+		setupGL();
+		g.setColor(c);
+		g.fill(new Rectangle(x, y, width, height));
 		dropGL();
 	}
 }

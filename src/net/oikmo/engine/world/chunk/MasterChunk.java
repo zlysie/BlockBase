@@ -92,6 +92,7 @@ public class MasterChunk {
 	
 	public void setBlock(Vector3f position, Block block) {
 		Chunk chunk = getChunk();
+		Main.theWorld.refreshChunk(this);
 		int localX = (int)(position.x + getOrigin().x)%16;
 		int localY = (int) position.y;
 		int localZ = (int)(position.z + getOrigin().z)%16;
@@ -111,6 +112,7 @@ public class MasterChunk {
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
+						Main.theWorld.refreshChunk(this);
 						
 					}
 				} else {
@@ -120,6 +122,7 @@ public class MasterChunk {
 				if(chunk.blocks[localX][localY][localZ] != -1) {
 					chunk.blocks[localX][localY][localZ] = -1;
 				}
+				Main.theWorld.refreshChunk(this);
 			}
 		}
 		Main.theWorld.refreshChunk(this);

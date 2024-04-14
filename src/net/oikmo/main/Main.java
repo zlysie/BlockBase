@@ -50,9 +50,9 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main extends Gui {
 	
-	private static final int resourceVersion = 00;
+	private static final int resourceVersion = 1;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.0.7";
+	public static final String version = "a0.0.8";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -65,6 +65,7 @@ public class Main extends Gui {
 	private static PanelCrashReport report;
 	private static boolean hasErrored = false;
 	
+	public static GuiInGame inGameGUI;
 	public static GuiScreen currentScreen;
 	
 	public static World theWorld;
@@ -86,6 +87,9 @@ public class Main extends Gui {
 			}
 			if(!new File(getResources() + "/music").exists()) {
 				new File(getResources() + "/music").mkdirs();
+			}
+			if(!new File(getResources() + "/sfx").exists()) {
+				new File(getResources() + "/sfx").mkdirs();
 			}
 			
 			frame = new Frame(Main.gameName);
@@ -120,9 +124,9 @@ public class Main extends Gui {
 			InputManager im = new InputManager();
 
 			theWorld = new World();
-			currentScreen = new GuiInGame();
-
+			
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
+			inGameGUI = new GuiInGame();
 			
 			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
 			
@@ -146,7 +150,13 @@ public class Main extends Gui {
 				theWorld.update(thePlayer.getCamera());
 				im.handleInput();
 				
-				Main.currentScreen.update();
+				if(inGameGUI != null) {				
+					inGameGUI.update();
+				}
+				
+				if(Main.currentScreen != null) {
+					Main.currentScreen.update();
+				}
 				
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
@@ -176,7 +186,7 @@ public class Main extends Gui {
 		displayRequest = true;
 		DisplayManager.closeDisplay();
 		SoundMaster.cleanUp();
-		System.exit(0);
+		//System.exit(0);
 	}
 
 	/**
@@ -233,10 +243,10 @@ public class Main extends Gui {
 		tmp.mkdir();
 		if(!txt.exists()) {
 
-			FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
+			FileWriter resourceTxtWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
 
-			myWriter.write(Integer.toString(resourceVersion));
-			myWriter.close();
+			resourceTxtWriter.write(Integer.toString(resourceVersion));
+			resourceTxtWriter.close();
 
 			int options = JOptionPane.showConfirmDialog(frame, "Going to download resources based on resourceVersion: " + resourceVersion +  ".\nJust saying this will take a while depending on your connection or disk speeds.", "Resource Downloader Reminder", JOptionPane.PLAIN_MESSAGE);
 
@@ -277,21 +287,25 @@ public class Main extends Gui {
 										if(!path.toString().contains("custom")) {
 											Files.delete(path);  //delete each file or directory
 										}
-
 									} catch (IOException e) {
 										e.printStackTrace();
 									}
 								});
 							}
 
-
-
 							int options = JOptionPane.showConfirmDialog(frame, "Going to download resources based on resourceVersion: " + resourceVersion +  ".\nJust saying this will take a while depending on your connection or disk speeds.", "Resource Downloader Reminder", JOptionPane.PLAIN_MESSAGE);
 
 							if(options == -1) {
 								System.exit(0);
 							}
-
+							
+							
+							if(!new File(getResources() + "/music").exists()) {
+								new File(getResources() + "/music").mkdirs();
+							}
+							if(!new File(getResources() + "/sfx").exists()) {
+								new File(getResources() + "/sfx").mkdirs();
+							}
 							if(new File(getResources()+"/music").list().length == 0) {
 								download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
 								UnzipUtility unzipper = new UnzipUtility();

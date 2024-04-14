@@ -8,7 +8,7 @@ public class Slot {
 	
 	public Slot(Item item) {
 		this.item = item;
-		this.maxStackSize = item.maxStackSize;
+		this.maxStackSize = item.getMaxStackSize();
 		this.currentAmount = 1;
 	}
 

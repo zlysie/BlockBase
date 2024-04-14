@@ -7,29 +7,37 @@ import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiInventory;
+import net.oikmo.main.gui.GuiPauseMenu;
 
 public class InputManager {
 
-	private final int toggleUIKey = Keyboard.KEY_F1;
+	private final int texturePackKey = Keyboard.KEY_F1;
 	private final int screenShotKey = Keyboard.KEY_F2;
-	private final int texturePackKey = Keyboard.KEY_F3;
+	private final int debugKey = Keyboard.KEY_F3;
+	
+	private final int pauseEscapeKey = Keyboard.KEY_ESCAPE;
+	
 	private final int refreshKey = Keyboard.KEY_F;
-	private final int saveKey = Keyboard.KEY_R;
-	private final int loadKey = Keyboard.KEY_T;
+	private final int inventoryKey = Keyboard.KEY_E;
+	private final int teleportKey = Keyboard.KEY_P;
 	private final int itemKey = Keyboard.KEY_Y;
-	private final int pauseKey = Keyboard.KEY_ESCAPE;
-
-	private boolean lockInScreenshot = false;
-	private boolean lockInChangeTexture = false;
-	private boolean lockInUI = false;
-	private boolean lockInRefresh = false;
-	private boolean lockInWorldSave = false;
-	private boolean lockInWorldLoad = false;
-	private boolean lockInItem = false;
+	
 	private boolean lockInPause = false;
+	
+	private boolean lockInChangeTexture = false;
+	private boolean lockInScreenshot = false;
+	private boolean lockInDebug = false;
+	
+	private boolean lockInRefresh = false;
+	private boolean lockInItem = false;
 
 	public void handleInput() {
 		if(!Main.isPaused()) {
+			if(Keyboard.isKeyDown(teleportKey)) {
+				Main.thePlayer.resetPos();
+			}
+			
 			if(Keyboard.isKeyDown(refreshKey)) {
 				if(!lockInRefresh) {
 					Main.theWorld.refreshChunks();
@@ -40,33 +48,13 @@ public class InputManager {
 				lockInRefresh = false;
 			}
 
-			if(Keyboard.isKeyDown(saveKey)) {
-				if(!lockInWorldSave) {
-					Main.theWorld.saveWorld();
+			if(Keyboard.isKeyDown(debugKey)) {
+				if(!lockInDebug) {
+					Main.inGameGUI.toggleDebug();
 				}
-
-				lockInWorldSave = true;
+				lockInDebug = true;
 			} else {
-				lockInWorldSave = false;
-			}
-
-			if(Keyboard.isKeyDown(loadKey)) {
-				if(!lockInWorldLoad) {
-					Main.theWorld.loadWorld();
-				}
-
-				lockInWorldLoad = true;
-			} else {
-				lockInWorldLoad = false;
-			}
-
-			if(Keyboard.isKeyDown(toggleUIKey)) {
-				if(!lockInUI) {
-					Main.currentScreen.onClose();
-				}
-				lockInUI = true;
-			} else {
-				lockInUI = false;
+				lockInDebug = false;
 			}
 
 			if(Keyboard.isKeyDown(texturePackKey)) {
@@ -96,6 +84,12 @@ public class InputManager {
 			} else {
 				lockInItem = false;
 			}
+			
+			if(Keyboard.isKeyDown(inventoryKey)) {
+				if(Main.currentScreen == null) {
+					Main.currentScreen = new GuiInventory();
+				}
+			}
 		}
 		
 
@@ -109,17 +103,21 @@ public class InputManager {
 		}
 		
 		if(!lockInPause) {
-			if(Keyboard.isKeyDown(pauseKey)) {
-				Main.shouldTick();
+			if(Keyboard.isKeyDown(pauseEscapeKey)) {
+				
+				if(Main.currentScreen != null) {
+					Main.currentScreen.prepareCleanUp();
+					Main.currentScreen = null;
+				} else {
+					Main.currentScreen = new GuiPauseMenu();
+				}
 				lockInPause = true;
 			}
 		} else {
-			if(!Keyboard.isKeyDown(pauseKey)) {
+			if(!Keyboard.isKeyDown(pauseEscapeKey)) {
 				lockInPause = false;
 			}
 		}
-		
-		
 	}
 
 }

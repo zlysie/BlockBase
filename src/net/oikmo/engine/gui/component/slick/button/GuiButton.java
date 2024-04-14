@@ -90,15 +90,8 @@ public class GuiButton extends Gui implements GuiComponent {
 		}
 		
 		drawImage(texture, x, y, width, height);
-		int textWidth = (font.getWidth(text));
-		int textHeight = font.getHeight(text);
-		float width2 =  (width - textWidth);
-		float height2 = ((height - textHeight)+fontSize)/2;
-		float textX = x - (width2/2);
-		float textY = y - height2/2;
-		
 		Color c = isHovering ? Color.yellow : Color.white;
-		drawShadowString(c, textX, textY, text);
+		drawShadowStringCentered(c, x, y, text);
 	}
 
 	public void updateComponent() {

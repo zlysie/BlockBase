@@ -33,13 +33,12 @@ public class ItemEntity extends Entity {
 			
 			if(!Main.theWorld.anyBlockInSpecificLocation((int)getRoundedPosition().x, (int)getRoundedPosition().y-1, (int)getRoundedPosition().z)) {
 				this.motion.y = (float)((double)this.motion.y - 0.005D);
-				this.move(0, this.motion.y, 0);
+				this.move(0, this.motion.y, 0,1);
 			}
-			
 		} else {
 			lastY = getPosition().y;
 			this.motion.y = (float)((double)this.motion.y - 0.005D);
-			this.move(this.motion.x, this.motion.y, this.motion.z);
+			this.move(this.motion.x, this.motion.y, this.motion.z,1);
 		}
 		
 		if(bb.intersects(Main.thePlayer.getAABB())) {

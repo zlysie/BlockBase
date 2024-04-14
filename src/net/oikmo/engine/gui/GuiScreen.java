@@ -1,7 +1,5 @@
 package net.oikmo.engine.gui;
 
-import org.lwjgl.input.Keyboard;
-
 import net.oikmo.engine.textures.GuiTexture;
 
 public class GuiScreen extends Gui {
@@ -20,8 +18,8 @@ public class GuiScreen extends Gui {
 
 	public void update() {
 		if(dontUpdate) { return; }
-		
 		onUpdate();
+		cursor.tick();
 	}
 
 	public void prepareCleanUp() {
@@ -32,16 +30,6 @@ public class GuiScreen extends Gui {
 	public void onInit() {}
 	public void onUpdate() {}
 	public void onClose() {}
-
-	protected void handleKeyboardInput() {
-		if(Keyboard.getEventKeyState()) {
-			keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
-		}
-	}
-
-	protected void keyTyped(char c, int i) {
-		if(i == 1) {}
-	}
 
 	public String getScreenID() {
 		return screenID;

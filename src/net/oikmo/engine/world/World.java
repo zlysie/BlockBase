@@ -113,7 +113,6 @@ public class World {
 							master.destroyMesh();
 						}
 					}
-
 				}
 			}
 		}
@@ -146,11 +145,9 @@ public class World {
 							} else {
 								if(Main.thePlayer.getInventory().addItem(((ItemEntity)entity).getItem())) {
 									entities.remove(entity);
-									System.out.println("removing item from world!");
 								} else {
 									((ItemEntity)entity).dontTick = false;
 								}
-								
 								
 								continue;
 							}
@@ -161,7 +158,6 @@ public class World {
 				}
 			}
 		}
-
 	}
 
 	public Block getBlock(Vector3f position) {
@@ -185,6 +181,7 @@ public class World {
 		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
 		if(m != null) {
 			m.setBlock(position, block);
+			refreshChunk(m);
 		}
 	}
 
@@ -192,33 +189,28 @@ public class World {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
 		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
-
+		
 		if(m != null) {
 			int localX = (int)(position.x + m.getOrigin().x)%16;
 			int localY = (int) position.y;
 			int localZ = (int)(position.z + m.getOrigin().z)%16;
-
+			
 			if(localX < 0) {
 				localX = localX+16;
 			}
 			if(localZ < 0) {
 				localZ = localZ+16;
 			}
-
-
-
+			
 			for(int dx = -1; dx <= 1; dx++) {
 				for(int dy = -1; dy <= 1; dy++) {
 					for(int dz= -1; dz <= 1; dz++) {
-						if (dx == 0 && dy == 0 && dz == 0) {
-							//continue;
-						}
 						int x = localX + dx;
 						int y = localY + dy;
 						int z = localZ + dz;
 
 						if((x != localX && y != localY && z != localZ) && (x != localX || y != localY || z != localZ)) {
-							//continue;
+							continue;
 						}
 
 						if(Maths.isWithinChunk(x, y, z)) {
@@ -233,23 +225,22 @@ public class World {
 		return false;
 	}
 
-	public void saveWorld() {
+	public void saveWorld(String world) {
 		List<ChunkSaveData> chunks = new ArrayList<>();
 
 		for(MasterChunk master : masterChunks) {
 			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
 		}
 
-		SaveSystem.save("world1", new SaveData(seed, chunks, Main.thePlayer));
+		SaveSystem.save(world, new SaveData(seed, chunks, Main.thePlayer));
 		chunks.clear();
 	}
 
-	public void loadWorld() {
-		if(canCreateChunks) {
-			Main.thePlayer.getCamera().setMouseLock(false);
+	public void loadWorld(String world) {
+		if(canCreateChunks && SaveSystem.load(world) != null) {
 			Main.thePlayer.resetMotion();
 			this.canCreateChunks = false;
-			SaveData data = SaveSystem.load("world1");
+			SaveData data = SaveSystem.load(world);
 			MasterChunk.clear();
 			this.masterChunks.clear();
 			this.chunkEntities.clear();
@@ -267,7 +258,6 @@ public class World {
 
 			Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
 			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
-			Main.thePlayer.getCamera().setMouseLock(true);
 			this.canCreateChunks = true;
 		}
 	}

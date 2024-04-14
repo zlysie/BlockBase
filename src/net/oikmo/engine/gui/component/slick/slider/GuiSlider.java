@@ -128,22 +128,31 @@ public class GuiSlider  extends Gui implements GuiComponent {
 		
 		drawImage(backgroundTexture, x, y, width, height);
 		drawImage(texture, x2, y, width2, height);
-
-		int textWidth = (font.getWidth(text));
-		int textHeight = font.getHeight(text);
-		float width2 =  (width - textWidth);
-		float height2 = ((height - textHeight)+fontSize)/2;
-		float textX = x - (width2/2);
-		float textY = y - height2/2;
-
 		Color c = isHovering ? Color.yellow : Color.white;
-		drawShadowString(c, textX, textY, text);
+		drawShadowStringCentered(c, x, y, text);
 	}
 
 	public void updateComponent() {
 		command.update();
 		this.x = command.getX();
 		this.y = command.getY();
+		
+		sliderValue = Math.max(0, Math.min(1, sliderValue));
+		float handleHalfWidth = width2 / 2;
+		float calculatedWidth = width - width2;
+		x2 = (sliderValue * calculatedWidth) + (x - width / 2) + handleHalfWidth;
+		x2 = Math.max(x - (width / 2) + handleHalfWidth, Math.min(x + (width / 2) - handleHalfWidth, x2));
+	}
+	
+	public void setSliderValue(float current, float min, float max) {
+	    current = Math.max(min, Math.min(max, current));
+
+	    sliderValue = (current - min) / (max - min);
+
+	    float handleHalfWidth = width2 / 2;
+	    float calculatedWidth = width - width2;
+	    x2 = (sliderValue * calculatedWidth) + (x - width / 2) + handleHalfWidth;
+	    x2 = Math.max(x - (width / 2) + handleHalfWidth, Math.min(x + (width / 2) - handleHalfWidth, x2));
 	}
 
 	@Override

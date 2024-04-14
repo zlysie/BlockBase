@@ -11,14 +11,14 @@ public class Item {
 	private static Image blockAtlas;
 	
 	public static Item[] blockItems = new Item[Block.blocks.length];
-	public static final Item ironBlock = new Item(Block.Type.IRONBLOCK, "Iron Block", 64).setBlockImageFromAtlas(15, 0);
-	public static final Item goldBlock = new Item(Block.Type.GOLDBLOCK, "Gold Block", 64).setBlockImageFromAtlas(15, 1);
-	public static final Item diamondBlock = new Item(Block.Type.DIAMONDBLOCK, "Diamond Block", 64).setBlockImageFromAtlas(15, 2);
+	public static final Item ironBlock = new Item(Block.Type.IRONBLOCK, "Iron Block", 64).setDescription("Block of iron").setBlockImageFromAtlas(15, 0);
+	public static final Item goldBlock = new Item(Block.Type.GOLDBLOCK, "Gold Block", 64).setDescription("Block of gold").setBlockImageFromAtlas(15, 1);
+	public static final Item diamondBlock = new Item(Block.Type.DIAMONDBLOCK, "Diamond Block", 64).setDescription("Block of diamonds").setBlockImageFromAtlas(15, 2);
 	
 	public static final Item grass = new Item(Block.Type.GRASS, "Grass", 64).setBlockImageFromAtlas(0, 0);
 	public static final Item dirt = new Item(Block.Type.DIRT, "Dirt", 64).setBlockImageFromAtlas(1, 0);
 	public static final Item stone = new Item(Block.Type.STONE, "Stone", 64).setBlockImageFromAtlas(2, 0);
-	public static final Item bedrock = new Item(Block.Type.BEDROCK, "Bedrock", 64).setBlockImageFromAtlas(3, 0);
+	public static final Item bedrock = new Item(Block.Type.BEDROCK, "Bedrock", 64).setDescription("How did you get this?").setBlockImageFromAtlas(3, 0);
 	public static final Item cobble = new Item(Block.Type.COBBLE, "Cobblestone", 64).setBlockImageFromAtlas(4, 0);
 	public static final Item mossycobble = new Item(Block.Type.MOSSYCOBBLE, "Mossy Cobblestone", 64).setBlockImageFromAtlas(5, 0);
 	public static final Item obsidian = new Item(Block.Type.OBSIDIAN, "Obsidian", 64).setBlockImageFromAtlas(6, 0);
@@ -31,7 +31,7 @@ public class Item {
 	public static final Item smoothStone = new Item(Block.Type.SMOOTHSTONE, "Smooth Stone", 64).setBlockImageFromAtlas(1, 2);
 	public static final Item brick = new Item(Block.Type.BRICK, "Bricks", 64).setBlockImageFromAtlas(2, 2);
 	
-	public static final Item tnt = new Item(Block.Type.TNT, "TNT", 64).setBlockImageFromAtlas(2, 2);
+	public static final Item tnt = new Item(Block.Type.TNT, "TNT", 64).setDescription("Boom boom boom. I can't stop singing this bloody tune tune tune").setBlockImageFromAtlas(0, 3);
 	
 	private static void initImage() {
 		if(atlas != null) { return; }
@@ -40,26 +40,44 @@ public class Item {
 	}
 	
 	private Image image;
-	public final String itemName;
-	public final int maxStackSize;
+	private String name = "";
+	private String desc = "";
+	private int maxStackSize;
 	
 	private int atlasX, atlasY;
 	
 	private Item(String itemName, int maxStackSize) {
 		initImage();
-		this.itemName = itemName;
+		this.name = itemName;
 		this.maxStackSize = maxStackSize;
 	}
 	
 	private Item(Block.Type type, String itemName, int maxStackSize) {
 		initImage();
-		this.itemName = itemName;
+		this.name = itemName;
 		this.maxStackSize = maxStackSize;
 		blockItems[type.ordinal()] = this;
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	public String getDescription() {
+		return desc;
+	}
+
+	public int getMaxStackSize() {
+		return maxStackSize;
+	}
+
 	public Image getImage() {
 		return image;
+	}
+	
+	public Item setDescription(String desc) {
+		this.desc = desc;
+		return this;
 	}
 	
 	public Item setImageFromAtlas(int x, int y) {
