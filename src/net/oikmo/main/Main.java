@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -40,6 +41,7 @@ import net.oikmo.engine.world.World;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.toolbox.Logger;
+import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.UnzipUtility;
 import net.oikmo.toolbox.error.CanvasLogo;
@@ -68,6 +70,8 @@ public class Main extends Gui {
 	public static GuiInGame inGameGUI;
 	public static GuiScreen currentScreen;
 	
+	private static String currentlyPlayingWorld;
+	
 	public static World theWorld;
 	public static Player thePlayer;
 	
@@ -77,6 +81,9 @@ public class Main extends Gui {
 	
 	private static boolean shouldTick = true;
 
+	private static String[] splashes;
+	private static String splashText;
+	
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
@@ -110,11 +117,13 @@ public class Main extends Gui {
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
 			frame.removeAll();
-			frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
+			
 			
 			if(Calendar.getInstance().get(Calendar.MONTH) == 3 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+				frame.setBackground(new Color(0f, 0.6f, 0.8274509803921568f, 1f));
 				frame.add(new CanvasLogo("icon_aprilFools"), "Center");
 			} else {
+				frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
 				frame.add(new CanvasLogo("iconx128"), "Center");
 			}
 			
@@ -132,23 +141,22 @@ public class Main extends Gui {
 
 			InputManager im = new InputManager();
 			
-			shouldTick = false;
+			shouldTick = false; 
 			
-			currentScreen = new GuiMainMenu();
+			//inGameGUI = new GuiInGame();loadWorld("your");
 			
+			splashes = Maths.fileToArray("splashes.txt");
+			splashText = splashes[new Random().nextInt(splashes.length)];
 			
+			currentScreen = new GuiMainMenu(splashText);
 			
 			while(!Display.isCloseRequested()) {
 				timer.advanceTime();
-				
-				
 				
 				for(int e = 0; e < timer.ticks; ++e) {
 					elapsedTime += 0.1f;
 					
 					if(shouldTick) {
-						
-						
 						if(thePlayer != null) {
 							Main.thePlayer.updateCamera();
 						}
@@ -156,8 +164,6 @@ public class Main extends Gui {
 						tick();
 					}
 				}
-				
-				
 				
 				if(theWorld != null) {
 					theWorld.update(thePlayer.getCamera());
@@ -181,7 +187,10 @@ public class Main extends Gui {
 		close();
 	}
 	
+	private static boolean hasSaved = false;
+	
 	public static void loadWorld(String worldName) {
+		currentlyPlayingWorld = worldName;
 		theWorld = new World();
 		inGameGUI = new GuiInGame();
 		
@@ -199,9 +208,12 @@ public class Main extends Gui {
 	}
 
 	private static void tick() {
-		
 		theWorld.tick();
 		camPos = new Vector3f(thePlayer.getCamera().getPosition());
+		if(!hasSaved && thePlayer.isOnGround()) {
+			theWorld.saveWorld(currentlyPlayingWorld);
+			hasSaved = true;
+		}
 	}
 
 	public static void close() {

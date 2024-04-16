@@ -83,6 +83,7 @@ public class Gui {
 		for(int x = 0; x < (Display.getWidth()+size)/size; x++) {
 			for(int y = 0; y < (Display.getHeight()+size)/size; y++) {
 				Image img = new Image(texture);
+				
 				img.setFilter(Image.FILTER_NEAREST);
 				img.draw(x*size, y*size, size, size);
 			}
@@ -142,6 +143,7 @@ public class Gui {
 		dropGL();
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void drawShadowString(float fontSize, float degrees, Color c, float x, float y, String text) {
 		setupGL();
 		
@@ -167,7 +169,9 @@ public class Gui {
 	}
 
 	protected void drawImg(Image image, float x, float y, float width, float height) {
+		setupGL();
 		image.draw(x-width/2, y-height/2, width, height);
+		dropGL();
 	}
 
 	protected void drawImageRaw(Texture texture, float x, float y, float width, float height) {

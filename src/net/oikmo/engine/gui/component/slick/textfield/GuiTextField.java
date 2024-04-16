@@ -3,6 +3,7 @@ package net.oikmo.engine.gui.component.slick.textfield;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 
 import net.oikmo.engine.ResourceLoader;
@@ -92,7 +93,11 @@ public class GuiTextField  extends Gui implements GuiComponent {
 
 		drawImage(backgroundTexture, x, y, width, height);
 		
-		drawShadowString((x+3)-width/2, y-font.getHeight(inputText)/2, inputText);
+		if(inputText.length() == 0) {
+			drawShadowString(Color.darkGray, (x+3)-width/2, y-font.getHeight("Type here...")/2, "Type here...");
+		} else {
+			drawShadowString((x+3)-width/2, y-font.getHeight(inputText)/2, inputText);
+		}
 	}
 
 	protected void handleKeyboardInput() {

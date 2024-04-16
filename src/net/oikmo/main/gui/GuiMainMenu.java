@@ -22,8 +22,9 @@ import net.oikmo.toolbox.Maths;
 
 public class GuiMainMenu extends GuiScreen {
 
-	public GuiMainMenu() {
+	public GuiMainMenu(String splashText) {
 		super("Main Menu");
+		this.splashText = splashText;
 	}
 
 	private Thread musicThread;	
@@ -32,8 +33,6 @@ public class GuiMainMenu extends GuiScreen {
 	private GuiButton quitButton;
 
 	private String[] menuIDS;
-	
-	private String[] splashes;
 	
 	private String splashText;
 	
@@ -45,8 +44,6 @@ public class GuiMainMenu extends GuiScreen {
 				"music.floatingtrees"
 		};
 		this.menuIDS = menuIDS;
-		this.splashes = Maths.fileToArray("splashes.txt");
-		this.splashText = splashes[new Random().nextInt(splashes.length)];
 		
 		float offsetY = 20f;
 		

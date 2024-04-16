@@ -23,7 +23,7 @@ public class Entity {
 	private Vector3f chunkPos;
 	
 	protected AABB bb;
-	protected boolean onGround;
+	private boolean onGround;
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
@@ -116,7 +116,7 @@ public class Entity {
 		}
 
 		this.bb.move(0.0F, 0.0F, za);
-		this.onGround = yaOrg != ya && yaOrg < 0.0F;
+		this.setOnGround(yaOrg != ya && yaOrg < 0.0F);
 		if(xaOrg != xa) {
 			this.motion.x = 0.0F;
 		}
@@ -267,4 +267,12 @@ public class Entity {
 	}
 	
 	public void tick() {}
+
+	public boolean isOnGround() {
+		return onGround;
+	}
+
+	public void setOnGround(boolean onGround) {
+		this.onGround = onGround;
+	}
 }

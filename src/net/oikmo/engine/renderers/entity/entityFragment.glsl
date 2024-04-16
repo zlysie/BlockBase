@@ -2,6 +2,7 @@
 
 in vec2 pass_textureCoords;
 in float visibility;
+in vec3 surfaceNormal;
 
 out vec4 out_Colour;
 
@@ -15,7 +16,8 @@ void main(void) {
 		discard;
 	}
 	
-	texture = vec4(texture.r + whiteOffset, texture.g + whiteOffset, texture.b + whiteOffset, texture.a);
+	texture.rgb += whiteOffset;
+	
 	out_Colour = texture;
 	out_Colour = mix(vec4(skyColour,1.0), out_Colour, visibility);
 }

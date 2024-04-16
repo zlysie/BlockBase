@@ -43,12 +43,12 @@ public class Player extends Entity {
 			++xa;
 		}
 		
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && this.onGround) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && this.isOnGround()) {
 			this.motion.y = 0.2F;
 		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
-		this.moveRelative(xa, ya, this.onGround ? 0.015F : 0.005F);
+		this.moveRelative(xa, ya, this.isOnGround() ? 0.015F : 0.005F);
 		this.motion.y = (float)((double)this.motion.y - 0.008D);
 		this.move(this.motion.x, this.motion.y, this.motion.z);
 		if(this.getPosition().y < 0) {
@@ -58,7 +58,7 @@ public class Player extends Entity {
 		this.motion.x *= 0.91F;
 		this.motion.y *= 0.98F;
 		this.motion.z *= 0.91F;
-		if(this.onGround) {
+		if(this.isOnGround()) {
 			this.motion.x *= 0.8F;
 			this.motion.z *= 0.8F;
 		}

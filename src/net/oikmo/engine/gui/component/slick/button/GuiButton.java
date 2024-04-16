@@ -4,6 +4,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Image;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
@@ -13,9 +14,11 @@ import net.oikmo.engine.sound.SoundMaster;
 
 public class GuiButton extends Gui implements GuiComponent {
 
-	private Texture texture;
 	private static Texture normalTexture;
 	private static Texture hoveredTexture;
+	
+	private Texture texture = normalTexture;
+	
 	private String text;
 	private GuiCommand command;
 
@@ -60,7 +63,7 @@ public class GuiButton extends Gui implements GuiComponent {
 		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
 
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
-			texture = hoveredTexture;
+			//texture = hoveredTexture;
 
 			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
@@ -89,8 +92,13 @@ public class GuiButton extends Gui implements GuiComponent {
 			}
 		}
 		
-		drawImage(texture, x, y, width, height);
-		Color c = isHovering ? Color.yellow : Color.white;
+		Image img = new Image(texture);
+		if(isHovering) {
+			img.setImageColor(0.85f, 0.85f, 2f);
+		}
+		drawImg(img, x, y, width, height);
+		
+		Color c = isHovering ? new Color(0.9f,0.9f,0.1f,1f) : Color.white;
 		drawShadowStringCentered(c, x, y, text);
 	}
 

@@ -96,7 +96,7 @@ public class World {
 					if(master.getEntity() == null) {
 						if(master.getMesh() != null) {
 							if(master.getMesh().hasMeshInfo()) {
-								RawModel raw = Loader.getInstance().loadToVAO(master.getMesh().positions, master.getMesh().uvs);
+								RawModel raw = Loader.getInstance().loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
 								TexturedModel texModel = new TexturedModel(raw, tex);
 								Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
 								master.setEntity(entity);

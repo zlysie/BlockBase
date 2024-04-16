@@ -28,7 +28,7 @@ public class ItemEntity extends Entity {
 	public void tick() {
 		this.increaseRotation(0, 0.5f, 0);
 		
-		if(onGround) {
+		if(isOnGround()) {
 			this.setPosition(getPosition().x, (lastY+0.2f)+bobOscillate, getPosition().z);
 			
 			if(!Main.theWorld.anyBlockInSpecificLocation((int)getRoundedPosition().x, (int)getRoundedPosition().y-1, (int)getRoundedPosition().z)) {
