@@ -21,6 +21,7 @@ import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
+import net.oikmo.engine.renderers.skybox.SkyBoxRenderer;
 import net.oikmo.engine.textures.GuiTexture;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.main.Main;
@@ -37,11 +38,12 @@ public class MasterRenderer {
 		return instance;
 	}
 	
-	private float FOV = 60f;
+	public float FOV = 60f;
 	private final float NEAR_PLANE = 0.1f, FAR_PLANE = 10000f;
 	
 	private Matrix4f projectionMatrix;
 	
+	private SkyBoxRenderer skyboxRenderer;
 	private EntityRenderer entityRenderer;
 	
 	public static ModelTexture currentTexturePack;
@@ -56,6 +58,7 @@ public class MasterRenderer {
 		
 		float offset = 0.2f;
 		
+		skyboxRenderer = new SkyBoxRenderer("panorama", projectionMatrix);
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		defaultTexturePack = ResourceLoader.loadTexture("textures/defaultPack");
 		
@@ -119,6 +122,7 @@ public class MasterRenderer {
 	
 	public void render(Camera camera) {
 		prepare();
+		skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
 		entityRenderer.render(entities, camera);
 		entities.clear();
 	}

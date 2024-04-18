@@ -53,6 +53,11 @@ public class Camera {
 		mouseLocked = true;
 	}
 	
+	public Camera() {
+		this.position = new Vector3f();
+		mouseLocked = false;
+	}
+	
 	int index = 0;
 	float multiplier = 100;
 	boolean inventory = false;

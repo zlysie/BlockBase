@@ -10,9 +10,11 @@ import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Color;
 
 import net.oikmo.engine.ResourceLoader;
+import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.sound.SoundByte;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
@@ -36,6 +38,8 @@ public class GuiMainMenu extends GuiScreen {
 	
 	private String splashText;
 	
+	private Camera mainMenuCamera;
+	
 	public void onInit() {
 		String[] menuIDS = {
 				"music.moogcity",
@@ -44,6 +48,9 @@ public class GuiMainMenu extends GuiScreen {
 				"music.floatingtrees"
 		};
 		this.menuIDS = menuIDS;
+		
+		Camera mainMenuCamera = new Camera();
+		this.mainMenuCamera = mainMenuCamera;
 		
 		float offsetY = 20f;
 		
@@ -122,20 +129,35 @@ public class GuiMainMenu extends GuiScreen {
 		musicThread.start();
 	}
 	
+	private boolean isNegative = false;
+	
 	public void onUpdate() {
 		if(Main.isPaused()) {
-			drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
+			mainMenuCamera.yaw += 0.025f;
+			
+			if(mainMenuCamera.pitch < -45) {
+				isNegative = true;
+			} else if(mainMenuCamera.pitch > 45) {
+				isNegative = false;
+			}
+			
+			if(!isNegative) {
+				mainMenuCamera.pitch -= 0.025f;
+			} else {
+				mainMenuCamera.pitch += 0.025f;
+			}
+			
+			MasterRenderer.getInstance().FOV = 90f;
+			MasterRenderer.getInstance().updateProjectionMatrix();
+			MasterRenderer.getInstance().render(mainMenuCamera);
+			//drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
 			float x = (Display.getWidth()/2);
-			float y = (Display.getHeight()/2)-100;
+			float y = (Display.getHeight()/2)-120;
 			float width = 256;
 			float height = 64;
 			
-			
 			drawImage(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
-			
-			float yOffset = splashText.length() > 16 ? splashText.length()/3 : 0;
-			
-			drawShadowStringCentered(fontSize, -10, Color.yellow, x+width/2,((y+height/2)+10)+yOffset, splashText);
+			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
 			playButton.tick();
 			quitButton.tick();
 		}
