@@ -43,6 +43,7 @@ public class World {
 	public List<Entity> entities = new ArrayList<Entity>();
 	private List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	private Thread chunkCreator;
+	private Thread chunkBackUp;
 
 	private boolean canCreateChunks = true;
 
@@ -87,28 +88,6 @@ public class World {
 			}
 		});
 		
-		//this uh double checks in case a chunk has been occupied but literally hasn't been added here
-		new Thread(new Runnable() { 
-			public void run() {
-				while (!Main.displayRequest) {
-					if(canCreateChunks) {
-						synchronized(MasterChunk.chunkMap) {
-							try {
-								for(Map.Entry<Vector3f, MasterChunk> entry : MasterChunk.chunkMap.entrySet()) {
-									MasterChunk m = entry.getValue();
-
-									if(!masterChunks.contains(m)) {
-										masterChunks.add(m);
-									}
-								}
-							} catch(java.util.ConcurrentModificationException e) {
-								//humbly fuck off, i want chunks to load after player saves it :sob:
-							}
-						}
-					}
-				}
-			}
-		}).start();
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
 	}
@@ -263,6 +242,7 @@ public class World {
 		chunks.clear();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void saveWorldAndQuit(String world) {
 		List<ChunkSaveData> chunks = new ArrayList<>();
 
@@ -273,15 +253,21 @@ public class World {
 		SaveSystem.save(world, new SaveData(seed, chunks, Main.thePlayer));
 		chunks.clear();
 
+		this.chunkCreator.interrupt();
+		this.chunkCreator.stop();
+		
+		if(this.chunkBackUp != null) {
+			this.chunkBackUp.interrupt();
+			this.chunkBackUp.stop();
+		}
+		
 		Main.theWorld = null;
 	}
 
 	public void loadWorld(String world) {
 		if(canCreateChunks && SaveSystem.load(world) != null) {
 			this.canCreateChunks = false;
-
-
-
+			
 			SaveData data = SaveSystem.load(world);
 
 			this.seed = data.seed;
@@ -299,7 +285,7 @@ public class World {
 			this.masterChunks.clear();
 			this.chunkEntities.clear();
 			for(ChunkSaveData s : data.chunks) {
-				masterChunks.add(new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks));
+				new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks);
 			}
 
 			new Thread(new Runnable() {
@@ -307,12 +293,35 @@ public class World {
 					JOptionPane.showMessageDialog(null, "World has loaded!");
 				}
 			}).start();
-			System.out.println(this.seed + " " + data.seed);
-
-			System.out.println(this.seed + " " + data.seed);
-
+			
 			Vector3f v = Main.thePlayer.getPosition();
+			
+			this.chunkBackUp = new Thread(new Runnable() {
+				public void run() {
+					while(!Main.displayRequest) {
+						synchronized(MasterChunk.chunkMap) {
+							try {
+								for(Map.Entry<Vector3f, MasterChunk> entry : MasterChunk.chunkMap.entrySet()) {
+									MasterChunk m = entry.getValue();
 
+									if(!masterChunks.contains(m)) {
+										System.out.println(m);
+										masterChunks.add(m);
+									}
+								}
+							} catch(java.util.ConcurrentModificationException e) {
+								//humbly fuck off, i want chunks to load after player saves it :sob:
+							}
+						}
+					}
+				}
+			});
+					
+			this.chunkBackUp.start();
+			
+			//this uh double checks in case a chunk has been occupied but literally hasn't been added here
+			
+			
 			v.y = getHeightFromPosition(Main.thePlayer.getRoundedPosition());
 			if(v.y != -1) {
 				v.y++;
@@ -320,7 +329,7 @@ public class World {
 			}
 
 			//Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
-			//Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
+			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
 			this.canCreateChunks = true;
 		}
 	}
@@ -338,10 +347,13 @@ public class World {
 
 	public void refreshChunk(MasterChunk master) {
 		if(master.getMesh() != null) {
+			master.getMesh().removeMeshInfo();
 			master.destroyMesh();
 			chunkEntities.remove(master.getEntity());
 			master.setEntity(null);
 			master.createMesh();
+		} else {
+			
 		}
 	}
 
