@@ -36,13 +36,14 @@ import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
+import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.toolbox.Logger;
-import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.Logger.LogLevel;
+import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.UnzipUtility;
 import net.oikmo.toolbox.error.CanvasLogo;
 import net.oikmo.toolbox.error.PanelCrashReport;
@@ -70,7 +71,7 @@ public class Main extends Gui {
 	public static GuiInGame inGameGUI;
 	public static GuiScreen currentScreen;
 	
-	private static String currentlyPlayingWorld;
+	public static String currentlyPlayingWorld;
 	
 	public static World theWorld;
 	public static Player thePlayer;
@@ -82,7 +83,7 @@ public class Main extends Gui {
 	private static boolean shouldTick = true;
 
 	private static String[] splashes;
-	private static String splashText;
+	public static String splashText;
 	
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
@@ -150,32 +151,47 @@ public class Main extends Gui {
 			
 			currentScreen = new GuiMainMenu(splashText);
 			
+			((GuiMainMenu)currentScreen).doRandomMusic();
+			
 			while(!Display.isCloseRequested()) {
 				timer.advanceTime();
+				
+				if(thePlayer != null) {
+					Main.thePlayer.updateCamera();
+				}
+				
+				if(Main.currentScreen != null && Main.currentScreen instanceof GuiMainMenu) {
+					Main.currentScreen.update();
+				}
+				
 				
 				for(int e = 0; e < timer.ticks; ++e) {
 					elapsedTime += 0.1f;
 					
-					if(shouldTick) {
-						if(thePlayer != null) {
-							Main.thePlayer.updateCamera();
+					if(Main.currentScreen != null && Main.currentScreen instanceof GuiMainMenu) {
+						if(((GuiMainMenu)Main.currentScreen).getCamera() != null) {
+							((GuiMainMenu)Main.currentScreen).getCamera().yaw += 0.1f;
 						}
-						
+					}
+					
+					if(shouldTick) {
 						tick();
 					}
 				}
+				
+				
+				
+				im.handleInput();
 				
 				if(theWorld != null) {
 					theWorld.update(thePlayer.getCamera());
 				}
 				
-				im.handleInput();
-				
 				if(inGameGUI != null) {				
 					inGameGUI.update();
 				}
 				
-				if(Main.currentScreen != null) {
+				if(Main.currentScreen != null && !(Main.currentScreen instanceof GuiMainMenu)) {
 					Main.currentScreen.update();
 				}
 				
@@ -187,20 +203,37 @@ public class Main extends Gui {
 		close();
 	}
 	
+	public static String getRandomSplash() {
+		return splashes[new Random().nextInt(splashes.length)];
+	}
+	
 	private static boolean hasSaved = false;
 	
 	public static void loadWorld(String worldName) {
 		currentlyPlayingWorld = worldName;
+		SoundMaster.stopMusic();
+		SoundMaster.doMusic();
 		theWorld = new World();
 		inGameGUI = new GuiInGame();
 		
-		thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
-		theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
+		if(SaveSystem.load(worldName) != null) {
+			theWorld.loadWorld(worldName);
+		} else {
+			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
+		}
+		
+		if(Main.thePlayer != null) {
+			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
+		}
+		
 	}
 	
 	public static void shouldTick() {
 		Main.shouldTick = !shouldTick;
-		Main.thePlayer.getCamera().setMouseLock(shouldTick);
+		if(Main.thePlayer != null) {
+			Main.thePlayer.getCamera().setMouseLock(shouldTick);
+		}
+		
 	}
 	
 	public static boolean isPaused() {

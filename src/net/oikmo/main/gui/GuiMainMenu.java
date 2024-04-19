@@ -11,6 +11,7 @@ import org.newdawn.slick.Color;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
@@ -49,6 +50,9 @@ public class GuiMainMenu extends GuiScreen {
 		};
 		this.menuIDS = menuIDS;
 		
+		MasterRenderer.getInstance().FOV = 90f;
+		MasterRenderer.getInstance().updateProjectionMatrix();
+		
 		Camera mainMenuCamera = new Camera();
 		this.mainMenuCamera = mainMenuCamera;
 		
@@ -58,7 +62,9 @@ public class GuiMainMenu extends GuiScreen {
 		playButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
-				
+				prepareCleanUp();
+				Gui.cleanUp();
+				Main.currentScreen = new GuiSelectWorld();
 			}
 
 			@Override
@@ -83,10 +89,12 @@ public class GuiMainMenu extends GuiScreen {
 			}
 		});
 		
-		doRandomMusic();
+		
 	}
 	
-	private void doRandomMusic() {
+	public void doRandomMusic() {
+		
+		
 		List<SoundByte> bytes = new ArrayList<>();
 		for(String entry : menuIDS) {
 			SoundByte b = SoundMaster.getMusicByte(entry);
@@ -99,8 +107,8 @@ public class GuiMainMenu extends GuiScreen {
 			public void run() {
 				
 				try {
-					long thing = new Random().nextInt(12000);
-					System.out.println("waiting for " + thing + "ms");
+					long thing = new Random().nextInt(6000);
+					Logger.log(LogLevel.INFO, "waiting for " + thing + "ms");
 					Thread.sleep(thing);
 					
 					
@@ -129,13 +137,14 @@ public class GuiMainMenu extends GuiScreen {
 		musicThread.start();
 	}
 	
-	private boolean isNegative = false;
+	//private boolean isNegative = false;
 	
+	private int ticksToWait = 0;
+	private int maxCoolDown = 120; //2s
+	private boolean lockTick = false;
 	public void onUpdate() {
 		if(Main.isPaused()) {
-			mainMenuCamera.yaw += 0.025f;
-			
-			if(mainMenuCamera.pitch < -45) {
+			/*if(mainMenuCamera.pitch < -45) {
 				isNegative = true;
 			} else if(mainMenuCamera.pitch > 45) {
 				isNegative = false;
@@ -145,27 +154,43 @@ public class GuiMainMenu extends GuiScreen {
 				mainMenuCamera.pitch -= 0.025f;
 			} else {
 				mainMenuCamera.pitch += 0.025f;
+			}*/
+			
+			if(ticksToWait < maxCoolDown) {
+				ticksToWait++;
 			}
 			
-			MasterRenderer.getInstance().FOV = 90f;
-			MasterRenderer.getInstance().updateProjectionMatrix();
-			MasterRenderer.getInstance().render(mainMenuCamera);
-			//drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
+			if(!lockTick && ticksToWait >= maxCoolDown) {
+				lockTick = true;
+			}
+			
 			float x = (Display.getWidth()/2);
 			float y = (Display.getHeight()/2)-120;
 			float width = 256;
 			float height = 64;
 			
+			MasterRenderer.getInstance().render(((GuiMainMenu)Main.currentScreen).getCamera());
 			drawImage(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
-			playButton.tick();
-			quitButton.tick();
+			playButton.tick(lockTick);
+			quitButton.tick(lockTick);
+			
+			
 		}
 	}
 	
 	@SuppressWarnings("deprecation")
 	public void onClose() {
-		musicThread.interrupt();
-		musicThread.stop();
+		
+		MasterRenderer.getInstance().FOV = 60f;
+		MasterRenderer.getInstance().updateProjectionMatrix();
+		if(this.musicThread != null) {
+			musicThread.interrupt();
+			musicThread.stop();
+		}
+	}
+
+	public Camera getCamera() {
+		return this.mainMenuCamera;
 	}
 }

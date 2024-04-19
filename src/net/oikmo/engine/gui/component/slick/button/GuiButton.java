@@ -16,15 +16,15 @@ public class GuiButton extends Gui implements GuiComponent {
 
 	private static Texture normalTexture;
 	private static Texture hoveredTexture;
-	
+
 	private Texture texture = normalTexture;
-	
+
 	private String text;
 	private GuiCommand command;
 
 	private float x, y, width, height;
 	private boolean lockButton = false;
-	
+
 	private boolean isHovering = false;
 
 	private void onInit() {
@@ -56,7 +56,7 @@ public class GuiButton extends Gui implements GuiComponent {
 		this.height = height;
 		components.add(this);
 	}
-	
+
 	@Override
 	public void tick() {
 		float mouseX = Mouse.getX();
@@ -64,19 +64,16 @@ public class GuiButton extends Gui implements GuiComponent {
 
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
 			//texture = hoveredTexture;
-
 			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
 				if(command != null) {
 					if(!lockButton) {
 						if(!lockedRightNow && current != this) {
-							Gui.lockedRightNow = true;
+							lockedRightNow = true;
+							current = this;
 							SoundMaster.playSFX("ui.button.click");
 							command.invoke();
-							lockButton = true;
-							current = this;
 						}
-						
 					}
 				}
 			} else {
@@ -88,7 +85,7 @@ public class GuiButton extends Gui implements GuiComponent {
 			if(lockedRightNow && current == this) {
 				lockedRightNow = false;
 				current = null;
-				
+
 			}
 		}
 		
@@ -100,6 +97,49 @@ public class GuiButton extends Gui implements GuiComponent {
 		
 		Color c = isHovering ? new Color(0.9f,0.9f,0.1f,1f) : Color.white;
 		drawShadowStringCentered(c, x, y, text);
+	}
+
+	public void tick(boolean shouldClicky) {
+		float mouseX = Mouse.getX();
+		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
+
+		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
+			isHovering = true;
+			if(Mouse.isButtonDown(0) && shouldClicky) {
+				if(command != null) {
+					if(!lockButton) {
+						if(!lockedRightNow && current != this) {
+							lockedRightNow = true;
+							current = this;
+							SoundMaster.playSFX("ui.button.click");
+							command.invoke();
+						}
+					}
+				}
+			} else {
+				lockButton = false;
+			}
+		} else {
+			isHovering = false;
+			texture = normalTexture;
+			if(lockedRightNow && current == this) {
+				lockedRightNow = false;
+				current = null;
+			}
+		}
+		
+		Image img = new Image(texture);
+		if(isHovering) {
+			img.setImageColor(0.85f, 0.85f, 2f);
+		}
+		drawImg(img, x, y, width, height);
+		
+		Color c = isHovering ? new Color(0.9f,0.9f,0.1f,1f) : Color.white;
+		drawShadowStringCentered(c, x, y, text);
+	}
+
+	public void setText(String text) {
+		this.text = text;
 	}
 
 	public void updateComponent() {
@@ -116,7 +156,7 @@ public class GuiButton extends Gui implements GuiComponent {
 	public boolean isHovering() {
 		return isHovering;
 	}
-	
+
 	public void setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;

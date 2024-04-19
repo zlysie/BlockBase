@@ -22,6 +22,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
+import net.oikmo.main.Main;
 
 public class Maths {
 
@@ -230,5 +231,9 @@ public class Maths {
 		}
 		
 		return null;
+	}
+	
+	public static float getWorldSize(String fileDir) {
+		return new File(Main.getDir()+"/saves/"+fileDir+".world").length();
 	}
 }

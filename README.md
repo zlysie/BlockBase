@@ -7,12 +7,14 @@
 - (+ or -) keys - Blocks to select
 - WASD - move
 - Space - jump
-- F - Refresh all chunks
-- R - save world
-- T - load world
-- E - reset position
 
-- F1 - toggle UI
+- E - Open inventory
+- F - Refresh all chunks
+- P - reset position
+
+- ESC - pause menu / escape
+
+- F1 - switch texture pack to custom (if created)
 - F2 - take screenshot
-- F3 - switch texture pack to custom (if created)
+- F3 - toggle debug ui
 - F11 - toggle fullscreen

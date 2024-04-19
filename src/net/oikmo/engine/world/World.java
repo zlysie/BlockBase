@@ -3,6 +3,7 @@ package net.oikmo.engine.world;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
@@ -13,6 +14,7 @@ import net.oikmo.engine.Loader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.ItemEntity;
+import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
@@ -59,7 +61,6 @@ public class World {
 	private void init(long seed) {
 		this.seed = seed;
 		this.tex = MasterRenderer.currentTexturePack;
-		//this.noiseGen = new PerlinNoiseGenerator(seed);
 		this.noise = new OpenSimplexNoise(seed);
 		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {
@@ -85,6 +86,29 @@ public class World {
 				}
 			}
 		});
+		
+		//this uh double checks in case a chunk has been occupied but literally hasn't been added here
+		new Thread(new Runnable() { 
+			public void run() {
+				while (!Main.displayRequest) {
+					if(canCreateChunks) {
+						synchronized(MasterChunk.chunkMap) {
+							try {
+								for(Map.Entry<Vector3f, MasterChunk> entry : MasterChunk.chunkMap.entrySet()) {
+									MasterChunk m = entry.getValue();
+
+									if(!masterChunks.contains(m)) {
+										masterChunks.add(m);
+									}
+								}
+							} catch(java.util.ConcurrentModificationException e) {
+								//humbly fuck off, i want chunks to load after player saves it :sob:
+							}
+						}
+					}
+				}
+			}
+		}).start();
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
 	}
@@ -116,7 +140,7 @@ public class World {
 				}
 			}
 		}
-		
+
 		for(Entity entity : chunkEntities) {
 			if(isInValidRange(entity.getPosition())) {
 				MasterRenderer.getInstance().addEntity(entity);
@@ -132,7 +156,10 @@ public class World {
 	}
 
 	public void tick() {
-		Main.thePlayer.tick();
+		if(Main.thePlayer != null) {
+			Main.thePlayer.tick();
+		}
+
 		ItemEntity.updateOscillation();
 		synchronized(entities) {
 			for(int i = 0; i < entities.size(); i++) {
@@ -148,7 +175,7 @@ public class World {
 								} else {
 									((ItemEntity)entity).dontTick = false;
 								}
-								
+
 								continue;
 							}
 						} else {
@@ -170,7 +197,7 @@ public class World {
 
 		return null;
 	}
-	
+
 	public boolean anyBlockInSpecificLocation(int x, int y, int z) {
 		return getBlock(new Vector3f(x,y,z)) != null;
 	}
@@ -189,19 +216,19 @@ public class World {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
 		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
-		
+
 		if(m != null) {
 			int localX = (int)(position.x + m.getOrigin().x)%16;
 			int localY = (int) position.y;
 			int localZ = (int)(position.z + m.getOrigin().z)%16;
-			
+
 			if(localX < 0) {
 				localX = localX+16;
 			}
 			if(localZ < 0) {
 				localZ = localZ+16;
 			}
-			
+
 			for(int dx = -1; dx <= 1; dx++) {
 				for(int dy = -1; dy <= 1; dy++) {
 					for(int dz= -1; dz <= 1; dz++) {
@@ -236,11 +263,38 @@ public class World {
 		chunks.clear();
 	}
 
+	public void saveWorldAndQuit(String world) {
+		List<ChunkSaveData> chunks = new ArrayList<>();
+
+		for(MasterChunk master : masterChunks) {
+			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
+		}
+
+		SaveSystem.save(world, new SaveData(seed, chunks, Main.thePlayer));
+		chunks.clear();
+
+		Main.theWorld = null;
+	}
+
 	public void loadWorld(String world) {
 		if(canCreateChunks && SaveSystem.load(world) != null) {
-			Main.thePlayer.resetMotion();
 			this.canCreateChunks = false;
+
+
+
 			SaveData data = SaveSystem.load(world);
+
+			this.seed = data.seed;
+			this.noise = null;
+			this.noise = new OpenSimplexNoise(seed);
+
+			if(Main.thePlayer == null) {
+				Main.thePlayer = new Player(new Vector3f(data.x, data.y, data.z), new Vector3f(data.rotX, data.rotY, data.rotZ));
+				entities.add(Main.thePlayer.getCamera().getSelectedBlock());
+			}
+
+			Main.thePlayer.resetMotion();
+
 			MasterChunk.clear();
 			this.masterChunks.clear();
 			this.chunkEntities.clear();
@@ -253,13 +307,33 @@ public class World {
 					JOptionPane.showMessageDialog(null, "World has loaded!");
 				}
 			}).start();
-			this.noise = null;
-			this.noise = new OpenSimplexNoise(data.seed);
+			System.out.println(this.seed + " " + data.seed);
 
-			Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
-			Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
+			System.out.println(this.seed + " " + data.seed);
+
+			Vector3f v = Main.thePlayer.getPosition();
+
+			v.y = getHeightFromPosition(Main.thePlayer.getRoundedPosition());
+			if(v.y != -1) {
+				v.y++;
+				Main.thePlayer.setPosition(v);
+			}
+
+			//Main.thePlayer.setPosition(new Vector3f(data.x, data.y, data.z));
+			//Main.thePlayer.getCamera().setRotation(data.rotX, data.rotY, data.rotZ);
 			this.canCreateChunks = true;
 		}
+	}
+
+	public int getHeightFromPosition(Vector3f position) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(position, chunkPos);
+		MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
+
+		if(m != null) {
+			return m.getChunk().getHeightFromPosition(chunkPos, position);
+		}
+		return -1;
 	}
 
 	public void refreshChunk(MasterChunk master) {

@@ -25,6 +25,7 @@ import net.oikmo.engine.renderers.skybox.SkyBoxRenderer;
 import net.oikmo.engine.textures.GuiTexture;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 
@@ -122,7 +123,10 @@ public class MasterRenderer {
 	
 	public void render(Camera camera) {
 		prepare();
-		skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
+		if(Main.currentScreen instanceof GuiMainMenu) {
+			skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
+		}
+		
 		entityRenderer.render(entities, camera);
 		entities.clear();
 	}

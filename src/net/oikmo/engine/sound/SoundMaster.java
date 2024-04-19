@@ -133,8 +133,9 @@ public class SoundMaster {
 			public void run() {
 				try {
 					long thing = new Random().nextInt(48000);
+					Logger.log(LogLevel.INFO, "waiting for " + thing + "ms");
 					Thread.sleep(thing);
-					System.out.println("waiting for " + thing + "ms");
+					
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -205,6 +206,15 @@ public class SoundMaster {
 		if(musicThread != null) {
 			musicThread.stop();
 		}
+		
+	}
+
+	@SuppressWarnings("deprecation")
+	public static void stopMusic() {
+		if(musicThread != null) {
+			musicThread.stop();
+		}
+		soundSystem.stop("music");
 		
 	}
 }

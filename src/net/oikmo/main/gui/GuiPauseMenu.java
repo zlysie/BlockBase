@@ -3,11 +3,13 @@ package net.oikmo.main.gui;
 import org.lwjgl.opengl.Display;
 
 import net.oikmo.engine.ResourceLoader;
+import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
 import net.oikmo.engine.gui.component.slick.slider.GuiSlider;
 import net.oikmo.engine.gui.component.slick.textfield.GuiTextField;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 
 public class GuiPauseMenu extends GuiScreen {
@@ -19,8 +21,6 @@ public class GuiPauseMenu extends GuiScreen {
 	
 	private GuiSlider testSlider;
 	private GuiTextField worldTextField;
-	private GuiButton saveButton;
-	private GuiButton loadButton;
 	private GuiButton quitButton;
 	
 	public void onInit() {
@@ -32,41 +32,6 @@ public class GuiPauseMenu extends GuiScreen {
 			public void update() {
 				x = Display.getWidth()/2;
 				y = Display.getHeight() - 60;
-			}
-		});
-		
-		saveButton = new GuiButton((Display.getWidth()/2) - 50, Display.getHeight()-20, 90, 30, "Save...");
-		saveButton.setGuiCommand(new GuiCommand() {
-			@Override
-			public void invoke() {
-				if(worldTextField.hasContent()) {
-					Main.theWorld.saveWorld(worldTextField.getInputText().replace(" ", "-"));
-					System.out.println(worldTextField.getInputText().replace(" ", "-"));
-				}
-				
-			}
-			
-			@Override
-			public void update() {
-				x = (Display.getWidth()/2) - 50;
-				y = Display.getHeight() - 20;
-			}
-		});
-		
-		loadButton = new GuiButton((Display.getWidth()/2) + 50, Display.getHeight()-20, 90, 30, "Load...");
-		loadButton.setGuiCommand(new GuiCommand() {
-			@Override
-			public void invoke() {
-				if(worldTextField.hasContent()) {
-					Main.theWorld.loadWorld(worldTextField.getInputText().replace(" ", "-"));
-					System.out.println(worldTextField.getInputText().replace(" ", "-"));
-				}
-			}
-			
-			@Override
-			public void update() {
-				x = (Display.getWidth()/2) + 50;
-				y = Display.getHeight() - 20;
 			}
 		});
 		
@@ -83,8 +48,13 @@ public class GuiPauseMenu extends GuiScreen {
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
-				Main.close();
-				System.exit(0);
+				Main.inGameGUI = null;
+				Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
+				
+				Main.shouldTick();
+				prepareCleanUp();
+				SoundMaster.stopMusic();
+				Main.currentScreen = new GuiMainMenu(Main.getRandomSplash());
 			}
 			
 			@Override
@@ -99,15 +69,13 @@ public class GuiPauseMenu extends GuiScreen {
 	public void onUpdate() {
 		if(Main.isPaused()) {
 			drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
-			saveButton.tick();
-			loadButton.tick();
 			quitButton.tick();
 			testSlider.tick();
-			worldTextField.tick();
 		}
 	}
 	
 	public void onClose() {
 		Main.shouldTick();
+		Gui.cleanUp();
 	}
 }

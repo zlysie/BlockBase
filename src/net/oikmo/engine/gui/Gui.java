@@ -204,4 +204,9 @@ public class Gui {
 		g.fill(new Rectangle(x, y, width, height));
 		dropGL();
 	}
+
+	public static void cleanUp() {
+		Gui.lockedRightNow = false;
+		Gui.current = null;
+	}
 }
