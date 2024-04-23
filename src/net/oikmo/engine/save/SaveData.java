@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import net.oikmo.engine.entity.Player;
+import net.oikmo.engine.inventory.Container;
 
 public class SaveData implements Serializable {
 
@@ -13,6 +14,7 @@ public class SaveData implements Serializable {
 	public ChunkSaveData[] chunks;
 	public float x, y, z;
 	public float rotX, rotY, rotZ;
+	public Container cont;
 	
 	public SaveData(long seed, List<ChunkSaveData> chunks, Player player) {
 		this.seed = seed;
@@ -26,5 +28,6 @@ public class SaveData implements Serializable {
 		this.rotX = player.getCamera().getPitch();
 		this.rotY = player.getCamera().getYaw();
 		this.rotZ = player.getCamera().getRoll();
+		this.cont = player.getInventory();
 	}
 }

@@ -42,6 +42,7 @@ public class World {
 	private List<Entity> chunkEntities = Collections.synchronizedList(new ArrayList<Entity>());
 	public List<Entity> entities = new ArrayList<Entity>();
 	private List<MasterChunk> masterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
+	private List<MasterChunk> currentMasterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	private Thread chunkCreator;
 	private Thread chunkBackUp;
 
@@ -71,13 +72,10 @@ public class World {
 							for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
 								int chunkX = x * 16;
 								int chunkZ = z * 16;
-
-								if(chunkX < 0 || chunkZ < 0) {
-									//continue;
-								}
+								
 								Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
 								synchronized(MasterChunk.usedPositions) {
-									if(!MasterChunk.isPositionUsed(chunkPos)) {
+									if(!MasterChunk.isPositionUsed(chunkPos) && MasterChunk.getChunkFromPosition(chunkPos) == null) {
 										masterChunks.add(new MasterChunk(noise, chunkPos));
 									}
 								}
@@ -87,34 +85,47 @@ public class World {
 				}
 			}
 		});
-		
+
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
 	}
 
 	public void update(Camera camera) {
+		currentMasterChunks.clear();
+		for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
+			for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
+				int chunkX = x * 16;
+				int chunkZ = z * 16;
+				Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
+				synchronized(MasterChunk.usedPositions) {
+					if(MasterChunk.isPositionUsed(chunkPos)) {
+						MasterChunk m = MasterChunk.getChunkFromPosition(chunkPos);
+
+						if(m != null) {
+							if(!currentMasterChunks.contains(m)) {
+								currentMasterChunks.add(m);
+							}
+						}
+					}
+				}	
+			}
+		}
+
+
 		if(canCreateChunks) {
-			synchronized(masterChunks) {
-				for(MasterChunk master : masterChunks) {
-					if(master.getEntity() == null) {
-						if(master.getMesh() != null) {
-							if(master.getMesh().hasMeshInfo()) {
-								RawModel raw = Loader.getInstance().loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
-								TexturedModel texModel = new TexturedModel(raw, tex);
-								Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
-								master.setEntity(entity);
-								chunkEntities.add(entity);
-								master.getMesh().removeMeshInfo();
-							}
-						} else {
-							if(isInValidRange(master.getOrigin())) {
-								master.createMesh();
-							}
+			for(MasterChunk master : currentMasterChunks) {
+				if(master.getEntity() == null) {
+					if(master.getMesh() != null) {
+						if(master.getMesh().hasMeshInfo()) {
+							RawModel raw = Loader.getInstance().loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
+							TexturedModel texModel = new TexturedModel(raw, tex);
+							Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
+							master.setEntity(entity);
+							chunkEntities.add(entity);
+							master.getMesh().removeMeshInfo();
 						}
 					} else {
-						if(!isInValidRange(master.getOrigin())) {
-							master.destroyMesh();
-						}
+						master.createMesh();
 					}
 				}
 			}
@@ -211,6 +222,10 @@ public class World {
 			for(int dx = -1; dx <= 1; dx++) {
 				for(int dy = -1; dy <= 1; dy++) {
 					for(int dz= -1; dz <= 1; dz++) {
+
+						if (dx == 0 && dy == 0 && dz == 0) {
+							continue; // Skip the current block
+						}
 						int x = localX + dx;
 						int y = localY + dy;
 						int z = localZ + dz;
@@ -230,7 +245,7 @@ public class World {
 		}
 		return false;
 	}
-
+	
 	public void saveWorld(String world) {
 		List<ChunkSaveData> chunks = new ArrayList<>();
 
@@ -255,19 +270,19 @@ public class World {
 
 		this.chunkCreator.interrupt();
 		this.chunkCreator.stop();
-		
+
 		if(this.chunkBackUp != null) {
 			this.chunkBackUp.interrupt();
 			this.chunkBackUp.stop();
 		}
-		
+
 		Main.theWorld = null;
 	}
 
 	public void loadWorld(String world) {
 		if(canCreateChunks && SaveSystem.load(world) != null) {
 			this.canCreateChunks = false;
-			
+
 			SaveData data = SaveSystem.load(world);
 
 			this.seed = data.seed;
@@ -278,14 +293,15 @@ public class World {
 				Main.thePlayer = new Player(new Vector3f(data.x, data.y, data.z), new Vector3f(data.rotX, data.rotY, data.rotZ));
 				entities.add(Main.thePlayer.getCamera().getSelectedBlock());
 			}
-
+			
+			Main.thePlayer.setInventory(data.cont);
 			Main.thePlayer.resetMotion();
 
 			MasterChunk.clear();
 			this.masterChunks.clear();
 			this.chunkEntities.clear();
 			for(ChunkSaveData s : data.chunks) {
-				new MasterChunk(new Vector3f((int)s.x,0,(int)s.z), s.blocks);
+				new MasterChunk(new Vector3f(s.x,0,s.z), s.blocks);
 			}
 
 			new Thread(new Runnable() {
@@ -293,9 +309,9 @@ public class World {
 					JOptionPane.showMessageDialog(null, "World has loaded!");
 				}
 			}).start();
-			
+
 			Vector3f v = Main.thePlayer.getPosition();
-			
+
 			this.chunkBackUp = new Thread(new Runnable() {
 				public void run() {
 					while(!Main.displayRequest) {
@@ -305,7 +321,6 @@ public class World {
 									MasterChunk m = entry.getValue();
 
 									if(!masterChunks.contains(m)) {
-										System.out.println(m);
 										masterChunks.add(m);
 									}
 								}
@@ -316,12 +331,12 @@ public class World {
 					}
 				}
 			});
-					
+			this.chunkBackUp.setName("Chunk Backup Thread");
 			this.chunkBackUp.start();
-			
+
 			//this uh double checks in case a chunk has been occupied but literally hasn't been added here
-			
-			
+
+
 			v.y = getHeightFromPosition(Main.thePlayer.getRoundedPosition());
 			if(v.y != -1) {
 				v.y++;
@@ -353,21 +368,19 @@ public class World {
 			master.setEntity(null);
 			master.createMesh();
 		} else {
-			
+
 		}
 	}
 
 	public void refreshChunks() {
-		Logger.log(LogLevel.INFO, "Clearing " + masterChunks.size() + " chunks!");
+		Logger.log(LogLevel.INFO, "Clearing " + currentMasterChunks.size() + " chunks!");
 		this.chunkEntities.clear();
 
-		for(MasterChunk master : masterChunks) {
+		for(MasterChunk master : currentMasterChunks) {
 			master.destroyMesh();
 			master.setEntity(null);
 
-			if(isInValidRange(master.getOrigin())){
-				master.createMesh();
-			}
+			master.createMesh();
 		}
 	}
 

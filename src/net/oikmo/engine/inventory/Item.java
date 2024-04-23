@@ -1,11 +1,16 @@
 package net.oikmo.engine.inventory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.newdawn.slick.Image;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.world.blocks.Block;
 
 public class Item {
+	
+	private static Map<String, Item> itemIndex = new HashMap<>();
 	
 	private static Image atlas;
 	private static Image blockAtlas;
@@ -50,6 +55,7 @@ public class Item {
 		initImage();
 		this.name = itemName;
 		this.maxStackSize = maxStackSize;
+		itemIndex.put(itemName.replaceAll("\\s+","").toLowerCase(), this);
 	}
 	
 	private Item(Block.Type type, String itemName, int maxStackSize) {
@@ -57,6 +63,11 @@ public class Item {
 		this.name = itemName;
 		this.maxStackSize = maxStackSize;
 		blockItems[type.ordinal()] = this;
+		itemIndex.put(itemName.replaceAll("\\s+","").toLowerCase(), this);
+	}
+	
+	public String getID() {
+		return name.replaceAll("\\s+","").toLowerCase();
 	}
 	
 	public String getName() {

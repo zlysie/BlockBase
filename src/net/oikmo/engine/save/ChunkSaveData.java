@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.inventory.Container;
+
 public class ChunkSaveData implements Serializable {
 
 	private static final long serialVersionUID = 1L;

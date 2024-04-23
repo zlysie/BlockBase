@@ -83,4 +83,8 @@ public class Player extends Entity {
 	public Camera getCamera() {
 		return camera;
 	}
+
+	public void setInventory(Container cont) {
+		this.inventory = cont;
+	}
 }

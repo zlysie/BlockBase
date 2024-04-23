@@ -1,5 +1,6 @@
 package net.oikmo.engine.inventory;
 
+import net.oikmo.engine.save.InventorySaveData;
 import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiInventory;
 
@@ -72,5 +73,23 @@ public class Container {
 
 	public int getColumns() {
 		return columns;
+	}
+	
+	public net.oikmo.engine.save.InventorySaveData.Slot[][] saveContainer() {
+		net.oikmo.engine.save.InventorySaveData.Slot[][] slots = new net.oikmo.engine.save.InventorySaveData.Slot[rows][columns];
+		
+		for (int y = 0; y < columns; y++) {
+			for (int x = 0; x < rows; x++) {
+				Slot s = this.slots[x][y];
+				if(s != null) {
+					slots[x][y] = new net.oikmo.engine.save.InventorySaveData.Slot(s.getItem().getID(), s.getMaxStackSize(), s.getCurrentAmount());
+				}
+			}
+		}
+		return slots;
+	}
+	
+	public void loadSavedContainer(InventorySaveData data) {
+		
 	}
 }

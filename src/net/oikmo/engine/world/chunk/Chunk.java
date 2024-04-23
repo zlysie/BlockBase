@@ -29,6 +29,7 @@ public class Chunk {
 		this.blocks = blocks;
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		calculateHeights();
+		calculateHeights();
 	}
 
 	/**
