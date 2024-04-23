@@ -11,6 +11,12 @@ public class Slot {
 		this.maxStackSize = item.getMaxStackSize();
 		this.currentAmount = 1;
 	}
+	
+	public Slot(Item item, int currentAmount) {
+		this.item = item;
+		this.maxStackSize = item.getMaxStackSize();
+		this.currentAmount = currentAmount;
+	}
 
 	public Item getItem() {
 		return item;

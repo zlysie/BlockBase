@@ -16,8 +16,7 @@ import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class MasterChunk {
-	public static Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
-	public static List<Vector3f> usedPositions = new ArrayList<>();
+	
 	private int index;
 	
 	private Vector3f origin;
@@ -26,48 +25,17 @@ public class MasterChunk {
 	private Entity entity;
 	
 	public MasterChunk(OpenSimplexNoise noiseGen, Vector3f origin) {
-		setIndex(usedPositions.size());
 		this.origin = origin;
 		this.chunk = new Chunk(noiseGen, origin);
 		this.mesh = new ChunkMesh(this.chunk);
-		MasterChunk.usedPositions.add(origin);
-		MasterChunk.chunkMap.put(this.origin, this);
 	}
 	
 	public MasterChunk(Vector3f origin, byte[][][] blocks) {
-		setIndex(usedPositions.size());
 		this.origin = origin;
 		this.chunk = new Chunk(blocks);
-		MasterChunk.usedPositions.add(origin);
-		MasterChunk.chunkMap.put(this.origin, this);
 	}
 	
-	public static MasterChunk getChunkFromPosition(Vector3f position) {
-		return chunkMap.get(getPosition(position));
-	}
 	
-	public static boolean isPositionUsed(Vector3f pos) {
-		boolean result = false;
-		synchronized(usedPositions) {
-			result = usedPositions.contains(new Vector3f(pos.x, 0, pos.z));
-		}
-		return result;
-	}
-	
-	public static Vector3f getPosition(Vector3f pos) {
-		Vector3f result = null;
-		synchronized(usedPositions) {
-			for(int i = 0; i < usedPositions.size(); i++) {
-				if(usedPositions.get(i) != null) {
-					if((int)usedPositions.get(i).x == (int)pos.x && (int)usedPositions.get(i).z == (int)pos.z) {
-						result = usedPositions.get(i);
-					}
-				}
-				
-			}
-		}
-		return result;
-	}
 	
 	int prevX, prevY, prevZ;
 	public Block getBlock(Vector3f position) {
@@ -92,7 +60,7 @@ public class MasterChunk {
 	
 	public void setBlock(Vector3f position, Block block) {
 		Chunk chunk = getChunk();
-		Main.theWorld.refreshChunk(this);
+		//Main.theWorld.refreshChunk(this);
 		int localX = (int)(position.x + getOrigin().x)%16;
 		int localY = (int) position.y;
 		int localZ = (int)(position.z + getOrigin().z)%16;
@@ -112,7 +80,7 @@ public class MasterChunk {
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
-						Main.theWorld.refreshChunk(this);
+						//Main.theWorld.refreshChunk(this);
 						
 					}
 				} else {
@@ -122,10 +90,9 @@ public class MasterChunk {
 				if(chunk.blocks[localX][localY][localZ] != -1) {
 					chunk.blocks[localX][localY][localZ] = -1;
 				}
-				Main.theWorld.refreshChunk(this);
+				//Main.theWorld.refreshChunk(this);
 			}
 		}
-		Main.theWorld.refreshChunk(this);
 	}
 	
 	private Vector2f position;
@@ -142,7 +109,7 @@ public class MasterChunk {
 						if (getChunk().blocks[localX][y][localZ] != -1) {
 							if(getChunk().blocks[localX][y][localZ] != block.getByteType()) {
 								getChunk().blocks[localX][y - 0][localZ] = block.getByteType();
-								Main.theWorld.refreshChunk(this);
+								//Main.theWorld.refreshChunk(this);
 								break;
 							}
 						}
@@ -185,12 +152,5 @@ public class MasterChunk {
 		return index;
 	}
 
-	private void setIndex(int index) {
-		this.index = index;
-	}
-
-	public static void clear() {
-		chunkMap.clear();
-		usedPositions.clear();
-	}
+	
 }

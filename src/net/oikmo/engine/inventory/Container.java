@@ -75,21 +75,33 @@ public class Container {
 		return columns;
 	}
 	
-	public net.oikmo.engine.save.InventorySaveData.Slot[][] saveContainer() {
+	public net.oikmo.engine.save.InventorySaveData saveContainer() {
 		net.oikmo.engine.save.InventorySaveData.Slot[][] slots = new net.oikmo.engine.save.InventorySaveData.Slot[rows][columns];
 		
 		for (int y = 0; y < columns; y++) {
 			for (int x = 0; x < rows; x++) {
 				Slot s = this.slots[x][y];
 				if(s != null) {
-					slots[x][y] = new net.oikmo.engine.save.InventorySaveData.Slot(s.getItem().getID(), s.getMaxStackSize(), s.getCurrentAmount());
+					slots[x][y] = new net.oikmo.engine.save.InventorySaveData.Slot(s.getItem().getID(), s.getCurrentAmount());
 				}
 			}
 		}
-		return slots;
+		return new InventorySaveData(slots, rows, columns);
 	}
 	
-	public void loadSavedContainer(InventorySaveData data) {
+	public static Container loadSavedContainer(InventorySaveData data) {
+		Container cont = new Container(data.rows, data.columns);
 		
+		for (int y = 0; y < data.columns; y++) {
+			for (int x = 0; x < data.rows; x++) {
+				net.oikmo.engine.save.InventorySaveData.Slot slot = data.getSlots()[x][y];
+				if(slot != null) {
+					cont.slots[x][y] = new Slot(Item.getItemFromID(slot.getItemID()), slot.getCurrentAmount());
+				}
+				
+			}
+		}
+		
+		return cont;
 	}
 }

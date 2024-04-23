@@ -14,7 +14,7 @@ public class SaveData implements Serializable {
 	public ChunkSaveData[] chunks;
 	public float x, y, z;
 	public float rotX, rotY, rotZ;
-	public Container cont;
+	public InventorySaveData cont;
 	
 	public SaveData(long seed, List<ChunkSaveData> chunks, Player player) {
 		this.seed = seed;
@@ -28,6 +28,6 @@ public class SaveData implements Serializable {
 		this.rotX = player.getCamera().getPitch();
 		this.rotY = player.getCamera().getYaw();
 		this.rotZ = player.getCamera().getRoll();
-		this.cont = player.getInventory();
+		this.cont = player.getInventory().saveContainer();
 	}
 }

@@ -66,6 +66,10 @@ public class Item {
 		itemIndex.put(itemName.replaceAll("\\s+","").toLowerCase(), this);
 	}
 	
+	public static Item getItemFromID(String id) {
+		return itemIndex.get(id);
+	}
+	
 	public String getID() {
 		return name.replaceAll("\\s+","").toLowerCase();
 	}

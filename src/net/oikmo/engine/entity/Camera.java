@@ -156,7 +156,7 @@ public class Camera {
 						Vector3f v = new Vector3f(picker.getPointRounded());
 						v.y += 1f;
 						ItemBlock item = new ItemBlock(block, v);
-						Main.theWorld.entities.add(item);
+						Main.theWorld.addEntity(item);
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;

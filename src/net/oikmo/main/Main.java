@@ -213,18 +213,21 @@ public class Main extends Gui {
 		currentlyPlayingWorld = worldName;
 		SoundMaster.stopMusic();
 		SoundMaster.doMusic();
-		theWorld = new World();
+		
 		inGameGUI = new GuiInGame();
 		
 		if(SaveSystem.load(worldName) != null) {
-			theWorld.loadWorld(worldName);
+			theWorld = World.loadWorld(worldName);
 		} else {
+			theWorld = new World();
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
+			theWorld.startChunkCreator();
 		}
 		
 		if(Main.thePlayer != null) {
-			theWorld.entities.add(thePlayer.getCamera().getSelectedBlock());
+			theWorld.addEntity(thePlayer.getCamera().getSelectedBlock());
 		}
+		
 		
 	}
 	

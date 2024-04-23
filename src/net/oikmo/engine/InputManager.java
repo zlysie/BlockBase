@@ -73,12 +73,11 @@ public class InputManager {
 
 			if(Keyboard.isKeyDown(itemKey)) {
 				if(!lockInItem) {
-					System.out.println("creating");
 					ItemBlock block = new ItemBlock(Block.grass, new Vector3f(Main.thePlayer.getCamera().getPosition()));
 					block.setRotation(0.0f, Main.thePlayer.getCamera().getYaw()-90, 0.0f);
 					block.moveRelative(1, 0, 0.1f);
 					//block.setPosition(block.getRoundedPosition());
-					Main.theWorld.entities.add(block);
+					Main.theWorld.addEntity(block);
 				}
 				lockInItem = true;
 			} else {

@@ -18,33 +18,12 @@ public class GuiPauseMenu extends GuiScreen {
 		super("Pause Menu");
 	}
 	
-	
-	private GuiSlider testSlider;
-	private GuiTextField worldTextField;
 	private GuiButton quitButton;
 	
 	public void onInit() {
 		Main.shouldTick();
 		
-		worldTextField = new GuiTextField(Display.getWidth()/2, Display.getHeight()-60, 200, 30);
-		worldTextField.setGuiCommand(new GuiCommand() {
-			@Override
-			public void update() {
-				x = Display.getWidth()/2;
-				y = Display.getHeight() - 60;
-			}
-		});
-		
-		testSlider = new GuiSlider(Display.getWidth()/2, (Display.getHeight()/2)-30, 200, 30, "Test slider");
-		testSlider.setGuiCommand(new GuiCommand() {
-			@Override
-			public void update() {
-				x = Display.getWidth()/2;
-				y = Display.getHeight()/2 - 30;
-			}
-		});
-		
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+30, 200, 30, "Quit game");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Quit world...");
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -60,7 +39,7 @@ public class GuiPauseMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = Display.getHeight()/2 + 30;
+				y = Display.getHeight()/2;
 			}
 		});
 		
@@ -70,7 +49,6 @@ public class GuiPauseMenu extends GuiScreen {
 		if(Main.isPaused()) {
 			drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
 			quitButton.tick();
-			testSlider.tick();
 		}
 	}
 	

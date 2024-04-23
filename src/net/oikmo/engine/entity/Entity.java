@@ -250,12 +250,14 @@ public class Entity {
 	public MasterChunk getCurrentChunk() {
 		if(chunkPos == null) { chunkPos = new Vector3f(); }
 		Maths.calculateChunkPosition(getPosition(), chunkPos);
-		synchronized(MasterChunk.chunkMap) {
-			synchronized(MasterChunk.usedPositions) {
-				return MasterChunk.getChunkFromPosition(chunkPos);
+		if(Main.theWorld != null) {
+			synchronized(Main.theWorld.chunkMap) {
+				synchronized(Main.theWorld.usedPositions) {
+					return Main.theWorld.getChunkFromPosition(chunkPos);
+				}
 			}
-
 		}
+		return null;
 	}
 	
 	public AABB getAABB() {

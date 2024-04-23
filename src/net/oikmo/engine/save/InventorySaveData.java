@@ -6,28 +6,30 @@ import java.io.Serializable;
 public class InventorySaveData implements Serializable {
 	
 	private Slot[][] slots;
+	public int rows;
+	public int columns;
 	
-	public InventorySaveData(Slot[][] slots) {
+	public InventorySaveData(Slot[][] slots, int rows, int columns) {
 		this.slots = slots;
+		this.rows = rows;
+		this.columns = columns;
+	}
+	
+	public Slot[][] getSlots() {
+		return slots;
 	}
 
-	public static class Slot {
+	public static class Slot implements Serializable {
 		private String itemID;
-		private int maxStackSize;
 		private int currentAmount;
 		
-		public Slot(String itemID, int maxStackSize, int currentAmount) {
+		public Slot(String itemID, int currentAmount) {
 			this.itemID = itemID;
-			this.maxStackSize = maxStackSize;
 			this.currentAmount = currentAmount;
 		}
 		
 		public String getItemID() {
 			return itemID;
-		}
-		
-		public int getMaxStackSize() {
-			return maxStackSize;
 		}
 		
 		public int getCurrentAmount() {
