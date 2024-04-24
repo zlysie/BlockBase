@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import net.oikmo.engine.entity.Player;
-import net.oikmo.engine.inventory.Container;
 
 public class SaveData implements Serializable {
 

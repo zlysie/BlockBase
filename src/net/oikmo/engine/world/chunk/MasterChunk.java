@@ -1,10 +1,5 @@
 package net.oikmo.engine.world.chunk;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -16,9 +11,6 @@ import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class MasterChunk {
-	
-	private int index;
-	
 	private Vector3f origin;
 	private Chunk chunk;
 	private ChunkMesh mesh;
@@ -27,7 +19,6 @@ public class MasterChunk {
 	public MasterChunk(OpenSimplexNoise noiseGen, Vector3f origin) {
 		this.origin = origin;
 		this.chunk = new Chunk(noiseGen, origin);
-		this.mesh = new ChunkMesh(this.chunk);
 	}
 	
 	public MasterChunk(Vector3f origin, byte[][][] blocks) {
@@ -35,9 +26,6 @@ public class MasterChunk {
 		this.chunk = new Chunk(blocks);
 	}
 	
-	
-	
-	int prevX, prevY, prevZ;
 	public Block getBlock(Vector3f position) {
 		Chunk chunk = getChunk();
 		int localX = (int)(position.x + getOrigin().x)%16;
@@ -80,7 +68,7 @@ public class MasterChunk {
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
-						//Main.theWorld.refreshChunk(this);
+						Main.theWorld.refreshChunk(this);
 						
 					}
 				} else {
@@ -90,7 +78,7 @@ public class MasterChunk {
 				if(chunk.blocks[localX][localY][localZ] != -1) {
 					chunk.blocks[localX][localY][localZ] = -1;
 				}
-				//Main.theWorld.refreshChunk(this);
+				Main.theWorld.refreshChunk(this);
 			}
 		}
 	}
@@ -117,7 +105,6 @@ public class MasterChunk {
 				}
 			}
 		}
-		
 	}
 	
 	public Vector3f getOrigin() {
@@ -147,10 +134,4 @@ public class MasterChunk {
 	public void setEntity(Entity entity) {
 		this.entity = entity;
 	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	
 }

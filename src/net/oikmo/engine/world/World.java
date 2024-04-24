@@ -104,9 +104,6 @@ public class World {
 							}
 						}
 						
-						
-						
-						
 						if(master != null) {
 							if(!currentMasterChunks.contains(master)) {
 								currentMasterChunks.add(master);
@@ -154,14 +151,16 @@ public class World {
 		}
 	}
 	
-	public void setBlock(Vector3f position, Block block) {
+	public boolean setBlock(Vector3f position, Block block) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
 		MasterChunk m = getChunkFromPosition(chunkPos);
 		if(m != null) {
 			m.setBlock(position, block);
-			refreshChunk(m);
+			
+			return true;
 		}
+		return false;
 	}
 	public Block getBlock(Vector3f position) {
 		Vector3f chunkPos = new Vector3f();

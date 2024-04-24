@@ -20,7 +20,7 @@ public class SaveSystem {
 	    		directory.mkdir();
 	    	}
 	    	
-	    	File save = new File(directory + "/" + name + ".world");
+	    	File save = new File(directory + "/" + name + ".dat");
 	    	save.delete();
 	    	//save.createNewFile();
 	    	FileOutputStream fos = new FileOutputStream(save);
@@ -38,7 +38,7 @@ public class SaveSystem {
 		File directory = new File(Main.getDir()+ "/saves/");
 		
 		if(directory.exists()) {
-			File save = new File(directory + "/" + name + ".world");
+			File save = new File(directory + "/" + name + ".dat");
 			if(save.exists()) {
 				ObjectInputStream obj;
 				try {

@@ -14,7 +14,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="libraries/jar/lwjgl.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/VoxelEngine/libraries/jar/lwjgl-2.9.3-javadoc.jar!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/BlockBase/libraries/jar/javadoc/lwjgl-2.9.3-javadoc.jar!/"/>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="BlockBase/libraries/native/windows"/>
 		</attributes>
 	</classpathentry>

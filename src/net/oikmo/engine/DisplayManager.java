@@ -55,8 +55,7 @@ public class DisplayManager {
 			MasterRenderer.getInstance();
 			Loader.getInstance();
 		} catch (LWJGLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Main.error("Display Error!", e);
 		}
 	}
 

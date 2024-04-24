@@ -3,14 +3,9 @@ package net.oikmo.toolbox.noise;
 
 
 /**
- * This is a template class and can be used to start a new processing Library.
- * Make sure you rename this class as well as the name of the example package 'template' 
- * to your own Library naming convention.
+ * I DIDN'T TAKE THIS FROM GITHUB WTFDYM
  * 
- * (the tag example followed by the name of an example included in folder 'examples' will
- * automatically include the example in the javadoc.)
- *
- * @example Hello 
+ * @author i forgor ;-;
  */
 public class OpenSimplexNoise {
 
