@@ -23,7 +23,7 @@ void main(void) {
 	
 	pass_textureCoords = textureCoords;
 	
-	surfaceNormal = normal;
+	surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
 	
 	float distance = length(positionRelativeToCam.xyz);
 	visibility = exp(-pow((distance*density), gradient));

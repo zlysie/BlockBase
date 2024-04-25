@@ -86,19 +86,19 @@ public class ChunkMesh {
 		          //Add visible face to the chunkMesh
 					
 		            if (!px) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, CubeModel.NORMALS);
+	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, CubeModel.PX_NORMALS);
 	                }
 
 	                if (!nx) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, CubeModel.NORMALS);
+	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, CubeModel.NX_NORMALS);
 	                } 
 
 	                if (!py) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, CubeModel.NORMALS);
+	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, CubeModel.PY_NORMALS);
 	                }
 
 	                if (!ny) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, CubeModel.NORMALS);
+	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, CubeModel.NY_NORMALS);
 	                }
 
 	                if (!pz) {

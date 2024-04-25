@@ -1,4 +1,4 @@
-#version 140
+#version 150
 
 in vec2 pass_textureCoords;
 in float visibility;
@@ -18,6 +18,10 @@ void main(void) {
 	
 	texture.rgb += whiteOffset;
 	
-	out_Colour = texture;
+	vec3 unitNormal = normalize(surfaceNormal);
+	float nDot1 = dot(unitNormal, surfaceNormal);
+	vec3 diffuse = nDot1 * vec3(1,1,1);
+	
+	out_Colour = vec4(diffuse, 1.0) * texture;
 	out_Colour = mix(vec4(skyColour,1.0), out_Colour, visibility);
 }

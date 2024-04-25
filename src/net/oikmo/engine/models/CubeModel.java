@@ -73,13 +73,56 @@ public class CubeModel {
 	public static Vector2f[] UV_PZ;
 	public static Vector2f[] UV_NZ;
 
+	static float normal = 0.0000001f;
+	
 	public static Vector3f[] NORMALS = {
-			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 1
-			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 2
-			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 3
-			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 4
-			new Vector3f(1.f, 0.f, 0.f),   // Normal for Vertex 5
-			new Vector3f(1.f, 0.f, 0.f)    // Normal for Vertex 6
+			new Vector3f(normal, normal, normal),   // Normal for Vertex 1
+			new Vector3f(normal, normal, normal),   // Normal for Vertex 2
+			new Vector3f(normal, normal, normal),   // Normal for Vertex 3
+			new Vector3f(normal, normal, normal),   // Normal for Vertex 4
+			new Vector3f(normal, normal, normal),   // Normal for Vertex 5
+			new Vector3f(normal, normal, normal),   // Normal for Vertex 6
+	};
+	
+	public static Vector3f[] PX_NORMALS = {
+			
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f)			
+	};
+	
+	
+	public static Vector3f[] NX_NORMALS = {
+			
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f)			
+	};
+	
+	public static Vector3f[] PY_NORMALS = {
+			
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f),
+			new Vector3f(1f, 1f, 1f)			
+	};
+	
+	public static Vector3f[] NY_NORMALS = {
+			
+			new Vector3f(0.25f, 0.25f, 0.25f),		
+			new Vector3f(0.25f, 0.25f, 0.25f),		
+			new Vector3f(0.25f, 0.25f, 0.25f),		
+			new Vector3f(0.25f, 0.25f, 0.25f),		
+			new Vector3f(0.25f, 0.25f, 0.25f),		
+			new Vector3f(0.25f, 0.25f, 0.25f),		
 	};
 
 	public static void setup() {
