@@ -164,7 +164,6 @@ public class Main extends Gui {
 					Main.currentScreen.update();
 				}
 				
-				
 				for(int e = 0; e < timer.ticks; ++e) {
 					elapsedTime += 0.1f;
 					
@@ -178,8 +177,6 @@ public class Main extends Gui {
 						tick();
 					}
 				}
-				
-				
 				
 				im.handleInput();
 				

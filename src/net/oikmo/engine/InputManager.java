@@ -34,6 +34,20 @@ public class InputManager {
 
 	public void handleInput() {
 		if(!Main.isPaused()) {
+			
+			if(Keyboard.isKeyDown(itemKey)) {
+				if(!lockInItem) {
+					ItemBlock block = new ItemBlock(Block.grass, new Vector3f(Main.thePlayer.getCamera().getPosition()));
+					block.setRotation(0.0f, Main.thePlayer.getCamera().getYaw()-90, 0.0f);
+					block.moveRelative(1, 0, 0.1f);
+					//block.setPosition(block.getRoundedPosition());
+					Main.theWorld.addEntity(block);
+				}
+				lockInItem = true;
+			} else {
+				lockInItem = false;
+			}
+			
 			if(Keyboard.isKeyDown(teleportKey)) {
 				Main.thePlayer.resetPos();
 			}
@@ -71,18 +85,7 @@ public class InputManager {
 				lockInChangeTexture = false;
 			}
 
-			if(Keyboard.isKeyDown(itemKey)) {
-				if(!lockInItem) {
-					ItemBlock block = new ItemBlock(Block.grass, new Vector3f(Main.thePlayer.getCamera().getPosition()));
-					block.setRotation(0.0f, Main.thePlayer.getCamera().getYaw()-90, 0.0f);
-					block.moveRelative(1, 0, 0.1f);
-					//block.setPosition(block.getRoundedPosition());
-					Main.theWorld.addEntity(block);
-				}
-				lockInItem = true;
-			} else {
-				lockInItem = false;
-			}
+			
 			
 			if(Keyboard.isKeyDown(inventoryKey)) {
 				if(Main.currentScreen == null) {
