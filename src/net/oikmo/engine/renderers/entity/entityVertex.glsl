@@ -23,7 +23,13 @@ void main(void) {
 	
 	pass_textureCoords = textureCoords;
 	
-	surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
+	
+	if(normal.x <= 0 && normal.y <= 0 && normal.z <= 0) {
+		surfaceNormal = (transformationMatrix * vec4(vec3(1,1,1), 0.0)).xyz;
+	} else {
+		surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
+	}
+	
 	
 	float distance = length(positionRelativeToCam.xyz);
 	visibility = exp(-pow((distance*density), gradient));

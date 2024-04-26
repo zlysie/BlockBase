@@ -63,20 +63,6 @@ public class World {
 		this.noise = new OpenSimplexNoise(this.seed);
 	}	
 	public void update(Camera camera) {
-		for(MasterChunk master : currentMasterChunks) {
-			if(master.getEntity() != null) {
-				MasterRenderer.getInstance().addEntity(master.getEntity());
-			}
-		}
-		
-		for(Entity entity : entities) {
-			if(isInValidRange(entity.getPosition())) {
-				MasterRenderer.getInstance().addEntity(entity);
-			}
-		}
-		MasterRenderer.getInstance().render(camera);
-	}
-	public void tick() {
 		currentMasterChunks.clear();
 		for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
 			for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
@@ -113,6 +99,22 @@ public class World {
 				}	
 			}
 		}
+		
+		for(MasterChunk master : currentMasterChunks) {
+			if(master.getEntity() != null) {
+				MasterRenderer.getInstance().addEntity(master.getEntity());
+			}
+		}
+		
+		for(Entity entity : entities) {
+			if(isInValidRange(entity.getPosition())) {
+				MasterRenderer.getInstance().addEntity(entity);
+			}
+		}
+		MasterRenderer.getInstance().render(camera);
+	}
+	public void tick() {
+		
 		
 		if(Main.thePlayer != null) {
 			Main.thePlayer.tick();

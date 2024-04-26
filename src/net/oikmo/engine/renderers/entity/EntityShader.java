@@ -17,6 +17,7 @@ public class EntityShader extends ShaderProgram {
 	private int location_viewMatrix;
 	private int location_whiteOffset;
 	private int location_skyColour;
+	private int location_fakeLighting;
 	
 	public EntityShader() {
 		super(vertexFile, fragmentFile);	
@@ -36,6 +37,11 @@ public class EntityShader extends ShaderProgram {
 		location_viewMatrix = super.getUniformLocation("viewMatrix");
 		location_whiteOffset = super.getUniformLocation("whiteOffset");
 		location_skyColour = super.getUniformLocation("skyColour");
+		location_fakeLighting = super.getUniformLocation("shouldFakeIt");
+	}
+	
+	public void loadFakeLighting(boolean input) {
+		super.loadBoolean(location_fakeLighting, input);
 	}
 	
 	public void loadSkyColour(float r, float g, float b) {

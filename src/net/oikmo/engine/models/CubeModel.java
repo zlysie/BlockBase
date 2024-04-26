@@ -72,58 +72,103 @@ public class CubeModel {
 	public static Vector2f[] UV_NY;
 	public static Vector2f[] UV_PZ;
 	public static Vector2f[] UV_NZ;
-
-	static float normal = 0.0000001f;
 	
-	public static Vector3f[] NORMALS = {
-			new Vector3f(normal, normal, normal),   // Normal for Vertex 1
-			new Vector3f(normal, normal, normal),   // Normal for Vertex 2
-			new Vector3f(normal, normal, normal),   // Normal for Vertex 3
-			new Vector3f(normal, normal, normal),   // Normal for Vertex 4
-			new Vector3f(normal, normal, normal),   // Normal for Vertex 5
-			new Vector3f(normal, normal, normal),   // Normal for Vertex 6
-	};
+	public static Vector3f PX_NORMALS = new Vector3f(1f, 1f, 1f);
+	public static Vector3f NX_NORMALS = new Vector3f(0.75f, 0.75f, 0.75f);
+	public static Vector3f PY_NORMALS = new Vector3f(1f, 1f, 1f);
+	public static Vector3f NY_NORMALS = new Vector3f(0.5f, 0.5f, 0.5f);
+	public static Vector3f PZ_NORMALS = new Vector3f(1f, 1f, 1f);
+	public static Vector3f NZ_NORMALS = new Vector3f(0.75f, 0.75f, 0.75f);
 	
-	public static Vector3f[] PX_NORMALS = {
+	public static float[] normals = {
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
 			
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f)			
-	};
-	
-	
-	public static Vector3f[] NX_NORMALS = {
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
 			
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f)			
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
+			0.75f, 0.75f, 0.75f,
 	};
 	
-	public static Vector3f[] PY_NORMALS = {
-			
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f),
-			new Vector3f(1f, 1f, 1f)			
-	};
-	
-	public static Vector3f[] NY_NORMALS = {
-			
-			new Vector3f(0.25f, 0.25f, 0.25f),		
-			new Vector3f(0.25f, 0.25f, 0.25f),		
-			new Vector3f(0.25f, 0.25f, 0.25f),		
-			new Vector3f(0.25f, 0.25f, 0.25f),		
-			new Vector3f(0.25f, 0.25f, 0.25f),		
-			new Vector3f(0.25f, 0.25f, 0.25f),		
-	};
+	private static float[] createNormals() {
+		float[] sumOfNormals = new float[6*4];
+		
+		int index = 0;
+		int cap = 6;
+		
+		for(int i = 0; i < cap; i++) {
+			sumOfNormals[i] = PX_NORMALS.x;
+			sumOfNormals[i+1] = PX_NORMALS.y;
+			sumOfNormals[i+2] = PX_NORMALS.z;
+		}
+		index+=6*3;
+		
+		for(int i = index+1; i < cap; i++) {
+			sumOfNormals[i] = NX_NORMALS.x;
+			sumOfNormals[i+1] = NX_NORMALS.y;
+			sumOfNormals[i+2] = NX_NORMALS.z;
+		}
+		index+=6*3;
+		for(int i = index+1; i < cap; i++) {
+			sumOfNormals[i] = PY_NORMALS.x;
+			sumOfNormals[i+1] = PY_NORMALS.y;
+			sumOfNormals[i+2] = PY_NORMALS.z;
+		}
+		index+=6*3;
+		for(int i = index+1; i < cap; i++) {
+			sumOfNormals[i] = NY_NORMALS.x;
+			sumOfNormals[i+1] = NY_NORMALS.y;
+			sumOfNormals[i+2] = NY_NORMALS.z;
+		}
+		index+=6*3;
+		for(int i = index+1; i < cap; i++) {
+			sumOfNormals[i] = PZ_NORMALS.x;
+			sumOfNormals[i+1] = PZ_NORMALS.y;
+			sumOfNormals[i+2] = PZ_NORMALS.z;
+		}
+		for(int i = index+1; i < cap; i++) {
+			sumOfNormals[i] = NZ_NORMALS.x;
+			sumOfNormals[i+1] = NZ_NORMALS.y;
+			sumOfNormals[i+2] = NZ_NORMALS.z;
+		}
+		index+=6*3;
+		System.out.println(index);
+		return sumOfNormals;
+	}
 
 	public static void setup() {
 		UV_PX = setupUVPX(); //side
@@ -133,6 +178,7 @@ public class CubeModel {
 		UV_PZ = setupUVPZ(); //side
 		UV_NZ = setupUVNZ(); //side
 		createVertices();
+		//normals = createNormals();
 	}
 	
 	public static Vector2f[] setupUVPX() {
@@ -323,7 +369,7 @@ public class CubeModel {
 	}
 
 	public static RawModel getRawModel(Block block) {
-		if(block == null) { return Loader.getInstance().loadToVAO(vertices, getUVs(Block.stone.getByteType())); }
-		return Loader.getInstance().loadToVAO(vertices, getUVs(block.getByteType()));
+		if(block == null) { return Loader.getInstance().loadToVAO(vertices, getUVs(Block.stone.getByteType()),normals); }
+		return Loader.getInstance().loadToVAO(vertices, getUVs(block.getByteType()), normals);
 	}
 }

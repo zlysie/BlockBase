@@ -55,7 +55,7 @@ public class Main extends Gui {
 	
 	private static final int resourceVersion = 1;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.0.8";
+	public static final String version = "a0.0.9";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;

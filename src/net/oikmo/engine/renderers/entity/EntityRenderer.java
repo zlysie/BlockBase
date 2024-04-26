@@ -11,6 +11,8 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.entity.ItemBlock;
+import net.oikmo.engine.entity.ItemEntity;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.toolbox.Maths;
 
@@ -47,6 +49,9 @@ public class EntityRenderer {
 					Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
 					shader.loadTransformationMatrix(transformationMatrix);
 					shader.loadWhiteOffset(entity.getWhiteOffset()/10);
+					if(entity instanceof ItemEntity || entity instanceof ItemBlock) {
+						shader.loadFakeLighting(true);
+					}
 					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
 					
 				}

@@ -19,6 +19,7 @@ public class ItemEntity extends Entity {
 	public ItemEntity(Item item, TexturedModel model, Vector3f position) {
 		super(model, position, new Vector3f(), 0.25f);
 		this.item = item;
+		this.setWhiteOffset(2f);
 	}
 	
 	public static void updateOscillation() {

@@ -86,27 +86,27 @@ public class ChunkMesh {
 		          //Add visible face to the chunkMesh
 					
 		            if (!px) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, CubeModel.PX_NORMALS);
+	                    addFaceVertices(blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, CubeModel.PX_NORMALS);
 	                }
 
 	                if (!nx) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, CubeModel.NX_NORMALS);
+	                    addFaceVertices(blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, CubeModel.NX_NORMALS);
 	                } 
 
 	                if (!py) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, CubeModel.PY_NORMALS);
+	                    addFaceVertices(blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, CubeModel.PY_NORMALS);
 	                }
 
 	                if (!ny) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, CubeModel.NY_NORMALS);
+	                    addFaceVertices(blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, CubeModel.NY_NORMALS);
 	                }
 
 	                if (!pz) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.PZ_POS, CubeModel.UV_PZ, CubeModel.NORMALS);
+	                    addFaceVertices(blockI, x, y, z, CubeModel.PZ_POS, CubeModel.UV_PZ, CubeModel.PZ_NORMALS);
 	                }
 
 	                if (!nz) {
-	                    addFaceVertices(uniqueVertices, vertices, blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, CubeModel.NORMALS);
+	                    addFaceVertices(blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, CubeModel.NZ_NORMALS);
 	                }
 		        }	
 		        
@@ -114,7 +114,7 @@ public class ChunkMesh {
 		}
 	}
 	
-	private void addFaceVertices(HashMap<Vector3f, Vertex> uniqueVertices, List<Vertex> vertices, byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, Vector3f[] normals) {
+	private void addFaceVertices(byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, Vector3f normals) {
 	    byte type = block;
 	    int startIndex = type * 6;
 
@@ -123,7 +123,7 @@ public class ChunkMesh {
 	        Vertex vertex = uniqueVertices.get(position);
 
 	        if (vertex == null) {
-	            vertex = new Vertex(position, normals[k], uvs[startIndex + k]);
+	            vertex = new Vertex(position, normals, uvs[startIndex + k]);
 	            uniqueVertices.put(position, vertex);
 	            vertices.add(vertex);
 	        }
