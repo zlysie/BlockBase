@@ -51,6 +51,8 @@ public class EntityRenderer {
 					shader.loadWhiteOffset(entity.getWhiteOffset()/10);
 					if(entity instanceof ItemEntity || entity instanceof ItemBlock) {
 						shader.loadFakeLighting(true);
+					} else {
+						shader.loadFakeLighting(false);
 					}
 					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getRawModel().getVertexCount());
 					

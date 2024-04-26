@@ -114,8 +114,6 @@ public class World {
 		MasterRenderer.getInstance().render(camera);
 	}
 	public void tick() {
-		
-		
 		if(Main.thePlayer != null) {
 			Main.thePlayer.tick();
 		}
@@ -159,7 +157,6 @@ public class World {
 		MasterChunk m = getChunkFromPosition(chunkPos);
 		if(m != null) {
 			m.setBlock(position, block);
-			
 			return true;
 		}
 		return false;
@@ -254,7 +251,6 @@ public class World {
 	public void handleLoad(SaveData data) {
 		if(Main.thePlayer == null) {
 			Main.thePlayer = new Player(new Vector3f(data.x, data.y, data.z), new Vector3f(data.rotX, data.rotY, data.rotZ));
-			entities.add(Main.thePlayer.getCamera().getSelectedBlock());
 		}
 		
 		Main.thePlayer.setInventory(Container.loadSavedContainer(data.cont));

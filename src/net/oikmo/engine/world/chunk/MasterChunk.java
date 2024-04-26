@@ -69,7 +69,6 @@ public class MasterChunk {
 							chunk.recalculateHeight(localX, localZ);
 						}
 						Main.theWorld.refreshChunk(this);
-						
 					}
 				} else {
 					return;
@@ -97,7 +96,7 @@ public class MasterChunk {
 						if (getChunk().blocks[localX][y][localZ] != -1) {
 							if(getChunk().blocks[localX][y][localZ] != block.getByteType()) {
 								getChunk().blocks[localX][y - 0][localZ] = block.getByteType();
-								//Main.theWorld.refreshChunk(this);
+								Main.theWorld.refreshChunk(this);
 								break;
 							}
 						}

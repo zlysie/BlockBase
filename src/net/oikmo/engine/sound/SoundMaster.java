@@ -80,6 +80,8 @@ public class SoundMaster {
 	}
 
 	private static void registerMusic() {
+		registerMusicByte("music.jackblack", "jackblock.ogg");
+		
 		registerMusicByte("music.minecraft", "calm1.ogg");
 		registerMusicByte("music.clark", "calm2.ogg");
 		registerMusicByte("music.sweden", "calm3.ogg");

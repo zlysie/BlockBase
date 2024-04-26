@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,12 +12,15 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.entity.Camera.TargetedAABB;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.models.TexturedModel;
@@ -28,6 +32,7 @@ import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
+import net.oikmo.toolbox.Maths;
 
 public class MasterRenderer {
 	
@@ -122,13 +127,72 @@ public class MasterRenderer {
 	}
 	
 	public void render(Camera camera) {
+		
+		
 		prepare();
 		if(Main.currentScreen instanceof GuiMainMenu) {
 			skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
 		}
 		
+		if(Main.thePlayer != null) {
+			initGL();
+			if(Main.thePlayer.getCamera().shouldRenderAABB()) {
+				renderAABB(Main.thePlayer.getCamera().getAABB());
+			}
+		}
+		
 		entityRenderer.render(entities, camera);
 		entities.clear();
+	}
+	
+	FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
+	
+	public void initGL() {
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadMatrix(projectionBuffer);
+		glPerspective3(Main.thePlayer.getPosition(), Main.thePlayer.getCamera().getRotation());
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+	}
+	
+	public void glPerspective3(Vector3f position, Vector3f rotation) {
+		GL11.glRotatef(rotation.x, 1, 0, 0);
+		GL11.glRotatef(rotation.y, 0, 1, 0);
+		GL11.glRotatef(rotation.z, 0, 0, 1);
+		GL11.glTranslatef(-position.x, -position.y, -position.z);
+	}
+	
+	public void renderAABB(TargetedAABB ent) {
+		initGL();
+		float wb2 = 0.501f, hb2 =  0.501f;
+		GL11.glColor3f(0, 0, 0);
+		GL11.glTranslatef(ent.getPosition().x, ent.getPosition().y-0.81f, ent.getPosition().z);
+		GL11.glBegin(GL11.GL_LINE_STRIP);
+		GL11.glVertex3f(-wb2, -hb2, -wb2);
+		GL11.glVertex3f(-wb2, -hb2, wb2);
+		GL11.glVertex3f(wb2, -hb2, wb2);
+		GL11.glVertex3f(wb2, -hb2, -wb2);
+		GL11.glVertex3f(-wb2, -hb2, -wb2);
+		GL11.glEnd();
+		GL11.glBegin(GL11.GL_LINES);
+		GL11.glVertex3f(-wb2, -hb2, -wb2);
+		GL11.glVertex3f(-wb2, hb2, -wb2);
+		GL11.glVertex3f(wb2, -hb2, -wb2);
+		GL11.glVertex3f(wb2, hb2, -wb2);
+		GL11.glVertex3f(-wb2, -hb2, wb2);
+		GL11.glVertex3f(-wb2, hb2, wb2);
+		GL11.glVertex3f(wb2, -hb2, wb2);
+		GL11.glVertex3f(wb2, hb2, wb2);
+		GL11.glEnd();
+		GL11.glBegin(GL11.GL_LINE_STRIP);
+		GL11.glVertex3f(-wb2, hb2, -wb2);
+		GL11.glVertex3f(-wb2, hb2, wb2);
+		GL11.glVertex3f(wb2, hb2, wb2);
+		GL11.glVertex3f(wb2, hb2, -wb2);
+		GL11.glVertex3f(-wb2, hb2, -wb2);
+		GL11.glEnd();
+		GL11.glLineWidth(5f);
+		GL11.glTranslatef(-ent.getPosition().x, -ent.getPosition().y-0.81f, -ent.getPosition().z);
 	}
 	
 	public List<GuiTexture> getGUIList() {
@@ -178,6 +242,7 @@ public class MasterRenderer {
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 = -(2 * FAR_PLANE * NEAR_PLANE) / zm;
 		projectionMatrix.m33 = 0;
+		Maths.matrixToBuffer(projectionMatrix, projectionBuffer);
 	}
 	
 	public void updateProjectionMatrix() {

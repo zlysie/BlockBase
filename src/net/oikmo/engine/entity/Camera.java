@@ -4,11 +4,9 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.ResourceLoader;
-import net.oikmo.engine.models.CubeModel;
-import net.oikmo.engine.models.TexturedModel;
+import com.mojang.minecraft.phys.AABB;
+
 import net.oikmo.engine.renderers.MasterRenderer;
-import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
@@ -32,10 +30,9 @@ public class Camera {
 	private boolean lockInCam;
 	
 	private MousePicker picker;
-	private int invisibleTexture;
 	private Block selectedBlock = Block.cobble;
-	private Entity block;
-
+	private TargetedAABB aabb;
+	
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -48,8 +45,7 @@ public class Camera {
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
-		this.invisibleTexture = ResourceLoader.loadTexture("textures/transparent");
-		this.block = new Entity(new TexturedModel(CubeModel.getRawModel(selectedBlock), new ModelTexture(MasterRenderer.currentTexturePack.getTextureID())), position, new Vector3f(0,0,0), 1.002f);
+		this.aabb = new TargetedAABB(new Vector3f());
 		mouseLocked = true;
 	}
 	
@@ -63,6 +59,7 @@ public class Camera {
 	boolean inventory = false;
 	boolean mouseClickLeft = false;
 	boolean mouseClickRight = false;
+	boolean shouldRenderAABB = false;
 	/**
 	 * Fly cam
 	 * @param heightOffset 
@@ -84,21 +81,8 @@ public class Camera {
 				}			
 			}
 
-			Vector3f pos = picker.getPoint();
-			Maths.roundVector(pos);
-
-			block.setPosition(pos);
-			Block thatBlock = Main.theWorld.getBlock(pos);
-			if(thatBlock != null) {
-				block.setWhiteOffset(2f);
-				block.setRawModel(CubeModel.getRawModel(thatBlock));
-			} else {
-				block.setWhiteOffset(0.5f);
-				block.setRawModel(CubeModel.getRawModel(selectedBlock));
-			}
-
+			
 			try {
-
 				if(!inventory) {
 					if(Keyboard.isKeyDown(Keyboard.KEY_EQUALS)) {
 						index += 1;
@@ -123,19 +107,13 @@ public class Camera {
 			catch(NumberFormatException e) {}
 			catch(ArithmeticException e) {}
 			
-			if(Main.theWorld.getBlock(block.getRoundedPosition()) == null) {
-				block.setTextureID(MasterRenderer.currentTexturePack.getTextureID());
-			}
-			if(!Main.theWorld.blockHasNeighbours(block.getRoundedPosition())) {
-				block.setTextureID(invisibleTexture);
-			}
 			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
-					Block block1 = Main.theWorld.getBlock(picker.getPointRounded(picker.distance));
+					Block block1 = Main.theWorld.getBlock(picker.getPointRounded());
 					if(block1 == null) {
-						if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance))) {
-							Main.theWorld.setBlock(picker.getPointRounded(picker.distance), selectedBlock);
+						if(Main.theWorld.blockHasNeighbours(picker.getPointRounded())) {
+							Main.theWorld.setBlock(picker.getPointRounded(), selectedBlock);
 						}
 					} else {
 						if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) {
@@ -153,10 +131,10 @@ public class Camera {
 				if(!mouseClickLeft) {
 					Block block = Main.theWorld.getBlock(picker.getPointRounded());
 					if(block != null) {
-						Vector3f v = new Vector3f(picker.getPointRounded());
-						v.y += 1f;
-						ItemBlock item = new ItemBlock(block, v);
-						Main.theWorld.addEntity(item);
+						//Vector3f v = new Vector3f(picker.getPointRounded());
+						//v.y += 1f;
+						//ItemBlock item = new ItemBlock(block, v);
+						//Main.theWorld.addEntity(item);
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;
@@ -166,11 +144,20 @@ public class Camera {
 			}
 			
 			if(Mouse.isButtonDown(2)) {
-				Block toBeSelected = Main.theWorld.getBlock(block.getRoundedPosition());
+				Block toBeSelected = Main.theWorld.getBlock(picker.getPointRounded());
 				if(toBeSelected != null) {
 					index = toBeSelected.getType();
 				}
 			}
+			
+			Block thatBlock = Main.theWorld.getBlock(picker.getPointRounded());
+			if(thatBlock != null) {
+				aabb.setPosition(picker.getPointRounded());
+				shouldRenderAABB = true;
+			} else {
+				shouldRenderAABB = false;
+			}
+			
 		}
 
 		this.move();
@@ -179,9 +166,9 @@ public class Camera {
 	public Block getCurrentlySelectedBlock() {
 		return selectedBlock;
 	}
-
-	public Entity getSelectedBlock() {
-		return block;
+	
+	public TargetedAABB getAABB() {
+		return aabb;
 	}
 	
 	public void toggleMouseLock() {
@@ -253,6 +240,10 @@ public class Camera {
 		this.yaw = dy;
 		this.roll = dz;
 	}
+	
+	public boolean shouldRenderAABB() {
+		return shouldRenderAABB;
+	}
 
 	/**
 	 * Sets position to given 3D Vector
@@ -264,6 +255,10 @@ public class Camera {
 
 	public Vector3f getPosition() {
 		return position;
+	}
+	
+	public Vector3f getRotation() {
+		return new Vector3f(pitch,yaw,roll);
 	}
 
 	public float getPitch() {
@@ -278,5 +273,42 @@ public class Camera {
 
 	public boolean isLocked() {
 		return mouseLocked;
+	}
+	
+	public static class TargetedAABB {
+		
+		private AABB aabb;
+		private Vector3f position;
+		
+		public TargetedAABB(Vector3f position) {
+			this.position = position;
+			float x = this.position.x;
+			float y = this.position.y;
+			float z = this.position.z;
+			this.aabb = new AABB(x - 0.5f, y - 0.5f, z - 0.5f, x + 0.5f, y + 0.5f, z + 0.5f);
+		}
+		
+		public void setPosition(float x, float y, float z) {
+			this.position.x = x;
+			this.position.y = y	;
+			this.position.z = z;
+			this.aabb = new AABB(x - 0.5f, y - 0.5f, z - 0.5f, x + 0.5f, y + 0.5f, z + 0.5f);
+		}
+		
+		public void setPosition(Vector3f position) {
+			this.position = position;
+			float x = this.position.x;
+			float y = this.position.y;
+			float z = this.position.z;
+			this.aabb = new AABB(x - 0.5f, y - 0.5f,z - 0.5f, x + 0.5f, y + 0.5f,z + 0.5f);
+		}
+
+		public AABB getAABB() {
+			return aabb;
+		}
+		
+		public Vector3f getPosition() {
+			return position;
+		}
 	}
 }

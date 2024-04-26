@@ -22,11 +22,11 @@ public class Entity {
 	private Vector3f roundPos;
 	private Vector3f chunkPos;
 	
-	protected AABB bb;
+	protected AABB aabb;
 	private boolean onGround;
 	protected float heightOffset = 0.0F;
-	protected float bbWidth = 0.6F;
-	protected float bbHeight = 1.8F;
+	private float bbWidth = 0.6F;
+	private float bbHeight = 1.8F;
 	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
@@ -38,35 +38,35 @@ public class Entity {
 	}
 
 	protected void setSize(float width, float height) {
-		this.bbWidth = width;
-		this.bbHeight = height;
+		this.setBbWidth(width);
+		this.setBbHeight(height);
 		float x = position.x;
 		float y = position.y;
 		float z = position.z;
-		float w = this.bbWidth / 2.0F;
-		float h = this.bbHeight / 2.0F;
-		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
+		float w = this.getBBWidth() / 2.0F;
+		float h = this.getBBHeight() / 2.0F;
+		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 
 	protected void setPos(float x, float y, float z) {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;
-		float w = this.bbWidth / 2.0F;
-		float h = this.bbHeight / 2.0F;
-		this.bb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
+		float w = this.getBBWidth() / 2.0F;
+		float h = this.getBBHeight() / 2.0F;
+		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 	
 	public List<AABB> getSurroundingAABBsPhys(int aabbOffset) {
 		
 		List<AABB> surroundingAABBs = new ArrayList<>();
 		
-		int x0 = Maths.roundFloat(bb.minX - aabbOffset);
-		int x1 = Maths.roundFloat(bb.maxX + aabbOffset);
-		int y0 = Maths.roundFloat(bb.minY - aabbOffset);
-		int y1 = Maths.roundFloat(bb.maxY + aabbOffset);
-		int z0 = Maths.roundFloat(bb.minZ - aabbOffset);
-		int z1 = Maths.roundFloat(bb.maxZ + aabbOffset);
+		int x0 = Maths.roundFloat(aabb.minX - aabbOffset);
+		int x1 = Maths.roundFloat(aabb.maxX + aabbOffset);
+		int y0 = Maths.roundFloat(aabb.minY - aabbOffset);
+		int y1 = Maths.roundFloat(aabb.maxY + aabbOffset);
+		int z0 = Maths.roundFloat(aabb.minZ - aabbOffset);
+		int z1 = Maths.roundFloat(aabb.maxZ + aabbOffset);
 		
 		for(int x = x0; x < x1; ++x) {
 			for(int y = y0; y < y1; ++y) {
@@ -100,22 +100,22 @@ public class Entity {
 
 		int i;
 		for(i = 0; i < aabbs.size(); ++i) {
-			ya = aabbs.get(i).clipYCollide(this.bb, ya);
+			ya = aabbs.get(i).clipYCollide(this.aabb, ya);
 		}
 
-		this.bb.move(0.0F, ya, 0.0F);
+		this.aabb.move(0.0F, ya, 0.0F);
 
 		for(i = 0; i < aabbs.size(); ++i) {
-			xa = aabbs.get(i).clipXCollide(this.bb, xa);
+			xa = aabbs.get(i).clipXCollide(this.aabb, xa);
 		}
 
-		this.bb.move(xa, 0.0F, 0.0F);
+		this.aabb.move(xa, 0.0F, 0.0F);
 
 		for(i = 0; i < aabbs.size(); ++i) {
-			za = aabbs.get(i).clipZCollide(this.bb, za);
+			za = aabbs.get(i).clipZCollide(this.aabb, za);
 		}
 
-		this.bb.move(0.0F, 0.0F, za);
+		this.aabb.move(0.0F, 0.0F, za);
 		this.setOnGround(yaOrg != ya && yaOrg < 0.0F);
 		if(xaOrg != xa) {
 			this.motion.x = 0.0F;
@@ -129,9 +129,9 @@ public class Entity {
 			this.motion.z = 0.0F;
 		}
 		
-		this.position.x = (this.bb.minX + this.bb.maxX) / 2.0F;
-		this.position.y = this.bb.minY + this.heightOffset;
-		this.position.z = (this.bb.minZ + this.bb.maxZ) / 2.0F;
+		this.position.x = (this.aabb.minX + this.aabb.maxX) / 2.0F;
+		this.position.y = this.aabb.minY + this.heightOffset;
+		this.position.z = (this.aabb.minZ + this.aabb.maxZ) / 2.0F;
 	}
 	
 	/**
@@ -260,8 +260,12 @@ public class Entity {
 		return null;
 	}
 	
+	public void setAABB(AABB aabb) {
+		this.aabb = aabb;
+	}
+	
 	public AABB getAABB() {
-		return bb;
+		return aabb;
 	}
 
 	public float getHeightOffset() {
@@ -276,5 +280,21 @@ public class Entity {
 
 	public void setOnGround(boolean onGround) {
 		this.onGround = onGround;
+	}
+
+	public float getBBWidth() {
+		return bbWidth;
+	}
+
+	public void setBbWidth(float bbWidth) {
+		this.bbWidth = bbWidth;
+	}
+
+	public float getBBHeight() {
+		return bbHeight;
+	}
+
+	public void setBbHeight(float bbHeight) {
+		this.bbHeight = bbHeight;
 	}
 }

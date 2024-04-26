@@ -42,7 +42,7 @@ public class ItemEntity extends Entity {
 			this.move(this.motion.x, this.motion.y, this.motion.z,1);
 		}
 		
-		if(bb.intersects(Main.thePlayer.getAABB())) {
+		if(aabb.intersects(Main.thePlayer.getAABB())) {
 			if(allowDisabling) {
 				dontTick = true;
 			}

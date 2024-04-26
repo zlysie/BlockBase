@@ -12,6 +12,8 @@ uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 
+uniform float shouldFakeIt;
+
 const float density = 0.015;
 const float gradient = 1.5;
 
@@ -23,13 +25,12 @@ void main(void) {
 	
 	pass_textureCoords = textureCoords;
 	
-	
-	if(normal.x <= 0 && normal.y <= 0 && normal.z <= 0) {
-		surfaceNormal = (transformationMatrix * vec4(vec3(1,1,1), 0.0)).xyz;
+	if(shouldFakeIt > 0.5) {
+		vec3 damn = normal + 1.5;
+		surfaceNormal = (transformationMatrix * vec4(damn, 0.0)).xyz;
 	} else {
 		surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
 	}
-	
 	
 	float distance = length(positionRelativeToCam.xyz);
 	visibility = exp(-pow((distance*density), gradient));

@@ -59,7 +59,8 @@ public class Gui {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GL11.glOrtho(0,Display.getWidth(), Display.getHeight(), 0, -1, 1);
-
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -191,6 +192,7 @@ public class Gui {
 		g.setColor(c);
 		g.setLineWidth(lineWidth);
 		g.draw(new Rectangle(x, y, width, height));
+		g.setLineWidth(0);
 		dropGL();
 	}
 

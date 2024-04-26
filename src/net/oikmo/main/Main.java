@@ -53,7 +53,7 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main extends Gui {
 	
-	private static final int resourceVersion = 1;
+	private static final int resourceVersion = 2;
 	public static final String gameName = "BlockBase";
 	public static final String version = "a0.0.9";
 	public static final String gameVersion = gameName + " " + version;
@@ -223,12 +223,6 @@ public class Main extends Gui {
 			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
 			theWorld.startChunkCreator();
 		}
-		
-		if(Main.thePlayer != null) {
-			theWorld.addEntity(thePlayer.getCamera().getSelectedBlock());
-		}
-		
-		
 	}
 	
 	public static void shouldTick() {
