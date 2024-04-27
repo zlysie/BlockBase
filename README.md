@@ -4,7 +4,6 @@
 
 - Left Click - Destroy selected block
 - Right Click - Place block
-- (+ or -) keys - Blocks to select
 - WASD - move
 - Space - jump
 
