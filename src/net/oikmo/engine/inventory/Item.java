@@ -48,6 +48,7 @@ public class Item {
 	private String name = "";
 	private String desc = "";
 	private int maxStackSize;
+	private int blockIndex = -1;
 	
 	private int atlasX, atlasY;
 	
@@ -63,6 +64,7 @@ public class Item {
 		this.name = itemName;
 		this.maxStackSize = maxStackSize;
 		blockItems[type.ordinal()] = this;
+		this.blockIndex = type.ordinal();
 		itemIndex.put(itemName.replaceAll("\\s+","").toLowerCase(), this);
 	}
 	
@@ -99,6 +101,7 @@ public class Item {
 		this.atlasX = x*16;
 		this.atlasY = y*16;
 		this.image = atlas.getSubImage(atlasX, atlasY, 16, 16);
+		this.image.setFilter(Image.FILTER_NEAREST);
 		
 		return this;
 	}
@@ -107,6 +110,7 @@ public class Item {
 		this.atlasX = x*16;
 		this.atlasY = y*16;
 		this.image = blockAtlas.getSubImage(atlasX, atlasY, 16, 16);
+		this.image.setFilter(Image.FILTER_NEAREST);
 		
 		return this;
 	}
@@ -115,5 +119,14 @@ public class Item {
 		return blockItems[block.getByteType()];
 	}
 	
-	
+	public static Block itemToBlock(Item item) {
+		if(item != null) {
+			int i = item.blockIndex;
+			if(i != -1) {
+				return Block.blocks[i];
+			}
+		}
+		
+		return null;
+	}
 }

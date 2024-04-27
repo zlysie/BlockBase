@@ -92,7 +92,7 @@ public class DisplayManager {
 						comp.updateComponent();
 					}
 					if(Main.currentScreen instanceof GuiInventory) {
-						((GuiInventory)Main.currentScreen).updateInventory();
+						((GuiInventory)Main.currentScreen).onDisplayUpdate();
 					}
 				}
 			}
@@ -125,7 +125,7 @@ public class DisplayManager {
 					comp.updateComponent();
 				}
 				if(Main.currentScreen instanceof GuiInventory) {
-					((GuiInventory)Main.currentScreen).updateInventory();
+					((GuiInventory)Main.currentScreen).onDisplayUpdate();
 				}
 			}
 		}

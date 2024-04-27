@@ -3,8 +3,8 @@ package net.oikmo.engine.renderers.skybox;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.renderers.ShaderProgram;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.renderers.ShaderProgram;
 import net.oikmo.toolbox.Maths;
 
 public class SkyBoxShader extends ShaderProgram {

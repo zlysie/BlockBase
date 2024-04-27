@@ -106,6 +106,12 @@ public class MasterChunk {
 		}
 	}
 	
+	public void replaceBlocks(byte[][][] blocks) {
+		this.chunk = new Chunk(blocks);
+		this.mesh = new ChunkMesh(chunk);
+		this.entity = null;
+	}
+	
 	public Vector3f getOrigin() {
 		return origin;
 	}

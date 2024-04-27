@@ -2,11 +2,9 @@ package net.oikmo.engine.gui.component.slick.button;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
-import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 
-import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
@@ -14,10 +12,10 @@ import net.oikmo.engine.sound.SoundMaster;
 
 public class GuiButton extends Gui implements GuiComponent {
 
-	private static Texture normalTexture;
-	private static Texture hoveredTexture;
+	private static Image normalTexture;
+	private static Image hoveredTexture;
 
-	private Texture texture = normalTexture;
+	private Image texture = normalTexture;
 
 	private String text;
 	private GuiCommand command;
@@ -29,10 +27,10 @@ public class GuiButton extends Gui implements GuiComponent {
 
 	private void onInit() {
 		if(normalTexture == null) {
-			normalTexture = ResourceLoader.loadUITexture("ui/normal/ui_button");
+			normalTexture = Gui.guiAtlas.getSubImage(0, 66, 200, 20);
 		}
 		if(hoveredTexture == null) {
-			hoveredTexture = ResourceLoader.loadUITexture("ui/normal/ui_button_hover");
+			hoveredTexture = Gui.guiAtlas.getSubImage(0, 86, 200, 20);
 		}
 	}
 
@@ -63,7 +61,7 @@ public class GuiButton extends Gui implements GuiComponent {
 		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
 
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
-			//texture = hoveredTexture;
+			texture = hoveredTexture;
 			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
 				if(command != null) {
@@ -89,11 +87,8 @@ public class GuiButton extends Gui implements GuiComponent {
 			}
 		}
 		
-		Image img = new Image(texture);
-		if(isHovering) {
-			img.setImageColor(0.85f, 0.85f, 2f);
-		}
-		drawImg(img, x, y, width, height);
+		
+		drawImage(texture, x, y, width, height);
 		
 		Color c = isHovering ? new Color(0.9f,0.9f,0.1f,1f) : Color.white;
 		drawShadowStringCentered(c, x, y, text);
@@ -105,6 +100,7 @@ public class GuiButton extends Gui implements GuiComponent {
 
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
 			isHovering = true;
+			texture = hoveredTexture;
 			if(Mouse.isButtonDown(0) && shouldClicky) {
 				if(command != null) {
 					if(!lockButton) {
@@ -128,11 +124,7 @@ public class GuiButton extends Gui implements GuiComponent {
 			}
 		}
 		
-		Image img = new Image(texture);
-		if(isHovering) {
-			img.setImageColor(0.85f, 0.85f, 2f);
-		}
-		drawImg(img, x, y, width, height);
+		drawImage(texture, x, y, width, height);
 		
 		Color c = isHovering ? new Color(0.9f,0.9f,0.1f,1f) : Color.white;
 		drawShadowStringCentered(c, x, y, text);
@@ -166,7 +158,7 @@ public class GuiButton extends Gui implements GuiComponent {
 		this.command = command;
 	}
 
-	public Texture getTexture() {
+	public Image getTexture() {
 		return texture;
 	}
 

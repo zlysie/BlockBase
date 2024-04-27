@@ -1,14 +1,13 @@
 package net.oikmo.engine;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.renderers.MasterRenderer;
-import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiInventory;
+import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.main.gui.GuiPauseMenu;
+import net.oikmo.main.gui.GuiSelectWorld;
 
 public class InputManager {
 
@@ -21,7 +20,7 @@ public class InputManager {
 	private final int refreshKey = Keyboard.KEY_F;
 	private final int inventoryKey = Keyboard.KEY_E;
 	private final int teleportKey = Keyboard.KEY_P;
-	private final int itemKey = Keyboard.KEY_Y;
+	//private final int itemKey = Keyboard.KEY_Y;
 	
 	private boolean lockInPause = false;
 	
@@ -30,14 +29,14 @@ public class InputManager {
 	private boolean lockInDebug = false;
 	
 	private boolean lockInRefresh = false;
-	private boolean lockInItem = false;
+	//private boolean lockInItem = false;
 
 	public void handleInput() {
 		if(!Main.isPaused()) {
 			
-			if(Keyboard.isKeyDown(itemKey)) {
+			/*if(Keyboard.isKeyDown(itemKey)) {
 				if(!lockInItem) {
-					ItemBlock block = new ItemBlock(Block.grass, new Vector3f(Main.thePlayer.getCamera().getPosition()));
+					ItemBlock block = new ItemBlock(Main.thePlayer.getCamera().getCurrentlySelectedBlock(), new Vector3f(Main.thePlayer.getCamera().getPosition()));
 					block.setRotation(0.0f, Main.thePlayer.getCamera().getYaw()-90, 0.0f);
 					block.moveRelative(1, 0, 0.1f);
 					//block.setPosition(block.getRoundedPosition());
@@ -46,7 +45,7 @@ public class InputManager {
 				lockInItem = true;
 			} else {
 				lockInItem = false;
-			}
+			}*/
 			
 			if(Keyboard.isKeyDown(teleportKey)) {
 				Main.thePlayer.resetPos();
@@ -95,31 +94,36 @@ public class InputManager {
 		}
 		
 
-		if(Keyboard.isKeyDown(screenShotKey)) {
-			if(!lockInScreenshot) {
-				DisplayManager.saveScreenshot();
+		
+		
+		if(!(Main.currentScreen instanceof GuiMainMenu) && !(Main.currentScreen instanceof GuiSelectWorld)) {
+			if(Keyboard.isKeyDown(screenShotKey)) {
+				if(!lockInScreenshot) {
+					DisplayManager.saveScreenshot();
+				}
+				lockInScreenshot = true;
+			} else {
+				lockInScreenshot = false;
 			}
-			lockInScreenshot = true;
-		} else {
-			lockInScreenshot = false;
+			
+			if(!lockInPause) {
+				if(Keyboard.isKeyDown(pauseEscapeKey)) {
+					
+					if(Main.currentScreen != null) {
+						Main.currentScreen.prepareCleanUp();
+						Main.currentScreen = null;
+					} else {
+						Main.currentScreen = new GuiPauseMenu();
+					}
+					lockInPause = true;
+				}
+			} else {
+				if(!Keyboard.isKeyDown(pauseEscapeKey)) {
+					lockInPause = false;
+				}
+			}
 		}
 		
-		if(!lockInPause) {
-			if(Keyboard.isKeyDown(pauseEscapeKey)) {
-				
-				if(Main.currentScreen != null) {
-					Main.currentScreen.prepareCleanUp();
-					Main.currentScreen = null;
-				} else {
-					Main.currentScreen = new GuiPauseMenu();
-				}
-				lockInPause = true;
-			}
-		} else {
-			if(!Keyboard.isKeyDown(pauseEscapeKey)) {
-				lockInPause = false;
-			}
-		}
 	}
 
 }

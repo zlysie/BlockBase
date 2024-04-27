@@ -2,7 +2,6 @@ package net.oikmo.engine.gui;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 
 import org.lwjgl.opengl.Display;
@@ -16,6 +15,7 @@ import org.newdawn.slick.font.effects.ColorEffect;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.opengl.Texture;
 
+import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.component.slick.Cursor;
 import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.main.Main;
@@ -25,6 +25,8 @@ public class Gui {
 	public static GuiComponent current = null;
 	public static boolean lockedRightNow = false;
 
+	protected static Image guiAtlas;
+	
 	protected static Graphics g = new Graphics();
 	protected static UnicodeFont font;
 
@@ -49,7 +51,8 @@ public class Gui {
 		} catch (SlickException e1) {
 			e1.printStackTrace();
 		}
-
+		
+		guiAtlas = new Image(ResourceLoader.loadUITexture("ui/gui"));
 		cursor = new Cursor();
 	}
 
@@ -120,38 +123,49 @@ public class Gui {
 	protected void drawShadowStringCentered(Color c, float x, float y, String text) {
 		drawShadowString(c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
 	}
-
-	protected void drawShadowStringCentered(float fontSize, float degrees, Color c, float x, float y, String text) {
-		drawShadowString(fontSize, degrees, c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
-	}
 	
 	protected void drawShadowStringCentered(float x, float y, String text) {
 		drawShadowString(Color.white, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
 	}
 	
-	protected void drawShadowStringCentered(float fontSize, float degrees, float x, float y, String text) {
-		drawShadowString(fontSize, degrees, Color.white, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+	protected void drawShadowStringCentered(UnicodeFont font, float x, float y, String text) {
+		drawShadowString(font, Color.white, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+	}
+	
+	protected void drawShadowStringCentered(UnicodeFont font, Color c, float x, float y, String text) {
+		drawShadowString(font, c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
 	}
 
 	protected void drawShadowString(float x, float y, String text) {
-		drawShadowString(Color.white, x, y, text);
+		drawShadowString(null, Color.white, x, y, text);
 	}
-
+	
 	protected void drawShadowString(Color c, float x, float y, String text) {
 		setupGL();
 		font.drawString(x+2, y+2, text, Color.gray);
 		font.drawString(x, y, text, c);
 		dropGL();
 	}
-
-	@SuppressWarnings("unchecked")
-	protected void drawShadowString(float fontSize, float degrees, Color c, float x, float y, String text) {
+	
+	protected void drawShadowString(UnicodeFont font, int x, int y, String text) {
+		drawShadowString(font, Color.white, x, y, text);
+	}
+	
+	protected void drawShadowString(UnicodeFont font, Color c, float x, float y, String text) {
 		setupGL();
+		if(font == null) {
+			font = Gui.font;
+		}
 		
-		AffineTransform affineTransform = new AffineTransform();
-		affineTransform.rotate(Math.toRadians(degrees), 0, 0);
-		java.awt.Font f = awtFont.deriveFont(affineTransform);
-		UnicodeFont font = new UnicodeFont(f.deriveFont(fontSize));
+		font.drawString(x+2, y+2, text, Color.gray);
+		font.drawString(x, y, text, c);
+		
+		dropGL();	
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected UnicodeFont calculateFont(float fontSize) {
+		UnicodeFont font = new UnicodeFont(awtFont.deriveFont(fontSize));
 		font.getEffects().add(new ColorEffect());
 		
 		font.addAsciiGlyphs();
@@ -160,22 +174,20 @@ public class Gui {
 		} catch (SlickException e1) {
 			e1.printStackTrace();
 		}
-		font.drawString(x+2, y+2, text, Color.gray);
-		font.drawString(x, y, text, c);
-		dropGL();	
+		return font;
 	}
 
-	protected void drawImage(Texture texture, float x, float y, float width, float height) {
-		drawImageRaw(texture, x-width/2, y-height/2, width, height);
+	protected void drawTexture(Texture texture, float x, float y, float width, float height) {
+		drawTextureRaw(texture, x-width/2, y-height/2, width, height);
 	}
 
-	protected void drawImg(Image image, float x, float y, float width, float height) {
+	protected void drawImage(Image image, float x, float y, float width, float height) {
 		setupGL();
 		image.draw(x-width/2, y-height/2, width, height);
 		dropGL();
 	}
 
-	protected void drawImageRaw(Texture texture, float x, float y, float width, float height) {
+	protected void drawTextureRaw(Texture texture, float x, float y, float width, float height) {
 		setupGL();
 		Image img = new Image(texture);
 		img.setFilter(Image.FILTER_NEAREST);
@@ -183,6 +195,8 @@ public class Gui {
 		dropGL();
 	}
 
+	
+	
 	protected void drawSquare(float x, float y, float width, float height) {
 		drawSquare(Color.darkGray, 1f, x, y, width, height);
 	}

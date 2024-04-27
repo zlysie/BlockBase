@@ -7,8 +7,6 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
-import net.oikmo.engine.gui.component.slick.slider.GuiSlider;
-import net.oikmo.engine.gui.component.slick.textfield.GuiTextField;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 
@@ -21,16 +19,31 @@ public class GuiPauseMenu extends GuiScreen {
 	private GuiButton quitButton;
 	
 	public void onInit() {
-		Main.shouldTick();
+		if(Main.network != null) {
+			Main.thePlayer.getCamera().setMouseLock(false);
+		} else {
+			Main.shouldTick();
+		}
+		
 		
 		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Quit world...");
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				Main.inGameGUI = null;
-				Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
+				if(Main.network == null) {
+					Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
+				} else {
+					Main.network.disconnect();
+					Main.network = null;
+				}
 				
-				Main.shouldTick();
+				
+				if(Main.network != null) {
+					Main.thePlayer.getCamera().setMouseLock(false);
+				} else {
+					Main.shouldTick();
+				}
 				prepareCleanUp();
 				SoundMaster.stopMusic();
 				Main.currentScreen = new GuiMainMenu(Main.getRandomSplash());
@@ -42,18 +55,20 @@ public class GuiPauseMenu extends GuiScreen {
 				y = Display.getHeight()/2;
 			}
 		});
-		
 	}
 	
 	public void onUpdate() {
-		if(Main.isPaused()) {
-			drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
-			quitButton.tick();
-		}
+		drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
+		quitButton.tick();
 	}
 	
 	public void onClose() {
-		Main.shouldTick();
+		if(Main.network != null) {
+			Main.thePlayer.getCamera().setMouseLock(true);
+		} else {
+			Main.shouldTick();
+		}
+		
 		Gui.cleanUp();
 	}
 }

@@ -8,6 +8,7 @@ import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Color;
 
 import net.oikmo.engine.gui.Gui;
+import net.oikmo.engine.gui.component.slick.inventory.InventorySlot;
 
 public class Cursor extends Gui implements GuiComponent {
 	

@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -32,15 +33,22 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.Timer;
+import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
+import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.main.gui.GuiMainMenu;
+import net.oikmo.network.client.NetworkHandler;
+import net.oikmo.network.client.OtherPlayer;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
@@ -53,9 +61,11 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main extends Gui {
 	
+	public static final int bufferSize = 10240;
+	
 	private static final int resourceVersion = 2;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.0.9";
+	public static final String version = "a0.1.0";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -80,10 +90,12 @@ public class Main extends Gui {
 	
 	public static Vector3f camPos = new Vector3f(0,0,0);
 	
-	private static boolean shouldTick = true;
+	public static boolean shouldTick = true;
 
 	private static String[] splashes;
 	public static String splashText;
+	
+	public static NetworkHandler network;
 	
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
@@ -153,6 +165,8 @@ public class Main extends Gui {
 			
 			((GuiMainMenu)currentScreen).doRandomMusic();
 			
+			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidian), MasterRenderer.currentTexturePack);
+			
 			while(!Display.isCloseRequested()) {
 				timer.advanceTime();
 				
@@ -180,6 +194,17 @@ public class Main extends Gui {
 				
 				im.handleInput();
 				
+				if(network != null) {
+					for(Map.Entry<Integer, OtherPlayer> e : NetworkHandler.players.entrySet()) {
+						OtherPlayer p = e.getValue();
+						Vector3f position = new Vector3f(p.x,p.y+1.72f,p.z);
+						//System.out.println(position);
+						Vector3f rotation = new Vector3f(p.rotZ,p.rotY,-p.rotX);
+						Entity entity = new Entity(obsidian, position, rotation, 1f);
+						MasterRenderer.getInstance().addEntity(entity);
+					}
+				}
+				
 				if(theWorld != null) {
 					theWorld.update(thePlayer.getCamera());
 				}
@@ -198,6 +223,20 @@ public class Main extends Gui {
 			Main.error("Runtime Error!", e);
 		}
 		close();
+	}
+	
+	public static boolean isInValidRange(Vector3f origin) {
+		return isInValidRange(1, origin);
+	}
+	public static boolean isInValidRange(int size, Vector3f origin) {
+		int distX = (int) FastMath.abs((Main.camPos.x * size) - origin.x);
+		int distZ = (int) FastMath.abs((Main.camPos.z * size) - origin.z);
+
+		if((distX <= World.WORLD_SIZE) && (distZ <= World.WORLD_SIZE)) {
+			return true;
+		}
+
+		return false;
 	}
 	
 	public static String getRandomSplash() {
@@ -222,12 +261,18 @@ public class Main extends Gui {
 		}
 	}
 	
+	private static boolean tick;
 	public static void shouldTick() {
-		Main.shouldTick = !shouldTick;
-		if(Main.thePlayer != null) {
-			Main.thePlayer.getCamera().setMouseLock(shouldTick);
+		if(Main.network == null) {
+			Main.shouldTick = !shouldTick;
+			tick = Main.shouldTick;
+		} else {
+			tick = !tick;
 		}
 		
+		if(Main.thePlayer != null) {
+			Main.thePlayer.getCamera().setMouseLock(tick);
+		}	
 	}
 	
 	public static boolean isPaused() {
@@ -235,12 +280,18 @@ public class Main extends Gui {
 	}
 
 	private static void tick() {
-		theWorld.tick();
-		camPos = new Vector3f(thePlayer.getCamera().getPosition());
-		if(!hasSaved && thePlayer.isOnGround()) {
-			theWorld.saveWorld(currentlyPlayingWorld);
-			hasSaved = true;
-		}
+		if(Main.network == null) {
+			theWorld.tick();
+			camPos = new Vector3f(thePlayer.getCamera().getPosition());
+			if(!hasSaved && thePlayer.isOnGround()) {
+				theWorld.saveWorld(currentlyPlayingWorld);
+				hasSaved = true;
+			}
+		} else {
+			thePlayer.tick();
+			network.update();
+			camPos = new Vector3f(thePlayer.getCamera().getPosition());
+		}	
 	}
 
 	public static void close() {

@@ -1,11 +1,11 @@
 package net.oikmo.engine.entity;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.mojang.minecraft.phys.AABB;
 
+import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
@@ -30,7 +30,6 @@ public class Camera {
 	private boolean lockInCam;
 	
 	private MousePicker picker;
-	private Block selectedBlock = Block.cobble;
 	private TargetedAABB aabb;
 	
 	/**
@@ -54,7 +53,6 @@ public class Camera {
 		mouseLocked = false;
 	}
 	
-	int index = 0;
 	float multiplier = 100;
 	boolean inventory = false;
 	boolean mouseClickLeft = false;
@@ -69,9 +67,9 @@ public class Camera {
 		this.position.x = Maths.lerp(this.position.x, position.x, 0.1f);
 		this.position.z = Maths.lerp(this.position.z, position.z, 0.1f);
 		this.position.y = position.y + heightOffset;
-		if(mouseLocked) {
+		if(mouseLocked && Main.theWorld != null) {
 			picker.update();
-
+			
 			picker.distance = picker.BASE_DISTANCE;
 			for(int i = 0; i < picker.BASE_DISTANCE; i++) {
 				Block block = Main.theWorld.getBlock(picker.getPointRounded(i));
@@ -80,46 +78,22 @@ public class Camera {
 					break;
 				}			
 			}
-
-			
-			try {
-				if(!inventory) {
-					if(Keyboard.isKeyDown(Keyboard.KEY_EQUALS)) {
-						index += 1;
-						index = index > Block.blocks.length-1 ? 0 : index;
-						inventory = true;
-					} else if(Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
-						index -= 1;
-						index = index <= -1 ? Block.blocks.length-1 : index;
-						inventory = true;
-					}
-				} else {
-					if(!Keyboard.isKeyDown(Keyboard.KEY_EQUALS) && !Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
-						inventory = false;
-					}
-				}
-				if(Block.blocks[index] != null) {
-					if(selectedBlock != Block.blocks[index]) {
-						selectedBlock = Block.blocks[index];
-					}
-				}
-			} 
-			catch(NumberFormatException e) {}
-			catch(ArithmeticException e) {}
-			
 			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
 					Block block1 = Main.theWorld.getBlock(picker.getPointRounded());
-					if(block1 == null) {
-						if(Main.theWorld.blockHasNeighbours(picker.getPointRounded())) {
-							Main.theWorld.setBlock(picker.getPointRounded(), selectedBlock);
-						}
-					} else {
-						if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) {
-							Main.theWorld.setBlock(picker.getPointRounded(picker.distance-1), selectedBlock);
+					if(Main.inGameGUI.getSelectedItem() != null) {
+						if(block1 == null) {
+							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded())) {
+								Main.theWorld.setBlock(picker.getPointRounded(), Main.inGameGUI.getSelectedItem());
+							}
+						} else {
+							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) {
+								Main.theWorld.setBlock(picker.getPointRounded(picker.distance-1), Main.inGameGUI.getSelectedItem());
+							}
 						}
 					}
+					
 					
 					mouseClickRight = true;
 				}
@@ -131,10 +105,10 @@ public class Camera {
 				if(!mouseClickLeft) {
 					Block block = Main.theWorld.getBlock(picker.getPointRounded());
 					if(block != null) {
-						//Vector3f v = new Vector3f(picker.getPointRounded());
-						//v.y += 1f;
-						//ItemBlock item = new ItemBlock(block, v);
-						//Main.theWorld.addEntity(item);
+						/*Vector3f v = new Vector3f(picker.getPointRounded());
+						v.y += 1f;
+						ItemBlock item = new ItemBlock(block, v);
+						Main.theWorld.addEntity(item);*/
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;
@@ -146,7 +120,7 @@ public class Camera {
 			if(Mouse.isButtonDown(2)) {
 				Block toBeSelected = Main.theWorld.getBlock(picker.getPointRounded());
 				if(toBeSelected != null) {
-					index = toBeSelected.getType();
+					Main.inGameGUI.setSelectedItem(Item.blockToItem(toBeSelected));
 				}
 			}
 			
@@ -161,10 +135,6 @@ public class Camera {
 		}
 
 		this.move();
-	}
-
-	public Block getCurrentlySelectedBlock() {
-		return selectedBlock;
 	}
 	
 	public TargetedAABB getAABB() {

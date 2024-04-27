@@ -126,8 +126,8 @@ public class GuiSlider  extends Gui implements GuiComponent {
 			texture = normalTexture;
 		}
 		
-		drawImage(backgroundTexture, x, y, width, height);
-		drawImage(texture, x2, y, width2, height);
+		drawTexture(backgroundTexture, x, y, width, height);
+		drawTexture(texture, x2, y, width2, height);
 		Color c = isHovering ? Color.yellow : Color.white;
 		drawShadowStringCentered(c, x, y, text);
 	}

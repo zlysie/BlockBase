@@ -15,6 +15,8 @@ public class Player extends Entity {
 	private Camera camera;
 	private Container inventory;
 	
+	public boolean tick = true;
+	
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
 		resetPos();
@@ -24,15 +26,16 @@ public class Player extends Entity {
 	}
 	
 	public void tick() {
+		if(!tick) {return;}
 		float xa = 0.0F;
-		float ya = 0.0F;
+		float za = 0.0F;
   		
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			--ya;
+			--za;
 		}
 
 		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			++ya;
+			++za;
 		}
 
 		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A)) {
@@ -48,12 +51,13 @@ public class Player extends Entity {
 		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
-		this.moveRelative(xa, ya, this.isOnGround() ? 0.015F : 0.005F);
+		this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);
 		this.motion.y = (float)((double)this.motion.y - 0.008D);
 		this.move(this.motion.x, this.motion.y, this.motion.z);
 		if(this.getPosition().y < 0) {
 			resetPos();
 		}
+		//System.out.println(xa + " " + za);
 		
 		this.motion.x *= 0.91F;
 		this.motion.y *= 0.98F;
@@ -69,13 +73,16 @@ public class Player extends Entity {
 	}
 
 	public void updateCamera() {
-		camera.update(new Vector3f(getPosition()), heightOffset);
+		if(tick)
+			camera.update(new Vector3f(getPosition()), heightOffset);
 	}
 	
 	public void resetPos() {
 		MasterChunk currentChunk = getCurrentChunk();
 		if(currentChunk != null) {
 			this.setPos(getPosition().x, currentChunk.getChunk().getHeightFromPosition(currentChunk.getOrigin(), getPosition()), getPosition().z);
+		} else {
+			this.setPos(getPosition().x, 1, getPosition().z);
 		}
 		
 	}

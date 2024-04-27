@@ -1,4 +1,4 @@
-package net.oikmo.engine.gui.component.slick;
+package net.oikmo.engine.gui.component.slick.inventory;
 
 public class InventoryContainer {
 	

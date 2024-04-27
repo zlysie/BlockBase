@@ -7,8 +7,8 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 
 import net.oikmo.engine.Loader;
-import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.models.RawModel;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 

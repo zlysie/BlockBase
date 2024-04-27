@@ -91,7 +91,7 @@ public class GuiTextField  extends Gui implements GuiComponent {
 			handleKeyboardInput();
 		}
 
-		drawImage(backgroundTexture, x, y, width, height);
+		drawTexture(backgroundTexture, x, y, width, height);
 		
 		if(inputText.length() == 0) {
 			drawShadowString(Color.darkGray, (x+3)-width/2, y-font.getHeight("Type here...")/2, "Type here...");

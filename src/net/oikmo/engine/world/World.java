@@ -124,26 +124,26 @@ public class World {
 				Entity entity = entities.get(i);
 				if(entity != null) {
 					if(isInValidRange(entity.getPosition())) {
-						if(entity instanceof ItemEntity) {
-							if(!((ItemEntity)entity).dontTick && entity.getPosition().y > 0) {
-								entity.tick();
-							} else {
-								if(Main.thePlayer.getInventory().addItem(((ItemEntity)entity).getItem())) {
-									entities.remove(entity);
-								} else {
-									((ItemEntity)entity).dontTick = false;
-								}
-
-								continue;
-							}
-						} else {
-							entity.tick();
-						}
+						entity.tick();
 					}
 				}
 			}
 		}
 	}
+	
+	/*  if(entity instanceof ItemEntity) {
+			if(!((ItemEntity)entity).dontTick && entity.getPosition().y > 0) {
+				entity.tick();
+			} else {
+				if(Main.thePlayer.getInventory().addItem(((ItemEntity)entity).getItem())) {
+					entities.remove(entity);
+				} else {
+					((ItemEntity)entity).dontTick = false;
+				}
+				continue;
+			}
+		}
+	 */
 	
 	public void addEntity(Entity ent) {
 		if(!entities.contains(ent)) {
@@ -157,6 +157,9 @@ public class World {
 		MasterChunk m = getChunkFromPosition(chunkPos);
 		if(m != null) {
 			m.setBlock(position, block);
+			if(Main.network != null) {
+				Main.network.updateChunk(m);
+			}
 			return true;
 		}
 		return false;
@@ -246,7 +249,7 @@ public class World {
 	public void addChunk(MasterChunk m) {
 		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
-	}	
+	}
 	
 	public void handleLoad(SaveData data) {
 		if(Main.thePlayer == null) {
@@ -355,6 +358,7 @@ public class World {
 		this.chunkCreator.interrupt();
 		this.chunkCreator.stop();
 
+		Main.inGameGUI = null;
 		Main.thePlayer = null;
 		Main.theWorld = null;
 	}

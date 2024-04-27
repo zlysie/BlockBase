@@ -1,9 +1,11 @@
-package net.oikmo.engine.gui.component.slick;
+package net.oikmo.engine.gui.component.slick.inventory;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import net.oikmo.engine.gui.Gui;
+import net.oikmo.engine.gui.component.slick.GuiCommand;
+import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.engine.inventory.Slot;
 import net.oikmo.engine.sound.SoundMaster;
 
@@ -63,7 +65,7 @@ public class InventorySlot extends Gui implements GuiComponent {
 			lockedRightNow = false;
 		}
 		
-		drawImg(slot.getItem().getImage(), x, y, width, height);
+		drawImage(slot.getItem().getImage(), x, y, width, height);
 	}
 
 	public static void dropCurrent() {

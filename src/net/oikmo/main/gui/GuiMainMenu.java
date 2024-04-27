@@ -33,6 +33,7 @@ public class GuiMainMenu extends GuiScreen {
 	private Thread musicThread;	
 	
 	private GuiButton playButton;
+	private GuiButton multiplayerButton;
 	private GuiButton quitButton;
 
 	private String[] menuIDS;
@@ -42,6 +43,12 @@ public class GuiMainMenu extends GuiScreen {
 	private Camera mainMenuCamera;
 	
 	public void onInit() {
+		if(Main.thePlayer != null) {
+			Main.thePlayer.getCamera().setMouseLock(false);
+		}
+		Main.thePlayer = null;
+		Main.shouldTick = false;
+		Main.theWorld = null;
 		String[] menuIDS = {
 				"music.moogcity",
 				"music.mutation",
@@ -58,7 +65,7 @@ public class GuiMainMenu extends GuiScreen {
 		
 		float offsetY = 20f;
 		
-		playButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY, 200, 30, "Play game");
+		playButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY*2f, 200, 30, "Play game");
 		playButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -70,11 +77,27 @@ public class GuiMainMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = (Display.getHeight()/2)-offsetY;
+				y = (Display.getHeight()/2)-offsetY*2f;
+			}
+		});
+		
+		multiplayerButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Multiplayer");
+		multiplayerButton.setGuiCommand(new GuiCommand() {
+			@Override
+			public void invoke() {
+				prepareCleanUp();
+				Gui.cleanUp();
+				Main.currentScreen = new GuiMultiplayer();
+			}
+
+			@Override
+			public void update() {
+				x = Display.getWidth()/2;
+				y = (Display.getHeight()/2);
 			}
 		});
 
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+offsetY, 200, 30, "Quit game");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+offsetY*2f, 200, 30, "Quit game");
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -85,11 +108,9 @@ public class GuiMainMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = (Display.getHeight()/2)+offsetY;
+				y = (Display.getHeight()/2)+offsetY*2f;
 			}
 		});
-		
-		
 	}
 	
 	public void doRandomMusic() {
@@ -170,9 +191,10 @@ public class GuiMainMenu extends GuiScreen {
 			float height = 64;
 			
 			MasterRenderer.getInstance().render(((GuiMainMenu)Main.currentScreen).getCamera());
-			drawImage(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
+			drawTexture(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
 			playButton.tick(lockTick);
+			multiplayerButton.tick(lockTick);
 			quitButton.tick(lockTick);
 			
 			

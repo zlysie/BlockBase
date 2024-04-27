@@ -96,38 +96,42 @@ public class Entity {
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
-		List<AABB> aabbs = this.getSurroundingAABBsPhys(size);
+		
+		if(Main.theWorld != null) {
+			List<AABB> aabbs = this.getSurroundingAABBsPhys(size);
 
-		int i;
-		for(i = 0; i < aabbs.size(); ++i) {
-			ya = aabbs.get(i).clipYCollide(this.aabb, ya);
+			int i;
+			for(i = 0; i < aabbs.size(); ++i) {
+				ya = aabbs.get(i).clipYCollide(this.aabb, ya);
+			}
+
+			this.aabb.move(0.0F, ya, 0.0F);
+
+			for(i = 0; i < aabbs.size(); ++i) {
+				xa = aabbs.get(i).clipXCollide(this.aabb, xa);
+			}
+
+			this.aabb.move(xa, 0.0F, 0.0F);
+
+			for(i = 0; i < aabbs.size(); ++i) {
+				za = aabbs.get(i).clipZCollide(this.aabb, za);
+			}
+
+			this.aabb.move(0.0F, 0.0F, za);
+			this.setOnGround(yaOrg != ya && yaOrg < 0.0F);
+			if(xaOrg != xa) {
+				this.motion.x = 0.0F;
+			}
+
+			if(yaOrg != ya) {
+				this.motion.y = 0.0F;
+			}
+
+			if(zaOrg != za) {
+				this.motion.z = 0.0F;
+			}
 		}
 
-		this.aabb.move(0.0F, ya, 0.0F);
-
-		for(i = 0; i < aabbs.size(); ++i) {
-			xa = aabbs.get(i).clipXCollide(this.aabb, xa);
-		}
-
-		this.aabb.move(xa, 0.0F, 0.0F);
-
-		for(i = 0; i < aabbs.size(); ++i) {
-			za = aabbs.get(i).clipZCollide(this.aabb, za);
-		}
-
-		this.aabb.move(0.0F, 0.0F, za);
-		this.setOnGround(yaOrg != ya && yaOrg < 0.0F);
-		if(xaOrg != xa) {
-			this.motion.x = 0.0F;
-		}
-
-		if(yaOrg != ya) {
-			this.motion.y = 0.0F;
-		}
-
-		if(zaOrg != za) {
-			this.motion.z = 0.0F;
-		}
 		
 		this.position.x = (this.aabb.minX + this.aabb.maxX) / 2.0F;
 		this.position.y = this.aabb.minY + this.heightOffset;

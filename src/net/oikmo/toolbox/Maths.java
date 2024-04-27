@@ -1,14 +1,22 @@
 package net.oikmo.toolbox;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.FloatBuffer;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -243,5 +251,41 @@ public class Maths {
 	
 	public static float getWorldSize(String fileDir) {
 		return new File(Main.getDir()+"/saves/"+fileDir+".dat").length();
+	}
+	
+	public static String humanReadableByteCountBin(long bytes) {
+	    long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+	    if (absB < 1024) {
+	        return bytes + " B";
+	    }
+	    long value = absB;
+	    CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+	    for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+	        value >>= 10;
+	        ci.next();
+	    }
+	    value *= Long.signum(bytes);
+	    return String.format("%.1f %ciB", value / 1024.0, ci.current());
+	}
+	
+	public static byte[] compressObject(Object object) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		GZIPOutputStream gzipOut = new GZIPOutputStream(baos);;
+		ObjectOutputStream oos = new ObjectOutputStream(gzipOut);
+		oos.writeObject(object);
+		oos.close();
+		
+		System.out.println(humanReadableByteCountBin(baos.size()));
+		return baos.toByteArray();
+	}
+	
+	public static Object uncompressStream(byte[] data) throws ClassNotFoundException, IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		GZIPInputStream gzipIn = new GZIPInputStream(bais);
+		ObjectInputStream objectIn = new ObjectInputStream(gzipIn);
+		Object obj = objectIn.readObject();
+		objectIn.close();
+		
+		return obj;
 	}
 }
