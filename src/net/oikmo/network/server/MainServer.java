@@ -71,7 +71,9 @@ public class MainServer {
 	
 	public static World theWorld;
 	
-	private static String version = "a0.1.1";
+	private static String version = "S0.0.1";
+	
+	private static Thread saveThread;
 
 	public MainServer(int tcpPort, int udpPort) {
 		this.tcpPort = tcpPort;
@@ -109,6 +111,24 @@ public class MainServer {
 			logPanel.append("Server online! (PORT="+ tcpPort +")\n");
 			logPanel.append("----------------------------");
 			logPanel.append("\n");
+			saveThread = new Thread(new Runnable() {
+				public void run() {
+					while(true) {
+						System.gc();
+						try {
+							Thread.sleep(60000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						MainServer.theWorld.saveWorld("server-level");
+						logPanel.append("[AUTO] Saving world!\n");
+						System.gc();
+					}
+				}
+			});
+			saveThread.setName("World Save Thread");
+			saveThread.start();
 			
 		} catch (IOException e) {
 			Logger.log(LogLevel.INFO,"Port already used");
