@@ -11,6 +11,7 @@ import com.esotericsoftware.kryonet.Listener;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiDisconnected;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketRemovePlayer;
@@ -49,6 +50,19 @@ public class PlayerClientListener extends Listener {
 		else if(object instanceof PacketRemovePlayer){
 			PacketRemovePlayer packet = (PacketRemovePlayer) object;
 			NetworkHandler.players.remove(packet.id);
+			if(packet.id == NetworkHandler.client.getID()) {
+				Main.network.disconnect();
+				Main.network = null;
+				Main.shouldTick = false;
+				Main.thePlayer.getCamera().setMouseLock(false);
+				Main.thePlayer = null;
+				Main.theWorld = null;
+				Main.inGameGUI.prepareCleanUp();
+				Main.inGameGUI = null;
+				Main.currentScreen.prepareCleanUp();
+				
+				Main.currentScreen = new GuiDisconnected(packet.kick, packet.message);
+			}
 		} 
 		else if(object instanceof PacketUpdateX){
 			PacketUpdateX packet = (PacketUpdateX) object;
@@ -105,9 +119,8 @@ public class PlayerClientListener extends Listener {
 			PacketWorldJoin packet = (PacketWorldJoin) object;
 			Main.theWorld = new World(packet.seed);
 			
-			Main.thePlayer.setPosition(new Vector3f(packet.x,packet.y,packet.z));
-			
-			System.out.println(packet.seed);
+			Main.thePlayer.setPos(packet.x,packet.y,packet.z);
+			System.out.println("Server world seed:" + packet.seed);
 		} 
 		else if(object instanceof PacketTickPlayer) {
 			PacketTickPlayer packet = (PacketTickPlayer) object;

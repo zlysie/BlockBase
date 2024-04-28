@@ -14,7 +14,7 @@ public class GuiButton extends Gui implements GuiComponent {
 
 	private static Image normalTexture;
 	private static Image hoveredTexture;
-
+	
 	private Image texture = normalTexture;
 
 	private String text;
@@ -28,9 +28,11 @@ public class GuiButton extends Gui implements GuiComponent {
 	private void onInit() {
 		if(normalTexture == null) {
 			normalTexture = Gui.guiAtlas.getSubImage(0, 66, 200, 20);
+			normalTexture.clampTexture();
 		}
 		if(hoveredTexture == null) {
 			hoveredTexture = Gui.guiAtlas.getSubImage(0, 86, 200, 20);
+			normalTexture.clampTexture();
 		}
 	}
 

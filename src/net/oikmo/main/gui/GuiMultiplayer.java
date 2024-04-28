@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.Color;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Player;
@@ -28,15 +29,14 @@ public class GuiMultiplayer extends GuiScreen {
 	private GuiTextField serverAddress;
 	private GuiButton joinButton;
 	private GuiButton quitButton;
+	private String errorMsg;
+	private boolean errorPopup;
 	
 	public void onInit() {
-		serverAddress = new GuiTextField(Display.getWidth()/2, (Display.getHeight()/2)-15, 200, 30);
+		serverAddress = new GuiTextField("IP of server here...",Display.getWidth()/2, (Display.getHeight()/2)-15, 200, 30);
 		serverAddress.setGuiCommand(new GuiCommand() {
 			@Override
-			public void invoke() {
-				
-			}
-			
+			public void invoke() {}
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
@@ -48,21 +48,36 @@ public class GuiMultiplayer extends GuiScreen {
 		joinButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
-				
 				boolean hasErrored = false;
 				try {
-					InetAddress.getByName(serverAddress.getInputText());
+					if(serverAddress.hasContent() ) {
+						InetAddress.getByName(serverAddress.getInputText());
+						
+					} else {
+						hasErrored = true;
+					}
 					
-				} catch(UnknownHostException e) {
+					
+				} catch(Exception e) {
 					hasErrored = true;
+					Main.network = null;
 					Logger.log(LogLevel.WARN, "Couldn't connect to host!");
+					errorMsg = "Couldn't connect to server!";
 				}
+				
 				if(!hasErrored) {
+					errorPopup = false;
 					prepareCleanUp();
 					Gui.cleanUp();
 					
 					Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
-					Main.network = new NetworkHandler(serverAddress.getInputText());
+					try {
+						Main.network = new NetworkHandler(serverAddress.getInputText());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 					Main.inGameGUI = new GuiInGame();
 					Main.shouldTick = true;
 					if(Main.thePlayer != null) {
@@ -72,8 +87,12 @@ public class GuiMultiplayer extends GuiScreen {
 					SoundMaster.doMusic();
 					Main.shouldTick = true;
 					Main.currentScreen = null;
+				} else {
+					errorPopup = true;
+					if(!serverAddress.hasContent() ) {
+						errorMsg = "No input given!";
+					}
 				}
-				
 			}
 			
 			@Override
@@ -105,6 +124,10 @@ public class GuiMultiplayer extends GuiScreen {
 		if(Main.isPaused()) {
 			drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
 			drawShadowStringCentered((Display.getWidth()/2), (Display.getHeight()/2)-50, "Type in server address...");
+			if(errorPopup) {
+				
+				drawShadowStringCentered(Color.red, (Display.getWidth()/2), 0+font.getHeight(errorMsg), errorMsg);
+			}
 			serverAddress.tick();
 			joinButton.tick();
 			quitButton.tick();

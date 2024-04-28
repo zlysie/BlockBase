@@ -85,7 +85,7 @@ public class NetworkHandler {
 		kryo.register(PacketTickPlayer.class);
 	}
 	
-	public NetworkHandler(String ipAddress) {
+	public NetworkHandler(String ipAddress) throws Exception {
 		this.ip = ipAddress;
 		this.udpPort = 25565;
 		this.tcpPort = 25565;
@@ -93,24 +93,26 @@ public class NetworkHandler {
 		player = new OtherPlayer();
 		player.userName = "Player"+new Random().nextInt(256);
 
-		client = new Client(Main.bufferSize,Main.bufferSize);
+		client = new Client();
 		kryo = client.getKryo();
 		registerKryoClasses();
 		connect(ip);
 	}
 	
+	
+	float degreesOffsetX = -90;
 	public void update() {
 		
 		float x = player.x;
 		float y = player.y;
 		float z = player.z;
-		float rotX = player.x;
-		float rotY = player.y;
-		float rotZ = player.z;
+		float rotX = player.rotX;
+		float rotY = player.rotY-degreesOffsetX;
+		float rotZ = player.rotZ;
 		Vector3f pos = Main.thePlayer.getPosition();
 		Vector3f rot = Main.thePlayer.getCamera().getRotation();
 		player.updatePosition(pos.x, pos.y, pos.z);
-		player.updateRotation(rot.x, rot.y, rot.z);
+		player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
 		
 		if(x != player.x) {
 			PacketUpdateX packetX = new PacketUpdateX();
@@ -137,7 +139,7 @@ public class NetworkHandler {
 		}
 		if(rotY != player.rotY) {
 			PacketUpdateRotY packetY = new PacketUpdateRotY();
-			packetY.y = -player.rotY;
+			packetY.y = player.rotY;
 			client.sendUDP(packetY);
 		}
 		if(rotZ != player.rotZ) {
@@ -162,22 +164,17 @@ public class NetworkHandler {
 	}
 	
 
-	public void connect(String ip) {
-		try {
-			Main.thePlayer.tick = false;
-			Log.info("connecting...");
-			client.start();
-			client.connect(timeout, ip, tcpPort, udpPort);
-			client.addListener(new PlayerClientListener());
+	public void connect(String ip) throws Exception {
+		Main.thePlayer.tick = false;
+		Log.info("connecting...");
+		client.start();
+		client.connect(timeout, ip, tcpPort, udpPort);
+		client.addListener(new PlayerClientListener());
 
-			LoginRequest request = new LoginRequest();
-			request.setUserName("Player" + new Random().nextInt(256));
-			client.sendTCP(request);
-			Log.info("Connected.");
-		} catch (IOException e) {
-			Log.info("Server offline");
-			e.printStackTrace();
-		}
+		LoginRequest request = new LoginRequest();
+		request.setUserName("Player" + new Random().nextInt(256));
+		client.sendTCP(request);
+		Log.info("Connected.");
 	}
 	
 	public void disconnect() {

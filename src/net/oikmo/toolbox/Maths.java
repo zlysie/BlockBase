@@ -274,8 +274,6 @@ public class Maths {
 		ObjectOutputStream oos = new ObjectOutputStream(gzipOut);
 		oos.writeObject(object);
 		oos.close();
-		
-		System.out.println(humanReadableByteCountBin(baos.size()));
 		return baos.toByteArray();
 	}
 	

@@ -48,7 +48,7 @@ public class Entity {
 		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 
-	protected void setPos(float x, float y, float z) {
+	public void setPos(float x, float y, float z) {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;

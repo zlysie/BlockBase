@@ -61,11 +61,9 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main extends Gui {
 	
-	public static final int bufferSize = 10240;
-	
 	private static final int resourceVersion = 2;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.0";
+	public static final String version = "a0.1.1";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -197,9 +195,10 @@ public class Main extends Gui {
 				if(network != null) {
 					for(Map.Entry<Integer, OtherPlayer> e : NetworkHandler.players.entrySet()) {
 						OtherPlayer p = e.getValue();
-						Vector3f position = new Vector3f(p.x,p.y+1.72f,p.z);
+						Vector3f position = new Vector3f(p.x,p.y+1f,p.z);
 						//System.out.println(position);
-						Vector3f rotation = new Vector3f(p.rotZ,p.rotY,-p.rotX);
+						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
+						System.out.println(rotation);
 						Entity entity = new Entity(obsidian, position, rotation, 1f);
 						MasterRenderer.getInstance().addEntity(entity);
 					}
@@ -281,16 +280,22 @@ public class Main extends Gui {
 
 	private static void tick() {
 		if(Main.network == null) {
-			theWorld.tick();
-			camPos = new Vector3f(thePlayer.getCamera().getPosition());
-			if(!hasSaved && thePlayer.isOnGround()) {
-				theWorld.saveWorld(currentlyPlayingWorld);
-				hasSaved = true;
+			
+			if(theWorld != null) {
+				theWorld.tick();
 			}
+			if(thePlayer != null) {
+				camPos = new Vector3f(thePlayer.getCamera().getPosition());
+				if(!hasSaved && thePlayer.isOnGround()) {
+					theWorld.saveWorld(currentlyPlayingWorld);
+					hasSaved = true;
+				}
+			}
+			
 		} else {
+			camPos = new Vector3f(thePlayer.getCamera().getPosition());
 			thePlayer.tick();
 			network.update();
-			camPos = new Vector3f(thePlayer.getCamera().getPosition());
 		}	
 	}
 

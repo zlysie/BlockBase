@@ -24,6 +24,8 @@ public class GuiTextField  extends Gui implements GuiComponent {
 
 	private boolean isHovering = false;
 	private boolean grabbed = false;
+	
+	private String backgroundText;
 
 	private void onInit() {
 		if(backgroundTexture == null) {
@@ -31,9 +33,10 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		}
 	}
 
-	public GuiTextField(float x, float y, float width, float height,GuiCommand command) {
+	public GuiTextField(String backgroundText, float x, float y, float width, float height ,GuiCommand command) {
 		onInit();
 		this.command = command;
+		this.backgroundText = backgroundText;
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -41,11 +44,11 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		components.add(this);
 	}
 
-	public GuiTextField(float x, float y, float width, float height) {
+	public GuiTextField(String backgroundText, float x, float y, float width, float height) {
 		onInit();
+		this.backgroundText = backgroundText;
 		this.x = x;
 		this.y = y;
-
 		this.width = width;
 		this.height = height;
 
@@ -56,8 +59,7 @@ public class GuiTextField  extends Gui implements GuiComponent {
 	public void tick() {
 		float mouseX = Mouse.getX();
 		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
-
-
+		
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
 			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
@@ -93,8 +95,8 @@ public class GuiTextField  extends Gui implements GuiComponent {
 
 		drawTexture(backgroundTexture, x, y, width, height);
 		
-		if(inputText.length() == 0) {
-			drawShadowString(Color.darkGray, (x+3)-width/2, y-font.getHeight("Type here...")/2, "Type here...");
+		if(inputText.length() == 0 && current != this) {
+			drawShadowString(Color.darkGray, (x+3)-width/2, y-font.getHeight(backgroundText)/2, backgroundText);
 		} else {
 			drawShadowString((x+3)-width/2, y-font.getHeight(inputText)/2, inputText);
 		}

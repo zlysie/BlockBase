@@ -7,16 +7,21 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
-import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 
-public class GuiPauseMenu extends GuiScreen {
+public class GuiDisconnected extends GuiScreen {
 	
-	public GuiPauseMenu() {
-		super("Pause Menu");
+	private String message;
+	private boolean kick;
+	
+	public GuiDisconnected(boolean kick, String message) {
+		super("Disconnected");
+		this.message = message;
+		this.kick = kick;
 	}
 	
 	private GuiButton quitButton;
+	
 	
 	public void onInit() {
 		if(Main.network != null) {
@@ -25,39 +30,25 @@ public class GuiPauseMenu extends GuiScreen {
 			Main.shouldTick();
 		}
 		
-		
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Quit world...");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-40, 200, 30, "Back to main menu");
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
-				Main.inGameGUI = null;
-				if(Main.network == null) {
-					Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
-				} else {
-					Main.network.disconnect();
-					Main.network = null;
-				}
-				
-				if(Main.network != null) {
-					Main.thePlayer.getCamera().setMouseLock(false);
-				} else {
-					Main.shouldTick();
-				}
 				prepareCleanUp();
-				SoundMaster.stopMusic();
 				Main.currentScreen = new GuiMainMenu(Main.getRandomSplash());
 			}
 			
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)-40;
 			}
 		});
 	}
 	
 	public void onUpdate() {
-		drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
+		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
+		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), (!kick ? "Disconnected: " : "Kicked: ") + message);
 		quitButton.tick();
 	}
 	

@@ -9,6 +9,7 @@ import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.main.Main;
 
 public class Player extends Entity {
 	
@@ -54,7 +55,7 @@ public class Player extends Entity {
 		this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);
 		this.motion.y = (float)((double)this.motion.y - 0.008D);
 		this.move(this.motion.x, this.motion.y, this.motion.z);
-		if(this.getPosition().y < 0) {
+		if(this.getPosition().y < 0 && Main.network == null) {
 			resetPos();
 		}
 		//System.out.println(xa + " " + za);
@@ -81,8 +82,6 @@ public class Player extends Entity {
 		MasterChunk currentChunk = getCurrentChunk();
 		if(currentChunk != null) {
 			this.setPos(getPosition().x, currentChunk.getChunk().getHeightFromPosition(currentChunk.getOrigin(), getPosition()), getPosition().z);
-		} else {
-			this.setPos(getPosition().x, 1, getPosition().z);
 		}
 		
 	}
