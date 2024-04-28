@@ -1,82 +1,29 @@
 package net.oikmo.toolbox;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.FloatBuffer;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.TagException;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.entity.Camera;
-import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
-import net.oikmo.main.Main;
+import net.oikmo.network.server.MainServer;
+import net.oikmo.network.server.World;
 
-public class Maths {
-
-	private static Vector3f rxTable = new Vector3f(1,0,0);
-	private static Vector3f ryTable = new Vector3f(0,1,0);
-	private static Vector3f rzTable = new Vector3f(0,0,1);
-
-	private static List<Vector3f> scaleTable = new ArrayList<>();
-
-	private static Vector3f getScaleFromPool(float scale) {
-		Vector3f result = null;
-		if(scaleTable.size() != 0) {
-			for(Vector3f vec : scaleTable) {
-				if(vec.x == scale && vec.x == scale && vec.x == scale) {
-					result = vec;
-				}
-			}
-			if(result == null) {
-				Vector3f scaleVec = new Vector3f(scale,scale,scale);
-				scaleTable.add(scaleVec);
-				return scaleVec;
-			}
-		} else {
-			scaleTable.add(new Vector3f(scale, scale, scale));
-			result =  scaleTable.get(0);
-		}
-		return result;
-	}
-
-	public static Matrix4f createTransformationMatrix(Vector3f translation, Vector3f rotation, float scale) {	
-		Matrix4f matrix = new Matrix4f();
-		matrix.setIdentity();
-
-		Matrix4f.translate(translation, matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rotation.x), rxTable, matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rotation.y), ryTable, matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rotation.z), rzTable, matrix, matrix);
-		Matrix4f.scale(getScaleFromPool(scale), matrix, matrix);
-		return matrix;
-
-	}
-
-	public static Matrix4f createViewMatrix(Camera camera) {
-		Matrix4f matrix = new Matrix4f();
-		matrix.setIdentity();
-
-		Matrix4f.rotate((float) Math.toRadians(camera.getPitch()), new Vector3f(1,0,0), matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(camera.getYaw()), new Vector3f(0,1,0), matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(camera.getRoll()), new Vector3f(0,0,1), matrix, matrix);
-		Matrix4f.translate(new Vector3f(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z), matrix, matrix);
-
-		return matrix;
-	}
-	
+public class Maths {	
 	public static void matrixToBuffer(Matrix4f m, FloatBuffer dest)
     {
         matrixToBuffer(m, 0, dest);
@@ -187,40 +134,6 @@ public class Maths {
 		return one.x == two.x && one.y == two.y && one.z == two.z;
 	}
 
-	/**
-	 * Lerp, allows you to transition numbers<br><br>
-	 * 
-	 * {@code public static float lerp(float start, float end, float amount)} 
-	 * 
-	 * @param start - starting number to interpolate from <i>[float]</i>
-	 * @param end - end number to interpolate to <i>[float]</i>
-	 * @param amount - amount to interpolate to and from <i>[float]</i>
-	 * 
-	 * @return <b>result</b> <i>[float]</i>
-	 * 
-	 * @author <i>Oikmo</i>
-	 */
-	public static float lerp(float start, float end, float amount) {
-		return start + (amount)* (end - start);
-	}
-
-	public static long getDurationOfOGG(URL file) {
-		long length = -1;
-		try {
-			AudioFile audioFile = AudioFileIO.read(new File(file.toURI()));
-
-			// Extract the length of the OGG file in milliseconds
-			length = audioFile.getAudioHeader().getTrackLength()*1000;
-		} catch (IOException | CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return length;
-	}
-
 	public static String[] fileToArray(String fileLoc) {
 		try {
 			List<String> listOfStrings = new ArrayList<String>();
@@ -242,6 +155,42 @@ public class Maths {
 	}
 	
 	public static float getWorldSize(String fileDir) {
-		return new File(Main.getDir()+"/saves/"+fileDir+".dat").length();
+		return new File(MainServer.getDir()+"/saves/"+fileDir+".dat").length();
+	}
+	
+	public static String humanReadableByteCountBin(long bytes) {
+	    long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+	    if (absB < 1024) {
+	        return bytes + " B";
+	    }
+	    long value = absB;
+	    CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+	    for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+	        value >>= 10;
+	        ci.next();
+	    }
+	    value *= Long.signum(bytes);
+	    return String.format("%.1f %ciB", value / 1024.0, ci.current());
+	}
+	
+	public static byte[] compressObject(Object object) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		GZIPOutputStream gzipOut = new GZIPOutputStream(baos);;
+		ObjectOutputStream oos = new ObjectOutputStream(gzipOut);
+		oos.writeObject(object);
+		oos.close();
+		
+		//System.out.println(humanReadableByteCountBin(baos.size()));
+		return baos.toByteArray();
+	}
+	
+	public static Object uncompressStream(byte[] data) throws ClassNotFoundException, IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		GZIPInputStream gzipIn = new GZIPInputStream(bais);
+		ObjectInputStream objectIn = new ObjectInputStream(gzipIn);
+		Object obj = objectIn.readObject();
+		objectIn.close();
+		
+		return obj;
 	}
 }

@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Calendar;
 
-import net.oikmo.main.Main;
+import net.oikmo.network.server.MainServer;
 
 public class Logger {
 	
@@ -39,7 +39,7 @@ public class Logger {
 	
 	public static void saveLog() {
 		if(completeLog.isEmpty()) { return; }
-		File saveDirectory =  new File(Main.getDir() + "/logs/");
+		File saveDirectory =  new File(MainServer.getDir() + "/logs/");
 		if (!saveDirectory.exists()) {
 	        try {
 	        	saveDirectory.mkdir();
