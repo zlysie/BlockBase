@@ -281,6 +281,7 @@ public class MainServer {
 			logPanel.append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
 			logPanel.append("seed - returns the seed of the world - (seed)\n");
 			logPanel.append("save - saves the world - (save)\n");
+			logPanel.append("kick - kicks a player from their ip - (kick <id> <reason>)\n");
 		} else if(command.startsWith("setSpawn ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
