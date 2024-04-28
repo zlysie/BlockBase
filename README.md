@@ -1,20 +1,5 @@
-# BlockBase
+# BlockBase Server
 
-## Voxel game that is NO WAY related to the hit block game with 200 million sales
+This is the server branch.
 
-- Left Click - Destroy selected block
-- Right Click - Place block
-- (+ or -) keys - Blocks to select
-- WASD - move
-- Space - jump
-
-- E - Open inventory
-- F - Refresh all chunks
-- P - reset position
-
-- ESC - pause menu / escape
-
-- F1 - switch texture pack to custom (if created)
-- F2 - take screenshot
-- F3 - toggle debug ui
-- F11 - toggle fullscreen
+![image](https://github.com/oikmo/BlockBase/assets/78755068/e2bf2781-510c-4789-a318-6d73a044e711)
