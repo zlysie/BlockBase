@@ -48,72 +48,55 @@ public class MainServerListener extends Listener {
 		}
 
 		players.put(connection.getID(), player);
-		MainServer.logPanel.append(connection.getID() + " (ID) joined the server (Player.entity) " + player.userName);
-		MainServer.logPanel.append("\n");
-	} // end connected
+		
+	}
 
 	public void disconnected(Connection connection) {
-		MainServer.removePlayer(players.get(connection.getID()).userName);
+		String username = "";
+		if(players.get(connection.getID()) != null) {
+			username = players.get(connection.getID()).userName;
+			MainServer.removePlayer(username +" ("+ connection.getID() +")");
+		}
 		
 		players.remove(connection.getID());
 		PacketRemovePlayer removePacket = new PacketRemovePlayer();
 		
 		removePacket.id = connection.getID();
-		MainServer.server.sendToAllExceptTCP(connection.getID(), removePacket);
-		MainServer.logPanel.append(connection.getID() + " (ID) left the server (Player.entity)");
+		removePacket.kick = false;
+		removePacket.message = "";
+		
+		MainServer.server.sendToAllTCP(removePacket);
+		MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server");
 		MainServer.logPanel.append("\n");
-		MainServer.logPanel.append("\n");
-	} // end disconnected
+	}
 
 	public void received(Connection connection, Object object) {
 		if(object instanceof LoginRequest) {
 			LoginRequest request = (LoginRequest) object;
 			LoginResponse response = new LoginResponse();
-
-			// // check with database
-			// if(request.getUserName().equalsIgnoreCase("rAlA") &&
-			// request.getUserPassword().equalsIgnoreCase("test")){
-			// response.setResponseText("ok");
-			// MainServer.jTextArea.append(connection.getRemoteAddressTCP() + "
-			// connected.");
-			// MainServer.jTextArea.append("\n");
-			// MainServer.jTextArea.append("\n");
-			// }
-			// else{
-			// response.setResponseText("no");
-			// MainServer.jTextArea.append(connection.getRemoteAddressTCP() + "
-			// connected, but with invalid userdata");;
-			// MainServer.jTextArea.append("\n");
-			// MainServer.jTextArea.append("\n");
-			// }
-
-			// remove this below line
 			response.setResponseText("ok");
 			connection.sendTCP(response);
+			
 			PacketUserName packetUserName = new PacketUserName();
 			packetUserName.id = connection.getID();
 			packetUserName.userName = request.getUserName();
-			// MainServer.server.sendToAllExceptTCP(connection.getID(),
-			// packetUserName);
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packetUserName);
 			
 			players.get(connection.getID()).userName = request.getUserName();
 			
-			MainServer.addPlayer(request.getUserName());
+			MainServer.addPlayer(request.getUserName() +" ("+ connection.getID() +")");
 			
-			MainServer.logPanel.append("we got" + request.getUserName()+"\n");
+			MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
 			
 			PacketWorldJoin packetWorld = new PacketWorldJoin();
 			packetWorld.seed = MainServer.theWorld.getSeed();
 			
 			packetWorld.x = MainServer.xSpawn;
-			
 			Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
 			Vector3f chunkPos = new Vector3f();
 			Maths.calculateChunkPosition(spawn, chunkPos);
 			MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
 			packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
-			
 			packetWorld.z = MainServer.zSpawn;
 			connection.sendUDP(packetWorld);
 			
@@ -133,13 +116,12 @@ public class MainServerListener extends Listener {
 				try {
 					packet.data = Maths.compressObject(master.getChunk().blocks);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
 				connection.sendUDP(packet);
 			}
-			MainServer.logPanel.append("Sent chunks to: " + request.getUserName() +"\n");
+			MainServer.logPanel.append("Sent chunks to " + request.getUserName() +"!\n");
 			
 			PacketTickPlayer packetEnable = new PacketTickPlayer();
 			packetEnable.id = connection.getID();
@@ -162,42 +144,48 @@ public class MainServerListener extends Listener {
 
 		if(object instanceof PacketUpdateX) {
 			PacketUpdateX packet = (PacketUpdateX) object;
-			players.get(connection.getID()).x = packet.x;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).x = packet.x;
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
 		else if(object instanceof PacketUpdateY) {
 			PacketUpdateY packet = (PacketUpdateY) object;
-			players.get(connection.getID()).y = packet.y;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).y = packet.y;
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
 		else if(object instanceof PacketUpdateZ) {
 			PacketUpdateZ packet = (PacketUpdateZ) object;
-			players.get(connection.getID()).z = packet.z;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).z = packet.z;
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
 		else if(object instanceof PacketUpdateRotX) {
 			PacketUpdateRotX packet = (PacketUpdateRotX) object;
-			players.get(connection.getID()).rotX = packet.x;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).rotX = packet.x;
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
 		else if(object instanceof PacketUpdateRotY) {
 			PacketUpdateRotY packet = (PacketUpdateRotY) object;
-			players.get(connection.getID()).rotY = packet.y;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).rotY = packet.y;
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
 		else if(object instanceof PacketUpdateRotZ) {
 			PacketUpdateRotZ packet = (PacketUpdateRotZ) object;
-			players.get(connection.getID()).rotZ = packet.z;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).rotZ = packet.z;
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);

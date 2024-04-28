@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.util.Calendar;
 
 import net.oikmo.network.server.MainServer;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 public class Logger {
 	
@@ -29,6 +30,20 @@ public class Logger {
 		}
 		
 		completeLog += toLog + "\r\n";
+		
+		if(level == LogLevel.ERROR) {
+			System.err.println(toLog);
+		} else {
+			System.out.println(toLog);
+		}
+	}
+	
+	public static void logWithoutClass(LogLevel level, Object message) {
+		String toLog = getCurrentTime() + " [" + level.name() + "] " + message.toString() + "\n";
+		
+		completeLog += toLog + "\r";
+		
+		MainServer.logPanel.append(toLog);
 		
 		if(level == LogLevel.ERROR) {
 			System.err.println(toLog);

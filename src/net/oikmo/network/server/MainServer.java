@@ -71,7 +71,7 @@ public class MainServer {
 	
 	public static World theWorld;
 	
-	private static String version = "S0.0.1";
+	private static String version = "S0.0.2";
 	
 	private static Thread saveThread;
 
@@ -100,8 +100,6 @@ public class MainServer {
 			logPanel.append("Loaded world at .blockbase-server/saves/server-level.dat!\n\n");
 		}
 		
-		
-		
 		Logger.log(LogLevel.INFO,"Starting Server");
 		logPanel.append("Starting Server...\n");
 		server.start();
@@ -109,6 +107,7 @@ public class MainServer {
 			server.bind(tcpPort, udpPort);
 			server.addListener(listener);
 			logPanel.append("Server online! (PORT="+ tcpPort +")\n");
+			Logger.log(LogLevel.INFO, "Server online! (PORT="+ tcpPort +")");
 			logPanel.append("----------------------------");
 			logPanel.append("\n");
 			saveThread = new Thread(new Runnable() {
@@ -144,8 +143,16 @@ public class MainServer {
 		logPanel.append("Server stopped.");
 		logPanel.append("\n");
 		theWorld.saveWorld("server-level");
+		for (OtherPlayer p : MainServerListener.players.values()) {
+			PacketRemovePlayer packetDisconnect = new PacketRemovePlayer();
+			packetDisconnect.id = p.c.getID();
+			packetDisconnect.message = "Server closed";
+			// connection.sendTCP(packetUserName2);
+			p.c.sendUDP(packetDisconnect);
+		}
 		SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
 		server.stop();
+		Logger.saveLog();
 	}
 
 	private void registerKryoClasses() {
@@ -310,6 +317,51 @@ public class MainServer {
 		} else if(command.startsWith("save")) {
 			theWorld.saveWorld("server-level");
 			logPanel.append("Saved world!");
+		} else if(command.startsWith("kick ")) {
+			String[] split = cmd.split(" ");
+			boolean continueToDoStuff = true;
+			String toID = null;
+			String message = null;
+			
+			int playerID = Integer.MIN_VALUE;
+			try {
+				toID = split[1];
+				message = split[2];
+			} catch(ArrayIndexOutOfBoundsException e) {
+				continueToDoStuff = false;
+			}
+			
+			try {
+				playerID = Integer.valueOf(toID);
+			} catch(NumberFormatException e) {
+				continueToDoStuff = false;
+			}
+			
+			if(message == null) {
+				continueToDoStuff = false;
+			}
+			
+			if(MainServerListener.players.get(playerID) == null) {
+				continueToDoStuff = false;
+			}
+			
+			if(continueToDoStuff) {
+				String reason = cmd.split("kick " + playerID + " ")[1];
+				
+				PacketRemovePlayer packetKick = new PacketRemovePlayer();
+				packetKick.id = playerID;
+				packetKick.kick = true;
+				packetKick.message = reason;
+				MainServer.server.sendToAllTCP(packetKick);
+				MainServer.removePlayer(MainServerListener.players.get(playerID).userName);
+				MainServerListener.players.remove(playerID);
+				
+				logPanel.append("Kicked " + playerID + " from the server\n");
+				logPanel.append("\n");
+				
+			} else {
+				logPanel.append("ID was not valid / Reason was not supplied");
+			}
 		} else {
 			logPanel.append("Command \""+ cmd + "\" was not recognized!");
 		} 
