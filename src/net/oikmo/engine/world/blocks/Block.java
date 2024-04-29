@@ -1,7 +1,7 @@
 package net.oikmo.engine.world.blocks;
 
 public abstract class Block {
-	public static final Block[] blocks = new Block[17];
+	public static final Block[] blocks = new Block[18];
 	public static final Block grass = new BlockGrass(Type.GRASS);
 	public static final Block dirt = new BlockDirt(Type.DIRT);
 	public static final Block stone = new BlockStone(Type.STONE);
@@ -19,6 +19,7 @@ public abstract class Block {
 	public static final Block goldBlock = new BlockGoldBlock(Type.GOLDBLOCK);
 	public static final Block diamondBlock = new BlockDiamondBlock(Type.DIAMONDBLOCK);
 	public static final Block tnt = new BlockTNT(Type.TNT);
+	public static final Block obsidianPlayer = new BlockObsidian(Type.OBSIDIANPLAYER);
 	
 	public static enum Type {
 		GRASS, 
@@ -37,7 +38,8 @@ public abstract class Block {
 		TNT,
 		IRONBLOCK,
 		GOLDBLOCK,
-		DIAMONDBLOCK,
+		DIAMONDBLOCK, 
+		OBSIDIANPLAYER,
 	};
 	
 	public Type type;

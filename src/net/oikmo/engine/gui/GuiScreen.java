@@ -29,6 +29,7 @@ public class GuiScreen extends Gui {
 
 	public void onInit() {}
 	public void onUpdate() {}
+	public void onTick() {}
 	public void onClose() {}
 
 	public String getScreenID() {

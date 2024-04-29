@@ -35,7 +35,6 @@ public class GuiInventory extends GuiScreen {
 		Main.thePlayer.getCamera().setMouseLock(false);		
 		
 		List<BlockSlot> slots =  new ArrayList<BlockSlot>();
-		System.out.println(Block.blocks.length);
 		this.slots = slots;
 	}
 	
@@ -67,7 +66,7 @@ public class GuiInventory extends GuiScreen {
 		xPos += 20;
 		yPos += 20;
 		
-		int test = Block.blocks.length;
+		int test = Block.blocks.length-1;
 		int yIndex = 0;
 		while(test-7 > 0) {
 			test -= 7;
@@ -92,7 +91,7 @@ public class GuiInventory extends GuiScreen {
 					slots.add(new BlockSlot(item, xPos+(x*32)+xOffset, yPos+(y*32)+8+yOffset));
 					xOffset += 8;
 				}
-				if(xOff < Block.blocks.length-1) {
+				if(xOff < Block.blocks.length-2) {
 					xOff++;
 				} else {
 					break;

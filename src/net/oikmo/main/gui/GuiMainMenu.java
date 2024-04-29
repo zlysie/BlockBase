@@ -43,6 +43,7 @@ public class GuiMainMenu extends GuiScreen {
 	private Camera mainMenuCamera;
 	
 	public void onInit() {
+		ticksToWait = 0;
 		if(Main.thePlayer != null) {
 			Main.thePlayer.getCamera().setMouseLock(false);
 		}
@@ -161,7 +162,7 @@ public class GuiMainMenu extends GuiScreen {
 	//private boolean isNegative = false;
 	
 	private int ticksToWait = 0;
-	private int maxCoolDown = 120; //2s
+	private int maxCoolDown = 30; //0.5s
 	private boolean lockTick = false;
 	public void onUpdate() {
 		if(Main.isPaused()) {
@@ -177,27 +178,31 @@ public class GuiMainMenu extends GuiScreen {
 				mainMenuCamera.pitch += 0.025f;
 			}*/
 			
-			if(ticksToWait < maxCoolDown) {
-				ticksToWait++;
-			}
 			
-			if(!lockTick && ticksToWait >= maxCoolDown) {
-				lockTick = true;
-			}
 			
 			float x = (Display.getWidth()/2);
 			float y = (Display.getHeight()/2)-120;
 			float width = 256;
 			float height = 64;
 			
-			MasterRenderer.getInstance().render(((GuiMainMenu)Main.currentScreen).getCamera());
+			MasterRenderer.getInstance().render(mainMenuCamera);
 			drawTexture(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
 			playButton.tick(lockTick);
 			multiplayerButton.tick(lockTick);
 			quitButton.tick(lockTick);
-			
-			
+		}
+	}
+	
+	public void onTick() {
+		mainMenuCamera.yaw += 0.1f;
+		
+		if(ticksToWait < maxCoolDown) {
+			ticksToWait++;
+		}
+		
+		if(!lockTick && ticksToWait >= maxCoolDown) {
+			lockTick = true;
 		}
 	}
 	
@@ -210,9 +215,5 @@ public class GuiMainMenu extends GuiScreen {
 			musicThread.interrupt();
 			musicThread.stop();
 		}
-	}
-
-	public Camera getCamera() {
-		return this.mainMenuCamera;
 	}
 }

@@ -11,7 +11,6 @@ import com.esotericsoftware.kryonet.Listener;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
-import net.oikmo.main.gui.GuiDisconnected;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketRemovePlayer;
@@ -20,12 +19,12 @@ import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
+import net.oikmo.network.shared.PacketUpdateWithheldBlock;
 import net.oikmo.network.shared.PacketUpdateX;
 import net.oikmo.network.shared.PacketUpdateY;
 import net.oikmo.network.shared.PacketUpdateZ;
 import net.oikmo.network.shared.PacketUserName;
 import net.oikmo.network.shared.PacketWorldJoin;
-import net.oikmo.network.shared.RandomNumber;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
@@ -38,6 +37,14 @@ public class PlayerClientListener extends Listener {
 			if(response.getResponseText().equalsIgnoreCase("ok")){
 				Logger.log(LogLevel.INFO,"Login Ok");
 			} else {
+				Main.network.disconnect();
+				System.out.println(response.PROTOCOL + " " + NetworkHandler.NETWORK_PROTOCOL);
+				if(response.PROTOCOL != NetworkHandler.NETWORK_PROTOCOL) {
+					Main.disconnect(false, "Wrong protocol!");
+				} else {
+					Main.disconnect(false, "Login failed.");
+				}
+				
 				Logger.log(LogLevel.WARN,"Login failed");
 			}
 		}
@@ -49,19 +56,11 @@ public class PlayerClientListener extends Listener {
 		} 
 		else if(object instanceof PacketRemovePlayer){
 			PacketRemovePlayer packet = (PacketRemovePlayer) object;
-			NetworkHandler.players.remove(packet.id);
-			if(packet.id == NetworkHandler.client.getID()) {
+			if(packet.id == Main.network.client.getID()) {
 				Main.network.disconnect();
-				Main.network = null;
-				Main.shouldTick = false;
-				Main.thePlayer.getCamera().setMouseLock(false);
-				Main.thePlayer = null;
-				Main.theWorld = null;
-				Main.inGameGUI.prepareCleanUp();
-				Main.inGameGUI = null;
-				Main.currentScreen.prepareCleanUp();
-				
-				Main.currentScreen = new GuiDisconnected(packet.kick, packet.message);
+				Main.disconnect(packet.kick, packet.message);
+			} else {
+				NetworkHandler.players.remove(packet.id);
 			}
 		} 
 		else if(object instanceof PacketUpdateX){
@@ -126,9 +125,9 @@ public class PlayerClientListener extends Listener {
 			PacketTickPlayer packet = (PacketTickPlayer) object;
 			Main.thePlayer.tick = packet.shouldTick;
 		}
-		if(object instanceof RandomNumber) {
-			RandomNumber packet = (RandomNumber)object;
-			NetworkHandler.rand = packet.randomFloat;
+		else if(object instanceof PacketUpdateWithheldBlock) {
+			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
+			NetworkHandler.players.get(packet.id).block = packet.block;
 		}
 	} // end received method
 	

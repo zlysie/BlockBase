@@ -14,6 +14,7 @@ import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.inventory.Slot;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.network.shared.PacketUpdateWithheldBlock;
 
 public class GuiInGame extends GuiScreen {
 	
@@ -61,6 +62,8 @@ public class GuiInGame extends GuiScreen {
 		
 		drawImage(hotbarSelector, calculateXPosition(selectedIndex), Display.getHeight()-28, 48,48);
 		
+		int previousIndex = selectedIndex;
+		
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				try {
@@ -78,10 +81,27 @@ public class GuiInGame extends GuiScreen {
 	    	selectedIndex -= 1;
 			selectedIndex = selectedIndex <= -1 ? 8 : selectedIndex;
 	    }
+	    
+	    if(selectedIndex != previousIndex) {
+	    	updatePlayerHand();
+	    }
+	}
+	
+	private void updatePlayerHand() {
+		if(Main.network != null) {
+    		PacketUpdateWithheldBlock packet = new PacketUpdateWithheldBlock();
+    		if(Main.thePlayer.getInventory().getSlots()[selectedIndex][0] != null) {
+    			packet.block = Item.itemToBlock(Main.thePlayer.getInventory().getSlots()[selectedIndex][0].getItem()).getByteType();
+    		}
+    		
+    		Main.network.client.sendUDP(packet);
+    	}
+    	
 	}
 
 	public void setSelectedItem(Item item) {
 		Main.thePlayer.getInventory().getSlots()[selectedIndex][0] = new Slot(item);
+		updatePlayerHand();
 	}
 	
 	public Block getSelectedItem() {

@@ -67,7 +67,7 @@ public class Camera {
 		this.position.x = Maths.lerp(this.position.x, position.x, 0.1f);
 		this.position.z = Maths.lerp(this.position.z, position.z, 0.1f);
 		this.position.y = position.y + heightOffset;
-		if(mouseLocked && Main.theWorld != null) {
+		if(mouseLocked && Main.theWorld != null && Main.thePlayer.tick) {
 			picker.update();
 			
 			picker.distance = picker.BASE_DISTANCE;

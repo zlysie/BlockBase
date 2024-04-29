@@ -2,13 +2,19 @@ package net.oikmo.network.client;
 
 import com.esotericsoftware.kryonet.Connection;
 
+import net.oikmo.engine.world.blocks.Block;
+
 public class OtherPlayer {
+	
+	public Connection c;
+	public int id;
+	
+	public String userName;
 	
 	public float x, y, z;
 	public float rotX, rotY, rotZ;
-	public int id;
-	public String userName;
-	public Connection c;
+	
+	public byte block = -1;
 	
 	public void updatePosition(float x, float y, float z) {
 		this.x = x;

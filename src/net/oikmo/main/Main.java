@@ -44,6 +44,8 @@ import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.main.gui.GuiConnecting;
+import net.oikmo.main.gui.GuiDisconnected;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.network.client.NetworkHandler;
@@ -63,7 +65,7 @@ public class Main extends Gui {
 	
 	private static final int resourceVersion = 2;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.1";
+	public static final String version = "a0.1.2";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -163,7 +165,7 @@ public class Main extends Gui {
 			
 			((GuiMainMenu)currentScreen).doRandomMusic();
 			
-			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidian), MasterRenderer.currentTexturePack);
+			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			
 			while(!Display.isCloseRequested()) {
 				timer.advanceTime();
@@ -179,10 +181,12 @@ public class Main extends Gui {
 				for(int e = 0; e < timer.ticks; ++e) {
 					elapsedTime += 0.1f;
 					
-					if(Main.currentScreen != null && Main.currentScreen instanceof GuiMainMenu) {
-						if(((GuiMainMenu)Main.currentScreen).getCamera() != null) {
-							((GuiMainMenu)Main.currentScreen).getCamera().yaw += 0.1f;
-						}
+					if(Main.currentScreen != null) {
+						Main.currentScreen.onTick();
+					}
+					
+					if(network != null) {
+						network.tick();
 					}
 					
 					if(shouldTick) {
@@ -195,11 +199,18 @@ public class Main extends Gui {
 				if(network != null) {
 					for(Map.Entry<Integer, OtherPlayer> e : NetworkHandler.players.entrySet()) {
 						OtherPlayer p = e.getValue();
-						Vector3f position = new Vector3f(p.x,p.y+1f,p.z);
+						Vector3f position = new Vector3f(p.x,p.y,p.z);
 						//System.out.println(position);
 						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
-						System.out.println(rotation);
+						//System.out.println(rotation);
 						Entity entity = new Entity(obsidian, position, rotation, 1f);
+						if(p.block != -1) {
+							Vector3f pos = new Vector3f(position);
+							pos.y += 0.85f;
+							Entity block = new Entity(new TexturedModel(CubeModel.getRawModel(Block.getBlockFromOrdinal(p.block)), MasterRenderer.currentTexturePack), pos, new Vector3f(p.rotZ,-p.rotY,0), 0.4f);
+							MasterRenderer.getInstance().addEntity(block);
+						}
+						
 						MasterRenderer.getInstance().addEntity(entity);
 					}
 				}
@@ -207,6 +218,13 @@ public class Main extends Gui {
 				if(theWorld != null) {
 					theWorld.update(thePlayer.getCamera());
 				}
+				
+				if(Main.thePlayer != null) {
+					if(!(Main.currentScreen instanceof GuiConnecting) && !Main.thePlayer.tick) {
+						Main.currentScreen = new GuiConnecting();
+					}
+				}
+				
 				
 				if(inGameGUI != null) {				
 					inGameGUI.update();
@@ -222,6 +240,20 @@ public class Main extends Gui {
 			Main.error("Runtime Error!", e);
 		}
 		close();
+	}
+	
+	public static void disconnect(boolean kick, String message) {
+		Main.shouldTick = false;
+		Main.thePlayer.getCamera().setMouseLock(false);
+		Main.thePlayer = null;
+		Main.theWorld = null;
+		Main.inGameGUI.prepareCleanUp();
+		Main.inGameGUI = null;
+		Main.network = null;
+		if(Main.currentScreen != null)
+			Main.currentScreen.prepareCleanUp();
+		Main.currentScreen = new GuiDisconnected(kick, message);
+		
 	}
 	
 	public static boolean isInValidRange(Vector3f origin) {
@@ -315,6 +347,10 @@ public class Main extends Gui {
 	 */
 	public static void error(String id, Throwable throwable) {
 		if(!hasErrored) {
+			if(network != null) {
+				network.disconnect();
+			}
+			
 			displayRequest = true;
 			Logger.saveLog();
 			DisplayManager.closeDisplay();

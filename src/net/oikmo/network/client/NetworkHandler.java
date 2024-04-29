@@ -6,15 +6,11 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 
 import org.lwjgl.util.vector.Vector3f;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.minlog.Log;
 
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
@@ -29,6 +25,7 @@ import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
+import net.oikmo.network.shared.PacketUpdateWithheldBlock;
 import net.oikmo.network.shared.PacketUpdateX;
 import net.oikmo.network.shared.PacketUpdateY;
 import net.oikmo.network.shared.PacketUpdateZ;
@@ -43,11 +40,6 @@ public class NetworkHandler {
 	
 	public static float rand;
 
-	public static JLabel label_login;
-	public static JTextField login;
-	public static JLabel label_password;
-	public static JPasswordField password;
-
 	public static JFrame frame;
 	public Random random = new Random();
 	
@@ -56,11 +48,14 @@ public class NetworkHandler {
 	private int timeout;
 	private String ip;
 	
-	public static Client client;
+	public Client client;
 	private Kryo kryo;
 	
 	private OtherPlayer player;
 	public static Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
+	
+	private int tickTimer = 0;
+	public static final int NETWORK_PROTOCOL = 1;
 	
 	private void registerKryoClasses() {		
 		kryo.register(LoginRequest.class);
@@ -83,6 +78,7 @@ public class NetworkHandler {
 		kryo.register(RandomNumber.class);
 		kryo.register(PacketGameOver.class);
 		kryo.register(PacketTickPlayer.class);
+		kryo.register(PacketUpdateWithheldBlock.class);
 	}
 	
 	public NetworkHandler(String ipAddress) throws Exception {
@@ -99,9 +95,44 @@ public class NetworkHandler {
 		connect(ip);
 	}
 	
+	public void tick() {
+		if(tickTimer <= 60) {
+			tickTimer++;
+		} else {
+			tickTimer = 0;
+			Vector3f pos = Main.thePlayer.getCamera().getPosition();
+			Vector3f rot = Main.thePlayer.getCamera().getRotation();
+			player.updatePosition(pos.x, pos.y, pos.z);
+			player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
+			
+			PacketUpdateX packetX = new PacketUpdateX();
+			packetX.x = player.x;
+			client.sendUDP(packetX);
+			PacketUpdateY packetY = new PacketUpdateY();
+			packetY.y = player.y;
+			client.sendUDP(packetY);
+			PacketUpdateZ packetZ = new PacketUpdateZ();
+			packetZ.z = player.z;
+			client.sendUDP(packetZ);
+			PacketUpdateRotX packetRotX = new PacketUpdateRotX();
+			packetRotX.x = player.rotX;
+			client.sendUDP(packetRotX);
+			PacketUpdateRotY packetRotY = new PacketUpdateRotY();
+			packetRotY.y = player.rotY;
+			client.sendUDP(packetRotY);
+			PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
+			packetRotZ.z = player.rotZ;
+			client.sendUDP(packetRotZ);
+		}
+	}
 	
-	float degreesOffsetX = -90;
+	private float degreesOffsetX = -90;
 	public void update() {
+		if(!client.isConnected()) {
+			this.disconnect();
+			Main.disconnect(false, "Unknown (Wrong protocol?)");
+			return;
+		}
 		
 		float x = player.x;
 		float y = player.y;
@@ -109,7 +140,7 @@ public class NetworkHandler {
 		float rotX = player.rotX;
 		float rotY = player.rotY-degreesOffsetX;
 		float rotZ = player.rotZ;
-		Vector3f pos = Main.thePlayer.getPosition();
+		Vector3f pos = Main.thePlayer.getCamera().getPosition();
 		Vector3f rot = Main.thePlayer.getCamera().getRotation();
 		player.updatePosition(pos.x, pos.y, pos.z);
 		player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
@@ -146,10 +177,10 @@ public class NetworkHandler {
 			PacketUpdateRotZ packetZ = new PacketUpdateRotZ();
 			packetZ.z = player.rotZ;
 			client.sendUDP(packetZ);
-		}
-		
-		
-	} // end update
+		}	
+	}
+	
+	
 
 	public void updateChunk(MasterChunk master) {
 		PacketUpdateChunk packet = new PacketUpdateChunk();
@@ -165,21 +196,24 @@ public class NetworkHandler {
 	
 
 	public void connect(String ip) throws Exception {
-		Main.thePlayer.tick = false;
-		Log.info("connecting...");
+		if (Main.thePlayer != null)
+			Main.thePlayer.tick = false;
+		Logger.log(LogLevel.INFO, "Connecting...");
 		client.start();
 		client.connect(timeout, ip, tcpPort, udpPort);
 		client.addListener(new PlayerClientListener());
 
 		LoginRequest request = new LoginRequest();
 		request.setUserName("Player" + new Random().nextInt(256));
+		request.PROTOCOL = NetworkHandler.NETWORK_PROTOCOL;
 		client.sendTCP(request);
-		Log.info("Connected.");
+		Logger.log(LogLevel.INFO, "Connected.");
 	}
 	
 	public void disconnect() {
-		Logger.log(LogLevel.INFO, "disconnecting...");
+		Logger.log(LogLevel.INFO, "Disconnecting...");
 		client.stop();
+		Logger.log(LogLevel.INFO, "Disconnected.");
 	}
 
 	

@@ -1,5 +1,8 @@
 package net.oikmo.engine.models;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -73,20 +76,20 @@ public class CubeModel {
 	public static Vector2f[] UV_PZ;
 	public static Vector2f[] UV_NZ;
 	
-	public static Vector3f PX_NORMALS = new Vector3f(0.85f, 0.85f, 0.85f);
+	public static Vector3f PX_NORMALS = new Vector3f(0.8f, 0.8f, 0.8f);
 	public static Vector3f NX_NORMALS = new Vector3f(0.65f, 0.65f, 0.65f);
 	public static Vector3f PY_NORMALS = new Vector3f(1f, 1f, 1f);
 	public static Vector3f NY_NORMALS = new Vector3f(0.5f, 0.5f, 0.5f);
-	public static Vector3f PZ_NORMALS = new Vector3f(0.85f, 0.85f, 0.85f);
+	public static Vector3f PZ_NORMALS = new Vector3f(0.8f, 0.8f, 0.8f);
 	public static Vector3f NZ_NORMALS = new Vector3f(0.65f, 0.65f, 0.65f);
 	
 	public static float[] normals = {
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
 			
 			0.65f, 0.65f, 0.65f,
 			0.65f, 0.65f, 0.65f,
@@ -109,12 +112,12 @@ public class CubeModel {
 			0.5f, 0.5f, 0.5f,
 			0.5f, 0.5f, 0.5f,
 			
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
-			0.85f, 0.85f, 0.85f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
+			0.8f, 0.8f, 0.8f,
 			
 			0.65f, 0.65f, 0.65f,
 			0.65f, 0.65f, 0.65f,
@@ -154,7 +157,8 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
 		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
 		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
-
+		addTextureFromXY(uvArray, Block.obsidianPlayer.getType(), 7, 0);
+		
 		return uvArray;
 	}	
 	public static Vector2f[] setupUVNX() {
@@ -177,6 +181,7 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
 		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
 		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
+		addTextureFromXY(uvArray, Block.obsidianPlayer.getType(), 0, 15);
 		
 		return uvArray;
 	}
@@ -199,6 +204,7 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.goldBlock.getType(), 13, 1);
 		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 13, 2);
 		addTextureFromXY(uvArray, Block.tnt.getType(), 1, 4);
+		addTextureFromXY(uvArray, Block.obsidianPlayer.getType(), 7, 0);
 		
 		return uvArray;
 	}
@@ -221,6 +227,7 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.goldBlock.getType(), 15, 1);
 		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 15, 2);
 		addTextureFromXY(uvArray, Block.tnt.getType(), 2, 4);
+		addTextureFromXY(uvArray, Block.obsidianPlayer.getType(), 7, 0);
 		
 		return uvArray;
 	}
@@ -244,6 +251,7 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
 		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
 		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
+		addTextureFromXY(uvArray, Block.obsidianPlayer.getType(), 7, 0);
 		
 		return uvArray;
 	}	
@@ -267,6 +275,7 @@ public class CubeModel {
 		addTextureFromXY(uvArray, Block.goldBlock.getType(), 14, 1);
 		addTextureFromXY(uvArray, Block.diamondBlock.getType(), 14, 2);
 		addTextureFromXY(uvArray, Block.tnt.getType(), 0, 4);
+		addTextureFromXY(uvArray, Block.obsidianPlayer.getType(), 7, 0);
 		
 		return uvArray;
 	}
@@ -320,9 +329,13 @@ public class CubeModel {
 
 		return index;
 	}
+	
+	private static Map<Block, RawModel> models = new HashMap<>();
 
 	public static RawModel getRawModel(Block block) {
-		if(block == null) { return Loader.getInstance().loadToVAO(vertices, getUVs(Block.stone.getByteType()),normals); }
-		return Loader.getInstance().loadToVAO(vertices, getUVs(block.getByteType()), normals);
+		if(models.get(block) == null) {
+			models.put(block, Loader.getInstance().loadToVAO(vertices, getUVs(block.getByteType()), normals));
+		}
+		return models.get(block);
 	}
 }

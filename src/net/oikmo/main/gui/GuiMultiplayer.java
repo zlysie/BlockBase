@@ -48,11 +48,12 @@ public class GuiMultiplayer extends GuiScreen {
 		joinButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
+				NetworkHandler testNetwork = null;
 				boolean hasErrored = false;
 				try {
 					if(serverAddress.hasContent() ) {
 						InetAddress.getByName(serverAddress.getInputText());
-						
+						testNetwork = new NetworkHandler(serverAddress.getInputText());
 					} else {
 						hasErrored = true;
 					}
@@ -60,9 +61,13 @@ public class GuiMultiplayer extends GuiScreen {
 					
 				} catch(Exception e) {
 					hasErrored = true;
-					Main.network = null;
 					Logger.log(LogLevel.WARN, "Couldn't connect to host!");
+					e.printStackTrace();
 					errorMsg = "Couldn't connect to server!";
+				}
+				
+				if(testNetwork != null) {
+					testNetwork.disconnect();
 				}
 				
 				if(!hasErrored) {
