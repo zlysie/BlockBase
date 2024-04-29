@@ -42,31 +42,31 @@ public class MainServerListener extends Listener {
 		addPacket.id = connection.getID();
 		MainServer.server.sendToAllExceptTCP(connection.getID(), addPacket);
 
+		players.put(connection.getID(), player);
+		
 		for (OtherPlayer p : players.values()) {
 			PacketAddPlayer addPacket2 = new PacketAddPlayer();
 			addPacket2.id = p.c.getID();
 			connection.sendTCP(addPacket2);
 		}
-
-		players.put(connection.getID(), player);
-		
 	}
 
 	public void disconnected(Connection connection) {
 		String username = "";
 		if(players.get(connection.getID()) != null) {
 			username = players.get(connection.getID()).userName;
-			MainServer.removePlayer(username +" ("+ connection.getID() +")");
 		}
 		
-		players.remove(connection.getID());
 		PacketRemovePlayer removePacket = new PacketRemovePlayer();
 		
 		removePacket.id = connection.getID();
 		removePacket.kick = false;
 		removePacket.message = "";
 		
-		MainServer.server.sendToAllTCP(removePacket);
+		players.remove(connection.getID());
+		MainServer.refreshList();
+		
+		MainServer.server.sendToAllUDP(removePacket);
 		MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server");
 		MainServer.logPanel.append("\n");
 	}
@@ -75,67 +75,79 @@ public class MainServerListener extends Listener {
 		if(object instanceof LoginRequest) {
 			LoginRequest request = (LoginRequest) object;
 			LoginResponse response = new LoginResponse();
-			response.setResponseText("ok");
-			connection.sendTCP(response);
 			
-			PacketUserName packetUserName = new PacketUserName();
-			packetUserName.id = connection.getID();
-			packetUserName.userName = request.getUserName();
-			MainServer.server.sendToAllExceptUDP(connection.getID(), packetUserName);
-			
-			players.get(connection.getID()).userName = request.getUserName();
-			
-			MainServer.addPlayer(request.getUserName() +" ("+ connection.getID() +")");
-			
-			MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
-			
-			PacketWorldJoin packetWorld = new PacketWorldJoin();
-			packetWorld.seed = MainServer.theWorld.getSeed();
-			
-			packetWorld.x = MainServer.xSpawn;
-			Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
-			Vector3f chunkPos = new Vector3f();
-			Maths.calculateChunkPosition(spawn, chunkPos);
-			MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
-			packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
-			packetWorld.z = MainServer.zSpawn;
-			connection.sendUDP(packetWorld);
-			
-			PacketTickPlayer packetDisable = new PacketTickPlayer();
-			packetDisable.id = connection.getID();
-			packetDisable.shouldTick = false;
-			connection.sendUDP(packetDisable);
-			
-			for(Map.Entry<Vector3f, MasterChunk> entry : MainServer.theWorld.chunkMap.entrySet()) {
-				MasterChunk master = entry.getValue();
-				PacketUpdateChunk packet = new PacketUpdateChunk();
-				packet.id = connection.getID();
-				packet.x = master.getOrigin().x;
-				packet.z = master.getOrigin().z;
-				packet.add = true;
+			if(request.PROTOCOL == MainServer.NETWORK_PROTOCOL) {
+				response.PROTOCOL = MainServer.NETWORK_PROTOCOL;
+				response.setResponseText("ok");
+				connection.sendTCP(response);
 				
-				try {
-					packet.data = Maths.compressObject(master.getChunk().blocks);
-				} catch (IOException e) {
-					e.printStackTrace();
+				PacketUserName packetUserName = new PacketUserName();
+				packetUserName.id = connection.getID();
+				packetUserName.userName = request.getUserName();
+				MainServer.server.sendToAllExceptUDP(connection.getID(), packetUserName);
+				
+				players.get(connection.getID()).userName = request.getUserName();
+				
+				MainServer.refreshList();
+				
+				MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
+				
+				PacketWorldJoin packetWorld = new PacketWorldJoin();
+				packetWorld.seed = MainServer.theWorld.getSeed();
+				
+				packetWorld.x = MainServer.xSpawn;
+				Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
+				Vector3f chunkPos = new Vector3f();
+				Maths.calculateChunkPosition(spawn, chunkPos);
+				MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+				packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
+				packetWorld.z = MainServer.zSpawn;
+				connection.sendUDP(packetWorld);
+				
+				PacketTickPlayer packetDisable = new PacketTickPlayer();
+				packetDisable.id = connection.getID();
+				packetDisable.shouldTick = false;
+				connection.sendUDP(packetDisable);
+				
+				int i = 0;
+				for(Map.Entry<Vector3f, MasterChunk> entry : MainServer.theWorld.chunkMap.entrySet()) {
+					MasterChunk master = entry.getValue();
+					PacketUpdateChunk packet = new PacketUpdateChunk();
+					packet.id = connection.getID();
+					packet.x = master.getOrigin().x;
+					packet.z = master.getOrigin().z;
+					packet.add = true;
+					
+					try {
+						packet.data = Maths.compressObject(master.getChunk().blocks);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					i++;
+					
+					connection.sendUDP(packet);
 				}
+				MainServer.logPanel.append("Sent ("+i+") chunks to " + request.getUserName() +"!\n");
 				
-				connection.sendUDP(packet);
+				PacketTickPlayer packetEnable = new PacketTickPlayer();
+				packetEnable.id = connection.getID();
+				packetEnable.shouldTick = true;
+				connection.sendUDP(packetEnable);
+				
+				for (OtherPlayer p : players.values()) {
+					PacketUserName packetUserName2 = new PacketUserName();
+					packetUserName2.id = p.c.getID();
+					packetUserName2.userName = p.userName;
+					// connection.sendTCP(packetUserName2);
+					connection.sendUDP(packetUserName2);
+				}
+			} else {
+				response.PROTOCOL = -1;
+				response.setResponseText("not ok!");
+				connection.sendTCP(response);
+				MainServer.logPanel.append("Player \" "+ request.getUserName() + " \" (ID=" + connection.getID() + ") could not join\nas they had a protocol version of " + request.PROTOCOL +" whilst server is " + MainServer.NETWORK_PROTOCOL + "\n");
 			}
-			MainServer.logPanel.append("Sent chunks to " + request.getUserName() +"!\n");
 			
-			PacketTickPlayer packetEnable = new PacketTickPlayer();
-			packetEnable.id = connection.getID();
-			packetEnable.shouldTick = true;
-			connection.sendUDP(packetEnable);
-			
-			for (OtherPlayer p : players.values()) {
-				PacketUserName packetUserName2 = new PacketUserName();
-				packetUserName2.id = p.c.getID();
-				packetUserName2.userName = p.userName;
-				// connection.sendTCP(packetUserName2);
-				connection.sendUDP(packetUserName2);
-			}
 		}
 
 		// random number packet, sync'd across the entire network
@@ -213,14 +225,11 @@ public class MainServerListener extends Listener {
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		} else if(object instanceof PacketUpdateWithheldBlock) {
 			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
-			
 			if(players.get(connection.getID()) != null)
 				players.get(connection.getID()).block = packet.block;
 
 			packet.id = connection.getID();
-			
-			MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
-			
+			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
 	}
 }

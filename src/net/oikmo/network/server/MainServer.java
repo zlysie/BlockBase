@@ -10,6 +10,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Random;
 
 import javax.swing.BoxLayout;
@@ -73,6 +74,7 @@ public class MainServer {
 	public static World theWorld;
 	
 	private static String version = "S0.0.3";
+	public static final int NETWORK_PROTOCOL = 1;
 	
 	private static Thread saveThread;
 
@@ -253,26 +255,13 @@ public class MainServer {
 		return splashes[new Random().nextInt(splashes.length)];
 	}
 	
-	public static void addPlayer(String playerName) {
-		DefaultListModel<String> listModel = convertPlayersToList();
-		listModel.addElement(playerName);
-		playersPanel.setModel(listModel);
-	}
-	
-	public static void removePlayer(String playerName) {
-		DefaultListModel<String> listModel = convertPlayersToList();
-		listModel.removeElement(playerName);
-		playersPanel.setModel(listModel);
-	}
-	
-	private static DefaultListModel<String> convertPlayersToList() {
-		DefaultListModel<String> model = new DefaultListModel<String>();
-		for(int i = 0; i < playersPanel.getModel().getSize(); i++) {
-			String element = playersPanel.getModel().getElementAt(i);
-			model.addElement(element);
+	public static void refreshList() {
+		DefaultListModel<String> listModel = new DefaultListModel<>();
+		listModel.addElement("PLAYERS");
+		for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
+			listModel.addElement(entry.getValue().userName + " ("+entry.getKey()+")");
 		}
-		
-		return model;
+		playersPanel.setModel(listModel);
 	}
 	
 	private static void handleCommand(String cmd) {
@@ -284,6 +273,7 @@ public class MainServer {
 			logPanel.append("seed - returns the seed of the world - (seed)\n");
 			logPanel.append("save - saves the world - (save)\n");
 			logPanel.append("kick - kicks a player from their ip - (kick <id> <reason>)\n");
+			logPanel.append("chunks - returns total chunk size of world - (chunks)\n");
 		} else if(command.startsWith("setSpawn ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
@@ -315,9 +305,9 @@ public class MainServer {
 			} else {
 				logPanel.append("Unable to set spawn position as inputted values were invalid.");
 			}
-		} else if(command.startsWith("seed")) {
+		} else if(command.contentEquals("seed")) {
 			logPanel.append("World seed is: " + theWorld.getSeed());
-		} else if(command.startsWith("save")) {
+		} else if(command.contentEquals("save")) {
 			theWorld.saveWorld("server-level");
 			logPanel.append("Saved world!");
 		} else if(command.startsWith("kick ")) {
@@ -356,8 +346,6 @@ public class MainServer {
 				packetKick.kick = true;
 				packetKick.message = reason;
 				MainServer.server.sendToAllTCP(packetKick);
-				MainServer.removePlayer(MainServerListener.players.get(playerID).userName);
-				MainServerListener.players.remove(playerID);
 				
 				logPanel.append("Kicked " + playerID + " from the server\n");
 				logPanel.append("\n");
@@ -365,6 +353,10 @@ public class MainServer {
 			} else {
 				logPanel.append("ID was not valid / Reason was not supplied");
 			}
+		} else if(cmd.contentEquals("chunks")) {
+			logPanel.append("Server has a total chunk size of" + theWorld.chunkMap.size() + "\n");
+			logPanel.append("\n");
+			
 		} else {
 			logPanel.append("Command \""+ cmd + "\" was not recognized!");
 		} 
