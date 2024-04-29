@@ -93,10 +93,7 @@ public class InputManager {
 			}
 		}
 		
-
-		
-		
-		if(!(Main.currentScreen instanceof GuiMainMenu) && !(Main.currentScreen instanceof GuiSelectWorld)) {
+		if(Main.inGameGUI != null) {
 			if(Keyboard.isKeyDown(screenShotKey)) {
 				if(!lockInScreenshot) {
 					DisplayManager.saveScreenshot();
@@ -105,7 +102,9 @@ public class InputManager {
 			} else {
 				lockInScreenshot = false;
 			}
-			
+		}
+		
+		if(!(Main.currentScreen instanceof GuiMainMenu) && !(Main.currentScreen instanceof GuiSelectWorld)) {
 			if(!lockInPause) {
 				if(Keyboard.isKeyDown(pauseEscapeKey)) {
 					
