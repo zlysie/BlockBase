@@ -37,6 +37,7 @@ public class GuiInGame extends GuiScreen {
 	}
 	
 	public void onUpdate() {
+		if(Main.thePlayer == null) { return; }
 		Container c = Main.thePlayer.getInventory();
 		
 		drawShadowString(0f, 0f, Main.gameVersion);
