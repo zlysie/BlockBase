@@ -20,6 +20,7 @@ import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
+import net.oikmo.network.shared.PacketUpdateWithheldBlock;
 import net.oikmo.network.shared.PacketUpdateX;
 import net.oikmo.network.shared.PacketUpdateY;
 import net.oikmo.network.shared.PacketUpdateZ;
@@ -210,6 +211,16 @@ public class MainServerListener extends Listener {
 			}
 			
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
+		} else if(object instanceof PacketUpdateWithheldBlock) {
+			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
+			
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).block = packet.block;
+
+			packet.id = connection.getID();
+			
+			MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
+			
 		}
 	}
 }

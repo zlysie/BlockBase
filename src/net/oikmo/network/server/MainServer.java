@@ -39,6 +39,7 @@ import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
+import net.oikmo.network.shared.PacketUpdateWithheldBlock;
 import net.oikmo.network.shared.PacketUpdateX;
 import net.oikmo.network.shared.PacketUpdateY;
 import net.oikmo.network.shared.PacketUpdateZ;
@@ -71,7 +72,7 @@ public class MainServer {
 	
 	public static World theWorld;
 	
-	private static String version = "S0.0.2";
+	private static String version = "S0.0.3";
 	
 	private static Thread saveThread;
 
@@ -176,6 +177,7 @@ public class MainServer {
 		kryo.register(RandomNumber.class);
 		kryo.register(PacketGameOver.class);
 		kryo.register(PacketTickPlayer.class);
+		kryo.register(PacketUpdateWithheldBlock.class);
 	}
 
 	public static void createServerInterface() {
