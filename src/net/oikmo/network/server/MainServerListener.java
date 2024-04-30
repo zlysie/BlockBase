@@ -15,6 +15,7 @@ import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketRemovePlayer;
+import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketTickPlayer;
 import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
@@ -110,7 +111,7 @@ public class MainServerListener extends Listener {
 				connection.sendUDP(packetDisable);
 				
 				int i = 0;
-				for(Map.Entry<Vector3f, MasterChunk> entry : MainServer.theWorld.chunkMap.entrySet()) {
+				/*for(Map.Entry<Vector3f, MasterChunk> entry : MainServer.theWorld.chunkMap.entrySet()) {
 					MasterChunk master = entry.getValue();
 					PacketUpdateChunk packet = new PacketUpdateChunk();
 					packet.id = connection.getID();
@@ -126,7 +127,7 @@ public class MainServerListener extends Listener {
 					i++;
 					
 					connection.sendUDP(packet);
-				}
+				}*/
 				MainServer.logPanel.append("Sent ("+i+") chunks to " + request.getUserName() +"!\n");
 				
 				PacketTickPlayer packetEnable = new PacketTickPlayer();
@@ -230,6 +231,29 @@ public class MainServerListener extends Listener {
 
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
+		} else if(object instanceof PacketRequestChunk) {
+			PacketRequestChunk packet = (PacketRequestChunk) object;
+			Vector3f chunkPos = new Vector3f(packet.x,0,packet.z);
+			MasterChunk master = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+			
+			if(master == null) {
+				master = MainServer.theWorld.createAndAddChunk(new Vector3f(packet.x, 0, packet.z));
+				MainServer.logPanel.append("Creating new chunk at: [X=" + packet.x + ", Z="+packet.z+"]");
+			}
+			
+			PacketUpdateChunk packetChunk = new PacketUpdateChunk();
+			packetChunk.id = connection.getID();
+			packetChunk.x = master.getOrigin().x;
+			packetChunk.z = master.getOrigin().z;
+			packetChunk.add = true;
+			
+			try {
+				packetChunk.data = Maths.compressObject(master.getChunk().blocks);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			connection.sendUDP(packetChunk);
 		}
 	}
 }

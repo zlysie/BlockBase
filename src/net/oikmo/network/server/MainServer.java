@@ -35,6 +35,7 @@ import net.oikmo.network.shared.Message;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketGameOver;
 import net.oikmo.network.shared.PacketRemovePlayer;
+import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketTickPlayer;
 import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
@@ -180,6 +181,7 @@ public class MainServer {
 		kryo.register(PacketGameOver.class);
 		kryo.register(PacketTickPlayer.class);
 		kryo.register(PacketUpdateWithheldBlock.class);
+		kryo.register(PacketRequestChunk.class);
 	}
 
 	public static void createServerInterface() {

@@ -52,6 +52,13 @@ public class World {
 		chunkMap.put(m.getOrigin(), m);
 	}
 	
+	public MasterChunk createAndAddChunk(Vector3f chunkPos) {
+		MasterChunk m = new MasterChunk(this.noise, chunkPos);
+		usedPositions.add(m.getOrigin());
+		chunkMap.put(m.getOrigin(), m);
+		return m;
+	}
+	
 	public boolean isInValidRange(Vector3f origin) {
 		return isInValidRange(1, origin);
 	}
