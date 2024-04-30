@@ -26,6 +26,7 @@ import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
@@ -245,7 +246,52 @@ public class World {
 
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
-	}	
+	}
+	public List<Vector3f> hasAsked = new ArrayList<>();
+	public void startChunkRetriever() {
+		this.chunkCreator = new Thread(new Runnable() { 
+			public void run() {
+				while (!Main.displayRequest) {
+					for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
+						for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
+							int chunkX = x * 16;
+							int chunkZ = z * 16;
+							
+							Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
+							if(!hasAsked.contains(chunkPos)) {
+								hasAsked.add(chunkPos);
+								System.out.println(chunkPos);
+							}
+							
+							PacketRequestChunk request = new PacketRequestChunk();
+							
+							request.x = chunkX;
+							request.z = chunkZ;
+							
+							Main.network.client.sendUDP(request);
+							try {
+								Thread.sleep(500);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+					
+				}
+			}
+		});
+
+		this.chunkCreator.setName("Chunk Creator");
+		this.chunkCreator.start();
+	}
+	public boolean isChunkThreadRunning() {
+		if(this.chunkCreator != null) {
+			return this.chunkCreator.isAlive();
+		}
+		return false;
+	}
+	
 	public void addChunk(MasterChunk m) {
 		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
@@ -338,7 +384,22 @@ public class World {
 		}
 		return result;
 	}
+	public Vector3f getPositionFromMap(Vector3f pos) {
+		Vector3f result = null;
+		synchronized(this.hasAsked) {
+			for(int i = 0; i < this.hasAsked.size(); i++) {
+				Vector3f key = this.hasAsked.get(i);
+				if(key != null) {
+					if((int)key.x == (int)pos.x && key.z == (int)pos.z) {
+						result = key;
+					}
+				}
+			}
+		}
+		return result;
+	}
 
+	
 	public void saveWorld(String world) {
 		List<ChunkSaveData> chunks = new ArrayList<>();
 		
