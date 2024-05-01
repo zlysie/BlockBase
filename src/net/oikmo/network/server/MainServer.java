@@ -36,6 +36,7 @@ import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketGameOver;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
+import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
 import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
@@ -74,8 +75,8 @@ public class MainServer {
 	
 	public static World theWorld;
 	
-	private static String version = "S0.0.3";
-	public static final int NETWORK_PROTOCOL = 1;
+	private static String version = "S0.0.4";
+	public static final int NETWORK_PROTOCOL = 2;
 	
 	private static Thread saveThread;
 
@@ -182,6 +183,7 @@ public class MainServer {
 		kryo.register(PacketTickPlayer.class);
 		kryo.register(PacketUpdateWithheldBlock.class);
 		kryo.register(PacketRequestChunk.class);
+		kryo.register(PacketSavePlayerPosition.class);
 	}
 
 	public static void createServerInterface() {

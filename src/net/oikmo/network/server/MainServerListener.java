@@ -9,6 +9,8 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import net.oikmo.engine.save.PlayersPositionData;
+import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.network.client.OtherPlayer;
 import net.oikmo.network.shared.LoginRequest;
@@ -16,6 +18,7 @@ import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
+import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
 import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
@@ -96,44 +99,42 @@ public class MainServerListener extends Listener {
 				PacketWorldJoin packetWorld = new PacketWorldJoin();
 				packetWorld.seed = MainServer.theWorld.getSeed();
 				
-				packetWorld.x = MainServer.xSpawn;
-				Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
-				Vector3f chunkPos = new Vector3f();
-				Maths.calculateChunkPosition(spawn, chunkPos);
-				MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
-				packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
-				packetWorld.z = MainServer.zSpawn;
+				String ip = connection.getRemoteAddressTCP().getHostString();
+				PlayersPositionData data = SaveSystem.loadPlayerPositions();
+				System.out.println(data);
+				if(data != null) {
+					Vector3f playerPos = data.positions.get(ip);
+					if(playerPos != null) {
+						packetWorld.x = playerPos.x;
+						packetWorld.y = playerPos.y;
+						packetWorld.z = playerPos.z;
+						System.out.println(data.positions.get(ip));
+					} else {
+						packetWorld.x = MainServer.xSpawn;
+						Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
+						Vector3f chunkPos = new Vector3f();
+						Maths.calculateChunkPosition(spawn, chunkPos);
+						MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+						packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
+						packetWorld.z = MainServer.zSpawn;
+					}
+				} else {
+					packetWorld.x = MainServer.xSpawn;
+					Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
+					Vector3f chunkPos = new Vector3f();
+					Maths.calculateChunkPosition(spawn, chunkPos);
+					MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+					packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
+					packetWorld.z = MainServer.zSpawn;
+				}
+				
+				
 				connection.sendUDP(packetWorld);
 				
 				PacketTickPlayer packetDisable = new PacketTickPlayer();
 				packetDisable.id = connection.getID();
 				packetDisable.shouldTick = false;
 				connection.sendUDP(packetDisable);
-				
-				int i = 0;
-				/*for(Map.Entry<Vector3f, MasterChunk> entry : MainServer.theWorld.chunkMap.entrySet()) {
-					MasterChunk master = entry.getValue();
-					PacketUpdateChunk packet = new PacketUpdateChunk();
-					packet.id = connection.getID();
-					packet.x = master.getOrigin().x;
-					packet.z = master.getOrigin().z;
-					packet.add = true;
-					
-					try {
-						packet.data = Maths.compressObject(master.getChunk().blocks);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					i++;
-					
-					connection.sendUDP(packet);
-				}*/
-				MainServer.logPanel.append("Sent ("+i+") chunks to " + request.getUserName() +"!\n");
-				
-				PacketTickPlayer packetEnable = new PacketTickPlayer();
-				packetEnable.id = connection.getID();
-				packetEnable.shouldTick = true;
-				connection.sendUDP(packetEnable);
 				
 				for (OtherPlayer p : players.values()) {
 					PacketUserName packetUserName2 = new PacketUserName();
@@ -254,6 +255,24 @@ public class MainServerListener extends Listener {
 			}
 			
 			connection.sendUDP(packetChunk);
+		} else if(object instanceof PacketSavePlayerPosition) {
+			PacketSavePlayerPosition packet = (PacketSavePlayerPosition) object;
+			String ip = connection.getRemoteAddressTCP().getHostString();
+			PlayersPositionData data = SaveSystem.loadPlayerPositions();
+			if(data == null) {
+				data = new PlayersPositionData();
+				
+				data.positions.put(ip, new Vector3f(packet.x,packet.y,packet.z));
+				SaveSystem.savePlayerPositions(data);
+			} else {
+				if(data.positions.get(ip) == null) {
+					data.positions.put(ip, new Vector3f(packet.x,packet.y,packet.z));
+				} else {
+					data.positions.replace(ip, new Vector3f(packet.x,packet.y,packet.z));
+					SaveSystem.savePlayerPositions(data);
+				}
+			}
+			
 		}
 	}
 }

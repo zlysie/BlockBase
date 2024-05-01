@@ -8,7 +8,6 @@ import java.io.StringWriter;
 import java.util.Calendar;
 
 import net.oikmo.network.server.MainServer;
-import net.oikmo.toolbox.Logger.LogLevel;
 
 public class Logger {
 	
