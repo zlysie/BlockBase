@@ -27,6 +27,7 @@ public class SoundMaster {
 
 	private static Map<String, SoundByte> music = new HashMap<>();
 	private static Map<String, SoundByte> sfx = new HashMap<>();
+	private static Map<String, SoundEffect> sfxCollection = new HashMap<>();
 	private static SoundSystem soundSystem = null;
 
 	private static File customMusic = new File(Main.getResources()+"/custom/music");
@@ -117,6 +118,7 @@ public class SoundMaster {
 	}
 	private static void registerSFX() {
 		registerSFXByte("ui.button.click","random/click.ogg");
+		registerSFX("block.grass.break", "dig/grass");
 	}
 
 
@@ -181,12 +183,22 @@ public class SoundMaster {
 	private static void registerSFXByte(String id, String fileName) {
 		sfx.put(id, new SoundByte(id, "/sfx/"+fileName));
 	}
+	private static void registerSFX(String id, String name) {
+		sfxCollection.put(id, new SoundEffect(id, name));
+	}
 
 	public static void playSFX(String id) {
 		SoundByte sbyte = sfx.get(id);
 		if(sbyte != null) {
 			soundSystem.quickPlay(false, sbyte.getFileLocation(), sbyte.getFileName(), false, 0, 0, 0, 0, 0);
-		}	
+		} else {
+			SoundEffect sfx = sfxCollection.get(id);
+			if(sfx != null) {
+				SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
+				soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, 0, 0, 0, 0, 0);
+				
+			}
+		}
 	}
 	
 	public static SoundByte getMusicByte(String id) {
