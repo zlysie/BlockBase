@@ -9,9 +9,9 @@ public abstract class Block {
 	public static final Block cobble = new BlockCobble(Type.COBBLE);
 	public static final Block mossycobble = new BlockMossyCobble(Type.MOSSYCOBBLE);
 	public static final Block obsidian = new BlockObsidian(Type.OBSIDIAN);
-	public static final Block oaklog = new BlockOakLog(Type.OAKLOG);
-	public static final Block oakleaf = new BlockOakLeaf(Type.OAKLEAF);
-	public static final Block oakplanks = new BlockOakPlanks(Type.OAKPLANKS);
+	public static final Block oaklog = new BlockOakLog(Type.WOOD);
+	public static final Block oakleaf = new BlockOakLeaf(Type.LEAVES);
+	public static final Block oakplanks = new BlockOakPlanks(Type.PLANKS);
 	public static final Block glass = new BlockGlass(Type.GLASS);
 	public static final Block smoothstone = new BlockSmoothStone(Type.SMOOTHSTONE);
 	public static final Block brick = new BlockBrick(Type.BRICK);
@@ -29,9 +29,9 @@ public abstract class Block {
 		COBBLE,
 		MOSSYCOBBLE,
 		OBSIDIAN,
-		OAKLEAF,
-		OAKLOG,
-		OAKPLANKS,
+		LEAVES,
+		WOOD,
+		PLANKS,
 		GLASS,
 		SMOOTHSTONE,
 		BRICK,

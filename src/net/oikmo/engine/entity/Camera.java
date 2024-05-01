@@ -7,6 +7,7 @@ import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.renderers.MasterRenderer;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
@@ -85,10 +86,18 @@ public class Camera {
 					if(Main.inGameGUI.getSelectedItem() != null) {
 						if(block1 == null) {
 							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded())) {
+								int x = (int) picker.getPointRounded().x;
+								int y = (int) picker.getPointRounded().y;
+								int z = (int) picker.getPointRounded().z;
+								SoundMaster.playBlockPlaceSFX(Main.inGameGUI.getSelectedItem(), x, y, z);
 								Main.theWorld.setBlock(picker.getPointRounded(), Main.inGameGUI.getSelectedItem());
 							}
 						} else {
 							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) {
+								int x = (int) picker.getPointRounded().x;
+								int y = (int) picker.getPointRounded().y;
+								int z = (int) picker.getPointRounded().z;
+								SoundMaster.playBlockPlaceSFX(Main.inGameGUI.getSelectedItem(), x, y, z);
 								Main.theWorld.setBlock(picker.getPointRounded(picker.distance-1), Main.inGameGUI.getSelectedItem());
 							}
 						}
@@ -109,6 +118,10 @@ public class Camera {
 						v.y += 1f;
 						ItemBlock item = new ItemBlock(block, v);
 						Main.theWorld.addEntity(item);*/
+						int x = (int) picker.getPointRounded().x;
+						int y = (int) picker.getPointRounded().y;
+						int z = (int) picker.getPointRounded().z;
+						SoundMaster.playBlockBreakSFX(block, x, y, z);
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;

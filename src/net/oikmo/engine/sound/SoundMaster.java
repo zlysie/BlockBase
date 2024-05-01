@@ -12,6 +12,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
 
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
@@ -119,6 +120,12 @@ public class SoundMaster {
 	private static void registerSFX() {
 		registerSFXByte("ui.button.click","random/click.ogg");
 		registerSFX("block.grass.break", "dig/grass");
+		registerSFX("block.cloth.break", "dig/cloth");
+		registerSFX("block.gravel.break", "dig/gravel");
+		registerSFX("block.sand.break", "dig/sand");
+		registerSFX("block.stone.break", "dig/stone");
+		registerSFX("block.wood.break", "dig/wood");
+		registerSFX("block.glass.break", "dig/glass");
 	}
 
 
@@ -211,6 +218,28 @@ public class SoundMaster {
 			soundSystem.backgroundMusic("music", musicByte.getFileLocation(), musicByte.getFileName(), false);
 		}
 	}
+	
+	public static void playBlockBreakSFX(Block block, int x, int y, int z) {
+		Block.Type enumType = block.getEnumType();
+		String enumm = enumType.name().toLowerCase();
+		if(enumType == Block.Type.DIRT || enumType == Block.Type.LEAVES || enumType == Block.Type.TNT) {
+			enumm = "grass";
+		} else if(enumType == Block.Type.BEDROCK || enumType == Block.Type.COBBLE 
+				|| enumType == Block.Type.MOSSYCOBBLE || enumType == Block.Type.OBSIDIAN
+				|| enumType == Block.Type.SMOOTHSTONE || enumType == Block.Type.BRICK
+				|| enumType == Block.Type.IRONBLOCK || enumType == Block.Type.GOLDBLOCK
+				|| enumType == Block.Type.DIAMONDBLOCK) {
+			enumm = "stone";
+		} else if(enumType == Block.Type.PLANKS) {
+			enumm = "wood";
+		}
+		String id = "block."+enumm+".break";
+		SoundEffect sfx = sfxCollection.get(id);
+		if(sfx != null) {
+			SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
+			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 0);
+		}
+	}
 
 	@SuppressWarnings("deprecation")
 	public static void cleanUp() {
@@ -229,6 +258,27 @@ public class SoundMaster {
 			musicThread.stop();
 		}
 		soundSystem.stop("music");
-		
+	}
+
+	public static void playBlockPlaceSFX(Block block, int x, int y, int z) {
+		Block.Type enumType = block.getEnumType();
+		String enumm = enumType.name().toLowerCase();
+		if(enumType == Block.Type.DIRT || enumType == Block.Type.LEAVES || enumType == Block.Type.TNT) {
+			enumm = "grass";
+		} else if(enumType == Block.Type.BEDROCK || enumType == Block.Type.COBBLE 
+				|| enumType == Block.Type.MOSSYCOBBLE || enumType == Block.Type.OBSIDIAN
+				|| enumType == Block.Type.SMOOTHSTONE || enumType == Block.Type.BRICK
+				|| enumType == Block.Type.IRONBLOCK || enumType == Block.Type.GOLDBLOCK
+				|| enumType == Block.Type.DIAMONDBLOCK || enumType == Block.Type.GLASS) {
+			enumm = "stone";
+		} else if(enumType == Block.Type.PLANKS) {
+			enumm = "wood";
+		} 
+		String id = "block."+enumm+".break";
+		SoundEffect sfx = sfxCollection.get(id);
+		if(sfx != null) {
+			SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
+			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 0);
+		}
 	}
 }

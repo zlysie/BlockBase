@@ -28,9 +28,9 @@ public class Item {
 	public static final Item mossycobble = new Item(Block.Type.MOSSYCOBBLE, "Mossy Cobblestone", 64).setBlockImageFromAtlas(5, 0);
 	public static final Item obsidian = new Item(Block.Type.OBSIDIAN, "Obsidian", 64).setBlockImageFromAtlas(6, 0);
 	
-	public static final Item oakleaf = new Item(Block.Type.OAKLEAF, "Oak leaves", 64).setBlockImageFromAtlas(0, 1);
-	public static final Item oakLog = new Item(Block.Type.OAKLOG, "Oak Log", 64).setBlockImageFromAtlas(1, 1);
-	public static final Item oakPlanks = new Item(Block.Type.OAKPLANKS, "Oak Planks", 64).setBlockImageFromAtlas(2, 1);
+	public static final Item oakleaf = new Item(Block.Type.LEAVES, "Oak leaves", 64).setBlockImageFromAtlas(0, 1);
+	public static final Item oakLog = new Item(Block.Type.WOOD, "Oak Log", 64).setBlockImageFromAtlas(1, 1);
+	public static final Item oakPlanks = new Item(Block.Type.PLANKS, "Oak Planks", 64).setBlockImageFromAtlas(2, 1);
 	
 	public static final Item glass = new Item(Block.Type.GLASS, "Glass", 64).setBlockImageFromAtlas(0, 2);
 	public static final Item smoothStone = new Item(Block.Type.SMOOTHSTONE, "Smooth Stone", 64).setBlockImageFromAtlas(1, 2);
