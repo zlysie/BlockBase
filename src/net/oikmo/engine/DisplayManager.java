@@ -78,12 +78,6 @@ public class DisplayManager {
 					Main.error("Display Error!", e);
 				}
 				if(Display.isFullscreen()) {
-					try {
-						Display.setParent(null);
-					} catch (LWJGLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 					Main.WIDTH  = Display.getDisplayMode().getWidth();
 					Main.HEIGHT = Display.getDisplayMode().getHeight();
 					GL11.glViewport(0, 0, Main.WIDTH, Main.HEIGHT );
@@ -103,12 +97,7 @@ public class DisplayManager {
 
 		if(!Display.isFullscreen()) {
 			if((gameCanvas.getWidth() != Main.WIDTH || gameCanvas.getHeight() != Main.HEIGHT)) {
-				try {
-					Display.setParent(gameCanvas);
-				} catch (LWJGLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 				Main.WIDTH = gameCanvas.getWidth();
 				Main.HEIGHT = gameCanvas.getHeight();
 				if(Main.WIDTH <= 0) {

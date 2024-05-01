@@ -36,7 +36,8 @@ import net.oikmo.toolbox.noise.OpenSimplexNoise;
 public class World {
 
 	public static final int WORLD_HEIGHT = 128;
-	public static final int WORLD_SIZE = 4*8;
+	public static int RENDER_SIZE = 4;
+	public static final int WORLD_SIZE = RENDER_SIZE*8;
 
 	public Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
 	public List<Vector3f> usedPositions = new ArrayList<>();
@@ -247,33 +248,34 @@ public class World {
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
 	}
-	public List<Vector3f> hasAsked = new ArrayList<>();
+	private List<Vector3f> hasAsked = new ArrayList<>();
 	public void startChunkRetriever() {
 		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {
 				while (!Main.displayRequest) {
+					if(Main.thePlayer.getCurrentChunk() != null && !Main.thePlayer.tick) {
+						Main.thePlayer.tick = true;
+					}
+					
 					for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
 						for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
 							int chunkX = x * 16;
 							int chunkZ = z * 16;
 							
 							Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
-							if(!hasAsked.contains(chunkPos)) {
-								hasAsked.add(chunkPos);
-								System.out.println(chunkPos);
-							}
-							
-							PacketRequestChunk request = new PacketRequestChunk();
-							
-							request.x = chunkX;
-							request.z = chunkZ;
-							
-							Main.network.client.sendUDP(request);
-							try {
-								Thread.sleep(500);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+							synchronized(hasAsked) {
+								if(!hasAsked.contains(chunkPos)) {
+									hasAsked.add(chunkPos);
+									PacketRequestChunk request = new PacketRequestChunk();
+									
+									request.x = chunkX;
+									request.z = chunkZ;
+									
+									Main.network.client.sendUDP(request);
+								} else {
+									
+									continue;
+								}	
 							}
 						}
 					}
@@ -374,6 +376,11 @@ public class World {
 		Vector3f result = null;
 		synchronized(usedPositions) {
 			for(int i = 0; i < usedPositions.size(); i++) {
+				try {
+					usedPositions.get(i);
+				} catch(IndexOutOfBoundsException e) {
+					continue;
+				}
 				if(usedPositions.get(i) != null) {
 					if((int)usedPositions.get(i).x == (int)pos.x && (int)usedPositions.get(i).z == (int)pos.z) {
 						result = usedPositions.get(i);
@@ -416,6 +423,15 @@ public class World {
 	public void saveWorldAndQuit(String world) {
 		saveWorld(world);
 		
+		this.chunkCreator.interrupt();
+		this.chunkCreator.stop();
+
+		Main.inGameGUI = null;
+		Main.thePlayer = null;
+		Main.theWorld = null;
+	}
+	@SuppressWarnings("deprecation")
+	public void quitWorld() {
 		this.chunkCreator.interrupt();
 		this.chunkCreator.stop();
 

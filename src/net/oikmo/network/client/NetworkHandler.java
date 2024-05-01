@@ -12,6 +12,7 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 
+import net.oikmo.engine.InputManager;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.LoginRequest;
@@ -21,6 +22,7 @@ import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketGameOver;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
+import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
 import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
@@ -56,7 +58,7 @@ public class NetworkHandler {
 	public static Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
 	
 	private int tickTimer = 0;
-	public static final int NETWORK_PROTOCOL = 1;
+	public static final int NETWORK_PROTOCOL = 2;
 	
 	private void registerKryoClasses() {		
 		kryo.register(LoginRequest.class);
@@ -81,6 +83,7 @@ public class NetworkHandler {
 		kryo.register(PacketTickPlayer.class);
 		kryo.register(PacketUpdateWithheldBlock.class);
 		kryo.register(PacketRequestChunk.class);
+		kryo.register(PacketSavePlayerPosition.class);
 	}
 	
 	public NetworkHandler(String ipAddress) throws Exception {
@@ -102,29 +105,35 @@ public class NetworkHandler {
 			tickTimer++;
 		} else {
 			tickTimer = 0;
-			Vector3f pos = Main.thePlayer.getCamera().getPosition();
-			Vector3f rot = Main.thePlayer.getCamera().getRotation();
-			player.updatePosition(pos.x, pos.y, pos.z);
-			player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
+			if(!InputManager.hasMouseMoved()) {
+				Vector3f rot = Main.thePlayer.getCamera().getRotation();
+				player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
+				
+				PacketUpdateRotX packetRotX = new PacketUpdateRotX();
+				packetRotX.x = player.rotX;
+				client.sendUDP(packetRotX);
+				PacketUpdateRotY packetRotY = new PacketUpdateRotY();
+				packetRotY.y = player.rotY;
+				client.sendUDP(packetRotY);
+				PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
+				packetRotZ.z = player.rotZ;
+				client.sendUDP(packetRotZ);
+			}
+			if(!InputManager.isMoving()) {
+				
+				Vector3f pos = Main.thePlayer.getCamera().getPosition();
+				player.updatePosition(pos.x, pos.y, pos.z);
+				PacketUpdateX packetX = new PacketUpdateX();
+				packetX.x = player.x;
+				client.sendUDP(packetX);
+				PacketUpdateY packetY = new PacketUpdateY();
+				packetY.y = player.y;
+				client.sendUDP(packetY);
+				PacketUpdateZ packetZ = new PacketUpdateZ();
+				packetZ.z = player.z;
+				client.sendUDP(packetZ);
+			}
 			
-			PacketUpdateX packetX = new PacketUpdateX();
-			packetX.x = player.x;
-			client.sendUDP(packetX);
-			PacketUpdateY packetY = new PacketUpdateY();
-			packetY.y = player.y;
-			client.sendUDP(packetY);
-			PacketUpdateZ packetZ = new PacketUpdateZ();
-			packetZ.z = player.z;
-			client.sendUDP(packetZ);
-			PacketUpdateRotX packetRotX = new PacketUpdateRotX();
-			packetRotX.x = player.rotX;
-			client.sendUDP(packetRotX);
-			PacketUpdateRotY packetRotY = new PacketUpdateRotY();
-			packetRotY.y = player.rotY;
-			client.sendUDP(packetRotY);
-			PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
-			packetRotZ.z = player.rotZ;
-			client.sendUDP(packetRotZ);
 		}
 	}
 	
@@ -142,7 +151,6 @@ public class NetworkHandler {
 		} else {
 			return;
 		}
-		
 		
 		float x = player.x;
 		float y = player.y;
@@ -189,8 +197,6 @@ public class NetworkHandler {
 			client.sendUDP(packetZ);
 		}	
 	}
-	
-	
 
 	public void updateChunk(MasterChunk master) {
 		PacketUpdateChunk packet = new PacketUpdateChunk();
@@ -224,11 +230,22 @@ public class NetworkHandler {
 		Logger.log(LogLevel.INFO, "Connected.");
 	}
 	
-	public void disconnect() {
+	public void disconnect()  {
+		if(Main.thePlayer != null) {
+			PacketSavePlayerPosition data = new PacketSavePlayerPosition();
+			data.x = (int) Main.thePlayer.getPosition().x;
+			data.y = (int) Main.thePlayer.getPosition().y+1;
+			data.z = (int) Main.thePlayer.getPosition().z;
+			client.sendTCP(data);
+		}
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Logger.log(LogLevel.INFO, "Disconnecting...");
 		client.stop();
 		Logger.log(LogLevel.INFO, "Disconnected.");
 	}
-
-	
 }

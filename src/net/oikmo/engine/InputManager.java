@@ -1,6 +1,7 @@
 package net.oikmo.engine;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
@@ -123,6 +124,23 @@ public class InputManager {
 			}
 		}
 		
+	}
+	
+	public static boolean isMoving() {
+		return Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_SPACE);
+	}
+	
+	public static int lastMouseDX = Mouse.getDX();
+	public static int lastMouseDY = Mouse.getDY();
+	public static boolean hasMouseMoved() {
+		int mouseDX = Mouse.getDX();
+		int mouseDY = Mouse.getDX();
+		if( mouseDX != lastMouseDX || mouseDY != lastMouseDY) {
+			lastMouseDX = Mouse.getDX();
+			lastMouseDY = Mouse.getDY();
+			return true;
+		}
+		return false;
 	}
 
 }

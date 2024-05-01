@@ -46,10 +46,23 @@ public class GuiDisconnected extends GuiScreen {
 		});
 	}
 	
+	private int ticksToWait = 0;
+	private int maxCoolDown = 60;
+	private boolean lockTick = false;
+	public void onTick() {
+		if(ticksToWait < maxCoolDown) {
+			ticksToWait++;
+		}
+		
+		if(!lockTick && ticksToWait >= maxCoolDown) {
+			lockTick = true;
+		}
+	}
+	
 	public void onUpdate() {
 		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
 		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), (!kick ? "Disconnected: " : "Kicked: ") + message);
-		quitButton.tick();
+		quitButton.tick(lockTick);
 	}
 	
 	public void onClose() {

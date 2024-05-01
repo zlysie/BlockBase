@@ -43,10 +43,23 @@ public class GuiConnecting extends GuiScreen {
 		});
 	}
 	
+	private int ticksToWait = 0;
+	private int maxCoolDown = 60;
+	private boolean lockTick = false;
+	public void onTick() {
+		if(ticksToWait < maxCoolDown) {
+			ticksToWait++;
+		}
+		
+		if(!lockTick && ticksToWait >= maxCoolDown) {
+			lockTick = true;
+		}
+	}
+	
 	public void onUpdate() {
 		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
 		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), "Connecting...");
-		quitButton.tick();
+		quitButton.tick(lockTick);
 		
 		if(Main.thePlayer != null) {
 			if(Main.thePlayer.tick) {

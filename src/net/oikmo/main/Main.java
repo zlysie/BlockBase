@@ -65,7 +65,7 @@ public class Main extends Gui {
 	
 	private static final int resourceVersion = 2;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.2";
+	public static final String version = "a0.1.3";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -156,8 +156,6 @@ public class Main extends Gui {
 			
 			shouldTick = false; 
 			
-			//inGameGUI = new GuiInGame();loadWorld("your");
-			
 			splashes = Maths.fileToArray("splashes.txt");
 			splashText = splashes[new Random().nextInt(splashes.length)];
 			
@@ -246,6 +244,7 @@ public class Main extends Gui {
 		Main.shouldTick = false;
 		Main.thePlayer.getCamera().setMouseLock(false);
 		Main.thePlayer = null;
+		Main.theWorld.quitWorld();
 		Main.theWorld = null;
 		Main.inGameGUI.prepareCleanUp();
 		Main.inGameGUI = null;

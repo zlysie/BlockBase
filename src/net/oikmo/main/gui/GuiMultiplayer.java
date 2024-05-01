@@ -1,7 +1,6 @@
 package net.oikmo.main.gui;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
@@ -40,7 +39,7 @@ public class GuiMultiplayer extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)-15;
 			}
 		});
 		
@@ -103,7 +102,7 @@ public class GuiMultiplayer extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)+25;
 			}
 		});
 		
@@ -119,10 +118,23 @@ public class GuiMultiplayer extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)+65;
 			}
 		});
 		
+	}
+	
+	private int ticksToWait = 0;
+	private int maxCoolDown = 60;
+	private boolean lockTick = false;
+	public void onTick() {
+		if(ticksToWait < maxCoolDown) {
+			ticksToWait++;
+		}
+		
+		if(!lockTick && ticksToWait >= maxCoolDown) {
+			lockTick = true;
+		}
 	}
 	
 	public void onUpdate() {
@@ -134,8 +146,8 @@ public class GuiMultiplayer extends GuiScreen {
 				drawShadowStringCentered(Color.red, (Display.getWidth()/2), 0+font.getHeight(errorMsg), errorMsg);
 			}
 			serverAddress.tick();
-			joinButton.tick();
-			quitButton.tick();
+			joinButton.tick(lockTick);
+			quitButton.tick(lockTick);
 		}
 	}
 	

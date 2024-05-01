@@ -2,8 +2,6 @@ package net.oikmo.network.client;
 
 import com.esotericsoftware.kryonet.Connection;
 
-import net.oikmo.engine.world.blocks.Block;
-
 public class OtherPlayer {
 	
 	public Connection c;
