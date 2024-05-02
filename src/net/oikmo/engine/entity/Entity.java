@@ -9,8 +9,11 @@ import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.sound.SoundMaster;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Maths;
 
 public class Entity {
@@ -21,13 +24,16 @@ public class Entity {
 	private float scale;
 	private Vector3f roundPos;
 	private Vector3f chunkPos;
-	
+	public float distanceWalkedModified;
+	protected float fallDistance;
+	private int nextStepDistance;
+
 	protected AABB aabb;
 	private boolean onGround;
 	protected float heightOffset = 0.0F;
 	private float bbWidth = 0.6F;
 	private float bbHeight = 1.8F;
-	
+
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
@@ -56,18 +62,18 @@ public class Entity {
 		float h = this.getBBHeight() / 2.0F;
 		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
-	
+
 	public List<AABB> getSurroundingAABBsPhys(int aabbOffset) {
-		
+
 		List<AABB> surroundingAABBs = new ArrayList<>();
-		
+
 		int x0 = Maths.roundFloat(aabb.minX - aabbOffset);
 		int x1 = Maths.roundFloat(aabb.maxX + aabbOffset);
 		int y0 = Maths.roundFloat(aabb.minY - aabbOffset);
 		int y1 = Maths.roundFloat(aabb.maxY + aabbOffset);
 		int z0 = Maths.roundFloat(aabb.minZ - aabbOffset);
 		int z1 = Maths.roundFloat(aabb.maxZ + aabbOffset);
-		
+
 		for(int x = x0; x < x1; ++x) {
 			for(int y = y0; y < y1; ++y) {
 				for(int z = z0; z < z1; ++z) {
@@ -76,15 +82,15 @@ public class Entity {
 						//System.out.println(x + " " + y + " " + z);
 						surroundingAABBs.add(other);
 					}
-					
+
 				}
 			}
 		}
-	
-		
+
+
 		return surroundingAABBs;
 	}
-	
+
 	/**
 	 * handles aabb collision
 	 * 
@@ -93,10 +99,12 @@ public class Entity {
 	 * @param za - ({@link Float})
 	 */
 	public void move(float xa, float ya, float za, int size) {
+		double prevX = position.x;
+		double prevZ = position.z;
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
-		
+
 		if(Main.theWorld != null) {
 			List<AABB> aabbs = this.getSurroundingAABBsPhys(size);
 
@@ -132,12 +140,22 @@ public class Entity {
 			}
 		}
 
-		
 		this.position.x = (this.aabb.minX + this.aabb.maxX) / 2.0F;
 		this.position.y = this.aabb.minY + this.heightOffset;
 		this.position.z = (this.aabb.minZ + this.aabb.maxZ) / 2.0F;
+		double offsetX = position.x - prevX;
+		double offsetZ = position.z - prevZ;
+		distanceWalkedModified += (double)FastMath.sqrt((float) (offsetX * offsetX + offsetZ * offsetZ)) * 0.7D;
+		int posX = FastMath.floor_double(position.x);
+		int posY = Maths.roundFloat(position.y)-1;
+		int posZ = FastMath.floor_double(position.z);
+		Block block = Main.theWorld.getBlock(new Vector3f(posX,posY,posZ));
+		if(distanceWalkedModified > (float)nextStepDistance && block != null) {
+			nextStepDistance++;
+			SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
+		}
 	}
-	
+
 	/**
 	 * handles aabb collision
 	 * 
@@ -238,19 +256,19 @@ public class Entity {
 		getCurrentChunk();
 		return chunkPos;
 	}
-	
+
 	public void resetMotion() {
 		this.motion.x = 0;
 		this.motion.y = 0;
 		this.motion.z = 0;
 	}
-	
+
 	public Vector3f getRoundedPosition() {
 		if(roundPos == null) { roundPos = new Vector3f(); }
 		Maths.roundVector(getPosition(), roundPos);
 		return roundPos;
 	}
-	
+
 	public MasterChunk getCurrentChunk() {
 		if(chunkPos == null) { chunkPos = new Vector3f(); }
 		Maths.calculateChunkPosition(getPosition(), chunkPos);
@@ -263,11 +281,11 @@ public class Entity {
 		}
 		return null;
 	}
-	
+
 	public void setAABB(AABB aabb) {
 		this.aabb = aabb;
 	}
-	
+
 	public AABB getAABB() {
 		return aabb;
 	}
@@ -275,7 +293,7 @@ public class Entity {
 	public float getHeightOffset() {
 		return heightOffset;
 	}
-	
+
 	public void tick() {}
 
 	public boolean isOnGround() {

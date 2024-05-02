@@ -166,7 +166,7 @@ public class Main extends Gui {
 			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			
 			while(!Display.isCloseRequested()) {
-				timer.advanceTime();
+				timer.updateTimer();
 				
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
@@ -176,7 +176,7 @@ public class Main extends Gui {
 					Main.currentScreen.update();
 				}
 				
-				for(int e = 0; e < timer.ticks; ++e) {
+				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
 					
 					if(Main.currentScreen != null) {

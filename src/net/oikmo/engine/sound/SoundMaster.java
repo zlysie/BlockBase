@@ -82,7 +82,7 @@ public class SoundMaster {
 	}
 
 	private static void registerMusic() {
-		registerMusicByte("music.jackblack", "jackblock.ogg");
+		//registerMusicByte("music.jackblack", "jackblock.ogg");
 		
 		registerMusicByte("music.minecraft", "calm1.ogg");
 		registerMusicByte("music.clark", "calm2.ogg");
@@ -172,8 +172,6 @@ public class SoundMaster {
 		});
 		musicThread.setName("Music Player (BG)");
 		musicThread.start();
-
-
 	}
 
 	private static void registerMusicByte(String id, String fileName) {
@@ -278,7 +276,7 @@ public class SoundMaster {
 		SoundEffect sfx = sfxCollection.get(id);
 		if(sfx != null) {
 			SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
-			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 0);
+			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 4);
 		}
 	}
 }

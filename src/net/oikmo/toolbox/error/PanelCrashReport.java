@@ -94,6 +94,7 @@ public class PanelCrashReport extends Panel {
 		
 		TextArea textArea = new TextArea(main, 0, 0, 1);
 		textArea.setFont(new Font("Monospaced", Font.BOLD, 11));
+		textArea.setEditable(false);
 		add(new CanvasLogo(), "North");
 		add(new CanvasCrashReport(80), "East");
 		add(new CanvasCrashReport(80), "West");
