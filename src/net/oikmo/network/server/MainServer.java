@@ -78,7 +78,7 @@ public class MainServer {
 	
 	public static World theWorld;
 	
-	private static String version = "S0.0.5";
+	private static String version = "S0.0.6";
 	public static final int NETWORK_PROTOCOL = 3;
 	
 	private static Thread saveThread;
@@ -280,7 +280,7 @@ public class MainServer {
 			logPanel.append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
 			logPanel.append("seed - returns the seed of the world - (seed)\n");
 			logPanel.append("save - saves the world - (save)\n");
-			logPanel.append("kick - kicks a player from their ip - (kick <id> <reason>)\n");
+			logPanel.append("kick - kicks a player from their ip - (kick <id> <reason>) or (kick <playerName> <reason>)\n");
 			logPanel.append("chunks - returns total chunk size of world - (chunks)\n");
 		} else if(command.startsWith("setSpawn ")) {
 			String[] split = cmd.split(" ");
@@ -321,6 +321,7 @@ public class MainServer {
 		} else if(command.startsWith("kick ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
+			boolean noIDGiven = false;
 			String toID = null;
 			String message = null;
 			
@@ -335,7 +336,7 @@ public class MainServer {
 			try {
 				playerID = Integer.valueOf(toID);
 			} catch(NumberFormatException e) {
-				continueToDoStuff = false;
+				 noIDGiven = true;
 			}
 			
 			if(message == null) {
@@ -346,8 +347,20 @@ public class MainServer {
 				continueToDoStuff = false;
 			}
 			
+			continueToDoStuff = false;
+			for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
+				OtherPlayer p = entry.getValue();
+				
+				if(p.userName.contentEquals(toID)) {
+					playerID = entry.getKey();
+					continueToDoStuff = true;
+				}
+			}
+			
 			if(continueToDoStuff) {
-				String reason = cmd.split("kick " + playerID + " ")[1];
+				System.out.println("kick " + (noIDGiven ? toID : playerID) + " ");
+				
+				String reason = cmd.split("kick " + (noIDGiven ? toID : playerID) + " ")[1];
 				
 				PacketRemovePlayer packetKick = new PacketRemovePlayer();
 				packetKick.id = playerID;
@@ -355,20 +368,16 @@ public class MainServer {
 				packetKick.message = reason;
 				MainServer.server.sendToAllTCP(packetKick);
 				
-				logPanel.append("Kicked " + playerID + " from the server\n");
-				logPanel.append("\n");
+				logPanel.append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.");
 				
 			} else {
 				logPanel.append("ID was not valid / Reason was not supplied");
 			}
 		} else if(cmd.contentEquals("chunks")) {
-			logPanel.append("Server has a total chunk size of" + theWorld.chunkMap.size() + "\n");
-			logPanel.append("\n");
-			
+			logPanel.append("Server has a total chunk size of: " + theWorld.chunkMap.size() + "\n");
 		} else {
-			logPanel.append("Command \""+ cmd + "\" was not recognized!");
+			logPanel.append("Command \""+ cmd + "\" was not recognized!\n");
 		} 
-		logPanel.append("\n");
 	}
 
 	public static void main(String args[]) {

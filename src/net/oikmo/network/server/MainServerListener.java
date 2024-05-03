@@ -73,8 +73,11 @@ public class MainServerListener extends Listener {
 		MainServer.refreshList();
 		
 		MainServer.server.sendToAllUDP(removePacket);
-		MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server");
-		MainServer.logPanel.append("\n");
+		if(username != null) {
+			MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server");
+			MainServer.logPanel.append("\n");
+		}
+		
 	}
 
 	public void received(Connection connection, Object object) {
@@ -96,7 +99,10 @@ public class MainServerListener extends Listener {
 				
 				MainServer.refreshList();
 				
-				MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
+				if(request.getUserName() != null) {
+					MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
+				}
+				
 				
 				PacketWorldJoin packetWorld = new PacketWorldJoin();
 				packetWorld.seed = MainServer.theWorld.getSeed();
