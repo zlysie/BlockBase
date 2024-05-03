@@ -16,6 +16,8 @@ import net.oikmo.network.client.OtherPlayer;
 import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
+import net.oikmo.network.shared.PacketChatMessage;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
@@ -273,6 +275,16 @@ public class MainServerListener extends Listener {
 				}
 			}
 			
+		}
+		else if(object instanceof PacketPlaySoundAt) {
+			PacketPlaySoundAt packet = (PacketPlaySoundAt) object;
+			packet.id = connection.getID();
+			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
+		}
+		else if(object instanceof PacketChatMessage) {
+			PacketChatMessage packet = (PacketChatMessage) object;
+			packet.id = connection.getID();
+			MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
 		}
 	}
 }

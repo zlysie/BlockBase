@@ -4,8 +4,8 @@ import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
-import net.oikmo.network.server.World;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 

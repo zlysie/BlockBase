@@ -28,12 +28,15 @@ import com.esotericsoftware.kryonet.Server;
 
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.save.WorldPositionData;
+import net.oikmo.engine.world.World;
 import net.oikmo.network.client.OtherPlayer;
 import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.Message;
 import net.oikmo.network.shared.PacketAddPlayer;
+import net.oikmo.network.shared.PacketChatMessage;
 import net.oikmo.network.shared.PacketGameOver;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
@@ -75,8 +78,8 @@ public class MainServer {
 	
 	public static World theWorld;
 	
-	private static String version = "S0.0.4";
-	public static final int NETWORK_PROTOCOL = 2;
+	private static String version = "S0.0.5";
+	public static final int NETWORK_PROTOCOL = 3;
 	
 	private static Thread saveThread;
 
@@ -126,7 +129,6 @@ public class MainServer {
 							e.printStackTrace();
 						}
 						MainServer.theWorld.saveWorld("server-level");
-						logPanel.append("[AUTO] Saving world!\n");
 						System.gc();
 					}
 				}
@@ -184,6 +186,8 @@ public class MainServer {
 		kryo.register(PacketUpdateWithheldBlock.class);
 		kryo.register(PacketRequestChunk.class);
 		kryo.register(PacketSavePlayerPosition.class);
+		kryo.register(PacketPlaySoundAt.class);
+		kryo.register(PacketChatMessage.class);
 	}
 
 	public static void createServerInterface() {

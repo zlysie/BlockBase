@@ -19,9 +19,9 @@ import java.util.zip.GZIPOutputStream;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.network.server.MainServer;
-import net.oikmo.network.server.World;
 
 public class Maths {	
 	public static void matrixToBuffer(Matrix4f m, FloatBuffer dest)
