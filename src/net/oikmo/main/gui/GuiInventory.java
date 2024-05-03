@@ -131,7 +131,9 @@ public class GuiInventory extends GuiScreen {
 
 	public void onClose() {
 		Main.thePlayer.getCamera().setMouseLock(true);
-		
+		for(BlockSlot slot : slots) {
+			slot.onCleanUp();
+		}
 		InventorySlot.dropCurrent();
 	}
 }

@@ -63,9 +63,9 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main extends Gui {
 	
-	private static final int resourceVersion = 2;
+	private static final int resourceVersion = 3;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.3";
+	public static final String version = "a0.1.4";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -96,6 +96,7 @@ public class Main extends Gui {
 	public static String splashText;
 	
 	public static NetworkHandler network;
+	public static String playerName = null;
 	
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
@@ -168,6 +169,8 @@ public class Main extends Gui {
 			while(!Display.isCloseRequested()) {
 				timer.updateTimer();
 				
+				
+				
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
 				}
@@ -183,7 +186,7 @@ public class Main extends Gui {
 						Main.currentScreen.onTick();
 					}
 					
-					if(network != null) {
+					if(network != null && thePlayer != null) {
 						network.tick();
 					}
 					
@@ -213,16 +216,16 @@ public class Main extends Gui {
 					}
 				}
 				
-				if(theWorld != null) {
-					theWorld.update(thePlayer.getCamera());
-				}
-				
-				if(Main.thePlayer != null) {
-					if(!(Main.currentScreen instanceof GuiConnecting) && !Main.thePlayer.tick) {
+				if(theWorld != null && thePlayer != null) {
+					if(!(Main.currentScreen instanceof GuiConnecting) && !(Main.currentScreen instanceof GuiDisconnected) && !Main.thePlayer.tick) {
 						Main.currentScreen = new GuiConnecting();
 					}
+					if(thePlayer.getCamera() != null) {
+						SoundMaster.setListener(thePlayer.getCamera(), timer.renderPartialTicks);
+					}
+					
+					theWorld.update(thePlayer.getCamera());
 				}
-				
 				
 				if(inGameGUI != null) {				
 					inGameGUI.update();
@@ -246,11 +249,16 @@ public class Main extends Gui {
 		Main.thePlayer = null;
 		Main.theWorld.quitWorld();
 		Main.theWorld = null;
-		Main.inGameGUI.prepareCleanUp();
-		Main.inGameGUI = null;
+		if(Main.inGameGUI != null) {
+			Main.inGameGUI.prepareCleanUp();
+			Main.inGameGUI = null;
+		}
+		
+		
 		Main.network = null;
-		if(Main.currentScreen != null)
+		if(Main.currentScreen != null) {
 			Main.currentScreen.prepareCleanUp();
+		}
 		Main.currentScreen = new GuiDisconnected(kick, message);
 		
 	}

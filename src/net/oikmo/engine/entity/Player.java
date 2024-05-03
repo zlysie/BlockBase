@@ -10,6 +10,7 @@ import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiChat;
 
 public class Player extends Entity {
 	
@@ -31,25 +32,28 @@ public class Player extends Entity {
 		float xa = 0.0F;
 		float za = 0.0F;
   		
-		if(Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			--za;
-		}
+		if(!(Main.currentScreen instanceof GuiChat)) {
+			if(Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W)) {
+				--za;
+			}
 
-		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			++za;
-		}
+			if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S)) {
+				++za;
+			}
 
-		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			--xa;
-		}
+			if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A)) {
+				--xa;
+			}
 
-		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) || Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			++xa;
+			if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) || Keyboard.isKeyDown(Keyboard.KEY_D)) {
+				++xa;
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && this.isOnGround()) {
+				this.motion.y = 0.2F;
+			}
 		}
 		
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && this.isOnGround()) {
-			this.motion.y = 0.2F;
-		}
 		
 		this.setRotation(0.0f, camera.yaw, 0.0f);
 		this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);

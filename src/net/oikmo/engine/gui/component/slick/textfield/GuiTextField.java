@@ -6,6 +6,7 @@ import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 
+import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
@@ -62,23 +63,7 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
 			isHovering = true;
-			if(Mouse.isButtonDown(0)) {
-				if(command != null) {
-					if(!lockButton) {
-						if(!lockedRightNow && current != this) {
-							grabbed = true; 
-							Gui.lockedRightNow = true;
-							command.invoke();
-							lockButton = true;
-							current = this;
-						}
-
-					}
-				}
-			} else {
-				lockButton = false;
-			}
-		} else {
+ 		} else {
 			isHovering = false;
 			if(Mouse.isButtonDown(0)) {
 				grabbed = false;
@@ -89,6 +74,26 @@ public class GuiTextField  extends Gui implements GuiComponent {
 			}
 		}
 
+		if(Mouse.isButtonDown(0) && isHovering) {
+			if(command != null) {
+				if(!lockButton) {
+					if(!lockedRightNow && current != this) {
+						grabbed = true; 
+						Gui.lockedRightNow = true;
+						lockButton = true;
+						current = this;
+					}
+				}
+			}
+		} else if(Keyboard.isKeyDown(Keyboard.KEY_RETURN)) {
+			if(command != null && !lockButton) {
+				command.invoke();
+				lockButton = true;
+			}
+		} else {
+			lockButton = false;
+		}
+		
 		if(grabbed) {
 			handleKeyboardInput();
 		}
@@ -103,7 +108,7 @@ public class GuiTextField  extends Gui implements GuiComponent {
 	}
 
 	protected void handleKeyboardInput() {
-		if(Keyboard.next()) {
+		if(DisplayManager.keyboardHasNext()) {
 			if(Keyboard.isKeyDown(Keyboard.KEY_BACK)) {
 				if(getInputText().length() != 0) {
 					setInputText(getInputText().substring(0, getInputText().length()-1));

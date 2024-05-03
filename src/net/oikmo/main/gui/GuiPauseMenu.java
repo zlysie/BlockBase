@@ -1,6 +1,7 @@
 package net.oikmo.main.gui;
 
 import org.lwjgl.opengl.Display;
+import org.newdawn.slick.Color;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
@@ -9,6 +10,8 @@ import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
+import net.oikmo.network.client.NetworkHandler;
+import net.oikmo.network.client.OtherPlayer;
 
 public class GuiPauseMenu extends GuiScreen {
 	
@@ -55,9 +58,55 @@ public class GuiPauseMenu extends GuiScreen {
 			}
 		});
 	}
-	
+	private int width = 200;
 	public void onUpdate() {
 		drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
+		
+		if(Main.network != null) {
+			int height =  (fontSize *2)+5;
+			boolean flag = false;
+			if(!NetworkHandler.players.values().contains(Main.network.player.userName)) {
+				flag = true;
+			}
+			
+			for(OtherPlayer p : NetworkHandler.players.values()) {
+				height += fontSize + 5;
+				if(flag && p.userName != null && Main.network.player.userName != null) {
+					if(p.userName.contentEquals(Main.network.player.userName)) {
+						height -= fontSize + 5;
+					}
+					
+				}
+			}
+			
+			int xPos = 100;
+			int yPos = (Display.getHeight()/2)-height/2;
+			
+			this.drawSquareFilled(Color.gray, xPos, yPos, width, height);
+			this.drawSquare(Color.lightGray, 2, xPos, yPos, width, height);
+			drawShadowStringCentered(xPos+(width/2), yPos+10, "Players");	
+			height = fontSize+10;
+			if(flag) {
+				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.network.player.userName + " (You)");
+			}
+			for(OtherPlayer p : NetworkHandler.players.values()) {
+				if(p.userName != null) {
+					height += fontSize + 5;
+					if(!p.userName.contentEquals(Main.network.player.userName)) {
+						drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName);
+					} else {
+						if(!flag) {
+							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " (You)");
+						}
+						
+					}
+					
+				}
+				
+			}
+		}
+		
+		
 		quitButton.tick();
 	}
 	
@@ -67,7 +116,7 @@ public class GuiPauseMenu extends GuiScreen {
 		} else {
 			Main.shouldTick();
 		}
-		
+		quitButton.onCleanUp();
 		Gui.cleanUp();
 	}
 }

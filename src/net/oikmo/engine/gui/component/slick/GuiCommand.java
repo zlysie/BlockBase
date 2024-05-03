@@ -3,6 +3,7 @@ package net.oikmo.engine.gui.component.slick;
 public class GuiCommand {
 	
 	protected float x, y;
+	protected float width, height;
 	
 	public void invoke() { return; }
 	public void invoke(float sliderValue) { return; }
@@ -13,6 +14,12 @@ public class GuiCommand {
 	}
 	public float getY() {
 		return y;
+	}
+	public float getWidth() {
+		return width;
+	}
+	public float getHeight() {
+		return height;
 	}
 }
 

@@ -5,6 +5,7 @@ import org.lwjgl.input.Mouse;
 
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiChat;
 import net.oikmo.main.gui.GuiInventory;
 import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.main.gui.GuiPauseMenu;
@@ -12,25 +13,27 @@ import net.oikmo.main.gui.GuiSelectWorld;
 
 public class InputManager {
 
-	private final int texturePackKey = Keyboard.KEY_F1;
-	private final int screenShotKey = Keyboard.KEY_F2;
-	private final int debugKey = Keyboard.KEY_F3;
+	public static final int texturePackKey = Keyboard.KEY_F1;
+	public static final int screenShotKey = Keyboard.KEY_F2;
+	public static final int debugKey = Keyboard.KEY_F3;
 	
-	private final int pauseEscapeKey = Keyboard.KEY_ESCAPE;
+	public static final int pauseEscapeKey = Keyboard.KEY_ESCAPE;
 	
-	private final int refreshKey = Keyboard.KEY_F;
-	private final int inventoryKey = Keyboard.KEY_E;
-	private final int teleportKey = Keyboard.KEY_P;
-	//private final int itemKey = Keyboard.KEY_Y;
+	public static final int refreshKey = Keyboard.KEY_F;
+	public static final int inventoryKey = Keyboard.KEY_E;
+	public static final int teleportKey = Keyboard.KEY_P;
+
+	public static final int chatKey = Keyboard.KEY_T;
+	//public static final int itemKey = Keyboard.KEY_Y;
 	
-	private boolean lockInPause = false;
+	public static boolean lockInPause = false;
 	
-	private boolean lockInChangeTexture = false;
-	private boolean lockInScreenshot = false;
-	private boolean lockInDebug = false;
+	public static boolean lockInChangeTexture = false;
+	public static boolean lockInScreenshot = false;
+	public static boolean lockInDebug = false;
 	
-	private boolean lockInRefresh = false;
-	//private boolean lockInItem = false;
+	public static boolean lockInRefresh = false;
+	//public static boolean lockInItem = false;
 
 	public void handleInput() {
 		if(!Main.isPaused()) {
@@ -48,19 +51,38 @@ public class InputManager {
 				lockInItem = false;
 			}*/
 			
-			if(Keyboard.isKeyDown(teleportKey)) {
-				Main.thePlayer.resetPos();
-			}
-			
-			if(Keyboard.isKeyDown(refreshKey)) {
-				if(!lockInRefresh) {
-					Main.theWorld.refreshChunks();
+			if(!(Main.currentScreen instanceof GuiChat)) {
+				if(Keyboard.isKeyDown(teleportKey)) {
+					Main.thePlayer.resetPos();
+				}
+				
+				if(Keyboard.isKeyDown(refreshKey)) {
+					if(!lockInRefresh) {
+						Main.theWorld.refreshChunks();
+					}
+
+					lockInRefresh = true;
+				} else {
+					lockInRefresh = false;
 				}
 
-				lockInRefresh = true;
-			} else {
-				lockInRefresh = false;
+				if(Keyboard.isKeyDown(texturePackKey)) {
+					if(!lockInChangeTexture) {
+						int texture = MasterRenderer.currentTexturePack.getTextureID();
+						if(texture == MasterRenderer.defaultTexturePack) {
+							MasterRenderer.getInstance().setTexturePack(MasterRenderer.customTexturePack);
+						} else {
+							MasterRenderer.getInstance().setTexturePack(MasterRenderer.defaultTexturePack);
+						}
+					}
+					lockInChangeTexture = true;
+				} else {
+					lockInChangeTexture = false;
+				}
 			}
+			
+
+			
 
 			if(Keyboard.isKeyDown(debugKey)) {
 				if(!lockInDebug) {
@@ -71,26 +93,15 @@ public class InputManager {
 				lockInDebug = false;
 			}
 
-			if(Keyboard.isKeyDown(texturePackKey)) {
-				if(!lockInChangeTexture) {
-					int texture = MasterRenderer.currentTexturePack.getTextureID();
-					if(texture == MasterRenderer.defaultTexturePack) {
-						MasterRenderer.getInstance().setTexturePack(MasterRenderer.customTexturePack);
-					} else {
-						MasterRenderer.getInstance().setTexturePack(MasterRenderer.defaultTexturePack);
-					}
-				}
-				lockInChangeTexture = true;
-			} else {
-				lockInChangeTexture = false;
-			}
-
-			
 			
 			if(Keyboard.isKeyDown(inventoryKey)) {
 				if(Main.currentScreen == null) {
 					Main.currentScreen = new GuiInventory();
 				}
+			}
+			
+			if(Main.network != null && Keyboard.isKeyDown(chatKey) && Main.currentScreen == null) {
+				Main.currentScreen = new GuiChat();
 			}
 		}
 		

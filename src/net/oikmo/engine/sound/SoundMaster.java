@@ -11,9 +11,12 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
+import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
@@ -237,6 +240,33 @@ public class SoundMaster {
 			SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
 			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 0);
 		}
+	}
+	
+	public static void setListener(Camera camera) {
+		Vector3f pos = camera.getPosition();
+		float x = pos.x;
+		float y = pos.y;
+		float z = pos.z;
+		soundSystem.setListenerPosition(x, y, z);
+		soundSystem.setListenerOrientation(camera.roll, camera.pitch, camera.yaw, 0, 90, 0);
+	}
+	
+	public static void setListener(Camera camera, float f) {
+		float yaw = camera.prevYaw + (camera.yaw - camera.yaw) * f;
+		if(camera.getPosition() == null) { return; }
+		double x = camera.prevPosition.x + (camera.getPosition().x -  camera.prevPosition.x) * (double)f;
+		double y = camera.prevPosition.y + (camera.getPosition().y -  camera.prevPosition.y) * (double)f;
+		double z = camera.prevPosition.z + (camera.getPosition().z -  camera.prevPosition.z) * (double)f;
+		float f2 = FastMath.cos((float) (-yaw * 0.01745329F - Math.PI));
+		float f3 = FastMath.sin((float) (-yaw * 0.01745329F - Math.PI));
+		float lookX = -f3;
+		float lookY = 0.0F;
+		float lookZ = -f2;
+		float upX = 0.0F;
+		float upY = 1.0F;
+		float upZ = 0.0F;
+		soundSystem.setListenerPosition((float)x, (float)y, (float)z);
+		soundSystem.setListenerOrientation(lookX, lookY, lookZ, upX, upY, upZ);
 	}
 
 	@SuppressWarnings("deprecation")

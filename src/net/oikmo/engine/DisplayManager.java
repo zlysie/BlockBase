@@ -118,10 +118,16 @@ public class DisplayManager {
 				}
 			}
 		}
+		keyboardnext = Keyboard.next();
+		
 		//Display.sync(60);
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;
 		lastFrameTime = currentFrameTime;		
+	}
+	private static boolean keyboardnext = false;
+	public static boolean keyboardHasNext() {
+		return keyboardnext;
 	}
 
 	/**

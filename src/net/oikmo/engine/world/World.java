@@ -253,7 +253,7 @@ public class World {
 		this.chunkCreator = new Thread(new Runnable() { 
 			public void run() {
 				while (!Main.displayRequest) {
-					if(Main.thePlayer.getCurrentChunk() != null && !Main.thePlayer.tick) {
+					if(Main.thePlayer != null && Main.thePlayer.getCurrentChunk() != null && !Main.thePlayer.tick) {
 						Main.thePlayer.tick = true;
 					}
 					

@@ -13,6 +13,7 @@ import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Maths;
 
@@ -153,6 +154,15 @@ public class Entity {
 		if(distanceWalkedModified > (float)nextStepDistance && block != null) {
 			nextStepDistance++;
 			SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
+			if(Main.network != null) {
+				PacketPlaySoundAt packet = new PacketPlaySoundAt();
+				packet.place = true;
+				packet.blockID = block.getByteType();
+				packet.x = posX;
+				packet.y = posY;
+				packet.z = posZ;
+				Main.network.client.sendTCP(packet);
+			}
 		}
 	}
 

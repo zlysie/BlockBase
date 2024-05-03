@@ -11,6 +11,7 @@ import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.MousePicker;
 
@@ -21,9 +22,11 @@ import net.oikmo.toolbox.MousePicker;
  */
 public class Camera {
 	private int maxVerticalTurn = 90;
+	public Vector3f prevPosition;
 	private Vector3f position;
 
 	public float pitch = 0;
+	public float prevYaw;
 	public float yaw = 0;
 	public float roll = 0;
 
@@ -42,6 +45,7 @@ public class Camera {
 	 */
 	public Camera(Vector3f position, Vector3f rotation) {
 		this.position = position;
+		this.prevPosition = position;
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
 		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
@@ -65,9 +69,11 @@ public class Camera {
 	 */
 	public void update(Vector3f position, float heightOffset) {
 		this.position = position;
+		this.prevPosition = new Vector3f(position);
 		this.position.x = Maths.lerp(this.position.x, position.x, 0.1f);
 		this.position.z = Maths.lerp(this.position.z, position.z, 0.1f);
 		this.position.y = position.y + heightOffset;
+		this.prevYaw = yaw;
 		if(mouseLocked && Main.theWorld != null && Main.thePlayer.tick) {
 			picker.update();
 			
@@ -90,6 +96,15 @@ public class Camera {
 								int y = (int) picker.getPointRounded().y;
 								int z = (int) picker.getPointRounded().z;
 								SoundMaster.playBlockPlaceSFX(Main.inGameGUI.getSelectedItem(), x, y, z);
+								if(Main.network != null) {
+									PacketPlaySoundAt packet = new PacketPlaySoundAt();
+									packet.place = true;
+									packet.blockID = Main.inGameGUI.getSelectedItem().getByteType();
+									packet.x = x;
+									packet.y = y;
+									packet.z = z;
+									Main.network.client.sendTCP(packet);
+								}
 								Main.theWorld.setBlock(picker.getPointRounded(), Main.inGameGUI.getSelectedItem());
 							}
 						} else {
@@ -98,6 +113,15 @@ public class Camera {
 								int y = (int) picker.getPointRounded().y;
 								int z = (int) picker.getPointRounded().z;
 								SoundMaster.playBlockPlaceSFX(Main.inGameGUI.getSelectedItem(), x, y, z);
+								if(Main.network != null) {
+									PacketPlaySoundAt packet = new PacketPlaySoundAt();
+									packet.place = true;
+									packet.blockID = Main.inGameGUI.getSelectedItem().getByteType();
+									packet.x = x;
+									packet.y = y;
+									packet.z = z;
+									Main.network.client.sendTCP(packet);
+								}
 								Main.theWorld.setBlock(picker.getPointRounded(picker.distance-1), Main.inGameGUI.getSelectedItem());
 							}
 						}
@@ -122,6 +146,14 @@ public class Camera {
 						int y = (int) picker.getPointRounded().y;
 						int z = (int) picker.getPointRounded().z;
 						SoundMaster.playBlockBreakSFX(block, x, y, z);
+						if(Main.network != null) {
+							PacketPlaySoundAt packet = new PacketPlaySoundAt();
+							packet.blockID = block.getByteType();
+							packet.x = x;
+							packet.y = y;
+							packet.z = z;
+							Main.network.client.sendTCP(packet);
+						}
 						Main.theWorld.setBlock(picker.getPointRounded(), null);
 					}
 					mouseClickLeft = true;

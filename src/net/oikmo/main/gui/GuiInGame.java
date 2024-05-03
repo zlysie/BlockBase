@@ -4,6 +4,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
 
 import net.oikmo.engine.DisplayManager;
@@ -36,9 +37,11 @@ public class GuiInGame extends GuiScreen {
 		this.crosshair = Gui.guiAtlas.getSubImage(240, 0, 16, 16);
 	}
 	
+	private Color c = new Color(0, 0, 0, 0.5f);
+	
 	public void onUpdate() {
 		if(Main.thePlayer == null) { return; }
-		Container c = Main.thePlayer.getInventory();
+		Container cont = Main.thePlayer.getInventory();
 		
 		drawShadowString(0f, 0f, Main.gameVersion);
 		if(literallyUpdate) {
@@ -51,8 +54,8 @@ public class GuiInGame extends GuiScreen {
 		drawImage(hotbar, Display.getWidth()/2, Display.getHeight()-28, 364,44);
 		
 		
-		for(int i = 0; i < c.getRows(); i++) {
-			Slot s = c.getSlots()[i][0];
+		for(int i = 0; i < cont.getRows(); i++) {
+			Slot s = cont.getSlots()[i][0];
 			if(s != null) {
 				drawImage(s.getItem().getImage(), calculateXPosition(i), Display.getHeight()-28, 28,28);
 				/*String amount = s.getCurrentAmount()+"";
@@ -63,29 +66,43 @@ public class GuiInGame extends GuiScreen {
 		
 		drawImage(hotbarSelector, calculateXPosition(selectedIndex), Display.getHeight()-28, 48,48);
 		
+		
+		
 		int previousIndex = selectedIndex;
-		
-		while (Keyboard.next()) {
-			if (Keyboard.getEventKeyState()) {
-				try {
-					int i = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1;
-					selectedIndex = i != -1 ? i : 0;
-				} catch(Exception e) {}
+		if(!(Main.currentScreen instanceof GuiChat)) {
+			if(Main.network != null) {
+				int base = Display.getHeight()-fontSize;
+				int size = Main.network.currentlyShownMessages.size()-1;
+				for(int y = size; y > -1; y--) {
+					int realY = ((size-y)*fontSize)+fontSize;
+					this.drawSquareFilled(c, 0, base-realY, Display.getWidth(), fontSize);
+					this.drawShadowString(Main.network.currentlyShownMessages.get(y).isSpecial() ? Color.yellow : Color.white, 0, base-realY, Main.network.currentlyShownMessages.get(y).getMessage());
+					
+				}
 			}
+			
+			if (DisplayManager.keyboardHasNext()) {
+				if (Keyboard.getEventKeyState()) {
+					try {
+						int i = Integer.parseInt(Keyboard.getKeyName(Keyboard.getEventKey()))-1;
+						selectedIndex = i != -1 ? i : 0;
+					} catch(Exception e) {}
+				}
+			}
+			
+			int dWheel = Mouse.getDWheel();
+		    if (dWheel < 0) {
+		    	selectedIndex += 1;
+				selectedIndex = selectedIndex > 8 ? 0 : selectedIndex;
+		    } else if (dWheel > 0){
+		    	selectedIndex -= 1;
+				selectedIndex = selectedIndex <= -1 ? 8 : selectedIndex;
+		    }
+		    
+		    if(selectedIndex != previousIndex) {
+		    	updatePlayerHand();
+		    }
 		}
-		
-		int dWheel = Mouse.getDWheel();
-	    if (dWheel < 0) {
-	    	selectedIndex += 1;
-			selectedIndex = selectedIndex > 8 ? 0 : selectedIndex;
-	    } else if (dWheel > 0){
-	    	selectedIndex -= 1;
-			selectedIndex = selectedIndex <= -1 ? 8 : selectedIndex;
-	    }
-	    
-	    if(selectedIndex != previousIndex) {
-	    	updatePlayerHand();
-	    }
 	}
 	
 	private void updatePlayerHand() {

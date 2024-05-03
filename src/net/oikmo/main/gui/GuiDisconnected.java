@@ -67,5 +67,6 @@ public class GuiDisconnected extends GuiScreen {
 	
 	public void onClose() {
 		Gui.cleanUp();
+		quitButton.onCleanUp();
 	}
 }

@@ -215,5 +215,8 @@ public class GuiMainMenu extends GuiScreen {
 			musicThread.interrupt();
 			musicThread.stop();
 		}
+		playButton.onCleanUp();
+		multiplayerButton.onCleanUp();
+		quitButton.onCleanUp();
 	}
 }

@@ -182,5 +182,11 @@ public class GuiSelectWorld extends GuiScreen {
 
 	public void onClose() {
 		Gui.cleanUp();
+		world1Button.onCleanUp();
+		world2Button.onCleanUp();
+		world3Button.onCleanUp();
+		world4Button.onCleanUp();
+		world5Button.onCleanUp();
+		backButton.onCleanUp();
 	}
 }

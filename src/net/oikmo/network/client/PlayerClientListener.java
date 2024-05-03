@@ -8,11 +8,17 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import net.oikmo.engine.gui.ChatMessage;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiChat;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
+import net.oikmo.network.shared.PacketChatMessage;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketTickPlayer;
 import net.oikmo.network.shared.PacketUpdateChunk;
@@ -51,50 +57,101 @@ public class PlayerClientListener extends Listener {
 		
 		if(object instanceof PacketAddPlayer){
 			PacketAddPlayer packet = (PacketAddPlayer) object;
+		
 			OtherPlayer newPlayer = new OtherPlayer();
 			NetworkHandler.players.put(packet.id, newPlayer);
+			
 		} 
 		else if(object instanceof PacketRemovePlayer){
 			PacketRemovePlayer packet = (PacketRemovePlayer) object;
-			if(packet.id == Main.network.client.getID()) {
+			if(packet.id == Main.network.player.id) {
 				Main.network.disconnect();
 				Main.disconnect(packet.kick, packet.message);
 			} else {
+				if(Main.thePlayer != null) {
+					if(NetworkHandler.players.get(packet.id) != null && NetworkHandler.players.get(packet.id).userName != null) {
+						Main.network.rawMessages.add(new ChatMessage(NetworkHandler.players.get(packet.id).userName + " left the game", true));
+						if(Main.currentScreen instanceof GuiChat) {
+							((GuiChat)Main.currentScreen).updateMessages();
+						}
+					}
+				}
 				NetworkHandler.players.remove(packet.id);
+				
 			}
-		} 
-		else if(object instanceof PacketUpdateX){
-			PacketUpdateX packet = (PacketUpdateX) object;
-			NetworkHandler.players.get(packet.id).x = packet.x;
-		} 
-		else if(object instanceof PacketUpdateY){
-			PacketUpdateY packet = (PacketUpdateY) object;
-			NetworkHandler.players.get(packet.id).y = packet.y;
-		} 
-		else if(object instanceof PacketUpdateZ){
-			PacketUpdateZ packet = (PacketUpdateZ) object;
-			NetworkHandler.players.get(packet.id).z = packet.z;
-		} 
-		else if(object instanceof PacketUpdateRotX){
-			PacketUpdateRotX packet = (PacketUpdateRotX) object;
-			NetworkHandler.players.get(packet.id).rotX = packet.x;
-		} 
-		else if(object instanceof PacketUpdateRotY){
-			
-			PacketUpdateRotY packet = (PacketUpdateRotY) object;
-			NetworkHandler.players.get(packet.id).rotY = packet.y;
-			
-		} 
-		else if(object instanceof PacketUpdateRotZ){
-			PacketUpdateRotZ packet = (PacketUpdateRotZ) object;
-			NetworkHandler.players.get(packet.id).rotZ = packet.z;
 		}
 		else if(object instanceof PacketUserName){
 			PacketUserName packet = (PacketUserName) object;
 			for(Map.Entry<Integer, OtherPlayer> entry : NetworkHandler.players.entrySet() ){
 				if(entry.getKey() == packet.id){
 					entry.getValue().userName = packet.userName;
+					if(Main.thePlayer != null) {
+						if(packet.userName != null) {
+							System.out.println(Main.network.rawMessages + "  " + packet);
+							Main.network.rawMessages.add(new ChatMessage(packet.userName + " joined the game", true));
+							if(Main.currentScreen instanceof GuiChat) {
+								((GuiChat)Main.currentScreen).updateMessages();
+							}
+						}
+					}
 				}
+			}
+		}
+		else if(object instanceof PacketUpdateX){
+			PacketUpdateX packet = (PacketUpdateX) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).x = packet.x;
+			} else {
+				requestInfo(connection);
+			}
+		} 
+		else if(object instanceof PacketUpdateY){
+			PacketUpdateY packet = (PacketUpdateY) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).y = packet.y;
+			} else {
+				requestInfo(connection);
+			}
+		} 
+		else if(object instanceof PacketUpdateZ){
+			PacketUpdateZ packet = (PacketUpdateZ) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).z = packet.z;
+			} else {
+				requestInfo(connection);
+			}
+		} 
+		else if(object instanceof PacketUpdateRotX){
+			PacketUpdateRotX packet = (PacketUpdateRotX) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).rotX = packet.x;
+			} else {
+				requestInfo(connection);
+			}
+		} 
+		else if(object instanceof PacketUpdateRotY){
+			
+			PacketUpdateRotY packet = (PacketUpdateRotY) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).rotY = packet.y;
+			} else {
+				requestInfo(connection);
+			}
+		} 
+		else if(object instanceof PacketUpdateRotZ){
+			PacketUpdateRotZ packet = (PacketUpdateRotZ) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).rotZ = packet.z; 
+			} else {
+				requestInfo(connection);
+			}
+		}
+		else if(object instanceof PacketUpdateWithheldBlock) {
+			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
+			if(NetworkHandler.players.get(packet.id) != null) {
+				NetworkHandler.players.get(packet.id).block = packet.block;
+			} else {
+				requestInfo(connection);
 			}
 		}
 		else if(object instanceof PacketUpdateChunk) {
@@ -125,10 +182,30 @@ public class PlayerClientListener extends Listener {
 			PacketTickPlayer packet = (PacketTickPlayer) object;
 			Main.thePlayer.tick = packet.shouldTick;
 		}
-		else if(object instanceof PacketUpdateWithheldBlock) {
-			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
-			NetworkHandler.players.get(packet.id).block = packet.block;
+		
+		else if(object instanceof PacketPlaySoundAt) {
+			PacketPlaySoundAt packet = (PacketPlaySoundAt) object;
+			Block block = Block.getBlockFromOrdinal(packet.blockID);
+			if(block != null) {
+				if(packet.place) {
+					SoundMaster.playBlockPlaceSFX(block, packet.x, packet.y, packet.z);
+				} else {
+					SoundMaster.playBlockBreakSFX(block, packet.x, packet.y, packet.z);
+				}
+			}
 		}
-	} // end received method
+		else if(object instanceof PacketChatMessage) {
+			PacketChatMessage packet = (PacketChatMessage) object;
+			Main.network.rawMessages.add(new ChatMessage(packet.message, false));
+			if(Main.currentScreen instanceof GuiChat) {
+				((GuiChat)Main.currentScreen).updateMessages();
+			}
+		}
+	}
 	
+	private void requestInfo(Connection connection) {
+		if(!NetworkHandler.players.keySet().contains(connection.getID())) {
+			NetworkHandler.players.put(connection.getID(), new OtherPlayer());
+		}
+	}
 }

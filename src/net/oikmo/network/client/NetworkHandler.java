@@ -1,7 +1,9 @@
 package net.oikmo.network.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -13,13 +15,16 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 
 import net.oikmo.engine.InputManager;
+import net.oikmo.engine.gui.ChatMessage;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.Message;
 import net.oikmo.network.shared.PacketAddPlayer;
+import net.oikmo.network.shared.PacketChatMessage;
 import net.oikmo.network.shared.PacketGameOver;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
@@ -52,15 +57,17 @@ public class NetworkHandler {
 	private String ip;
 	
 	public Client client;
-	private Kryo kryo;
+	private static Kryo kryo;
 	
-	private OtherPlayer player;
+	public OtherPlayer player;
 	public static Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
+	public List<ChatMessage> rawMessages = new ArrayList<>();
+	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
 	
 	private int tickTimer = 0;
-	public static final int NETWORK_PROTOCOL = 2;
+	public static final int NETWORK_PROTOCOL = 3;
 	
-	private void registerKryoClasses() {		
+	private static void registerKryoClasses() {		
 		kryo.register(LoginRequest.class);
 		kryo.register(LoginResponse.class);
 		kryo.register(Message.class);
@@ -84,6 +91,8 @@ public class NetworkHandler {
 		kryo.register(PacketUpdateWithheldBlock.class);
 		kryo.register(PacketRequestChunk.class);
 		kryo.register(PacketSavePlayerPosition.class);
+		kryo.register(PacketPlaySoundAt.class);
+		kryo.register(PacketChatMessage.class);
 	}
 	
 	public NetworkHandler(String ipAddress) throws Exception {
@@ -92,15 +101,50 @@ public class NetworkHandler {
 		this.tcpPort = 25565;
 		this.timeout = 500000;
 		player = new OtherPlayer();
-		player.userName = "Player"+new Random().nextInt(256);
-
+		String name = "Player"+new Random().nextInt(256);
+		if(Main.playerName == null ) {
+			Main.playerName = name;
+		}
+		player.userName = Main.playerName;
+		currentlyShownMessages = new ArrayList<>();
 		client = new Client();
 		kryo = client.getKryo();
 		registerKryoClasses();
 		connect(ip);
 	}
 	
+	public static void testNetwork(String ipAddress) throws Exception {
+		String ip = ipAddress;
+		int udpPort = 25565;
+		int tcpPort = 25565;
+		int timeout = 500000;
+		Client client = new Client();
+		kryo = client.getKryo();
+		registerKryoClasses();
+		
+		if (Main.thePlayer != null)
+			Main.thePlayer.tick = false;
+		
+		if(Main.theWorld != null) {
+			Main.theWorld.startChunkRetriever();
+		}
+		Logger.log(LogLevel.INFO, "Test connecting...");
+		client.start();
+		client.connect(timeout, ip, tcpPort, udpPort);
+		Logger.log(LogLevel.INFO, "Test connected!");
+		Logger.log(LogLevel.INFO, "Test isconnecting...");
+		client.stop();
+		Logger.log(LogLevel.INFO, "Test disconnected.");
+	}
+	
 	public void tick() {
+		synchronized(currentlyShownMessages) {
+			for(int i = 0; i < currentlyShownMessages.size(); i++) {
+				currentlyShownMessages.get(i).tick();
+			}
+		}
+			
+		
 		if(tickTimer <= 60) {
 			tickTimer++;
 		} else {
@@ -140,6 +184,9 @@ public class NetworkHandler {
 	private float degreesOffsetX = -90;
 	public void update() {
 		if(!client.isConnected()) {
+			System.out.println("Yeahhh");
+		}
+		if(!client.isConnected()) {
 			this.disconnect();
 			Main.disconnect(false, "Unknown (Wrong protocol?)");
 			return;
@@ -148,8 +195,6 @@ public class NetworkHandler {
 			if(!Main.theWorld.isChunkThreadRunning()) {
 				Main.theWorld.startChunkRetriever();
 			}
-		} else {
-			return;
 		}
 		
 		float x = player.x;
@@ -212,21 +257,17 @@ public class NetworkHandler {
 	
 
 	public void connect(String ip) throws Exception {
-		if (Main.thePlayer != null)
-			Main.thePlayer.tick = false;
-		
-		if(Main.theWorld != null) {
-			Main.theWorld.startChunkRetriever();
-		}
+		Main.thePlayer.tick = false;
 		Logger.log(LogLevel.INFO, "Connecting...");
 		client.start();
 		client.connect(timeout, ip, tcpPort, udpPort);
 		client.addListener(new PlayerClientListener());
-
+		
 		LoginRequest request = new LoginRequest();
-		request.setUserName("Player" + new Random().nextInt(256));
+		request.setUserName(player.userName);
 		request.PROTOCOL = NetworkHandler.NETWORK_PROTOCOL;
 		client.sendTCP(request);
+		
 		Logger.log(LogLevel.INFO, "Connected.");
 	}
 	
@@ -238,6 +279,7 @@ public class NetworkHandler {
 			data.z = (int) Main.thePlayer.getPosition().z;
 			client.sendTCP(data);
 		}
+		
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {

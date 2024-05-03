@@ -73,5 +73,6 @@ public class GuiConnecting extends GuiScreen {
 	
 	public void onClose() {
 		Gui.cleanUp();
+		quitButton.onCleanUp();
 	}
 }

@@ -35,24 +35,12 @@ public class GuiMultiplayer extends GuiScreen {
 		serverAddress = new GuiTextField("IP of server here...",Display.getWidth()/2, (Display.getHeight()/2)-15, 200, 30);
 		serverAddress.setGuiCommand(new GuiCommand() {
 			@Override
-			public void invoke() {}
-			@Override
-			public void update() {
-				x = Display.getWidth()/2;
-				y = (Display.getHeight()/2)-15;
-			}
-		});
-		
-		joinButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+25, 200, 30, "Join world...");
-		joinButton.setGuiCommand(new GuiCommand() {
-			@Override
 			public void invoke() {
-				NetworkHandler testNetwork = null;
 				boolean hasErrored = false;
 				try {
 					if(serverAddress.hasContent() ) {
-						InetAddress.getByName(serverAddress.getInputText());
-						testNetwork = new NetworkHandler(serverAddress.getInputText());
+						InetAddress.getByName(serverAddress.getInputText().trim());
+						NetworkHandler.testNetwork(serverAddress.getInputText().trim());
 					} else {
 						hasErrored = true;
 					}
@@ -65,8 +53,61 @@ public class GuiMultiplayer extends GuiScreen {
 					errorMsg = "Couldn't connect to server!";
 				}
 				
-				if(testNetwork != null) {
-					testNetwork.disconnect();
+				if(!hasErrored) {
+					errorPopup = false;
+					prepareCleanUp();
+					Gui.cleanUp();
+					
+					Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
+					try {
+						Main.network = new NetworkHandler(serverAddress.getInputText());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					Main.inGameGUI = new GuiInGame();
+					Main.shouldTick = true;
+					if(Main.thePlayer != null) {
+						Main.thePlayer.getCamera().setMouseLock(true);
+					}
+					SoundMaster.stopMusic();
+					SoundMaster.doMusic();
+					Main.shouldTick = true;
+					Main.currentScreen = null;
+				} else {
+					errorPopup = true;
+					if(!serverAddress.hasContent() ) {
+						errorMsg = "No input given!";
+					}
+				}
+			}
+			@Override
+			public void update() {
+				x = Display.getWidth()/2;
+				y = (Display.getHeight()/2)-15;
+			}
+		});
+		
+		joinButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+25, 200, 30, "Join world...");
+		joinButton.setGuiCommand(new GuiCommand() {
+			@Override
+			public void invoke() {
+				boolean hasErrored = false;
+				try {
+					if(serverAddress.hasContent() ) {
+						InetAddress.getByName(serverAddress.getInputText().trim());
+						NetworkHandler.testNetwork(serverAddress.getInputText().trim());
+					} else {
+						hasErrored = true;
+					}
+					
+					
+				} catch(Exception e) {
+					hasErrored = true;
+					Logger.log(LogLevel.WARN, "Couldn't connect to host!");
+					e.printStackTrace();
+					errorMsg = "Couldn't connect to server!";
 				}
 				
 				if(!hasErrored) {
@@ -153,5 +194,8 @@ public class GuiMultiplayer extends GuiScreen {
 	
 	public void onClose() {
 		Gui.cleanUp();
+		quitButton.onCleanUp();
+		joinButton.onCleanUp();
+		serverAddress.onCleanUp();
 	}
 }

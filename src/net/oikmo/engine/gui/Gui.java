@@ -96,11 +96,11 @@ public class Gui {
 	}
 
 	protected void drawStringCentered(Color c, float x, float y, String text) {
-		drawString(c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+		drawString(c, x-font.getWidth(text)/2, y-fontSize/2, text);
 	}
 
 	protected void drawStringCentered(float x, float y, String text) {
-		drawString(Color.white, x-font.getWidth(text), y-font.getHeight(text)/2, text);
+		drawString(Color.white, x-font.getWidth(text), y-fontSize/2, text);
 	}
 
 	protected void drawString(float x, float y, String text) {
@@ -121,19 +121,19 @@ public class Gui {
 	}
 
 	protected void drawShadowStringCentered(Color c, float x, float y, String text) {
-		drawShadowString(c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+		drawShadowString(c, x-font.getWidth(text)/2, y-fontSize/2, text);
 	}
 	
 	protected void drawShadowStringCentered(float x, float y, String text) {
-		drawShadowString(Color.white, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+		drawShadowString(Color.white, x-font.getWidth(text)/2, y-fontSize/2, text);
 	}
 	
 	protected void drawShadowStringCentered(UnicodeFont font, float x, float y, String text) {
-		drawShadowString(font, Color.white, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+		drawShadowString(font, Color.white, x-font.getWidth(text)/2, y-fontSize/2, text);
 	}
 	
 	protected void drawShadowStringCentered(UnicodeFont font, Color c, float x, float y, String text) {
-		drawShadowString(font, c, x-font.getWidth(text)/2, y-font.getHeight(text)/2, text);
+		drawShadowString(font, c, x-font.getWidth(text)/2, y-fontSize/2, text);
 	}
 
 	protected void drawShadowString(float x, float y, String text) {
@@ -194,8 +194,6 @@ public class Gui {
 		img.draw(x, y, width, height);
 		dropGL();
 	}
-
-	
 	
 	protected void drawSquare(float x, float y, float width, float height) {
 		drawSquare(Color.darkGray, 1f, x, y, width, height);
