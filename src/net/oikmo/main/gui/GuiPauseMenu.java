@@ -10,7 +10,6 @@ import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
-import net.oikmo.network.client.NetworkHandler;
 import net.oikmo.network.client.OtherPlayer;
 
 public class GuiPauseMenu extends GuiScreen {
@@ -65,11 +64,13 @@ public class GuiPauseMenu extends GuiScreen {
 		if(Main.network != null) {
 			int height =  (fontSize *2)+5;
 			boolean flag = false;
-			if(!NetworkHandler.players.values().contains(Main.network.player.userName)) {
-				flag = true;
-			}
 			
-			for(OtherPlayer p : NetworkHandler.players.values()) {
+			for(OtherPlayer p : Main.network.players.values()) {
+				if(p.userName != null) {
+					if(p.userName.contentEquals(Main.network.player.userName)) {
+						flag = true;
+					}
+				}
 				height += fontSize + 5;
 				if(flag && p.userName != null && Main.network.player.userName != null) {
 					if(p.userName.contentEquals(Main.network.player.userName)) {
@@ -89,13 +90,15 @@ public class GuiPauseMenu extends GuiScreen {
 			if(flag) {
 				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.network.player.userName + " (You)");
 			}
-			for(OtherPlayer p : NetworkHandler.players.values()) {
+			for(OtherPlayer p : Main.network.players.values()) {
 				if(p.userName != null) {
-					height += fontSize + 5;
+					
 					if(!p.userName.contentEquals(Main.network.player.userName)) {
+						height += fontSize + 5;
 						drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName);
 					} else {
 						if(!flag) {
+							height += fontSize + 5;
 							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " (You)");
 						}
 						

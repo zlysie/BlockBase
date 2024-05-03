@@ -75,21 +75,25 @@ public class World {
 				synchronized(usedPositions) {
 					if(isPositionUsed(chunkPos)) {
 						MasterChunk master = getChunkFromPosition(chunkPos);
-						
-						if(isInValidRange(master.getOrigin())) {
-							if(master.getEntity() == null) {
-								if(master.getMesh() != null) {
-									if(master.getMesh().hasMeshInfo()) {
-										RawModel raw = Loader.getInstance().loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
-										TexturedModel texModel = new TexturedModel(raw, MasterRenderer.currentTexturePack);
-										Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
-										master.setEntity(entity);
-										master.getMesh().removeMeshInfo();
-									}
-								} else {
-									master.createMesh();
+						if(master != null) {
+							if(isInValidRange(master.getOrigin())) {
+								if(Main.network != null) {
+									master.timer = MasterChunk.maxTime;
 								}
-							}
+								if(master.getEntity() == null) {
+									if(master.getMesh() != null) {
+										if(master.getMesh().hasMeshInfo()) {
+											RawModel raw = Loader.getInstance().loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
+											TexturedModel texModel = new TexturedModel(raw, MasterRenderer.currentTexturePack);
+											Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
+											master.setEntity(entity);
+											master.getMesh().removeMeshInfo();
+										}
+									} else {
+										master.createMesh();
+									}
+								}
+							} 
 						}
 						
 						if(master != null) {
@@ -99,6 +103,26 @@ public class World {
 						}
 					}
 				}	
+			}
+		}
+		
+		for(int m = 0; m < chunkMap.values().size(); m++) {
+			MasterChunk master = (MasterChunk) chunkMap.values().toArray()[m];
+			
+			if(master != null) {
+				if(!isInValidRange(master.getOrigin())) {
+					if(Main.network != null) {
+						if(master.timer > 0) {
+							master.timer--;
+						}
+						if(master.timer <= 0) {
+							System.out.println("removing chunk at " + master.getOrigin() + " as 5s has passed");
+							chunkMap.remove(master.getOrigin());
+							hasAsked.remove(master.getOrigin());
+						}
+					}
+					
+				}
 			}
 		}
 		
@@ -273,7 +297,6 @@ public class World {
 									
 									Main.network.client.sendUDP(request);
 								} else {
-									
 									continue;
 								}	
 							}

@@ -60,7 +60,7 @@ public class NetworkHandler {
 	private static Kryo kryo;
 	
 	public OtherPlayer player;
-	public static Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
+	public Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
 	public List<ChatMessage> rawMessages = new ArrayList<>();
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
 	
@@ -100,6 +100,7 @@ public class NetworkHandler {
 		this.udpPort = 25565;
 		this.tcpPort = 25565;
 		this.timeout = 500000;
+		players = new HashMap<Integer, OtherPlayer>();
 		player = new OtherPlayer();
 		String name = "Player"+new Random().nextInt(256);
 		if(Main.playerName == null ) {
@@ -122,12 +123,6 @@ public class NetworkHandler {
 		kryo = client.getKryo();
 		registerKryoClasses();
 		
-		if (Main.thePlayer != null)
-			Main.thePlayer.tick = false;
-		
-		if(Main.theWorld != null) {
-			Main.theWorld.startChunkRetriever();
-		}
 		Logger.log(LogLevel.INFO, "Test connecting...");
 		client.start();
 		client.connect(timeout, ip, tcpPort, udpPort);

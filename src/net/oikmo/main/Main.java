@@ -30,9 +30,10 @@ import javax.swing.JOptionPane;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.mojang.minecraft.Timer;
+
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
-import net.oikmo.engine.Timer;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.Gui;
@@ -65,7 +66,7 @@ public class Main extends Gui {
 	
 	private static final int resourceVersion = 3;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.4";
+	public static final String version = "a0.1.5";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -198,7 +199,7 @@ public class Main extends Gui {
 				im.handleInput();
 				
 				if(network != null) {
-					for(Map.Entry<Integer, OtherPlayer> e : NetworkHandler.players.entrySet()) {
+					for(Map.Entry<Integer, OtherPlayer> e : Main.network.players.entrySet()) {
 						OtherPlayer p = e.getValue();
 						Vector3f position = new Vector3f(p.x,p.y,p.z);
 						//System.out.println(position);
@@ -220,10 +221,11 @@ public class Main extends Gui {
 					if(!(Main.currentScreen instanceof GuiConnecting) && !(Main.currentScreen instanceof GuiDisconnected) && !Main.thePlayer.tick) {
 						Main.currentScreen = new GuiConnecting();
 					}
-					if(thePlayer.getCamera() != null) {
-						SoundMaster.setListener(thePlayer.getCamera(), timer.renderPartialTicks);
+					if(thePlayer != null) {
+						if(thePlayer.getCamera() != null) {
+							SoundMaster.setListener(thePlayer.getCamera(), timer.renderPartialTicks);
+						}
 					}
-					
 					theWorld.update(thePlayer.getCamera());
 				}
 				
@@ -247,7 +249,9 @@ public class Main extends Gui {
 		Main.shouldTick = false;
 		Main.thePlayer.getCamera().setMouseLock(false);
 		Main.thePlayer = null;
-		Main.theWorld.quitWorld();
+		if(Main.theWorld != null) {
+			Main.theWorld.quitWorld();
+		}
 		Main.theWorld = null;
 		if(Main.inGameGUI != null) {
 			Main.inGameGUI.prepareCleanUp();
@@ -332,9 +336,13 @@ public class Main extends Gui {
 			}
 			
 		} else {
-			camPos = new Vector3f(thePlayer.getCamera().getPosition());
-			thePlayer.tick();
-			network.update();
+			if(thePlayer != null && network != null) {
+				camPos = new Vector3f(thePlayer.getCamera().getPosition());
+				thePlayer.tick();
+				network.update();
+			}
+			
+			
 		}	
 	}
 

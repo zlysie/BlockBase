@@ -15,6 +15,8 @@ public class MasterChunk {
 	private Chunk chunk;
 	private ChunkMesh mesh;
 	private Entity entity;
+	public static final int maxTime = 60*(5);
+	public int timer = maxTime;
 	
 	public MasterChunk(OpenSimplexNoise noiseGen, Vector3f origin) {
 		this.origin = origin;

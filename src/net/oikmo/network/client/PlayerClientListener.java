@@ -1,6 +1,7 @@
 package net.oikmo.network.client;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -36,7 +37,7 @@ import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
 
 public class PlayerClientListener extends Listener {
-	
+
 	public void received(Connection connection, Object object){
 		if(object instanceof LoginResponse){
 			LoginResponse response = (LoginResponse) object;
@@ -50,48 +51,65 @@ public class PlayerClientListener extends Listener {
 				} else {
 					Main.disconnect(false, "Login failed.");
 				}
-				
+
 				Logger.log(LogLevel.WARN,"Login failed");
 			}
 		}
-		
+
 		if(object instanceof PacketAddPlayer){
 			PacketAddPlayer packet = (PacketAddPlayer) object;
-		
+
 			OtherPlayer newPlayer = new OtherPlayer();
-			NetworkHandler.players.put(packet.id, newPlayer);
-			
+			System.out.println(Main.network);
+			if(Main.network == null) {
+				Main.disconnect(false, "Unknown");
+			} else if(Main.network.players == null) {
+				Main.network.players = new HashMap<>();
+			}
+			Main.network.players.put(packet.id, newPlayer);
+
+
 		} 
 		else if(object instanceof PacketRemovePlayer){
 			PacketRemovePlayer packet = (PacketRemovePlayer) object;
-			if(packet.id == Main.network.player.id) {
+			if(packet.id == Main.network.client.getID()) {
 				Main.network.disconnect();
 				Main.disconnect(packet.kick, packet.message);
 			} else {
 				if(Main.thePlayer != null) {
-					if(NetworkHandler.players.get(packet.id) != null && NetworkHandler.players.get(packet.id).userName != null) {
-						Main.network.rawMessages.add(new ChatMessage(NetworkHandler.players.get(packet.id).userName + " left the game", true));
-						if(Main.currentScreen instanceof GuiChat) {
-							((GuiChat)Main.currentScreen).updateMessages();
+					if(Main.network.players.get(packet.id) != null && Main.network.players.get(packet.id).userName != null) {
+						if(!Main.network.players.get(packet.id).userName.contentEquals(Main.network.player.userName)) {
+							Main.network.rawMessages.add(new ChatMessage(Main.network.players.get(packet.id).userName + " left the game", true));
+							if(Main.currentScreen instanceof GuiChat) {
+								((GuiChat)Main.currentScreen).updateMessages();
+							}
 						}
+
 					}
 				}
-				NetworkHandler.players.remove(packet.id);
-				
+				Main.network.players.remove(packet.id);
+
 			}
 		}
 		else if(object instanceof PacketUserName){
 			PacketUserName packet = (PacketUserName) object;
-			for(Map.Entry<Integer, OtherPlayer> entry : NetworkHandler.players.entrySet() ){
+			if(Main.network == null) {
+				Main.disconnect(false, "Unknown");
+			} else if(Main.network.players == null) {
+				Main.network.players = new HashMap<>();
+			}
+			for(Map.Entry<Integer, OtherPlayer> entry : Main.network.players.entrySet() ){
 				if(entry.getKey() == packet.id){
 					entry.getValue().userName = packet.userName;
 					if(Main.thePlayer != null) {
 						if(packet.userName != null) {
-							System.out.println(Main.network.rawMessages + "  " + packet);
-							Main.network.rawMessages.add(new ChatMessage(packet.userName + " joined the game", true));
-							if(Main.currentScreen instanceof GuiChat) {
-								((GuiChat)Main.currentScreen).updateMessages();
+							if(!Main.network.players.get(packet.id).userName.contentEquals(Main.network.player.userName)) {
+								Main.network.rawMessages.add(new ChatMessage(packet.userName + " joined the game", true));
+								if(Main.currentScreen instanceof GuiChat) {
+									((GuiChat)Main.currentScreen).updateMessages();
+								}
 							}
+
 						}
 					}
 				}
@@ -99,57 +117,57 @@ public class PlayerClientListener extends Listener {
 		}
 		else if(object instanceof PacketUpdateX){
 			PacketUpdateX packet = (PacketUpdateX) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).x = packet.x;
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).x = packet.x;
 			} else {
 				requestInfo(connection);
 			}
 		} 
 		else if(object instanceof PacketUpdateY){
 			PacketUpdateY packet = (PacketUpdateY) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).y = packet.y;
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).y = packet.y;
 			} else {
 				requestInfo(connection);
 			}
 		} 
 		else if(object instanceof PacketUpdateZ){
 			PacketUpdateZ packet = (PacketUpdateZ) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).z = packet.z;
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).z = packet.z;
 			} else {
 				requestInfo(connection);
 			}
 		} 
 		else if(object instanceof PacketUpdateRotX){
 			PacketUpdateRotX packet = (PacketUpdateRotX) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).rotX = packet.x;
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).rotX = packet.x;
 			} else {
 				requestInfo(connection);
 			}
 		} 
 		else if(object instanceof PacketUpdateRotY){
-			
+
 			PacketUpdateRotY packet = (PacketUpdateRotY) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).rotY = packet.y;
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).rotY = packet.y;
 			} else {
 				requestInfo(connection);
 			}
 		} 
 		else if(object instanceof PacketUpdateRotZ){
 			PacketUpdateRotZ packet = (PacketUpdateRotZ) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).rotZ = packet.z; 
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).rotZ = packet.z; 
 			} else {
 				requestInfo(connection);
 			}
 		}
 		else if(object instanceof PacketUpdateWithheldBlock) {
 			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
-			if(NetworkHandler.players.get(packet.id) != null) {
-				NetworkHandler.players.get(packet.id).block = packet.block;
+			if(Main.network.players.get(packet.id) != null) {
+				Main.network.players.get(packet.id).block = packet.block;
 			} else {
 				requestInfo(connection);
 			}
@@ -164,17 +182,19 @@ public class PlayerClientListener extends Listener {
 				e.printStackTrace();
 			}
 			Vector3f chunkPos = new Vector3f(packet.x, 0, packet.z);
-			
+
 			if(packet.add) {
 				Main.theWorld.addChunk(new MasterChunk(chunkPos, blocks));
 			} else {
-				Main.theWorld.getChunkFromPosition(chunkPos).replaceBlocks(blocks);
+				if(Main.theWorld.getChunkFromPosition(chunkPos) != null) { 
+					Main.theWorld.getChunkFromPosition(chunkPos).replaceBlocks(blocks);
+				}
 			}
 		}
 		else if(object instanceof PacketWorldJoin) {
 			PacketWorldJoin packet = (PacketWorldJoin) object;
 			Main.theWorld = new World(packet.seed);
-			
+
 			Main.thePlayer.setPos(packet.x,packet.y,packet.z);
 			System.out.println("Server world seed:" + packet.seed);
 		} 
@@ -182,7 +202,7 @@ public class PlayerClientListener extends Listener {
 			PacketTickPlayer packet = (PacketTickPlayer) object;
 			Main.thePlayer.tick = packet.shouldTick;
 		}
-		
+
 		else if(object instanceof PacketPlaySoundAt) {
 			PacketPlaySoundAt packet = (PacketPlaySoundAt) object;
 			Block block = Block.getBlockFromOrdinal(packet.blockID);
@@ -202,10 +222,10 @@ public class PlayerClientListener extends Listener {
 			}
 		}
 	}
-	
+
 	private void requestInfo(Connection connection) {
-		if(!NetworkHandler.players.keySet().contains(connection.getID())) {
-			NetworkHandler.players.put(connection.getID(), new OtherPlayer());
+		if(!Main.network.players.keySet().contains(connection.getID())) {
+			Main.network.players.put(connection.getID(), new OtherPlayer());
 		}
 	}
 }

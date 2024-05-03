@@ -49,6 +49,7 @@ public class SoundMaster {
 		}
 		soundSystem = new SoundSystem();
 		soundSystem.setVolume("music", 0.5f);
+		soundSystem.setVolume("sfx", 0.25f);
 
 		if(!customMusic.exists()) {
 			customMusic.mkdirs();
@@ -238,7 +239,9 @@ public class SoundMaster {
 		SoundEffect sfx = sfxCollection.get(id);
 		if(sfx != null) {
 			SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
-			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 0);
+			soundSystem.newSource(false, id, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 2, 16);
+			soundSystem.setVolume(id, 0.25f); //volume * options.soundVolume
+			soundSystem.play(id);
 		}
 	}
 	
@@ -306,7 +309,9 @@ public class SoundMaster {
 		SoundEffect sfx = sfxCollection.get(id);
 		if(sfx != null) {
 			SoundByte bytes = sfx.getByteFromIndex(new Random().nextInt(4));
-			soundSystem.quickPlay(false, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 0, 4);
+			soundSystem.newSource(false, id, bytes.getFileLocation(), bytes.getFileName(), false, x, y, z, 2, 16);
+			soundSystem.setVolume(id, 0.25f); //volume * options.soundVolume
+			soundSystem.play(id);
 		}
 	}
 }

@@ -32,6 +32,11 @@ public class Chunk {
 		calculateHeights();
 	}
 
+	public Chunk() {
+		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
+	}
+
 	/**
 	 * Creates blocks from the top layer (given by {@link PerlinNoiseGenerator}) and is extended down to YLevel 0 in which it is refactored via {@link #calculateBlockType(int)}
 	 * @param origin

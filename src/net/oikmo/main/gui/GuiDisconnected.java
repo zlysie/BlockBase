@@ -25,7 +25,10 @@ public class GuiDisconnected extends GuiScreen {
 	
 	public void onInit() {
 		if(Main.network != null) {
-			Main.thePlayer.getCamera().setMouseLock(false);
+			if(Main.thePlayer != null) {
+				Main.thePlayer.getCamera().setMouseLock(false);
+			}
+			
 		} else {
 			Main.shouldTick();
 		}
