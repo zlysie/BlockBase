@@ -247,7 +247,10 @@ public class Main extends Gui {
 	
 	public static void disconnect(boolean kick, String message) {
 		Main.shouldTick = false;
-		Main.thePlayer.getCamera().setMouseLock(false);
+		if(Main.thePlayer != null) {
+			Main.thePlayer.getCamera().setMouseLock(false);
+		}
+		
 		Main.thePlayer = null;
 		if(Main.theWorld != null) {
 			Main.theWorld.quitWorld();
@@ -257,7 +260,6 @@ public class Main extends Gui {
 			Main.inGameGUI.prepareCleanUp();
 			Main.inGameGUI = null;
 		}
-		
 		
 		Main.network = null;
 		if(Main.currentScreen != null) {

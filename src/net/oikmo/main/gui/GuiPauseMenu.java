@@ -22,7 +22,12 @@ public class GuiPauseMenu extends GuiScreen {
 	
 	public void onInit() {
 		if(Main.network != null) {
-			Main.thePlayer.getCamera().setMouseLock(false);
+			if(Main.thePlayer != null) {
+				Main.thePlayer.getCamera().setMouseLock(false);
+			} else {
+				Main.disconnect(false, "Unknown");
+			}
+			
 		} else {
 			Main.shouldTick();
 		}
@@ -115,7 +120,9 @@ public class GuiPauseMenu extends GuiScreen {
 	
 	public void onClose() {
 		if(Main.network != null) {
-			Main.thePlayer.getCamera().setMouseLock(true);
+			if(Main.thePlayer != null) {
+				Main.thePlayer.getCamera().setMouseLock(true);
+			}
 		} else {
 			Main.shouldTick();
 		}
