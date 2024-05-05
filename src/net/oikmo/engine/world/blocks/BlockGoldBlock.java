@@ -15,7 +15,7 @@ public class BlockGoldBlock extends Block {
 	}
 	
 	public boolean blocksLight() {
-		return false;
+		return true;
 	}
 	
 }

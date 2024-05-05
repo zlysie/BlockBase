@@ -15,7 +15,7 @@ public class BlockDirt extends Block {
 	}
 	
 	public boolean blocksLight() {
-		return false;
+		return true;
 	}
 
 }

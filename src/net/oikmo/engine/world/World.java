@@ -200,6 +200,27 @@ public class World {
 		
 		return null;
 	}
+	public Vector3f getBlockPositionFromCalculatedChunk(int x, int y, int z) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(new Vector3f(x,y,z), chunkPos);
+		MasterChunk m = getChunkFromPosition(chunkPos);
+
+		if(m != null) {
+			int localX = (int)(x + m.getOrigin().x)%16;
+			int localY = (int) y;
+			int localZ = (int)(z + m.getOrigin().z)%16;
+
+			if(localX < 0) {
+				localX = localX+16;
+			}
+			if(localZ < 0) {
+				localZ = localZ+16;
+			}
+			
+			return new Vector3f(localX,localY,localZ);
+		}
+		return null;
+	}
 	public boolean blockHasNeighbours(Vector3f position) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
@@ -474,12 +495,6 @@ public class World {
 			}
 			
 			w.handleLoad(data);
-			
-			new Thread(new Runnable() {
-				public void run() {
-					JOptionPane.showMessageDialog(null, "World has loaded!");
-				}
-			}).start();
 			
 			w.startChunkCreator();
 			

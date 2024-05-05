@@ -15,6 +15,6 @@ public class BlockCobble extends Block {
 	}
 	
 	public boolean blocksLight() {
-		return false;
+		return true;
 	}
 }

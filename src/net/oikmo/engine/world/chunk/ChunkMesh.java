@@ -85,33 +85,52 @@ public class ChunkMesh {
 					}
 					
 					//Add visible face to the chunkMesh
+					float c;
+					float c1 = 0.5F;
+					float c2 = 0.8F;
+					float c3 = 0.6F;			
+					
 					if (!px) {
-						addFaceVertices(blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, CubeModel.PX_NORMALS);
+						c = chunk.getBrightness(x+1,y,z);
+						Vector3f lightVec = new Vector3f(c3*c,c3*c,c3*c);
+						addFaceVertices(blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, lightVec);
 					}
 					
 					if (!nx) {
-						addFaceVertices(blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, CubeModel.NX_NORMALS);
+						c = chunk.getBrightness(x-1,y,z);
+						Vector3f lightVec = new Vector3f(c*c3,c*c3,c*c3);
+						addFaceVertices(blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, lightVec);
 					}
 					
 					if (!py) {
-						addFaceVertices(blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, CubeModel.PY_NORMALS);
+						c = chunk.getBrightness(x, y+1, z);
+						Vector3f lightVec = new Vector3f(c*1f,c*1f,c*1f);
+						addFaceVertices(blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, lightVec);
 					}
 					
 					if (!ny) {
-						addFaceVertices(blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, CubeModel.NY_NORMALS);
+						c = chunk.getBrightness(x, y-1, z);
+						Vector3f lightVec = new Vector3f(c*c1,c*c1,c*c1);
+						addFaceVertices(blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, lightVec);
 					}
 					
 					if (!pz) {
-						addFaceVertices(blockI, x, y, z, CubeModel.PZ_POS, CubeModel.UV_PZ, CubeModel.PZ_NORMALS);
+						c = chunk.getBrightness(x,y,z+1);
+						Vector3f lightVec = new Vector3f(c*c2,c*c2,c*c2);
+						addFaceVertices(blockI, x, y, z, CubeModel.PZ_POS, CubeModel.UV_PZ, lightVec);
 					}
 					
 					if (!nz) {
-						addFaceVertices(blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, CubeModel.NZ_NORMALS);
+						c = chunk.getBrightness(x,y,z-1);
+						Vector3f lightVec = new Vector3f(c*c2,c*c2,c*c2);
+						addFaceVertices(blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, lightVec);
 					}
 				}
 			}
 		}
 	}
+	
+	
 
 	private void addFaceVertices(byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, Vector3f normals) {
 		byte type = block;

@@ -9,6 +9,7 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.ChatMessage;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
@@ -194,8 +195,8 @@ public class PlayerClientListener extends Listener {
 		else if(object instanceof PacketWorldJoin) {
 			PacketWorldJoin packet = (PacketWorldJoin) object;
 			Main.theWorld = new World(packet.seed);
-
 			Main.thePlayer.setPos(packet.x,packet.y,packet.z);
+			
 			System.out.println("Server world seed:" + packet.seed);
 		} 
 		else if(object instanceof PacketTickPlayer) {

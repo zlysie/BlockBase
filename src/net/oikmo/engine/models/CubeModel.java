@@ -76,13 +76,6 @@ public class CubeModel {
 	public static Vector2f[] UV_PZ;
 	public static Vector2f[] UV_NZ;
 	
-	public static Vector3f PX_NORMALS = new Vector3f(0.8f, 0.8f, 0.8f);
-	public static Vector3f NX_NORMALS = new Vector3f(0.65f, 0.65f, 0.65f);
-	public static Vector3f PY_NORMALS = new Vector3f(1f, 1f, 1f);
-	public static Vector3f NY_NORMALS = new Vector3f(0.5f, 0.5f, 0.5f);
-	public static Vector3f PZ_NORMALS = new Vector3f(0.8f, 0.8f, 0.8f);
-	public static Vector3f NZ_NORMALS = new Vector3f(0.65f, 0.65f, 0.65f);
-	
 	public static float[] normals = {
 			0.8f, 0.8f, 0.8f,
 			0.8f, 0.8f, 0.8f,

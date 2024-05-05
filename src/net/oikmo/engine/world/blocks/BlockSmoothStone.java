@@ -15,6 +15,6 @@ public class BlockSmoothStone extends Block {
 	}
 	
 	public boolean blocksLight() {
-		return false;
+		return true;
 	}
 }

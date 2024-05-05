@@ -6,6 +6,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -18,24 +19,26 @@ public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	public byte[][][] blocks;
 	private int[][] heights;
+	private int[][][] lightDepths;
 	
 	public Chunk(OpenSimplexNoise noiseGen, Vector3f origin) {
 		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		generateChunk(origin, noiseGen);
+		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
 	}
 
 	public Chunk(byte[][][] blocks) {
 		this.blocks = blocks;
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
+		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
 		calculateHeights();
 		calculateHeights();
 	}
+	
 
-	public Chunk() {
-		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
-	}
 
 	/**
 	 * Creates blocks from the top layer (given by {@link PerlinNoiseGenerator}) and is extended down to YLevel 0 in which it is refactored via {@link #calculateBlockType(int)}
@@ -70,6 +73,37 @@ public class Chunk {
 		}
 		generateTrees(noiseGen.getSeed());
 		calculateHeights();
+	}
+	
+	public float getBrightness(int x, int y, int z) {
+		return this.isLit(x, y, z) ? 1.0F : 0.6F;
+	}
+	
+	public void calcLightDepths(int x0, int y0, int x1, int y1) {
+		for(int x = x0; x < x0 + x1; ++x) {
+			for(int z = y0; z < y0 + y1; ++z) {
+				for(int y = 0; y < World.WORLD_HEIGHT; y++) {
+					int oldDepth = this.lightDepths[x][y][z];
+					int calculatedY;
+					for(calculatedY = World.WORLD_HEIGHT - 1; calculatedY > 0 && !this.isLightBlocker(x, calculatedY, z); --calculatedY) {
+					}
+
+					this.lightDepths[x][y][z] = calculatedY;
+					if(oldDepth != y) {
+						//update or something
+					}
+				}
+			}
+		}
+	}
+	
+	public boolean isLightBlocker(int x, int y, int z) {
+		Block block = Block.getBlockFromOrdinal((byte)getBlock(x, y, z));
+		return block == null ? false : block.blocksLight();
+	}
+	
+	public boolean isLit(int x, int y, int z) {
+		return x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < World.WORLD_HEIGHT && z < CHUNK_SIZE ? y >= this.lightDepths[x][y][z] : false;
 	}
 	
 	private void generateTrees(long seed) {
@@ -244,5 +278,9 @@ public class Chunk {
 	
 	public int getHeightFromPosition(int x, int z) {
 		return heights[x][z];
+	}
+
+	public int getBlock(int x, int y, int z) {
+		return blocks[x][y][z];
 	}
 }
