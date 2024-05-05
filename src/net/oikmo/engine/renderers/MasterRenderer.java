@@ -26,7 +26,6 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
 import net.oikmo.engine.renderers.skybox.SkyBoxRenderer;
-import net.oikmo.engine.textures.GuiTexture;
 import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiMainMenu;
@@ -57,7 +56,6 @@ public class MasterRenderer {
 	public static int customTexturePack;
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
-	private List<GuiTexture> guis = new ArrayList<>();
 	
 	public MasterRenderer() {
 		createProjectionMatrix();
@@ -127,21 +125,21 @@ public class MasterRenderer {
 	}
 	
 	public void render(Camera camera) {
-		
-		
 		prepare();
 		if(Main.currentScreen instanceof GuiMainMenu) {
 			skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
 		}
 		
-		if(Main.thePlayer != null) {
-			initGL();
-			if(Main.thePlayer.getCamera().shouldRenderAABB()) {
-				renderAABB(Main.thePlayer.getCamera().getAABB());
-			}
-		}
+		
+		
 		
 		entityRenderer.render(entities, camera);
+		if(Main.thePlayer != null) {
+			initGL();
+			if(Main.thePlayer.getCamera().shouldRenderAABB() && Main.thePlayer != null) {
+				MasterRenderer.getInstance().renderAABB(Main.thePlayer.getCamera().getAABB());
+			}
+		}
 		entities.clear();
 	}
 	
@@ -163,7 +161,7 @@ public class MasterRenderer {
 	}
 	
 	public void renderAABB(TargetedAABB ent) {
-		initGL();
+		
 		float wb2 = 0.501f, hb2 =  0.501f;
 		GL11.glColor3f(0, 0, 0);
 		GL11.glTranslatef(ent.getPosition().x, ent.getPosition().y-0.81f, ent.getPosition().z);
@@ -191,24 +189,7 @@ public class MasterRenderer {
 		GL11.glVertex3f(wb2, hb2, -wb2);
 		GL11.glVertex3f(-wb2, hb2, -wb2);
 		GL11.glEnd();
-		GL11.glLineWidth(5f);
 		GL11.glTranslatef(-ent.getPosition().x, -ent.getPosition().y-0.81f, -ent.getPosition().z);
-	}
-	
-	public List<GuiTexture> getGUIList() {
-		return guis;
-	}
-	
-	public void addToGUIs(GuiTexture texture) {
-		if(!guis.contains(texture)) {
-			guis.add(texture);
-		}
-	}
-	
-	public void removeFromGUIs(GuiTexture texture) {
-		if(guis.contains(texture)) {
-			guis.remove(texture);
-		}
 	}
 	
 	public void addEntity(Entity entity) {

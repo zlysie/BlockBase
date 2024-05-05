@@ -53,7 +53,6 @@ public class DisplayManager {
 			lastFrameTime = getCurrentTime();
 			lastFPS = getCurrentTime();
 			MasterRenderer.getInstance();
-			Loader.getInstance();
 		} catch (LWJGLException e) {
 			Main.error("Display Error!", e);
 		}

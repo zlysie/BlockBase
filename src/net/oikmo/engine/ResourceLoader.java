@@ -27,7 +27,7 @@ public class ResourceLoader {
 	 */
 	public static int loadTexture(String name) {
 		if(textures.get(name) == null) {
-			textures.put(name, Loader.getInstance().loadTexture(name));
+			textures.put(name, Loader.loadTexture(name));
 		}
 
 		return textures.get(name);
@@ -35,7 +35,7 @@ public class ResourceLoader {
 
 	public static int loadCustomTexture(String name) {
 		if(textures.get(name) == null) {
-			textures.put(name, Loader.getInstance().loadCustomTexture(name));
+			textures.put(name, Loader.loadCustomTexture(name));
 		}
 
 		return textures.get(name);

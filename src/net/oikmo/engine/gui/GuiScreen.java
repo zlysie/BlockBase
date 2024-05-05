@@ -1,11 +1,8 @@
 package net.oikmo.engine.gui;
 
-import net.oikmo.engine.textures.GuiTexture;
-
 public class GuiScreen extends Gui {
 
 	protected String screenID;
-	protected GuiTexture background;
 
 	private boolean lockInput = false;
 	private boolean dontUpdate = false;

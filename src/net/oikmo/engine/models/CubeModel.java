@@ -327,7 +327,7 @@ public class CubeModel {
 
 	public static RawModel getRawModel(Block block) {
 		if(models.get(block) == null) {
-			models.put(block, Loader.getInstance().loadToVAO(vertices, getUVs(block.getByteType()), normals));
+			models.put(block, Loader.loadToVAO(vertices, getUVs(block.getByteType()), normals));
 		}
 		return models.get(block);
 	}

@@ -27,6 +27,7 @@ import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -40,6 +41,8 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.particle.ParticleEmitter;
+import net.oikmo.engine.particle.ParticleEmitterBuilder;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.sound.SoundMaster;
@@ -167,36 +170,29 @@ public class Main extends Gui {
 			
 			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			
+			ParticleEmitter particleEmitter = new ParticleEmitterBuilder()
+		            .setInitialVelocity(new Vector3f(0, 0, 0))
+		            .setGravity(new Vector3f(0, -0.0001f, 0))
+		            .setSpawningRate(50)
+		            .setParticleLifeTime(500)
+		            .createParticleEmitter();
+			
+			boolean lockParticle = false;
 			while(!Display.isCloseRequested()) {
-				timer.updateTimer();
-				
-				
+				timer.updateTimer();				
 				
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
-				}
-				
-				if(Main.currentScreen != null && Main.currentScreen instanceof GuiMainMenu) {
-					Main.currentScreen.update();
-				}
-				
-				for(int e = 0; e < timer.elapsedTicks; ++e) {
-					elapsedTime += 0.1f;
-					
-					if(Main.currentScreen != null) {
-						Main.currentScreen.onTick();
-					}
-					
-					if(network != null && thePlayer != null) {
-						network.tick();
-					}
-					
-					if(shouldTick) {
-						tick();
+					particleEmitter.update();
+					if(Keyboard.isKeyDown(Keyboard.KEY_G)) {
+						particleEmitter.setVelocityModifier(particleEmitter.getVelocityModifier() * 1.01f);
+						particleEmitter.setGravity((Vector3f) particleEmitter.getGravity().scale(1.01f));
+						particleEmitter.setSpawningRate(particleEmitter.getSpawningRate() * 1.01f);
+						lockParticle = true;
+					} else {
+						lockParticle = false;
 					}
 				}
-				
-				im.handleInput();
 				
 				if(network != null) {
 					for(Map.Entry<Integer, OtherPlayer> e : Main.network.players.entrySet()) {
@@ -229,13 +225,34 @@ public class Main extends Gui {
 					theWorld.update(thePlayer.getCamera());
 				}
 				
+				particleEmitter.draw();
+				
 				if(inGameGUI != null) {				
 					inGameGUI.update();
 				}
 				
-				if(Main.currentScreen != null && !(Main.currentScreen instanceof GuiMainMenu)) {
+				if(Main.currentScreen != null) {
 					Main.currentScreen.update();
 				}
+				
+				for(int e = 0; e < timer.elapsedTicks; ++e) {
+					elapsedTime += 0.1f;
+					
+					if(Main.currentScreen != null) {
+						Main.currentScreen.onTick();
+					}
+					
+					if(network != null && thePlayer != null) {
+						network.tick();
+					}
+					
+					if(shouldTick) {
+						tick();
+						
+					}
+				}
+				
+				im.handleInput();
 				
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
@@ -315,6 +332,7 @@ public class Main extends Gui {
 		}
 		
 		if(Main.thePlayer != null) {
+			
 			Main.thePlayer.getCamera().setMouseLock(tick);
 		}	
 	}
@@ -330,6 +348,8 @@ public class Main extends Gui {
 				theWorld.tick();
 			}
 			if(thePlayer != null) {
+				
+				
 				camPos = new Vector3f(thePlayer.getCamera().getPosition());
 				if(!hasSaved && thePlayer.isOnGround()) {
 					theWorld.saveWorld(currentlyPlayingWorld);
