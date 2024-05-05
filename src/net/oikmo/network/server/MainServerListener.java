@@ -73,7 +73,7 @@ public class MainServerListener extends Listener {
 		MainServer.refreshList();
 		
 		MainServer.server.sendToAllUDP(removePacket);
-		if(username != null) {
+		if(username != null && !username.isEmpty()) {
 			MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server");
 			MainServer.logPanel.append("\n");
 		}
@@ -99,7 +99,7 @@ public class MainServerListener extends Listener {
 				
 				MainServer.refreshList();
 				
-				if(request.getUserName() != null) {
+				if(request.getUserName() != null && !request.getUserName().isEmpty()) {
 					MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
 				}
 				
