@@ -9,7 +9,6 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
-import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.ChatMessage;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;

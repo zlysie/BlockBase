@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.swing.JOptionPane;
-
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.Loader;
