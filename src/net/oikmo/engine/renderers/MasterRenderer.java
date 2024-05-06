@@ -110,7 +110,6 @@ public class MasterRenderer {
 		}
 		
 		currentTexturePack = new ModelTexture(defaultTexturePack);
-		
 		Gui.initFont();
 	}
 	
@@ -126,12 +125,10 @@ public class MasterRenderer {
 	
 	public void render(Camera camera) {
 		prepare();
+		
 		if(Main.currentScreen instanceof GuiMainMenu) {
 			skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
 		}
-		
-		
-		
 		
 		entityRenderer.render(entities, camera);
 		if(Main.thePlayer != null) {
@@ -148,7 +145,7 @@ public class MasterRenderer {
 	public void initGL() {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadMatrix(projectionBuffer);
-		glPerspective3(Main.thePlayer.getPosition(), Main.thePlayer.getCamera().getRotation());
+		glPerspective3(Main.thePlayer.getCamera().getPosition(), Main.thePlayer.getCamera().getRotation());
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 	}
@@ -164,7 +161,7 @@ public class MasterRenderer {
 		
 		float wb2 = 0.501f, hb2 =  0.501f;
 		GL11.glColor3f(0, 0, 0);
-		GL11.glTranslatef(ent.getPosition().x, ent.getPosition().y-0.81f, ent.getPosition().z);
+		GL11.glTranslatef(ent.getPosition().x, ent.getPosition().y, ent.getPosition().z);
 		GL11.glBegin(GL11.GL_LINE_STRIP);
 		GL11.glVertex3f(-wb2, -hb2, -wb2);
 		GL11.glVertex3f(-wb2, -hb2, wb2);
@@ -189,7 +186,7 @@ public class MasterRenderer {
 		GL11.glVertex3f(wb2, hb2, -wb2);
 		GL11.glVertex3f(-wb2, hb2, -wb2);
 		GL11.glEnd();
-		GL11.glTranslatef(-ent.getPosition().x, -ent.getPosition().y-0.81f, -ent.getPosition().z);
+		GL11.glTranslatef(-ent.getPosition().x, -ent.getPosition().y, -ent.getPosition().z);
 	}
 	
 	public void addEntity(Entity entity) {

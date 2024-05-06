@@ -1,8 +1,11 @@
 package net.oikmo.engine.entity;
 
+import java.util.Random;
+
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.mojang.minecraft.particle.Particle;
 import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.inventory.Item;
@@ -86,7 +89,35 @@ public class Camera {
 				}			
 			}
 			
+			int blockX = (int) this.picker.getPointRounded().x;
+			int blockY = (int) this.picker.getPointRounded().y;
+			int blockZ = (int) this.picker.getPointRounded().z;
+			/**/
+			
 			if(Mouse.isButtonDown(1)) {
+				if(this.picker.distance == 0) {
+					--blockY;
+				}
+
+				if(this.picker.distance == 1) {
+					++blockY;
+				}
+
+				if(this.picker.distance == 2) {
+					--blockZ;
+				}
+
+				if(this.picker.distance == 3) {
+					++blockZ;
+				}
+
+				if(this.picker.distance == 4) {
+					--blockX;
+				}
+
+				if(this.picker.distance == 5) {
+					++blockX;
+				}
 				if(!mouseClickRight) {
 					Block block1 = Main.theWorld.getBlock(picker.getPointRounded());
 					if(Main.inGameGUI.getSelectedItem() != null) {
@@ -142,10 +173,21 @@ public class Camera {
 						v.y += 1f;
 						ItemBlock item = new ItemBlock(block, v);
 						Main.theWorld.addEntity(item);*/
-						int x = (int) picker.getPointRounded().x;
-						int y = (int) picker.getPointRounded().y;
-						int z = (int) picker.getPointRounded().z;
-						SoundMaster.playBlockBreakSFX(block, x, y, z);
+						int x = blockX;
+						int y = blockY;
+						int z = blockZ;
+						SoundMaster.playBlockBreakSFX(block, blockX, blockY, blockZ);
+						for(int px = 0; px < 4; ++px) {
+							for(int py = 0; py < 4; ++py) {
+								for(int pz = 0; pz < 4; ++pz) {
+									float particleX = (float)x + ((float)px) / (float)4;
+									float particleY = (float)y + ((float)py) / (float)4;
+									float particleZ = (float)z + ((float)pz) / (float)4;
+									Particle particle = new Particle(particleX-0.5f, particleY-0.5f, particleZ-0.5f, particleX - (float)x, particleY - (float)y, particleZ - (float)z, block);
+									Main.theWorld.spawnParticle(particle);
+								}
+							}
+						}
 						if(Main.network != null) {
 							PacketPlaySoundAt packet = new PacketPlaySoundAt();
 							packet.blockID = block.getByteType();
@@ -154,7 +196,11 @@ public class Camera {
 							packet.z = z;
 							Main.network.client.sendTCP(packet);
 						}
-						Main.theWorld.setBlock(picker.getPointRounded(), null);
+						Main.theWorld.setBlock(new Vector3f(blockX,blockY,blockZ), null);
+						if(block.getType() == Block.tnt.getType()) {
+							Main.theWorld.addEntity(new PrimedTNT(new Vector3f(blockX,blockY,blockZ), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f));
+							System.out.println("AAAAAA");
+						}
 					}
 					mouseClickLeft = true;
 				}

@@ -1,6 +1,5 @@
 package net.oikmo.engine.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -30,13 +29,23 @@ public class Entity {
 	private int nextStepDistance;
 
 	protected AABB aabb;
-	private boolean onGround;
+	protected boolean onGround;
 	protected float heightOffset = 0.0F;
-	private float bbWidth = 0.6F;
-	private float bbHeight = 1.8F;
-
+	protected float bbWidth = 0.6F;
+	protected float bbHeight = 1.8F;
+	
+	protected boolean remove = false;
+	
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
+		this.position = position;
+		this.motion = new Vector3f();
+		this.rotation = rotation;
+		this.scale = scale;
+		setPos(position.x, position.y, position.z);
+	}
+	
+	public Entity(Vector3f position, Vector3f rotation, float scale) {
 		this.position = position;
 		this.motion = new Vector3f();
 		this.rotation = rotation;
@@ -64,34 +73,6 @@ public class Entity {
 		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
 	}
 
-	public List<AABB> getSurroundingAABBsPhys(int aabbOffset) {
-
-		List<AABB> surroundingAABBs = new ArrayList<>();
-
-		int x0 = Maths.roundFloat(aabb.minX - aabbOffset);
-		int x1 = Maths.roundFloat(aabb.maxX + aabbOffset);
-		int y0 = Maths.roundFloat(aabb.minY - aabbOffset);
-		int y1 = Maths.roundFloat(aabb.maxY + aabbOffset);
-		int z0 = Maths.roundFloat(aabb.minZ - aabbOffset);
-		int z1 = Maths.roundFloat(aabb.maxZ + aabbOffset);
-
-		for(int x = x0; x < x1; ++x) {
-			for(int y = y0; y < y1; ++y) {
-				for(int z = z0; z < z1; ++z) {
-					if(Main.theWorld.getBlock(new Vector3f(x,y,z)) != null) {
-						AABB other = new AABB(x-0.5f, y-0.5f, z-0.5f, x+0.5f, y+0.5f, z+0.5f);
-						//System.out.println(x + " " + y + " " + z);
-						surroundingAABBs.add(other);
-					}
-
-				}
-			}
-		}
-
-
-		return surroundingAABBs;
-	}
-
 	/**
 	 * handles aabb collision
 	 * 
@@ -107,8 +88,8 @@ public class Entity {
 		float zaOrg = za;
 
 		if(Main.theWorld != null) {
-			List<AABB> aabbs = this.getSurroundingAABBsPhys(size);
-
+			List<AABB> aabbs = Main.theWorld.getSurroundingAABBsPhys(this.aabb, size);
+			
 			int i;
 			for(i = 0; i < aabbs.size(); ++i) {
 				ya = aabbs.get(i).clipYCollide(this.aabb, ya);
@@ -164,6 +145,13 @@ public class Entity {
 				Main.network.client.sendTCP(packet);
 			}
 		}
+	}
+	
+	public float getBrightness() {
+		int x = (int)this.position.x;
+		int y = (int)(this.position.y + this.heightOffset / 2.0F);
+		int z = (int)this.position.z;
+		return Main.theWorld.getChunkFromPosition(getCurrentChunkPosition()).getChunk().getBrightness(x, y, z);
 	}
 
 	/**
@@ -277,6 +265,10 @@ public class Entity {
 		if(roundPos == null) { roundPos = new Vector3f(); }
 		Maths.roundVector(getPosition(), roundPos);
 		return roundPos;
+	}
+	
+	public boolean shouldBeRemoved() {
+		return remove;
 	}
 
 	public MasterChunk getCurrentChunk() {

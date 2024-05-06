@@ -138,6 +138,24 @@ public class Maths {
 		output.y = Maths.roundFloat(input.y);
 		output.z = Maths.roundFloat(input.z);
 	}
+	
+	public static Vector3f getBlockPositionFromCalculatedChunk(int x, int y, int z) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(new Vector3f(x,y,z), chunkPos);
+		
+		int localX = (int)(x + chunkPos.x)%16;
+		int localY = (int) y;
+		int localZ = (int)(z + chunkPos.z)%16;
+
+		if(localX < 0) {
+			localX = localX+16;
+		}
+		if(localZ < 0) {
+			localZ = localZ+16;
+		}
+		
+		return new Vector3f(localX,localY,localZ);
+	}
 
 	/**
 	 * Converts string to long via taking each character of the string and converting it into a number. Then that number is added to string to be parsed to {@link Long#valueOf(String)}

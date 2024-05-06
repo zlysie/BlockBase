@@ -70,7 +70,7 @@ public class MasterChunk {
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
-						getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
+						getChunk().calcLightDepths(localX, localZ, 1, 1);
 						Main.theWorld.refreshChunk(this);
 					}
 				} else {
@@ -80,7 +80,7 @@ public class MasterChunk {
 				if(chunk.blocks[localX][localY][localZ] != -1) {
 					chunk.blocks[localX][localY][localZ] = -1;
 				}
-				getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
+				getChunk().calcLightDepths(localX, localZ, 1, 1);
 				Main.theWorld.refreshChunk(this);
 			}
 		}

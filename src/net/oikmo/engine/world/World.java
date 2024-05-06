@@ -9,6 +9,10 @@ import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import com.mojang.minecraft.particle.Particle;
+import com.mojang.minecraft.particle.ParticleEngine;
+import com.mojang.minecraft.phys.AABB;
+
 import net.oikmo.engine.Loader;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
@@ -43,6 +47,8 @@ public class World {
 	private List<MasterChunk> currentMasterChunks = Collections.synchronizedList(new ArrayList<MasterChunk>());
 	private List<Entity> entities = new ArrayList<>();
 	
+	public ParticleEngine particleEngine;
+	
 	private long seed;
 	private OpenSimplexNoise noise;
 	
@@ -61,6 +67,7 @@ public class World {
 	private void init(long seed) {
 		this.seed = seed;
 		this.noise = new OpenSimplexNoise(this.seed);
+		particleEngine = new ParticleEngine();
 	}	
 	public void update(Camera camera) {
 		currentMasterChunks.clear();
@@ -136,23 +143,61 @@ public class World {
 			}
 		}
 		MasterRenderer.getInstance().render(camera);
+		particleEngine.render(Main.thePlayer, 1f);
 	}
 	public void tick() {
 		if(Main.thePlayer != null) {
 			Main.thePlayer.tick();
 		}
+		particleEngine.tick();
 
 		ItemEntity.updateOscillation();
 		synchronized(entities) {
 			for(int i = 0; i < entities.size(); i++) {
 				Entity entity = entities.get(i);
 				if(entity != null) {
-					if(isInValidRange(entity.getPosition())) {
-						entity.tick();
+					if(!entity.shouldBeRemoved()) {
+						if(isInValidRange(entity.getPosition())) {
+							entity.tick();
+						}
+					} else {
+						entities.remove(entity);
 					}
+					
 				}
 			}
 		}
+	}
+	
+	public void spawnParticle(Particle p) {
+		this.particleEngine.particles.add(p);
+	}
+	
+	public List<AABB> getSurroundingAABBsPhys(AABB aabb, int aabbOffset) {
+
+		List<AABB> surroundingAABBs = new ArrayList<>();
+
+		int x0 = Maths.roundFloat(aabb.minX - aabbOffset);
+		int x1 = Maths.roundFloat(aabb.maxX + aabbOffset);
+		int y0 = Maths.roundFloat(aabb.minY - aabbOffset);
+		int y1 = Maths.roundFloat(aabb.maxY + aabbOffset);
+		int z0 = Maths.roundFloat(aabb.minZ - aabbOffset);
+		int z1 = Maths.roundFloat(aabb.maxZ + aabbOffset);
+
+		for(int x = x0; x < x1; ++x) {
+			for(int y = y0; y < y1; ++y) {
+				for(int z = z0; z < z1; ++z) {
+					if(getBlock(new Vector3f(x,y,z)) != null) {
+						AABB other = new AABB(x-0.5f, y-0.5f, z-0.5f, x+0.5f, y+0.5f, z+0.5f);
+						surroundingAABBs.add(other);
+					}
+
+				}
+			}
+		}
+
+
+		return surroundingAABBs;
 	}
 	
 	/*  if(entity instanceof ItemEntity) {
@@ -173,6 +218,28 @@ public class World {
 		if(!entities.contains(ent)) {
 			entities.add(ent);
 		}
+	}
+
+	public Vector3f getBlockPositionFromCalculatedChunk(int x, int y, int z) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(new Vector3f(x,y,z), chunkPos);
+		MasterChunk m = getChunkFromPosition(chunkPos);
+
+		if(m != null) {
+			int localX = (int)(x + m.getOrigin().x)%16;
+			int localY = (int) y;
+			int localZ = (int)(z + m.getOrigin().z)%16;
+
+			if(localX < 0) {
+				localX = localX+16;
+			}
+			if(localZ < 0) {
+				localZ = localZ+16;
+			}
+			
+			return new Vector3f(localX,localY,localZ);
+		}
+		return null;
 	}
 	
 	public boolean setBlock(Vector3f position, Block block) {
@@ -198,27 +265,7 @@ public class World {
 		
 		return null;
 	}
-	public Vector3f getBlockPositionFromCalculatedChunk(int x, int y, int z) {
-		Vector3f chunkPos = new Vector3f();
-		Maths.calculateChunkPosition(new Vector3f(x,y,z), chunkPos);
-		MasterChunk m = getChunkFromPosition(chunkPos);
-
-		if(m != null) {
-			int localX = (int)(x + m.getOrigin().x)%16;
-			int localY = (int) y;
-			int localZ = (int)(z + m.getOrigin().z)%16;
-
-			if(localX < 0) {
-				localX = localX+16;
-			}
-			if(localZ < 0) {
-				localZ = localZ+16;
-			}
-			
-			return new Vector3f(localX,localY,localZ);
-		}
-		return null;
-	}
+	
 	public boolean blockHasNeighbours(Vector3f position) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
@@ -265,6 +312,23 @@ public class World {
 	public boolean anyBlockInSpecificLocation(int x, int y, int z) {
 		return getBlock(new Vector3f(x,y,z)) != null;
 	}
+	public void createRadiusFromBlock(int r, Block block, int x, int y, int z) {
+		int rx = r + x;
+		int ry = r + y;
+		int rz = r + z;
+		
+		for (int tz = z-r; z < rz+1; tz++) {
+			for (int ty = y-r; y < ry+1; ty++) {
+				for (int tx = x-r; x < rx+1; tx++) {
+					setBlock(new Vector3f(tx,ty,tz),null);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 */
 	
 	public void startChunkCreator() {
 		this.chunkCreator = new Thread(new Runnable() { 
@@ -447,7 +511,6 @@ public class World {
 		}
 		return result;
 	}
-
 	
 	public void saveWorld(String world) {
 		List<ChunkSaveData> chunks = new ArrayList<>();
