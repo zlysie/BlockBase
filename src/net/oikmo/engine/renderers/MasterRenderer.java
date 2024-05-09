@@ -54,6 +54,7 @@ public class MasterRenderer {
 	public static ModelTexture currentTexturePack;
 	public static int defaultTexturePack;
 	public static int customTexturePack;
+	public static int particleTexture;
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
 	
@@ -108,7 +109,7 @@ public class MasterRenderer {
 		} catch (IOException e) {
 			Logger.log(LogLevel.WARN, "Unable to write into README at " + dir.getAbsolutePath());
 		}
-		
+		particleTexture = ResourceLoader.loadTexture("textures/particles/blocks");
 		currentTexturePack = new ModelTexture(defaultTexturePack);
 		Gui.initFont();
 	}

@@ -189,7 +189,7 @@ public class GuiMainMenu extends GuiScreen {
 			drawTexture(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
 			playButton.tick(lockTick);
-			multiplayerButton.tick(lockTick);
+			multiplayerButton.tick(false);
 			quitButton.tick(lockTick);
 		}
 	}

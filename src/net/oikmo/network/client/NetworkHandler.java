@@ -65,7 +65,7 @@ public class NetworkHandler {
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
 	
 	private int tickTimer = 0;
-	public static final int NETWORK_PROTOCOL = 3;
+	public static final int NETWORK_PROTOCOL = 4;
 	
 	private static void registerKryoClasses() {		
 		kryo.register(LoginRequest.class);
@@ -127,7 +127,7 @@ public class NetworkHandler {
 		client.start();
 		client.connect(timeout, ip, tcpPort, udpPort);
 		Logger.log(LogLevel.INFO, "Test connected!");
-		Logger.log(LogLevel.INFO, "Test isconnecting...");
+		Logger.log(LogLevel.INFO, "Test disconnecting...");
 		client.stop();
 		Logger.log(LogLevel.INFO, "Test disconnected.");
 	}

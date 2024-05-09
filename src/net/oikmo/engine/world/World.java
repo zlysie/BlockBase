@@ -26,6 +26,7 @@ import net.oikmo.engine.save.ChunkSaveData;
 import net.oikmo.engine.save.SaveData;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.PacketRequestChunk;
@@ -242,6 +243,20 @@ public class World {
 		return null;
 	}
 	
+	
+	public MasterChunk setBlockNoUpdate(Vector3f position, Block block) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(position, chunkPos);
+		MasterChunk m = getChunkFromPosition(chunkPos);
+		if(m != null) {
+			m.setBlockNoUpdate(position, block);
+			if(Main.network != null) {
+				Main.network.updateChunk(m);
+			}
+			
+		}
+		return m;
+	}
 	public boolean setBlock(Vector3f position, Block block) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(position, chunkPos);
@@ -312,17 +327,50 @@ public class World {
 	public boolean anyBlockInSpecificLocation(int x, int y, int z) {
 		return getBlock(new Vector3f(x,y,z)) != null;
 	}
+	
+	
+	Vector3f holder = new Vector3f();
 	public void createRadiusFromBlock(int r, Block block, int x, int y, int z) {
+		List<MasterChunk> chunksToRefresh = new ArrayList<>();
 		int rx = r + x;
 		int ry = r + y;
 		int rz = r + z;
 		
-		for (int tz = z-r; z < rz+1; tz++) {
-			for (int ty = y-r; y < ry+1; ty++) {
-				for (int tx = x-r; x < rx+1; tx++) {
-					setBlock(new Vector3f(tx,ty,tz),null);
+		int radius = r * 2;
+		
+		for (int tz = z-r; tz < rz+1; tz++) {
+			for (int ty = y-r; ty < ry+1; ty++) {
+				for (int tx = x-r; tx < rx+1; tx++) {
+					if (FastMath.sqrt((float)(tx - radius / 2) * (tx - radius / 2) + (ty - radius / 2) * (ty - radius / 2) + (tz - radius / 2) * (tz - radius / 2)) <= radius / 2) {
+						holder.x = tx;
+						holder.y = ty;
+						holder.z = tz;
+						MasterChunk m = setBlockNoUpdate(holder,null);
+						if(!chunksToRefresh.contains(m)) {
+							chunksToRefresh.add(m);
+						}
+					}
+					
 				}
 			}
+		}
+		for(int tx=-r; tx< r+1; tx++){
+		    for(int ty=-r; ty< r+1; ty++){
+		        for(int tz=-r; tz< r+1; tz++){
+		            if(FastMath.sqrt(FastMath.pow(tx, 2)  +  FastMath.pow(ty, 2)  +  FastMath.pow(tz, 2)) <= r-2){
+		                holder.x = tx+x;
+						holder.y = ty+y;
+						holder.z =  tz+z;
+						MasterChunk m = setBlockNoUpdate(holder,null);
+						if(!chunksToRefresh.contains(m)) {
+							chunksToRefresh.add(m);
+						}
+		            }
+		        }
+		    }
+		}
+		for(MasterChunk m : chunksToRefresh) {
+			refreshChunk(m);
 		}
 	}
 	
@@ -351,7 +399,6 @@ public class World {
 				}
 			}
 		});
-
 		this.chunkCreator.setName("Chunk Creator");
 		this.chunkCreator.start();
 	}
@@ -429,6 +476,7 @@ public class World {
 			master.destroyMesh();
 			master.setEntity(null);
 			master.createMesh();
+			master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
 		}
 	}
 	public void refreshChunks() {
@@ -439,6 +487,7 @@ public class World {
 				master.destroyMesh();
 				master.setEntity(null);
 				master.createMesh();
+				master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
 			}
 			
 		}
@@ -471,6 +520,25 @@ public class World {
 	public MasterChunk getChunkFromPosition(Vector3f position) {
 		return chunkMap.get(getPosition(position));
 	}
+	
+	private MasterChunk prevChunk;
+	public MasterChunk getChunkFromPositionOther(Vector3f position) {
+		if(prevChunk == null) {
+			for(MasterChunk chunk : chunkMap.values()) {
+				if((int)chunk.getOrigin().x == (int)position.x && (int)chunk.getOrigin().z == (int)position.z) {
+					prevChunk = chunk;
+				}
+			}
+		} else if(!((int)prevChunk.getOrigin().x == (int)position.x && (int)prevChunk.getOrigin().z == (int)position.z)){
+			for(MasterChunk chunk : chunkMap.values()) {
+				if((int)chunk.getOrigin().x == (int)position.x && (int)chunk.getOrigin().z == (int)position.z) {
+					prevChunk = chunk;
+				}
+			}
+		}
+		
+		return prevChunk;
+	}
 	public boolean isPositionUsed(Vector3f pos) {
 		boolean result = false;
 		synchronized(usedPositions) {
@@ -482,9 +550,11 @@ public class World {
 		Vector3f result = null;
 		synchronized(usedPositions) {
 			for(int i = 0; i < usedPositions.size(); i++) {
+				
 				try {
 					usedPositions.get(i);
 				} catch(IndexOutOfBoundsException e) {
+					
 					continue;
 				}
 				if(usedPositions.get(i) != null) {

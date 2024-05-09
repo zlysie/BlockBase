@@ -9,6 +9,7 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.ChatMessage;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
@@ -60,7 +61,7 @@ public class PlayerClientListener extends Listener {
 			PacketAddPlayer packet = (PacketAddPlayer) object;
 
 			OtherPlayer newPlayer = new OtherPlayer();
-			System.out.println(Main.network);
+			System.out.println(Main.network + " network is?");
 			if(Main.network == null) {
 				Main.disconnect(false, "Unknown");
 			} else if(Main.network.players == null) {
@@ -194,6 +195,9 @@ public class PlayerClientListener extends Listener {
 		else if(object instanceof PacketWorldJoin) {
 			PacketWorldJoin packet = (PacketWorldJoin) object;
 			Main.theWorld = new World(packet.seed);
+			if(Main.thePlayer == null) {
+				Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
+			}
 			Main.thePlayer.setPos(packet.x,packet.y,packet.z);
 			
 			System.out.println("Server world seed:" + packet.seed);
@@ -211,6 +215,10 @@ public class PlayerClientListener extends Listener {
 					SoundMaster.playBlockPlaceSFX(block, packet.x, packet.y, packet.z);
 				} else {
 					SoundMaster.playBlockBreakSFX(block, packet.x, packet.y, packet.z);
+				}
+			} else {
+				if(packet.sfxID != null) {
+					SoundMaster.playSFX(packet.sfxID);
 				}
 			}
 		}

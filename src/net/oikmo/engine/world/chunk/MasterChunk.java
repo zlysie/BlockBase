@@ -48,6 +48,35 @@ public class MasterChunk {
 		return null;
 	}
 	
+	public void setBlockNoUpdate(Vector3f position, Block block) {
+		Chunk chunk = getChunk();
+		//Main.theWorld.refreshChunk(this);
+		int localX = (int)(position.x + getOrigin().x)%16;
+		int localY = (int) position.y;
+		int localZ = (int)(position.z + getOrigin().z)%16;
+		
+		if(localX < 0) {
+			localX = localX+16;
+		}
+		if(localZ < 0) {
+			localZ = localZ+16;
+		}
+		
+		if (Maths.isWithinChunk(localX, localY, localZ)) {
+			if (block != null) {
+				if (chunk.blocks[localX][localY][localZ] == -1) {
+					if(chunk.blocks[localX][localY][localZ] != block.getByteType()) {
+						chunk.blocks[localX][localY][localZ] = block.getByteType();
+					}
+				}
+			} else {
+				if(chunk.blocks[localX][localY][localZ] != -1) {
+					chunk.blocks[localX][localY][localZ] = -1;
+				}
+			}
+		}
+	}
+	
 	public void setBlock(Vector3f position, Block block) {
 		Chunk chunk = getChunk();
 		//Main.theWorld.refreshChunk(this);

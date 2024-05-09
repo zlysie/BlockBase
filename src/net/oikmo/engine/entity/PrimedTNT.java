@@ -7,8 +7,10 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 
 public class PrimedTNT extends Entity {
 
@@ -20,7 +22,20 @@ public class PrimedTNT extends Entity {
 		this.setRotation(0.0f, new Random().nextInt(4)*90, 0.0f);
 		this.heightOffset = 0.5f;
 		motion.y = ya;
+		int x = (int) getPosition().x;
+		int y = (int) getPosition().y;
+		int z = (int) getPosition().z;
 		//this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);
+		SoundMaster.playSFX("entity.tnt.primed");
+		if(Main.network != null) {
+			PacketPlaySoundAt packet = new PacketPlaySoundAt();
+			packet.blockID = -1;
+			packet.sfxID = "entity.tnt.primed";
+			packet.x = x;
+			packet.y = y;
+			packet.z = z;
+			Main.network.client.sendTCP(packet);
+		}
 	}
 	
 	public void tick() {
@@ -33,16 +48,26 @@ public class PrimedTNT extends Entity {
 		int y = (int) getPosition().y;
 		int z = (int) getPosition().z;
 		
-		System.out.println((timer % 30f)/30f);
+		//System.out.println((timer % 30f)/30f);
 		
-		if((timer % 30f)/30f <= 0.6f) {
-			this.setWhiteOffset(5);
+		if((timer % 45f)/45f <= 0.5f) {
+			this.setWhiteOffset(15);
 		} else {
 			this.setWhiteOffset(0);
 		}
 		
 		if(timer >= 60*5 && !remove) {
 			Main.theWorld.createRadiusFromBlock(5, null, x, y, z);
+			SoundMaster.playSFX("entity.generic.explode");
+			if(Main.network != null) {
+				PacketPlaySoundAt packet = new PacketPlaySoundAt();
+				packet.blockID = -1;
+				packet.sfxID = "entity.generic.explode";
+				packet.x = x;
+				packet.y = y;
+				packet.z = z;
+				Main.network.client.sendTCP(packet);
+			}
 			remove = true;
 		}
 	}

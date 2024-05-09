@@ -112,9 +112,9 @@ public class Maths {
 	public static int roundFloat(float number) {
 		int rounded;
 		if (number - (int) number >= 0.0 && number - (int) number < 1.0) {
-			rounded = Math.round(number - 0.1f);
+			rounded = (int) FastMath.round(number - 0.1f);
 		} else {
-			rounded = Math.round(number);
+			rounded = (int) FastMath.round(number);
 		}
 		return rounded;
 	}

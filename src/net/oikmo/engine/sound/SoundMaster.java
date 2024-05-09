@@ -122,6 +122,8 @@ public class SoundMaster {
 
 	}
 	private static void registerSFX() {
+		registerSFXByte("entity.tnt.primed", "random/fuse.ogg");
+		registerSFXByte("entity.generic.explode", "random/explode.ogg");
 		registerSFXByte("ui.button.click","random/click.ogg");
 		registerSFX("block.grass.break", "dig/grass");
 		registerSFX("block.cloth.break", "dig/cloth");

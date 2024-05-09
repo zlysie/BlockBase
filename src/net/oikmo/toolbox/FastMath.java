@@ -119,6 +119,15 @@ final public class FastMath {
 		}
 		return ((1f - scale) * startValue) + (scale * endValue);
 	}
+	
+	public static float round(float d) {
+
+	    if (d > 0) {
+	        return (float) (d + 0.5f);
+	    } else {
+	        return (float) (d - 0.5f);
+	    }
+	}
 
 	/**
 	 * Linear interpolation from startValue to endValue by the given percent.

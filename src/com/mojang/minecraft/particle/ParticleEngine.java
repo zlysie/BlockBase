@@ -9,11 +9,16 @@ import com.mojang.minecraft.Tesselator;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Player;
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.toolbox.FastMath;
 
 public final class ParticleEngine {
 	public List<Particle> particles = new ArrayList<>();
-	public ParticleEngine() {}
+	private int texID;
+	public ParticleEngine() {
+		texID = MasterRenderer.particleTexture;
+		//System.out.println(texID);
+	}
 
 	public final void tick() {
 		for(int var1 = 0; var1 < this.particles.size(); ++var1) {
@@ -26,7 +31,7 @@ public final class ParticleEngine {
 		}
 
 	}
-	int texID = ResourceLoader.loadTexture("textures/particles/blocks");
+	
 	public final void render(Player player, float tickSpeed) {
 		if(this.particles.size() != 0) {
 			GL11.glEnable(GL11.GL_TEXTURE_2D);

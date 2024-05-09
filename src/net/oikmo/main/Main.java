@@ -64,9 +64,9 @@ import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class Main extends Gui {
 	
-	private static final int resourceVersion = 3;
+	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.5";
+	public static final String version = "a0.1.6";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -323,8 +323,6 @@ public class Main extends Gui {
 				theWorld.tick();
 			}
 			if(thePlayer != null) {
-				
-				
 				camPos = new Vector3f(thePlayer.getCamera().getPosition());
 				if(!hasSaved && thePlayer.isOnGround()) {
 					theWorld.saveWorld(currentlyPlayingWorld);
@@ -333,13 +331,14 @@ public class Main extends Gui {
 			}
 			
 		} else {
-			if(thePlayer != null && network != null) {
+			
+			if(thePlayer != null) {
 				camPos = new Vector3f(thePlayer.getCamera().getPosition());
-				thePlayer.tick();
-				network.update();
+				if(theWorld != null) {
+					theWorld.tick();
+				}
+				network.update();	
 			}
-			
-			
 		}	
 	}
 

@@ -199,7 +199,6 @@ public class Camera {
 						Main.theWorld.setBlock(new Vector3f(blockX,blockY,blockZ), null);
 						if(block.getType() == Block.tnt.getType()) {
 							Main.theWorld.addEntity(new PrimedTNT(new Vector3f(blockX,blockY,blockZ), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f));
-							System.out.println("AAAAAA");
 						}
 					}
 					mouseClickLeft = true;
