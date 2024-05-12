@@ -17,12 +17,13 @@ import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketChatMessage;
+import net.oikmo.network.shared.PacketChunk;
+import net.oikmo.network.shared.PacketModifyChunk;
 import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
-import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
@@ -74,8 +75,7 @@ public class MainServerListener extends Listener {
 		
 		MainServer.server.sendToAllUDP(removePacket);
 		if(username != null && !username.isEmpty()) {
-			MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server");
-			MainServer.logPanel.append("\n");
+			MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server\n");
 		}
 		
 	}
@@ -93,6 +93,7 @@ public class MainServerListener extends Listener {
 				PacketUserName packetUserName = new PacketUserName();
 				packetUserName.id = connection.getID();
 				packetUserName.userName = request.getUserName();
+				
 				MainServer.server.sendToAllExceptUDP(connection.getID(), packetUserName);
 				
 				players.get(connection.getID()).userName = request.getUserName();
@@ -109,14 +110,14 @@ public class MainServerListener extends Listener {
 				
 				String ip = connection.getRemoteAddressTCP().getHostString();
 				PlayersPositionData data = SaveSystem.loadPlayerPositions();
-				System.out.println(data);
+				System.out.println(data + " data");
 				if(data != null) {
 					Vector3f playerPos = data.positions.get(ip);
 					if(playerPos != null) {
 						packetWorld.x = playerPos.x;
 						packetWorld.y = playerPos.y;
 						packetWorld.z = playerPos.z;
-						System.out.println(data.positions.get(ip));
+						System.out.println(data.positions.get(ip) + " putting data");
 					} else {
 						packetWorld.x = MainServer.xSpawn;
 						Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
@@ -148,6 +149,7 @@ public class MainServerListener extends Listener {
 					PacketUserName packetUserName2 = new PacketUserName();
 					packetUserName2.id = p.c.getID();
 					packetUserName2.userName = p.userName;
+					System.out.println(p.userName + " " + p.c.getID());
 					// connection.sendTCP(packetUserName2);
 					connection.sendUDP(packetUserName2);
 				}
@@ -213,33 +215,14 @@ public class MainServerListener extends Listener {
 			packet.id = connection.getID();
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		}
-		else if(object instanceof PacketUpdateChunk) {
-			PacketUpdateChunk packet = (PacketUpdateChunk) object;
+		else if(object instanceof PacketChunk) {
+			PacketChunk packet = (PacketChunk) object;
 			
 			packet.id = connection.getID();
 			
-			byte[][][] blocks = new byte[1][1][1];
-			try {
-				blocks = (byte[][][])Maths.uncompressStream(packet.data);
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-			}
 			Vector3f chunkPos = new Vector3f(packet.x, 0, packet.z);
 			
-			if(packet.add) {
-				MainServer.theWorld.addChunk(new MasterChunk(chunkPos, blocks));
-			} else {
-				MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos)).replaceBlocks(blocks);
-			}
-			
-			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
-		} else if(object instanceof PacketUpdateWithheldBlock) {
-			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
-			if(players.get(connection.getID()) != null)
-				players.get(connection.getID()).block = packet.block;
-
-			packet.id = connection.getID();
-			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
+			MainServer.theWorld.addChunk(chunkPos);
 		} else if(object instanceof PacketRequestChunk) {
 			PacketRequestChunk packet = (PacketRequestChunk) object;
 			Vector3f chunkPos = new Vector3f(packet.x,0,packet.z);
@@ -250,11 +233,10 @@ public class MainServerListener extends Listener {
 				MainServer.logPanel.append("Creating new chunk at: [X=" + packet.x + ", Z="+packet.z+"]");
 			}
 			
-			PacketUpdateChunk packetChunk = new PacketUpdateChunk();
+			PacketChunk packetChunk = new PacketChunk();
 			packetChunk.id = connection.getID();
 			packetChunk.x = master.getOrigin().x;
 			packetChunk.z = master.getOrigin().z;
-			packetChunk.add = true;
 			
 			try {
 				packetChunk.data = Maths.compressObject(master.getChunk().blocks);
@@ -263,6 +245,22 @@ public class MainServerListener extends Listener {
 			}
 			
 			connection.sendUDP(packetChunk);
+		} else if(object instanceof PacketUpdateWithheldBlock) {
+			PacketUpdateWithheldBlock packet = (PacketUpdateWithheldBlock) object;
+			if(players.get(connection.getID()) != null)
+				players.get(connection.getID()).block = packet.block;
+
+			packet.id = connection.getID();
+			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
+		} else if(object instanceof PacketModifyChunk) {
+			
+			PacketModifyChunk packet = (PacketModifyChunk) object;
+
+			packet.id = connection.getID();
+			
+			MainServer.theWorld.setBlock(new Vector3f(packet.x,packet.y,packet.z), packet.block);
+			System.out.println(new Vector3f(packet.x,packet.y,packet.z) + " " + packet.block);
+			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		} else if(object instanceof PacketSavePlayerPosition) {
 			PacketSavePlayerPosition packet = (PacketSavePlayerPosition) object;
 			String ip = connection.getRemoteAddressTCP().getHostString();
@@ -280,6 +278,12 @@ public class MainServerListener extends Listener {
 					SaveSystem.savePlayerPositions(data);
 				}
 			}
+			
+		}
+		else if(object instanceof PacketChunk) {
+			PacketChunk packet = (PacketChunk) object;
+			packet.id = connection.getID();
+			
 			
 		}
 		else if(object instanceof PacketPlaySoundAt) {

@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.save.ChunkSaveData;
 import net.oikmo.engine.save.SaveData;
 import net.oikmo.engine.save.SaveSystem;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.network.server.MainServer;
 import net.oikmo.toolbox.FastMath;
@@ -47,8 +48,13 @@ public class World {
 		this.noise = new OpenSimplexNoise(this.seed);
 	}
 	
+	public void addChunk(Vector3f position) {
+		MasterChunk m = new MasterChunk(noise, position);
+		usedPositions.add(m.getOrigin());
+		chunkMap.put(m.getOrigin(), m);
+	}
+	
 	public void addChunk(MasterChunk m) {
-		//System.out.println(m.getOrigin() + " " + m.getChunk().heights);
 		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
 	}
@@ -58,6 +64,17 @@ public class World {
 		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
 		return m;
+	}
+	
+	public boolean setBlock(Vector3f position, byte block) {
+		Vector3f chunkPos = new Vector3f();
+		Maths.calculateChunkPosition(position, chunkPos);
+		MasterChunk m = getChunkFromPosition(chunkPos);
+		if(m != null) {
+			m.setBlock(position, block);
+			return true;
+		}
+		return false;
 	}
 	
 	public boolean isInValidRange(Vector3f origin) {
@@ -75,7 +92,7 @@ public class World {
 	}
 	
 	public MasterChunk getChunkFromPosition(Vector3f position) {
-		return chunkMap.get(position);
+		return chunkMap.get(getPosition(position));
 	}
 	public boolean isPositionUsed(Vector3f pos) {
 		boolean result = false;

@@ -36,12 +36,13 @@ import net.oikmo.network.shared.Message;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketChatMessage;
 import net.oikmo.network.shared.PacketGameOver;
+import net.oikmo.network.shared.PacketModifyChunk;
 import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
-import net.oikmo.network.shared.PacketUpdateChunk;
+import net.oikmo.network.shared.PacketChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
@@ -72,14 +73,14 @@ public class MainServer {
 	private static PTextField commandInputPanel;
 	public static JList<String> playersPanel;
 	static MainServerListener listener = new MainServerListener();
-	public static int xSpawn,zSpawn;
+	public static int xSpawn = 0,zSpawn = 0;
 	
 	private static String[] splashes;
 	
 	public static World theWorld;
 	
-	private static String version = "S0.0.6";
-	public static final int NETWORK_PROTOCOL = 3;
+	private static String version = "S0.0.7";
+	public static final int NETWORK_PROTOCOL = 4;
 	
 	private static Thread saveThread;
 
@@ -169,6 +170,9 @@ public class MainServer {
 		kryo.register(OtherPlayer.class);
 		kryo.register(float[].class);
 		kryo.register(byte[].class);
+		kryo.register(PacketChunk.class);
+		kryo.register(PacketRequestChunk.class);
+		kryo.register(PacketModifyChunk.class);
 		kryo.register(PacketUpdateX.class);
 		kryo.register(PacketUpdateY.class);
 		kryo.register(PacketUpdateZ.class);
@@ -176,7 +180,6 @@ public class MainServer {
 		kryo.register(PacketUpdateRotY.class);
 		kryo.register(PacketUpdateRotZ.class);
 		kryo.register(PacketWorldJoin.class);
-		kryo.register(PacketUpdateChunk.class);
 		kryo.register(PacketAddPlayer.class);
 		kryo.register(PacketRemovePlayer.class);
 		kryo.register(PacketUserName.class);
@@ -184,10 +187,10 @@ public class MainServer {
 		kryo.register(PacketGameOver.class);
 		kryo.register(PacketTickPlayer.class);
 		kryo.register(PacketUpdateWithheldBlock.class);
-		kryo.register(PacketRequestChunk.class);
 		kryo.register(PacketSavePlayerPosition.class);
 		kryo.register(PacketPlaySoundAt.class);
 		kryo.register(PacketChatMessage.class);
+		
 	}
 
 	public static void createServerInterface() {
