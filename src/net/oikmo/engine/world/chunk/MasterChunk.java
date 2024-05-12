@@ -2,7 +2,6 @@ package net.oikmo.engine.world.chunk;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -50,7 +49,6 @@ public class MasterChunk {
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if(chunk.blocks[localX][localY][localZ] != block) {
 				chunk.blocks[localX][localY][localZ] = block;
-				
 			}
 		}
 	}

@@ -11,7 +11,6 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.save.ChunkSaveData;
 import net.oikmo.engine.save.SaveData;
 import net.oikmo.engine.save.SaveSystem;
-import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.network.server.MainServer;
 import net.oikmo.toolbox.FastMath;
