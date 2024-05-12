@@ -18,7 +18,7 @@ public class GuiConnecting extends GuiScreen {
 	private GuiButton quitButton;
 	
 	public void onInit() {
-		if(Main.network != null) {
+		if(Main.theNetwork != null) {
 			Main.thePlayer.getCamera().setMouseLock(false);
 		} else {
 			Main.shouldTick();
@@ -29,7 +29,7 @@ public class GuiConnecting extends GuiScreen {
 			@Override
 			public void invoke() {
 				prepareCleanUp();
-				Main.network.disconnect();
+				Main.theNetwork.disconnect();
 				Main.disconnect(false, "");
 				prepareCleanUp();
 				Main.currentScreen = new GuiMainMenu(Main.getRandomSplash());
@@ -46,9 +46,20 @@ public class GuiConnecting extends GuiScreen {
 	private int ticksToWait = 0;
 	private int maxCoolDown = 60;
 	private boolean lockTick = false;
+	private String elipsis = "";
 	public void onTick() {
 		if(ticksToWait < maxCoolDown) {
 			ticksToWait++;
+		}
+		if((ticksToWait % 60)/10f >= 0.5f) {
+			elipsis += ".";
+		}
+		
+		System.out.println((ticksToWait % 60)/10f);
+		
+		long count = elipsis.chars().filter(ch -> ch == '.').count();
+		if(count >= 3) {
+			elipsis = "";
 		}
 		
 		if(!lockTick && ticksToWait >= maxCoolDown) {
@@ -58,7 +69,7 @@ public class GuiConnecting extends GuiScreen {
 	
 	public void onUpdate() {
 		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
-		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), "Connecting...");
+		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), "Connecting" + elipsis);
 		quitButton.tick(lockTick);
 		
 		if(Main.thePlayer != null) {

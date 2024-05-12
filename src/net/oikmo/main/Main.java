@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -62,11 +61,16 @@ import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
+/**
+ * Main class. Starts the engine, handles logic.
+ * 
+ * @author Oikmo
+ */
 public class Main extends Gui {
 	
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.6";
+	public static final String version = "a0.1.7";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -96,9 +100,18 @@ public class Main extends Gui {
 	private static String[] splashes;
 	public static String splashText;
 	
-	public static NetworkHandler network;
+	public static NetworkHandler theNetwork;
 	public static String playerName = null;
 	
+	/**
+	 * Basically, it creates the resources folder if they don't exist,<br>
+	 * then it creates the window and checks wether or not the last<br>
+	 * recorded resource version is equal to the current version. If<br>
+	 * not then attempt to download the required resources and update<br>
+	 * the version. Then it enters the game loop in which that handles<br>
+	 * logic and rendering.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
@@ -181,8 +194,8 @@ public class Main extends Gui {
 						Main.currentScreen.onTick();
 					}
 					
-					if(network != null && thePlayer != null) {
-						network.tick();
+					if(theNetwork != null && thePlayer != null) {
+						theNetwork.tick();
 					}
 					
 					if(shouldTick) {
@@ -190,9 +203,8 @@ public class Main extends Gui {
 					}
 				}
 				
-				if(network != null) {
-					for(Map.Entry<Integer, OtherPlayer> e : Main.network.players.entrySet()) {
-						OtherPlayer p = e.getValue();
+				if(theNetwork != null) {
+					for(OtherPlayer p : Main.theNetwork.players.values()) {
 						Vector3f position = new Vector3f(p.x,p.y,p.z);
 						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
 						Entity entity = new Entity(obsidian, position, rotation, 1f);
@@ -237,6 +249,11 @@ public class Main extends Gui {
 		close();
 	}
 	
+	/**
+	 * Disconnects the player from a server.
+	 * @param kick
+	 * @param message
+	 */
 	public static void disconnect(boolean kick, String message) {
 		Main.shouldTick = false;
 		if(Main.thePlayer != null) {
@@ -252,8 +269,13 @@ public class Main extends Gui {
 			Main.inGameGUI.prepareCleanUp();
 			Main.inGameGUI = null;
 		}
+		if(Main.theNetwork != null) {
+			if(Main.theNetwork.players != null) {
+				Main.theNetwork.players.clear();
+			}
+		}
 		
-		Main.network = null;
+		Main.theNetwork = null;
 		if(Main.currentScreen != null) {
 			Main.currentScreen.prepareCleanUp();
 		}
@@ -299,7 +321,7 @@ public class Main extends Gui {
 	
 	private static boolean tick;
 	public static void shouldTick() {
-		if(Main.network == null) {
+		if(Main.theNetwork == null) {
 			Main.shouldTick = !shouldTick;
 			tick = Main.shouldTick;
 		} else {
@@ -315,9 +337,12 @@ public class Main extends Gui {
 	public static boolean isPaused() {
 		return shouldTick == false;
 	}
-
+	
+	/**
+	 * Every 1/60th this method is ran. This handles movement.
+	 */
 	private static void tick() {
-		if(Main.network == null) {
+		if(Main.theNetwork == null) {
 			
 			if(theWorld != null) {
 				theWorld.tick();
@@ -337,11 +362,14 @@ public class Main extends Gui {
 				if(theWorld != null) {
 					theWorld.tick();
 				}
-				network.update();	
+				theNetwork.update();	
 			}
 		}	
 	}
-
+	
+	/**
+	 * Closes the game.
+	 */
 	public static void close() {
 		Logger.saveLog();
 		displayRequest = true;
@@ -358,8 +386,8 @@ public class Main extends Gui {
 	 */
 	public static void error(String id, Throwable throwable) {
 		if(!hasErrored) {
-			if(network != null) {
-				network.disconnect();
+			if(theNetwork != null) {
+				theNetwork.disconnect();
 			}
 			
 			displayRequest = true;
@@ -558,7 +586,13 @@ public class Main extends Gui {
 			return folder;
 		}
 	}
-
+	
+	/**
+	 * Downloads xip from URL
+	 * @param urlStr
+	 * @param file
+	 * @throws IOException
+	 */
 	private static void download(String urlStr, String file) throws IOException {
 		URL url = new URL(urlStr);
 		ReadableByteChannel rbc = Channels.newChannel(url.openStream());

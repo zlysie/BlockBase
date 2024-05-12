@@ -19,6 +19,12 @@ public class Logger {
 		ERROR
 	}
 	
+	/**
+	 * Prints a log to the console based on given level. 
+	 * Then it adds it to a large log in which when the program quits it will be saved.
+	 * @param level
+	 * @param message
+	 */
 	public static void log(LogLevel level, Object message) {
 		String toLog = "";
 		ThreadCall call = getThreadCall();
@@ -37,6 +43,9 @@ public class Logger {
 		}
 	}
 	
+	/**
+	 * Saves the large log.
+	 */
 	public static void saveLog() {
 		if(completeLog.isEmpty()) { return; }
 		File saveDirectory =  new File(Main.getDir() + "/logs/");
@@ -80,22 +89,6 @@ public class Logger {
         }
         return null;
      }
-	@SuppressWarnings("unused")
-	private static String getCallerOfCallerClassName() { 
-	    StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-	    String callerClassName = null;
-	    for(int i = 1; i < stElements.length; i++) {
-	        StackTraceElement ste = stElements[i];
-	        if(!ste.getClassName().equals(Logger.class.getName()) && ste.getClassName().indexOf("java.lang.Thread") != 0) {
-	            if(callerClassName == null) {
-	                callerClassName = ste.getClassName();
-	            } else if (!callerClassName.equals(ste.getClassName())) {
-	                return ste.getClassName();
-	            }
-	        }
-	    }
-	    return null;
-	 }
 	
 	/**
 	 * returns currentTime in the form of [YYYY-MM-DD HH:MM:SS]
@@ -164,6 +157,11 @@ public class Logger {
 		return date + "_" + time;
 	}
 	
+	/**
+	 * Just data to be able to log it in.
+	 * @author Oikmo
+	 *
+	 */
 	private static class ThreadCall {
 		private String threadCall;
 		private String classCall;

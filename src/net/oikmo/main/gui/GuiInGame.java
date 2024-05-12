@@ -70,13 +70,13 @@ public class GuiInGame extends GuiScreen {
 		
 		int previousIndex = selectedIndex;
 		if(!(Main.currentScreen instanceof GuiChat)) {
-			if(Main.network != null) {
+			if(Main.theNetwork != null) {
 				int base = Display.getHeight()-fontSize;
-				int size = Main.network.currentlyShownMessages.size()-1;
+				int size = Main.theNetwork.currentlyShownMessages.size()-1;
 				for(int y = size; y > -1; y--) {
 					int realY = ((size-y)*fontSize)+fontSize;
 					this.drawSquareFilled(c, 0, base-realY, Display.getWidth(), fontSize);
-					this.drawShadowString(Main.network.currentlyShownMessages.get(y).isSpecial() ? Color.yellow : Color.white, 0, base-realY, Main.network.currentlyShownMessages.get(y).getMessage());
+					this.drawShadowString(Main.theNetwork.currentlyShownMessages.get(y).isSpecial() ? Color.yellow : Color.white, 0, base-realY, Main.theNetwork.currentlyShownMessages.get(y).getMessage());
 					
 				}
 			}
@@ -106,13 +106,13 @@ public class GuiInGame extends GuiScreen {
 	}
 	
 	private void updatePlayerHand() {
-		if(Main.network != null) {
+		if(Main.theNetwork != null) {
     		PacketUpdateWithheldBlock packet = new PacketUpdateWithheldBlock();
     		if(Main.thePlayer.getInventory().getSlots()[selectedIndex][0] != null) {
     			packet.block = Item.itemToBlock(Main.thePlayer.getInventory().getSlots()[selectedIndex][0].getItem()).getByteType();
     		}
     		
-    		Main.network.client.sendUDP(packet);
+    		Main.theNetwork.client.sendUDP(packet);
     	}
     	
 	}

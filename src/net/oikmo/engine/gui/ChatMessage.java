@@ -12,7 +12,7 @@ public class ChatMessage {
 	public ChatMessage(String message, boolean special) {
 		this.message = message;
 		this.special = special;
-		Main.network.currentlyShownMessages.add(this);
+		Main.theNetwork.currentlyShownMessages.add(this);
 		if(Main.currentScreen instanceof GuiChat) {
 			((GuiChat)Main.currentScreen).updateMessages();
 		}
@@ -21,7 +21,7 @@ public class ChatMessage {
 	public void tick() {
 		timer--;
 		if(timer <= 0) {
-			Main.network.currentlyShownMessages.remove(this);
+			Main.theNetwork.currentlyShownMessages.remove(this);
 		}
 	}
 	

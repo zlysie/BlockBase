@@ -1,12 +1,19 @@
 package net.oikmo.engine.world.chunk;
 
+import java.util.Random;
+
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.mojang.minecraft.particle.Particle;
+
 import net.oikmo.engine.entity.Entity;
+import net.oikmo.engine.entity.PrimedTNT;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -80,6 +87,9 @@ public class MasterChunk {
 	public void setBlock(Vector3f position, Block block) {
 		Chunk chunk = getChunk();
 		//Main.theWorld.refreshChunk(this);
+		int x = (int)position.x;
+		int y = (int)position.y;
+		int z = (int)position.z;
 		int localX = (int)(position.x + getOrigin().x)%16;
 		int localY = (int) position.y;
 		int localZ = (int)(position.z + getOrigin().z)%16;
@@ -91,6 +101,11 @@ public class MasterChunk {
 			localZ = localZ+16;
 		}
 		
+		if(localY == -1) {
+			Main.theWorld.refreshChunk(this);
+		}
+		
+		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
 				if (chunk.blocks[localX][localY][localZ] == -1) {
@@ -99,13 +114,51 @@ public class MasterChunk {
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
+						SoundMaster.playBlockPlaceSFX(block, x, y, z);
+						if(Main.theNetwork != null) {
+							PacketPlaySoundAt packet = new PacketPlaySoundAt();
+							packet.place = true;
+							packet.blockID = block.getByteType();
+							packet.x = x;
+							packet.y = y;
+							packet.z = z;
+							Main.theNetwork.client.sendTCP(packet);
+						}
 						getChunk().calcLightDepths(localX, localZ, 1, 1);
 						Main.theWorld.refreshChunk(this);
+						
 					}
 				} else {
 					return;
 				}
 			} else {
+				Block whatUsedToBeThere = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
+				SoundMaster.playBlockBreakSFX(whatUsedToBeThere, x,y,z);
+				if(Main.theNetwork != null) {
+					PacketPlaySoundAt packet = new PacketPlaySoundAt();
+					packet.blockID = whatUsedToBeThere.getByteType();
+					packet.x = x;
+					packet.y = y;
+					packet.z = z;
+					Main.theNetwork.client.sendTCP(packet);
+				}
+				for(int px = 0; px < 4; ++px) {
+					for(int py = 0; py < 4; ++py) {
+						for(int pz = 0; pz < 4; ++pz) {
+							float particleX = (float)x + ((float)px) / (float)4;
+							float particleY = (float)y + ((float)py) / (float)4;
+							float particleZ = (float)z + ((float)pz) / (float)4;
+							Particle particle = new Particle(particleX-0.5f, particleY-0.5f, particleZ-0.5f, particleX - (float)x, particleY - (float)y, particleZ - (float)z, whatUsedToBeThere);
+							Main.theWorld.spawnParticle(particle);
+						}
+					}
+				}
+				if(Main.theNetwork != null) {
+					if(whatUsedToBeThere.getByteType() == Block.tnt.getType()) {
+						Main.theWorld.addEntity(new PrimedTNT(new Vector3f(x,y,z), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, false));
+					}
+				}
+				
 				if(chunk.blocks[localX][localY][localZ] != -1) {
 					chunk.blocks[localX][localY][localZ] = -1;
 				}

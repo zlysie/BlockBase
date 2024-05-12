@@ -26,7 +26,7 @@ public class GuiChat extends GuiScreen {
 	private int offset = font.getWidth(" > ");
 	private int limit = 20;
 	
-	private List<ChatMessage> messages = new ArrayList<>(Main.network.rawMessages);
+	private List<ChatMessage> messages = new ArrayList<>(Main.theNetwork.rawMessages);
 	
 	public void onInit() {
 		Keyboard.enableRepeatEvents(true);
@@ -43,11 +43,11 @@ public class GuiChat extends GuiScreen {
 			
 			public void invoke() {
 				if(!bar.getInputText().trim().isEmpty()) {
-					ChatMessage message = new ChatMessage(" <" + Main.network.player.userName +"> " + bar.getInputText().trim(), false);
-					Main.network.rawMessages.add(message);
+					ChatMessage message = new ChatMessage(" <" + Main.theNetwork.player.userName +"> " + bar.getInputText().trim(), false);
+					Main.theNetwork.rawMessages.add(message);
 					PacketChatMessage packet =new PacketChatMessage();
 					packet.message = message.getMessage(); 
-					Main.network.client.sendTCP(packet);
+					Main.theNetwork.client.sendTCP(packet);
 					updateMessages();
 					bar.setInputText("");
 				}
@@ -58,7 +58,7 @@ public class GuiChat extends GuiScreen {
 	}
 	
 	public void updateMessages() {
-		this.messages = new ArrayList<>(Main.network.rawMessages);
+		this.messages = new ArrayList<>(Main.theNetwork.rawMessages);
 		//Collections.reverse(messages);
 	}
 	
@@ -68,13 +68,13 @@ public class GuiChat extends GuiScreen {
 		for(int y = size; y > -1; y--) {
 			int realY = ((size-y)*fontSize)+fontSize;
 			this.drawSquareFilled(c, 0, base-realY, Display.getWidth(), fontSize);
-			this.drawShadowString(Main.network.rawMessages.get(y).isSpecial() ? Color.yellow : Color.white, 0, base-realY, messages.get(y).getMessage());
+			this.drawShadowString(Main.theNetwork.rawMessages.get(y).isSpecial() ? Color.yellow : Color.white, 0, base-realY, messages.get(y).getMessage());
 		}
 		this.drawSquareFilled(c, 0, base, Display.getWidth(), fontSize);
 		this.drawShadowString(0, base, " > ");
 		bar.tick();
 		if(messages.size() > limit) {
-			Main.network.rawMessages.remove(0);
+			Main.theNetwork.rawMessages.remove(0);
 			messages.remove(0);
 		}
 	}

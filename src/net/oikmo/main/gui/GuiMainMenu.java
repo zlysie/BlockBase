@@ -112,6 +112,13 @@ public class GuiMainMenu extends GuiScreen {
 				y = (Display.getHeight()/2)+offsetY*2f;
 			}
 		});
+		
+		if(Main.theNetwork != null) {
+			if(Main.theNetwork.players != null) {
+				Main.theNetwork.players.clear();
+				Main.theNetwork.disconnect();
+			}
+		}
 	}
 	
 	public void doRandomMusic() {
@@ -127,17 +134,6 @@ public class GuiMainMenu extends GuiScreen {
 
 		musicThread = new Thread(new Runnable(){
 			public void run() {
-				
-				try {
-					long thing = new Random().nextInt(6000);
-					Logger.log(LogLevel.INFO, "waiting for " + thing + "ms");
-					Thread.sleep(thing);
-					
-					
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 
 				for(SoundByte musicByte : bytes) {
 					SoundMaster.playMusic(musicByte.getID());
@@ -189,7 +185,7 @@ public class GuiMainMenu extends GuiScreen {
 			drawTexture(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
 			playButton.tick(lockTick);
-			multiplayerButton.tick(false);
+			multiplayerButton.tick(lockTick);
 			quitButton.tick(lockTick);
 		}
 	}

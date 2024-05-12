@@ -21,7 +21,7 @@ public class GuiPauseMenu extends GuiScreen {
 	private GuiButton quitButton;
 	
 	public void onInit() {
-		if(Main.network != null) {
+		if(Main.theNetwork != null) {
 			if(Main.thePlayer != null) {
 				Main.thePlayer.getCamera().setMouseLock(false);
 			} else {
@@ -32,20 +32,19 @@ public class GuiPauseMenu extends GuiScreen {
 			Main.shouldTick();
 		}
 		
-		
 		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Quit world...");
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				Main.inGameGUI = null;
-				if(Main.network == null) {
+				if(Main.theNetwork == null) {
 					Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
 				} else {
-					Main.network.disconnect();
-					Main.network = null;
+					Main.theNetwork.disconnect();
+					Main.theNetwork = null;
 				}
 				
-				if(Main.network != null) {
+				if(Main.theNetwork != null) {
 					Main.thePlayer.getCamera().setMouseLock(false);
 				} else {
 					Main.shouldTick();
@@ -64,23 +63,23 @@ public class GuiPauseMenu extends GuiScreen {
 	}
 	private int width = 200;
 	public void onUpdate() {
+		
+		
 		drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
 		
-		if(Main.network != null) {
+		if(Main.theNetwork != null) {
 			int height =  (fontSize *2)+5;
 			boolean flag = false;
 			
-			for(OtherPlayer p : Main.network.players.values()) {
+			for(OtherPlayer p : Main.theNetwork.players.values()) {
 				if(p.userName != null) {
-					if(p.userName.contentEquals(Main.network.player.userName)) {
+					if(p.userName.contentEquals(Main.theNetwork.player.userName)) {
 						flag = true;
 					}
 				}
 				height += fontSize + 5;
-				if(flag && p.userName != null && Main.network.player.userName != null) {
-					if(p.userName.contentEquals(Main.network.player.userName)) {
-						height -= fontSize + 5;
-					}
+				if(flag && p.userName != null && Main.theNetwork.player.userName != null) {
+					height -= fontSize + 5;
 					
 				}
 			}
@@ -92,17 +91,17 @@ public class GuiPauseMenu extends GuiScreen {
 			this.drawSquare(Color.lightGray, 2, xPos, yPos, width, height);
 			drawShadowStringCentered(xPos+(width/2), yPos+10, "Players");	
 			height = fontSize+10;
-			if(flag) {
-				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.network.player.userName + " (You)");
+			if(!flag) {
+				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.theNetwork.player.userName + " (You)");
 			}
-			for(OtherPlayer p : Main.network.players.values()) {
+			for(OtherPlayer p : Main.theNetwork.players.values()) {
 				if(p.userName != null) {
 					
-					if(!p.userName.contentEquals(Main.network.player.userName)) {
+					if(!p.userName.contentEquals(Main.theNetwork.player.userName)) {
 						height += fontSize + 5;
 						drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName);
 					} else {
-						if(!flag) {
+						if(flag) {
 							height += fontSize + 5;
 							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " (You)");
 						}
@@ -119,7 +118,7 @@ public class GuiPauseMenu extends GuiScreen {
 	}
 	
 	public void onClose() {
-		if(Main.network != null) {
+		if(Main.theNetwork != null) {
 			if(Main.thePlayer != null) {
 				Main.thePlayer.getCamera().setMouseLock(true);
 			}

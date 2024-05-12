@@ -135,14 +135,14 @@ public class Entity {
 		if(distanceWalkedModified > (float)nextStepDistance && block != null) {
 			nextStepDistance++;
 			SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
-			if(Main.network != null) {
+			if(Main.theNetwork != null) {
 				PacketPlaySoundAt packet = new PacketPlaySoundAt();
 				packet.place = true;
 				packet.blockID = block.getByteType();
 				packet.x = posX;
 				packet.y = posY;
 				packet.z = posZ;
-				Main.network.client.sendTCP(packet);
+				Main.theNetwork.client.sendTCP(packet);
 			}
 		}
 	}

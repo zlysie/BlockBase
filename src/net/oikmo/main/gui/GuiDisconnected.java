@@ -1,5 +1,6 @@
 package net.oikmo.main.gui;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import net.oikmo.engine.ResourceLoader;
@@ -24,7 +25,7 @@ public class GuiDisconnected extends GuiScreen {
 	
 	
 	public void onInit() {
-		if(Main.network != null) {
+		if(Main.theNetwork != null) {
 			if(Main.thePlayer != null) {
 				Main.thePlayer.getCamera().setMouseLock(false);
 			}
@@ -63,6 +64,21 @@ public class GuiDisconnected extends GuiScreen {
 	}
 	
 	public void onUpdate() {
+		if(Main.inGameGUI != null) {
+			Main.inGameGUI.prepareCleanUp();
+			Main.inGameGUI = null;
+			Main.disconnect(false, "network was null");
+			if(Main.thePlayer != null) {
+				Main.thePlayer.getCamera().setMouseLock(false);
+				Main.thePlayer = null;
+			} else {
+				if(Mouse.isGrabbed() != false) {
+					Mouse.setGrabbed(false);
+				}
+			}
+		}
+		
+
 		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
 		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), (!kick ? "Disconnected: " : "Kicked: ") + message);
 		quitButton.tick(lockTick);

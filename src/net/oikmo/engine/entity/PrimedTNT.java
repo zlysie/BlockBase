@@ -15,8 +15,9 @@ import net.oikmo.network.shared.PacketPlaySoundAt;
 public class PrimedTNT extends Entity {
 
 	private int timer = 0;
+	private boolean actuallyExplode;
 	
-	public PrimedTNT(Vector3f position, float xa, float ya, float za) {
+	public PrimedTNT(Vector3f position, float xa, float ya, float za, boolean actuallyExplode) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.tnt),MasterRenderer.currentTexturePack), position, new Vector3f(), 1);
 		this.setSize(1, 1);
 		this.setRotation(0.0f, new Random().nextInt(4)*90, 0.0f);
@@ -26,16 +27,20 @@ public class PrimedTNT extends Entity {
 		int y = (int) getPosition().y;
 		int z = (int) getPosition().z;
 		//this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);
-		SoundMaster.playSFX("entity.tnt.primed");
-		if(Main.network != null) {
-			PacketPlaySoundAt packet = new PacketPlaySoundAt();
-			packet.blockID = -1;
-			packet.sfxID = "entity.tnt.primed";
-			packet.x = x;
-			packet.y = y;
-			packet.z = z;
-			Main.network.client.sendTCP(packet);
+		if(actuallyExplode) {
+			SoundMaster.playSFX("entity.tnt.primed");
+			if(Main.theNetwork != null) {
+				PacketPlaySoundAt packet = new PacketPlaySoundAt();
+				packet.blockID = -1;
+				packet.sfxID = "entity.tnt.primed";
+				packet.x = x;
+				packet.y = y;
+				packet.z = z;
+				Main.theNetwork.client.sendTCP(packet);
+			}
 		}
+		
+		this.actuallyExplode = actuallyExplode;
 	}
 	
 	public void tick() {
@@ -57,17 +62,20 @@ public class PrimedTNT extends Entity {
 		}
 		
 		if(timer >= 60*5 && !remove) {
-			Main.theWorld.createRadiusFromBlock(5, null, x, y, z);
-			SoundMaster.playSFX("entity.generic.explode");
-			if(Main.network != null) {
-				PacketPlaySoundAt packet = new PacketPlaySoundAt();
-				packet.blockID = -1;
-				packet.sfxID = "entity.generic.explode";
-				packet.x = x;
-				packet.y = y;
-				packet.z = z;
-				Main.network.client.sendTCP(packet);
+			if(actuallyExplode) {
+				Main.theWorld.createRadiusFromBlock(5, null, x, y, z);
+				SoundMaster.playSFX("entity.generic.explode");
+				if(Main.theNetwork != null) {
+					PacketPlaySoundAt packet = new PacketPlaySoundAt();
+					packet.blockID = -1;
+					packet.sfxID = "entity.generic.explode";
+					packet.x = x;
+					packet.y = y;
+					packet.z = z;
+					Main.theNetwork.client.sendTCP(packet);
+				}
 			}
+			
 			remove = true;
 		}
 	}

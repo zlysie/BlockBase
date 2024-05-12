@@ -1,6 +1,5 @@
 package net.oikmo.network.client;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,20 +15,21 @@ import com.esotericsoftware.kryonet.Client;
 
 import net.oikmo.engine.InputManager;
 import net.oikmo.engine.gui.ChatMessage;
-import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.Message;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketChatMessage;
+import net.oikmo.network.shared.PacketChunk;
 import net.oikmo.network.shared.PacketGameOver;
+import net.oikmo.network.shared.PacketModifyChunk;
 import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
-import net.oikmo.network.shared.PacketUpdateChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
@@ -41,8 +41,8 @@ import net.oikmo.network.shared.PacketUserName;
 import net.oikmo.network.shared.PacketWorldJoin;
 import net.oikmo.network.shared.RandomNumber;
 import net.oikmo.toolbox.Logger;
-import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
+import net.oikmo.toolbox.Logger.LogLevel;
 
 public class NetworkHandler {
 	
@@ -67,13 +67,16 @@ public class NetworkHandler {
 	private int tickTimer = 0;
 	public static final int NETWORK_PROTOCOL = 4;
 	
-	private static void registerKryoClasses() {		
+	private static void registerKryoClasses() {
 		kryo.register(LoginRequest.class);
 		kryo.register(LoginResponse.class);
 		kryo.register(Message.class);
 		kryo.register(OtherPlayer.class);
 		kryo.register(float[].class);
 		kryo.register(byte[].class);
+		kryo.register(PacketChunk.class);
+		kryo.register(PacketRequestChunk.class);
+		kryo.register(PacketModifyChunk.class);
 		kryo.register(PacketUpdateX.class);
 		kryo.register(PacketUpdateY.class);
 		kryo.register(PacketUpdateZ.class);
@@ -81,7 +84,6 @@ public class NetworkHandler {
 		kryo.register(PacketUpdateRotY.class);
 		kryo.register(PacketUpdateRotZ.class);
 		kryo.register(PacketWorldJoin.class);
-		kryo.register(PacketUpdateChunk.class);
 		kryo.register(PacketAddPlayer.class);
 		kryo.register(PacketRemovePlayer.class);
 		kryo.register(PacketUserName.class);
@@ -89,7 +91,6 @@ public class NetworkHandler {
 		kryo.register(PacketGameOver.class);
 		kryo.register(PacketTickPlayer.class);
 		kryo.register(PacketUpdateWithheldBlock.class);
-		kryo.register(PacketRequestChunk.class);
 		kryo.register(PacketSavePlayerPosition.class);
 		kryo.register(PacketPlaySoundAt.class);
 		kryo.register(PacketChatMessage.class);
@@ -192,6 +193,13 @@ public class NetworkHandler {
 			}
 		}
 		
+		if(player.c != null) {
+			if(players.containsKey(player.c.getID())) {
+				players.remove(player.c.getID());
+			}
+		}
+		
+		
 		float x = player.x;
 		float y = player.y;
 		float z = player.z;
@@ -238,18 +246,25 @@ public class NetworkHandler {
 		}	
 	}
 
-	public void updateChunk(MasterChunk master) {
-		PacketUpdateChunk packet = new PacketUpdateChunk();
-		
-		packet.add = false;
-		try {
-			packet.data = Maths.compressObject(master.getChunk().blocks);
-		} catch (IOException e) {}
-		packet.x = master.getOrigin().x;
-		packet.z = master.getOrigin().z;
-		client.sendUDP(packet);
-	}
 	
+	Vector3f lastRecordedPosition = new Vector3f();
+	byte lastBlock;
+	public void updateChunk(Vector3f position, Block block, boolean refresh, String yeah) {
+		System.out.println("really? " + yeah);
+		
+		byte b = block != null ? block.getByteType() : -1;
+		
+		if(!Maths.isVectorEqualTo(lastRecordedPosition, position) && b != lastBlock) {
+			PacketModifyChunk packet = new PacketModifyChunk();
+			packet.refresh = refresh;
+			packet.x = (int) position.x;
+			packet.y = (int) position.y;
+			packet.z = (int) position.z;
+			packet.block = b;
+			client.sendTCP(packet);
+		}
+		
+	}
 
 	public void connect(String ip) throws Exception {
 		Main.thePlayer.tick = false;
@@ -257,7 +272,7 @@ public class NetworkHandler {
 		client.start();
 		client.connect(timeout, ip, tcpPort, udpPort);
 		client.addListener(new PlayerClientListener());
-		
+		players = new HashMap<Integer, OtherPlayer>();
 		LoginRequest request = new LoginRequest();
 		request.setUserName(player.userName);
 		request.PROTOCOL = NetworkHandler.NETWORK_PROTOCOL;

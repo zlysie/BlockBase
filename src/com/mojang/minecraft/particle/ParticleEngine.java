@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.minecraft.Tesselator;
 
-import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.toolbox.FastMath;

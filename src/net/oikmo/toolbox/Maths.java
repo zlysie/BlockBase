@@ -85,12 +85,10 @@ public class Maths {
 		return matrix;
 	}
 	
-	public static void matrixToBuffer(Matrix4f m, FloatBuffer dest)
-    {
+	public static void matrixToBuffer(Matrix4f m, FloatBuffer dest) {
         matrixToBuffer(m, 0, dest);
     }
-    public static void matrixToBuffer(Matrix4f m, int offset, FloatBuffer dest)
-    {
+    public static void matrixToBuffer(Matrix4f m, int offset, FloatBuffer dest) {
         dest.put(offset, m.m00);
         dest.put(offset + 1, m.m01);
         dest.put(offset + 2, m.m02);

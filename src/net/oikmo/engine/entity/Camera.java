@@ -5,16 +5,13 @@ import java.util.Random;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.mojang.minecraft.particle.Particle;
 import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.renderers.MasterRenderer;
-import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
-import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.MousePicker;
 
@@ -123,36 +120,10 @@ public class Camera {
 					if(Main.inGameGUI.getSelectedItem() != null) {
 						if(block1 == null) {
 							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded())) {
-								int x = (int) picker.getPointRounded().x;
-								int y = (int) picker.getPointRounded().y;
-								int z = (int) picker.getPointRounded().z;
-								SoundMaster.playBlockPlaceSFX(Main.inGameGUI.getSelectedItem(), x, y, z);
-								if(Main.network != null) {
-									PacketPlaySoundAt packet = new PacketPlaySoundAt();
-									packet.place = true;
-									packet.blockID = Main.inGameGUI.getSelectedItem().getByteType();
-									packet.x = x;
-									packet.y = y;
-									packet.z = z;
-									Main.network.client.sendTCP(packet);
-								}
 								Main.theWorld.setBlock(picker.getPointRounded(), Main.inGameGUI.getSelectedItem());
 							}
 						} else {
 							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance-1))) {
-								int x = (int) picker.getPointRounded().x;
-								int y = (int) picker.getPointRounded().y;
-								int z = (int) picker.getPointRounded().z;
-								SoundMaster.playBlockPlaceSFX(Main.inGameGUI.getSelectedItem(), x, y, z);
-								if(Main.network != null) {
-									PacketPlaySoundAt packet = new PacketPlaySoundAt();
-									packet.place = true;
-									packet.blockID = Main.inGameGUI.getSelectedItem().getByteType();
-									packet.x = x;
-									packet.y = y;
-									packet.z = z;
-									Main.network.client.sendTCP(packet);
-								}
 								Main.theWorld.setBlock(picker.getPointRounded(picker.distance-1), Main.inGameGUI.getSelectedItem());
 							}
 						}
@@ -176,29 +147,10 @@ public class Camera {
 						int x = blockX;
 						int y = blockY;
 						int z = blockZ;
-						SoundMaster.playBlockBreakSFX(block, blockX, blockY, blockZ);
-						for(int px = 0; px < 4; ++px) {
-							for(int py = 0; py < 4; ++py) {
-								for(int pz = 0; pz < 4; ++pz) {
-									float particleX = (float)x + ((float)px) / (float)4;
-									float particleY = (float)y + ((float)py) / (float)4;
-									float particleZ = (float)z + ((float)pz) / (float)4;
-									Particle particle = new Particle(particleX-0.5f, particleY-0.5f, particleZ-0.5f, particleX - (float)x, particleY - (float)y, particleZ - (float)z, block);
-									Main.theWorld.spawnParticle(particle);
-								}
-							}
-						}
-						if(Main.network != null) {
-							PacketPlaySoundAt packet = new PacketPlaySoundAt();
-							packet.blockID = block.getByteType();
-							packet.x = x;
-							packet.y = y;
-							packet.z = z;
-							Main.network.client.sendTCP(packet);
-						}
+						
 						Main.theWorld.setBlock(new Vector3f(blockX,blockY,blockZ), null);
-						if(block.getType() == Block.tnt.getType()) {
-							Main.theWorld.addEntity(new PrimedTNT(new Vector3f(blockX,blockY,blockZ), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f));
+						if(block.getByteType() == Block.tnt.getType()) {
+							Main.theWorld.addEntity(new PrimedTNT(new Vector3f(x,y,z), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, true));
 						}
 					}
 					mouseClickLeft = true;

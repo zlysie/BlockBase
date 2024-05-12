@@ -60,7 +60,7 @@ public class GuiMultiplayer extends GuiScreen {
 					
 					Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
 					try {
-						Main.network = new NetworkHandler(serverAddress.getInputText());
+						Main.theNetwork = new NetworkHandler(serverAddress.getInputText());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -117,7 +117,7 @@ public class GuiMultiplayer extends GuiScreen {
 					
 					Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
 					try {
-						Main.network = new NetworkHandler(serverAddress.getInputText());
+						Main.theNetwork = new NetworkHandler(serverAddress.getInputText());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

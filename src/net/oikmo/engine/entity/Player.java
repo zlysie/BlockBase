@@ -59,7 +59,7 @@ public class Player extends Entity {
 		this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);
 		this.motion.y = (float)((double)this.motion.y - 0.008D);
 		this.move(this.motion.x, this.motion.y, this.motion.z);
-		if(this.getPosition().y < 0 && Main.network == null) {
+		if(this.getPosition().y < 0 && Main.theNetwork == null) {
 			resetPos();
 		}
 		//System.out.println(xa + " " + za);
