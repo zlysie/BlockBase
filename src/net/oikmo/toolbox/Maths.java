@@ -1,5 +1,6 @@
 package net.oikmo.toolbox;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -177,7 +180,13 @@ public class Maths {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		GZIPOutputStream gzipOut = new GZIPOutputStream(baos);;
 		ObjectOutputStream oos = new ObjectOutputStream(gzipOut);
-		oos.writeObject(object);
+		if(object instanceof BufferedImage) {
+			//oos.defaultWriteObject();
+			ImageIO.write((BufferedImage)object, "png", oos); // png is lossless
+		} else {
+			oos.writeObject(object);
+		}
+		
 		oos.close();
 		
 		//System.out.println(humanReadableByteCountBin(baos.size()));

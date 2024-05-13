@@ -7,12 +7,20 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URL;
 import java.util.Map;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -35,6 +43,7 @@ import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.Message;
 import net.oikmo.network.shared.PacketAddPlayer;
 import net.oikmo.network.shared.PacketChatMessage;
+import net.oikmo.network.shared.PacketChunk;
 import net.oikmo.network.shared.PacketGameOver;
 import net.oikmo.network.shared.PacketModifyChunk;
 import net.oikmo.network.shared.PacketPlaySoundAt;
@@ -42,7 +51,6 @@ import net.oikmo.network.shared.PacketRemovePlayer;
 import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.network.shared.PacketSavePlayerPosition;
 import net.oikmo.network.shared.PacketTickPlayer;
-import net.oikmo.network.shared.PacketChunk;
 import net.oikmo.network.shared.PacketUpdateRotX;
 import net.oikmo.network.shared.PacketUpdateRotY;
 import net.oikmo.network.shared.PacketUpdateRotZ;
@@ -61,27 +69,27 @@ import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
 public class MainServer {
-	
+
 	private int tcpPort;
 	private int udpPort;
 	public static Server server;
 	private Kryo kryo;
 	public static float randomFloatNumber;
-	
+
 	public static JFrame window;
 	public static JTextArea logPanel;
 	private static PTextField commandInputPanel;
 	public static JList<String> playersPanel;
 	static MainServerListener listener = new MainServerListener();
 	public static int xSpawn = 0,zSpawn = 0;
-	
+
 	private static String[] splashes;
-	
+
 	public static World theWorld;
-	
-	private static String version = "S0.0.7";
+
+	private static String version = "S0.0.8";
 	public static final int NETWORK_PROTOCOL = 4;
-	
+
 	private static Thread saveThread;
 
 	public MainServer(int tcpPort, int udpPort) {
@@ -108,7 +116,7 @@ public class MainServer {
 			zSpawn = data.zSpawn;
 			logPanel.append("Loaded world at .blockbase-server/saves/server-level.dat!\n\n");
 		}
-		
+
 		Logger.log(LogLevel.INFO,"Starting Server");
 		logPanel.append("Starting Server...\n");
 		server.start();
@@ -116,6 +124,7 @@ public class MainServer {
 			server.bind(tcpPort, udpPort);
 			server.addListener(listener);
 			logPanel.append("Server online! (PORT="+ tcpPort +")\n");
+			logPanel.append("Don't forget to port forward 25555 for server info!\n");
 			Logger.log(LogLevel.INFO, "Server online! (PORT="+ tcpPort +")");
 			logPanel.append("----------------------------");
 			logPanel.append("\n");
@@ -136,13 +145,72 @@ public class MainServer {
 			});
 			saveThread.setName("World Save Thread");
 			saveThread.start();
-			
+
 		} catch (IOException e) {
 			Logger.log(LogLevel.INFO,"Port already used");
 			logPanel.append("Port already in use");
 			logPanel.append("\n");
 			e.printStackTrace();
 		}
+		
+		new Thread(new Runnable() {
+
+			public void run() {    
+				try {
+					ServerSocket pingSocket = new ServerSocket(25555);
+					Socket socket = pingSocket.accept(); // Set up receive socket
+					
+					DataInputStream dIn = new DataInputStream(socket.getInputStream());
+					OutputStream out = socket.getOutputStream();
+					PrintWriter dOut = new PrintWriter(out, true);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					boolean done = false;
+					while(!done) {
+						byte messageType = (byte) dIn.read();
+						
+						switch(messageType) {
+							case 1: // request for players
+								dOut.println(MainServerListener.players.size());
+								dOut.flush();
+								break;
+							case 2: //request forimage
+								byte imgBytes[];
+								File packpng = new File(MainServer.getDir() + "/server-icon.png");
+								if(packpng.exists()) {
+									BufferedImage bimg = ImageIO.read(packpng);
+									if(bimg.getWidth() == 128 && bimg.getWidth() == bimg.getHeight()) {
+										ImageIO.write(bimg,"PNG",baos);
+										System.out.println("sending picture!");
+									} else {
+										bimg = ImageIO.read(MainServer.class.getResourceAsStream("/assets/pack.png"));
+										ImageIO.write(bimg,"PNG",baos);
+									}
+								
+								} else {
+									BufferedImage bimg = ImageIO.read(MainServer.class.getResourceAsStream("/assets/pack.png"));
+									ImageIO.write(bimg,"PNG",baos);
+								}
+								imgBytes = baos.toByteArray();
+								baos.close();
+								out.write((Integer.toString(imgBytes.length)).getBytes());
+								out.write(imgBytes,0,imgBytes.length);
+								dOut.flush();
+								break;
+							default:
+								done = true;
+						}
+						
+					}
+					dOut.close();
+					dIn.close();
+					pingSocket.close();
+					run();
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		}).start();
 	}
 
 	// Try changing this to non staic and see where this effects our game
@@ -190,13 +258,12 @@ public class MainServer {
 		kryo.register(PacketSavePlayerPosition.class);
 		kryo.register(PacketPlaySoundAt.class);
 		kryo.register(PacketChatMessage.class);
-		
 	}
 
 	public static void createServerInterface() {
 		splashes = Maths.fileToArray("splashes.txt");
 		window = new JFrame("BlockBase Server Console");
-		
+
 		URL iconURL = MainServer.class.getResource("/assets/iconx32.png");
 		ImageIcon icon = new ImageIcon(iconURL);
 		window.setIconImage(icon.getImage());
@@ -210,14 +277,14 @@ public class MainServer {
 		logPanel.append("<BlockBase " + version + ">\n");
 		logPanel.append("\n");
 		logPanel.append(getRandomSplash()+"\n");
-		
+
 		logPanel.setLineWrap(false);
 		logPanel.setEditable(false);
-		
+
 		commandInputPanel = new PTextField("Insert command here...");
 		commandInputPanel.setToolTipText("hi! :D");
 		commandInputPanel.setMaximumSize(new Dimension(300, (int) commandInputPanel.getPreferredSize().getHeight()));
-		
+
 		window.setResizable(true);
 		window.setSize(400, 300);
 		window.addComponentListener(new ComponentListener() {
@@ -235,7 +302,7 @@ public class MainServer {
 				System.exit(0); // successful exit
 			}
 		});
-		
+
 		commandInputPanel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -247,25 +314,25 @@ public class MainServer {
 				}
 			}
 		});
-		
-		
+
+
 		JScrollPane scrollPane = new JScrollPane(logPanel);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		
+
 		panel.add(scrollPane);
 		panel.add(commandInputPanel);
 		DefaultListModel<String> listModel = new DefaultListModel<>();
 		listModel.addElement("PLAYERS");
 		playersPanel.setModel(listModel);
-		
+
 		panel.add(playersPanel);
 	}
-	
+
 	public static String getRandomSplash() {
 		return splashes[new Random().nextInt(splashes.length)];
 	}
-	
+
 	public static void refreshList() {
 		DefaultListModel<String> listModel = new DefaultListModel<>();
 		listModel.addElement("PLAYERS");
@@ -274,10 +341,10 @@ public class MainServer {
 		}
 		playersPanel.setModel(listModel);
 	}
-	
+
 	private static void handleCommand(String cmd) {
 		String command = cmd.replace("/", "");
-		
+
 		if(command.contentEquals("help")) {
 			logPanel.append("\n");
 			logPanel.append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
@@ -290,28 +357,28 @@ public class MainServer {
 			boolean continueToDoStuff = true;
 			String toX = null;
 			String toZ = null;
-			
+
 			int tempX = Integer.MIN_VALUE;
 			int tempZ = Integer.MIN_VALUE;
 			try {
-				 toX = split[1];
-				 toZ = split[2];
+				toX = split[1];
+				toZ = split[2];
 			} catch(ArrayIndexOutOfBoundsException e) {
 				continueToDoStuff = false;
 			}
-			
+
 			try {
 				tempX = Integer.valueOf(toX);
 				tempZ = Integer.valueOf(toZ);
 			} catch(NumberFormatException e) {
 				continueToDoStuff = false;
 			}
-			
+
 			if(continueToDoStuff) {
 				xSpawn = tempX;
 				zSpawn = tempZ;
 				SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
-				
+
 				logPanel.append("Successfully set spawn position to: [X="+xSpawn+", Z="+zSpawn+"]!");
 			} else {
 				logPanel.append("Unable to set spawn position as inputted values were invalid.");
@@ -327,7 +394,7 @@ public class MainServer {
 			boolean noIDGiven = false;
 			String toID = null;
 			String message = null;
-			
+
 			int playerID = Integer.MIN_VALUE;
 			try {
 				toID = split[1];
@@ -335,44 +402,44 @@ public class MainServer {
 			} catch(ArrayIndexOutOfBoundsException e) {
 				continueToDoStuff = false;
 			}
-			
+
 			try {
 				playerID = Integer.valueOf(toID);
 			} catch(NumberFormatException e) {
-				 noIDGiven = true;
+				noIDGiven = true;
 			}
-			
+
 			if(message == null) {
 				continueToDoStuff = false;
 			}
-			
+
 			if(MainServerListener.players.get(playerID) == null) {
 				continueToDoStuff = false;
 			}
-			
+
 			continueToDoStuff = false;
 			for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
 				OtherPlayer p = entry.getValue();
-				
+
 				if(p.userName.contentEquals(toID)) {
 					playerID = entry.getKey();
 					continueToDoStuff = true;
 				}
 			}
-			
+
 			if(continueToDoStuff) {
 				System.out.println("kick " + (noIDGiven ? toID : playerID) + " ");
-				
+
 				String reason = cmd.split("kick " + (noIDGiven ? toID : playerID) + " ")[1];
-				
+
 				PacketRemovePlayer packetKick = new PacketRemovePlayer();
 				packetKick.id = playerID;
 				packetKick.kick = true;
 				packetKick.message = reason;
 				MainServer.server.sendToAllTCP(packetKick);
-				
+
 				logPanel.append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.");
-				
+
 			} else {
 				logPanel.append("ID was not valid / Reason was not supplied");
 			}
@@ -392,7 +459,7 @@ public class MainServer {
 		window.setVisible(true);
 		main.startServer();
 	}
-	
+
 
 	/**
 	 * Retrieves data directory of .blockbase/ using {@code Main.getAppDir(String)}
