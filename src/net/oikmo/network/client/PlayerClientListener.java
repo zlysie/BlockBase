@@ -66,12 +66,11 @@ public class PlayerClientListener extends Listener {
 			System.out.println(Main.theNetwork + " network is?");
 			if(Main.theNetwork == null) {
 				Main.disconnect(false, "disconnected");
+			} else {
+				if(!Main.theNetwork.players.containsKey(packet.id)) {
+					Main.theNetwork.players.put(packet.id, newPlayer);
+				}
 			}
-			System.out.println(Main.theNetwork.players.containsKey(packet.id) + " " + packet.id);
-			if(!Main.theNetwork.players.containsKey(packet.id)) {
-				Main.theNetwork.players.put(packet.id, newPlayer);
-			}
-			
 		}
 		else if(object instanceof PacketRemovePlayer){
 			PacketRemovePlayer packet = (PacketRemovePlayer) object;
@@ -142,12 +141,6 @@ public class PlayerClientListener extends Listener {
 					}
 				}
 			}
-			System.out.println(Main.theNetwork.players.keySet());
-			for(Integer in : Main.theNetwork.players.keySet()) {
-				System.out.println(Main.theNetwork.players.get(in));
-				System.out.println(Main.theNetwork.players.get(in).userName);
-			}
-
 		}
 		else if(object instanceof PacketUpdateX){
 			PacketUpdateX packet = (PacketUpdateX) object;
@@ -222,9 +215,6 @@ public class PlayerClientListener extends Listener {
 		}
 		else if(object instanceof PacketModifyChunk) {
 			PacketModifyChunk packet = (PacketModifyChunk) object;
-
-			System.out.println(packet.block+ " " + packet.refresh);
-
 			Vector3f blockPos = new Vector3f(packet.x,packet.y,packet.z);
 			Block block = Block.getBlockFromOrdinal(packet.block);
 			

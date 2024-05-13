@@ -101,9 +101,9 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		drawTexture(backgroundTexture, x, y, width, height);
 		
 		if(inputText.length() == 0 && current != this) {
-			drawShadowString(Color.darkGray, (x+3)-width/2, y-font.getHeight(backgroundText)/2, backgroundText);
+			drawShadowString(Color.darkGray, (x+3)-width/2, y-fontSize/2, backgroundText);
 		} else {
-			drawShadowString((x+3)-width/2, y-font.getHeight(inputText)/2, inputText);
+			drawShadowString((x+3)-width/2, y-fontSize/2, inputText);
 		}
 	}
 

@@ -88,7 +88,7 @@ public class GuiMainMenu extends GuiScreen {
 			public void invoke() {
 				prepareCleanUp();
 				Gui.cleanUp();
-				Main.currentScreen = new GuiMultiplayer();
+				Main.currentScreen = new GuiServerList();
 			}
 
 			@Override
@@ -174,16 +174,14 @@ public class GuiMainMenu extends GuiScreen {
 				mainMenuCamera.pitch += 0.025f;
 			}*/
 			
-			
-			
 			float x = (Display.getWidth()/2);
-			float y = (Display.getHeight()/2)-120;
-			float width = 256;
-			float height = 64;
+			float y = (Display.getHeight()/2)-140;
+			float width = (256+128)+64+64;
+			float height = 64+32;
 			
 			MasterRenderer.getInstance().render(mainMenuCamera);
 			drawTexture(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
-			drawShadowStringCentered(Color.yellow, x,((y+height/2)+10), splashText);
+			drawShadowStringCentered(Color.yellow, x,((y+height/2)+20), splashText);
 			playButton.tick(lockTick);
 			multiplayerButton.tick(lockTick);
 			quitButton.tick(lockTick);

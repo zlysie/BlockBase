@@ -62,4 +62,52 @@ public class SaveSystem {
 		return null;
 	}
 	
+	
+	public static void saveServers(ServerListData data) {
+	    try {
+	    	File directory = Main.getDir();
+	    	
+	    	File save = new File(directory + "/servers.dat");
+	    	save.delete();
+	    	//save.createNewFile();
+	    	FileOutputStream fos = new FileOutputStream(save);
+	    	GZIPOutputStream gzip = new GZIPOutputStream(fos);
+		    ObjectOutputStream oos = new ObjectOutputStream(gzip);
+			oos.writeObject(data);
+			oos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}   
+	}
+	
+	public static ServerListData loadServers() {
+		File directory = Main.getDir();
+    	
+    	File save = new File(directory + "/servers.dat");
+		
+		if(directory.exists()) {
+			if(save.exists()) {
+				ObjectInputStream obj;
+				try {
+					FileInputStream fis = new FileInputStream(save);
+					GZIPInputStream gzip = new GZIPInputStream(fis);
+					obj = new ObjectInputStream(gzip);
+					ServerListData data = (ServerListData) obj.readObject();
+					obj.close();
+					return data;
+				} catch (IOException | ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			} else {
+				return null;
+			}
+			
+		} else {
+			directory.mkdir();
+			return null;
+		}
+		return null;
+	}
+	
 }

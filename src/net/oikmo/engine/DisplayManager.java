@@ -35,6 +35,7 @@ public class DisplayManager {
 	private static int fps, literalfps;
 	private static long lastFrameTime, lastFPS;
 	private static float delta;
+	public static boolean activeDisplay = false;
 
 	/**
 	 * Creates window by size (loads cursor and window icon) and sets OpenGL version.
@@ -53,6 +54,7 @@ public class DisplayManager {
 			lastFrameTime = getCurrentTime();
 			lastFPS = getCurrentTime();
 			MasterRenderer.getInstance();
+			activeDisplay = true;
 		} catch (LWJGLException e) {
 			Main.error("Display Error!", e);
 		}

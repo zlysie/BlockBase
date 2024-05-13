@@ -251,7 +251,7 @@ public class World {
 		if(m != null) {
 			m.setBlockNoUpdate(position, block);
 			if(Main.theNetwork != null) {
-				Main.theNetwork.updateChunk(position,block, false, "no update");
+				Main.theNetwork.updateChunk(position,block, false);
 			}
 
 		}
@@ -273,7 +273,7 @@ public class World {
 		if(m != null) {
 			m.setBlock(position, block);
 			if(Main.theNetwork != null) {
-				Main.theNetwork.updateChunk(position,block, true, "update");
+				Main.theNetwork.updateChunk(position,block, true);
 			}
 			return true;
 		}

@@ -3,6 +3,8 @@ package net.oikmo.engine.gui;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -21,7 +23,9 @@ import net.oikmo.engine.gui.component.slick.GuiComponent;
 import net.oikmo.main.Main;
 
 public class Gui {
-
+	
+	private static Map<Integer, UnicodeFont> fontSizes = new HashMap<>();
+	
 	public static GuiComponent current = null;
 	public static boolean lockedRightNow = false;
 
@@ -40,10 +44,8 @@ public class Gui {
 		try {
 			awtFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/assets/fonts/minecraft.ttf"));
 		} catch (FontFormatException | IOException e) {}
-
-		ColorEffect effect = new ColorEffect();
 		font = new UnicodeFont(awtFont.deriveFont(Font.PLAIN, fontSize));
-		font.getEffects().add(effect);
+		font.getEffects().add(new ColorEffect());
 
 		font.addAsciiGlyphs();
 		try {
@@ -51,6 +53,8 @@ public class Gui {
 		} catch (SlickException e1) {
 			e1.printStackTrace();
 		}
+		
+		fontSizes.put(fontSize, font);
 		
 		guiAtlas = new Image(ResourceLoader.loadUITexture("ui/gui"));
 		cursor = new Cursor();
@@ -137,22 +141,20 @@ public class Gui {
 	}
 
 	protected void drawShadowString(float x, float y, String text) {
-		drawShadowString(null, Color.white, x, y, text);
+		drawShadowString(font, Color.white, x, y, text);
 	}
 	
 	protected void drawShadowString(Color c, float x, float y, String text) {
-		setupGL();
-		font.drawString(x+2, y+2, text, Color.gray);
-		font.drawString(x, y, text, c);
-		dropGL();
+		drawShadowString(font, c, x, y, text);
 	}
 	
 	protected void drawShadowString(UnicodeFont font, int x, int y, String text) {
 		drawShadowString(font, Color.white, x, y, text);
 	}
 	
-	protected void drawShadowString(UnicodeFont font, Color c, float x, float y, String text) {
+	protected void drawShadowString(UnicodeFont f, Color c, float x, float y, String text) {
 		setupGL();
+		UnicodeFont font = f;
 		if(font == null) {
 			font = Gui.font;
 		}
@@ -163,16 +165,23 @@ public class Gui {
 		dropGL();	
 	}
 	
+	
+	
 	@SuppressWarnings("unchecked")
-	protected UnicodeFont calculateFont(float fontSize) {
-		UnicodeFont font = new UnicodeFont(awtFont.deriveFont(fontSize));
-		font.getEffects().add(new ColorEffect());
+	protected UnicodeFont calculateFont(int fontSize) {
+		UnicodeFont font = fontSizes.get(fontSize);
 		
-		font.addAsciiGlyphs();
-		try {
-			font.loadGlyphs();
-		} catch (SlickException e1) {
-			e1.printStackTrace();
+		if(font == null)  {
+			font = new UnicodeFont(awtFont.deriveFont(Font.PLAIN, fontSize));
+			font.getEffects().add(new ColorEffect());
+
+			font.addAsciiGlyphs();
+			try {
+				font.loadGlyphs();
+			} catch (SlickException e1) {
+				e1.printStackTrace();
+			}
+			fontSizes.put(fontSize, font);
 		}
 		return font;
 	}

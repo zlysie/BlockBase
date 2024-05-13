@@ -249,9 +249,7 @@ public class NetworkHandler {
 	
 	Vector3f lastRecordedPosition = new Vector3f();
 	byte lastBlock;
-	public void updateChunk(Vector3f position, Block block, boolean refresh, String yeah) {
-		System.out.println("really? " + yeah);
-		
+	public void updateChunk(Vector3f position, Block block, boolean refresh) {
 		byte b = block != null ? block.getByteType() : -1;
 		
 		if(!Maths.isVectorEqualTo(lastRecordedPosition, position) && b != lastBlock) {

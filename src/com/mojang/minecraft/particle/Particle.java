@@ -34,8 +34,8 @@ public class Particle extends Entity {
 		this.xd = this.xd / x * var9 * 0.4F;
 		this.yd = this.yd / x * var9 * 0.4F + 0.1F;
 		this.zd = this.zd / x * var9 * 0.4F;
-		this.uo = (float)Math.random() * 3.0F;
-		this.vo = (float)Math.random() * 3.0F;
+		this.uo = (float)Math.random() * 2F;
+		this.vo = (float)Math.random() * 2F;
 		this.size = (float)(Math.random() * 0.5D + 0.5D);
 		this.lifetime = (int)(4.0D / (Math.random() * 0.9D + 0.1D));
 		this.age = 0;
@@ -60,15 +60,15 @@ public class Particle extends Entity {
 
 	}
 
-	public void render(Tesselator t, float var2, float var3, float var4, float var5, float var6, float var7) {
+	public void render(Tesselator t, float tickSpeed, float var3, float var4, float var5, float var6, float var7) {
 		float var8 = ((float)(this.tex % 16) + this.uo / 4.0F) / 16.0F;
-		float var9 = var8 + 0.999F / 64.0F;
+		float var9 = var8 + 0.999F / 32.0F;
 		float var10 = ((float)(this.tex / 16) + this.vo / 4.0F) / 16.0F;
-		float var11 = var10 + 0.999F / 64.0F;
+		float var11 = var10 + 0.999F / 32.0F;
 		float var12 = 0.1F * this.size;
-		float var13 = getPosition().x * var2;
-		float var14 = getPosition().y * var2;
-		float var15 = getPosition().z * var2;
+		float var13 = getPosition().x * tickSpeed;
+		float var14 = getPosition().y * tickSpeed;
+		float var15 = getPosition().z * tickSpeed;
 		t.vertexUV(var13 - var3 * var12 - var6 * var12, var14 - var4 * var12, var15 - var5 * var12 - var7 * var12, var8, var11);
 		t.vertexUV(var13 - var3 * var12 + var6 * var12, var14 + var4 * var12, var15 - var5 * var12 + var7 * var12, var8, var10);
 		t.vertexUV(var13 + var3 * var12 + var6 * var12, var14 + var4 * var12, var15 + var5 * var12 + var7 * var12, var9, var10);

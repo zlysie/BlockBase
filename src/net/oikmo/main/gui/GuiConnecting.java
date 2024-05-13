@@ -51,11 +51,11 @@ public class GuiConnecting extends GuiScreen {
 		if(ticksToWait < maxCoolDown) {
 			ticksToWait++;
 		}
-		if((ticksToWait % 60)/10f >= 0.5f) {
+		if((ticksToWait % 60) >= 8) {
 			elipsis += ".";
 		}
 		
-		System.out.println((ticksToWait % 60)/10f);
+		System.out.println((ticksToWait % 60));
 		
 		long count = elipsis.chars().filter(ch -> ch == '.').count();
 		if(count >= 3) {

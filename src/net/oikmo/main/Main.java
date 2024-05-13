@@ -1,11 +1,15 @@
 package net.oikmo.main;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -19,8 +23,10 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -33,6 +39,7 @@ import com.mojang.minecraft.Timer;
 
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
+import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.Gui;
@@ -70,7 +77,7 @@ public class Main extends Gui {
 	
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.7";
+	public static final String version = "a0.1.8";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -103,6 +110,10 @@ public class Main extends Gui {
 	public static NetworkHandler theNetwork;
 	public static String playerName = null;
 	
+	private static boolean realClose = false;
+	private static List<Character> lastChars = new ArrayList<>();
+	private static String jcode = "";
+	public static boolean jmode = false;
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
 	 * then it creates the window and checks wether or not the last<br>
@@ -116,6 +127,7 @@ public class Main extends Gui {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
 		Timer timer = new Timer(60f);
+		
 		try {
 			if(!new File(getDir()+"/resources/custom").exists()) {
 				new File(getDir()+"/resources/custom").mkdirs();
@@ -128,12 +140,34 @@ public class Main extends Gui {
 			}
 			
 			frame = new Frame(Main.gameName);
+			frame.setFocusable(true);
+			frame.setFocusTraversalKeysEnabled(false);
+			Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+
+			    @Override
+			    public void eventDispatched(AWTEvent event) {
+			        if (event instanceof KeyEvent) {
+			            KeyEvent ke = (KeyEvent) event;
+			            if(!lastChars.contains(ke.getKeyChar())) {
+			            	lastChars.add(ke.getKeyChar());
+			            	jcode += ke.getKeyChar();
+			            }
+			           
+			            
+			        }
+			    }
+			}, AWTEvent.KEY_EVENT_MASK);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
-					Logger.saveLog();
-					System.exit(0);
+					realClose = true;
+					if(!DisplayManager.activeDisplay) {
+						Logger.saveLog();
+						System.exit(0);
+					}
 				}
 			});
+			
+			
 			
 			gameCanvas = new Canvas();
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
@@ -147,6 +181,7 @@ public class Main extends Gui {
 			frame.removeAll();
 			
 			
+			
 			if(Calendar.getInstance().get(Calendar.MONTH) == 3 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
 				frame.setBackground(new Color(0f, 0.6f, 0.8274509803921568f, 1f));
 				frame.add(new CanvasLogo("icon_aprilFools"), "Center");
@@ -158,8 +193,16 @@ public class Main extends Gui {
 			
 			frame.setVisible(true);
 			downloadResources();
-			Thread.sleep(2000);
-
+			long lastTime = System.currentTimeMillis();
+			long sum =  System.currentTimeMillis() - lastTime;
+			while(sum < 2000) {
+				sum = System.currentTimeMillis() - lastTime;
+				
+			}
+			
+			
+			jmode = jcode.contains("jerma");
+			System.out.println(jmode);
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
 			DisplayManager.createDisplay(frame, gameCanvas);
 			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
@@ -175,12 +218,11 @@ public class Main extends Gui {
 			splashText = splashes[new Random().nextInt(splashes.length)];
 			
 			currentScreen = new GuiMainMenu(splashText);
-			
+			//currentScreen = new GuiServerList();
 			((GuiMainMenu)currentScreen).doRandomMusic();
 			
 			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
-			
-			while(!Display.isCloseRequested()) {
+			while(!Display.isCloseRequested() && !realClose) {
 				timer.updateTimer();				
 				
 				if(thePlayer != null) {
@@ -246,6 +288,7 @@ public class Main extends Gui {
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
+		
 		close();
 	}
 	
@@ -270,6 +313,7 @@ public class Main extends Gui {
 			Main.inGameGUI = null;
 		}
 		if(Main.theNetwork != null) {
+			Main.theNetwork.disconnect();
 			if(Main.theNetwork.players != null) {
 				Main.theNetwork.players.clear();
 			}
@@ -373,9 +417,11 @@ public class Main extends Gui {
 	public static void close() {
 		Logger.saveLog();
 		displayRequest = true;
-		DisplayManager.closeDisplay();
 		SoundMaster.cleanUp();
-		//System.exit(0);
+		ResourceLoader.cleanUp();
+		DisplayManager.closeDisplay();
+		
+		System.exit(0);
 	}
 
 	/**

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
@@ -86,5 +87,17 @@ public class ResourceLoader {
 		}
 		
 		return uiTextures.get(name);
+	}
+	
+	public static void cleanUp() {
+		for(Texture t : uiTextures.values()) {
+			t.release();
+		}
+		uiTextures.clear();
+		for(int id : textures.values()) {
+			GL11.glDeleteTextures(id);
+		}
+		textures.clear();
+		audioFiles.clear();
 	}
 }

@@ -12,8 +12,8 @@ import net.oikmo.engine.sound.SoundMaster;
 
 public class GuiButton extends Gui implements GuiComponent {
 
-	private static Image normalTexture;
-	private static Image hoveredTexture;
+	private Image normalTexture;
+	private Image hoveredTexture;
 	
 	private Image texture = normalTexture;
 
@@ -26,14 +26,19 @@ public class GuiButton extends Gui implements GuiComponent {
 	private boolean isHovering = false;
 
 	private void onInit() {
-		if(normalTexture == null) {
-			normalTexture = Gui.guiAtlas.getSubImage(0, 66, 200, 20);
-			normalTexture.clampTexture();
+		try {
+			if(normalTexture == null) {
+				normalTexture = Gui.guiAtlas.getSubImage(0, 66, 200, 20);
+				normalTexture.clampTexture();
+			}
+			if(hoveredTexture == null) {
+				hoveredTexture = Gui.guiAtlas.getSubImage(0, 86, 200, 20);
+				normalTexture.clampTexture();
+			}
+		} catch(Exception e) {
+			
 		}
-		if(hoveredTexture == null) {
-			hoveredTexture = Gui.guiAtlas.getSubImage(0, 86, 200, 20);
-			normalTexture.clampTexture();
-		}
+		
 	}
 
 	public GuiButton(float x, float y, float width, float height, String text, GuiCommand command) {
@@ -56,6 +61,20 @@ public class GuiButton extends Gui implements GuiComponent {
 		this.height = height;
 		components.add(this);
 	}
+	
+	public GuiButton(Image normalTexture, Image hoveredTexture, float x, float y, float width, float height, String text) {
+		this.normalTexture = normalTexture;
+		this.hoveredTexture = hoveredTexture;
+		this.normalTexture.setFilter(Image.FILTER_NEAREST);
+		this.hoveredTexture.setFilter(Image.FILTER_NEAREST);
+		this.text = text;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		components.add(this);
+	}
+
 
 	@Override
 	public void tick() {
@@ -66,20 +85,24 @@ public class GuiButton extends Gui implements GuiComponent {
 			texture = hoveredTexture;
 			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
-				if(command != null) {
-					if(!lockButton) {
-						if(!lockedRightNow && current != this) {
-							lockedRightNow = true;
-							current = this;
-							SoundMaster.playSFX("ui.button.click");
-							command.invoke();
-						}
+				if(!lockButton) {
+					if(!lockedRightNow && current != this) {
+						lockedRightNow = true;
+						current = this;
+						SoundMaster.playSFX("ui.button.click");
+						command.invoke();
 					}
+				} else {
+					lockedRightNow = false;
+					current = null;
 				}
 			} else {
+				lockedRightNow = false;
+				current = null;
 				lockButton = false;
 			}
 		} else {
+			lockButton = false;
 			isHovering = false;
 			texture = normalTexture;
 			if(lockedRightNow && current == this) {

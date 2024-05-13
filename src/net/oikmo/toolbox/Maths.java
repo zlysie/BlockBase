@@ -5,9 +5,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.FloatBuffer;
@@ -84,28 +86,28 @@ public class Maths {
 
 		return matrix;
 	}
-	
+
 	public static void matrixToBuffer(Matrix4f m, FloatBuffer dest) {
-        matrixToBuffer(m, 0, dest);
-    }
-    public static void matrixToBuffer(Matrix4f m, int offset, FloatBuffer dest) {
-        dest.put(offset, m.m00);
-        dest.put(offset + 1, m.m01);
-        dest.put(offset + 2, m.m02);
-        dest.put(offset + 3, m.m03);
-        dest.put(offset + 4, m.m10);
-        dest.put(offset + 5, m.m11);
-        dest.put(offset + 6, m.m12);
-        dest.put(offset + 7, m.m13);
-        dest.put(offset + 8, m.m20);
-        dest.put(offset + 9, m.m21);
-        dest.put(offset + 10, m.m22);
-        dest.put(offset + 11, m.m23);
-        dest.put(offset + 12, m.m30);
-        dest.put(offset + 13, m.m31);
-        dest.put(offset + 14, m.m32);
-        dest.put(offset + 15, m.m33);
-    }
+		matrixToBuffer(m, 0, dest);
+	}
+	public static void matrixToBuffer(Matrix4f m, int offset, FloatBuffer dest) {
+		dest.put(offset, m.m00);
+		dest.put(offset + 1, m.m01);
+		dest.put(offset + 2, m.m02);
+		dest.put(offset + 3, m.m03);
+		dest.put(offset + 4, m.m10);
+		dest.put(offset + 5, m.m11);
+		dest.put(offset + 6, m.m12);
+		dest.put(offset + 7, m.m13);
+		dest.put(offset + 8, m.m20);
+		dest.put(offset + 9, m.m21);
+		dest.put(offset + 10, m.m22);
+		dest.put(offset + 11, m.m23);
+		dest.put(offset + 12, m.m30);
+		dest.put(offset + 13, m.m31);
+		dest.put(offset + 14, m.m32);
+		dest.put(offset + 15, m.m33);
+	}
 
 	public static int roundFloat(float number) {
 		int rounded;
@@ -136,11 +138,11 @@ public class Maths {
 		output.y = Maths.roundFloat(input.y);
 		output.z = Maths.roundFloat(input.z);
 	}
-	
+
 	public static Vector3f getBlockPositionFromCalculatedChunk(int x, int y, int z) {
 		Vector3f chunkPos = new Vector3f();
 		Maths.calculateChunkPosition(new Vector3f(x,y,z), chunkPos);
-		
+
 		int localX = (int)(x + chunkPos.x)%16;
 		int localY = (int) y;
 		int localZ = (int)(z + chunkPos.z)%16;
@@ -151,7 +153,7 @@ public class Maths {
 		if(localZ < 0) {
 			localZ = localZ+16;
 		}
-		
+
 		return new Vector3f(localX,localY,localZ);
 	}
 
@@ -255,35 +257,35 @@ public class Maths {
 				listOfStrings.add(line);
 				line = bf.readLine();
 			}
-			
+
 			bf.close();
 			return listOfStrings.toArray(new String[0]);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	public static float getWorldSize(String fileDir) {
 		return new File(Main.getDir()+"/saves/"+fileDir+".dat").length();
 	}
-	
+
 	public static String humanReadableByteCountBin(long bytes) {
-	    long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
-	    if (absB < 1024) {
-	        return bytes + " B";
-	    }
-	    long value = absB;
-	    CharacterIterator ci = new StringCharacterIterator("KMGTPE");
-	    for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
-	        value >>= 10;
-	        ci.next();
-	    }
-	    value *= Long.signum(bytes);
-	    return String.format("%.1f %ciB", value / 1024.0, ci.current());
+		long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+		if (absB < 1024) {
+			return bytes + " B";
+		}
+		long value = absB;
+		CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+		for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+			value >>= 10;
+			ci.next();
+		}
+		value *= Long.signum(bytes);
+		return String.format("%.1f %ciB", value / 1024.0, ci.current());
 	}
-	
+
 	public static byte[] compressObject(Object object) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		GZIPOutputStream gzipOut = new GZIPOutputStream(baos);;
@@ -292,14 +294,50 @@ public class Maths {
 		oos.close();
 		return baos.toByteArray();
 	}
-	
+
 	public static Object uncompressStream(byte[] data) throws ClassNotFoundException, IOException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		GZIPInputStream gzipIn = new GZIPInputStream(bais);
 		ObjectInputStream objectIn = new ObjectInputStream(gzipIn);
 		Object obj = objectIn.readObject();
 		objectIn.close();
-		
+
 		return obj;
+	}
+
+	/**
+	 * Checks to see if a specific port is available.
+	 *
+	 *@param host to check the host
+	 * @param port the port to check for availability
+	 */
+	public static boolean availablePort(String host, int port) {
+		// Assume port is available.
+		boolean result = true;
+
+		try {
+			(new Socket(host, port)).close();
+			// Successful connection means the port is taken.
+			result = false;
+		} catch (IOException e) {
+			
+		}
+		return result;
+	}
+	
+	public static byte[] readExactly(InputStream input, int size) throws IOException
+	{
+	    byte[] data = new byte[size];
+	    int index = 0;
+	    while (index < size)
+	    {
+	        int bytesRead = input.read(data, index, size - index);
+	        if (bytesRead < 0)
+	        {
+	            throw new IOException("Insufficient data in stream");
+	        }
+	        index += bytesRead;
+	    }
+	    return data;
 	}
 }
