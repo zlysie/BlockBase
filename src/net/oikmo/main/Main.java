@@ -214,12 +214,15 @@ public class Main extends Gui {
 			
 			shouldTick = false; 
 			
-			splashes = Maths.fileToArray("splashes.txt");
+			if(!jmode) {
+				splashes = Maths.fileToArray("splashes.txt");
+			} else {
+				splashes = Maths.fileToArray("jermasplashes.txt");
+			}
+			
 			splashText = splashes[new Random().nextInt(splashes.length)];
 			
 			currentScreen = new GuiMainMenu(splashText);
-			//currentScreen = new GuiServerList();
-			((GuiMainMenu)currentScreen).doRandomMusic();
 			
 			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			while(!Display.isCloseRequested() && !realClose) {

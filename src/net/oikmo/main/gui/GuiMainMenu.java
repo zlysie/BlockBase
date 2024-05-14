@@ -180,7 +180,7 @@ public class GuiMainMenu extends GuiScreen {
 			float height = 64+32;
 			
 			MasterRenderer.getInstance().render(mainMenuCamera);
-			drawTexture(ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
+			drawTexture(Main.jmode ? ResourceLoader.loadUITexture("ui/title_j") : ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+20), splashText);
 			playButton.tick(lockTick);
 			multiplayerButton.tick(lockTick);
