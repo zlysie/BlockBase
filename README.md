@@ -2,7 +2,7 @@
 
 ## Voxel game that is NO WAY related to the hit block game with 200 million sales
 
-![image](https://github.com/oikmo/BlockBase/assets/78755068/cb48568d-dc85-4164-9293-b4a9d33db240)
+![image](https://github.com/oikmo/BlockBase/assets/78755068/285f2e60-5923-4cff-b67b-063a50d6c4b8)
 
 - Left Click - Destroy selected block
 - Right Click - Place block
