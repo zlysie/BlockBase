@@ -14,6 +14,7 @@ import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.MousePicker;
 
@@ -35,11 +36,19 @@ public class Camera {
 	private boolean mouseLocked = true;
 	private boolean lockInCam;
 	
-	private MousePicker picker;
 	private TargetedAABB aabb;
 	private World world;
 	
+	public Vector3f forward;
+	public Vector3f right;
+	public Vector3f up;
+	
 	Thread blockPicker;
+	
+	Camera camera;
+	
+	boolean yeah;
+	
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -52,16 +61,18 @@ public class Camera {
 		this.prevPosition = position;
 		this.pitch = rotation.x;
 		this.roll = rotation.z;
-		this.picker = new MousePicker(this, MasterRenderer.getInstance().getProjectionMatrix());
 		this.aabb = new TargetedAABB(new Vector3f());
+		this.forward = new Vector3f();
+		this.right = new Vector3f();
+		this.up = new Vector3f();
 		mouseLocked = true;
 		world = Main.theWorld;
-		
+		camera = this;
 		blockPicker = new Thread(new Runnable() {
 			public void run() {
 				while(DisplayManager.activeDisplay) {
 					//System.out.println(picker.distance);
-					Maths.raycast(world, getPosition(), picker.getPoint(picker.distance));
+					yeah = Maths.raycast(camera);
 					
 				}
 			}
@@ -82,9 +93,7 @@ public class Camera {
 	
 	private Vector3f currentPoint = null;
 	
-	Vector3f forward;
-	Vector3f right;
-	Vector3f up;
+	
 	
 	/**
 	 * Fly cam
@@ -98,20 +107,13 @@ public class Camera {
 		this.position.y = position.y + heightOffset;
 		this.prevYaw = yaw;
 		if(mouseLocked && Main.theWorld != null && Main.thePlayer.tick) {
-			
-			picker.update();
+			this.updateVectors();
 			if(world == null) {
 				world = Main.theWorld;
 				blockPicker.start();
 			}
-			picker.distance = picker.BASE_DISTANCE;
-			/*for(int i = 0; i < picker.BASE_DISTANCE; i++) {
-				Block block = Main.theWorld.getBlock(picker.getPointRounded(i));
-				if(block != null) {
-					picker.distance = i;
-					break;
-				}			
-			}*/
+			
+			
 			
 			currentPoint = Maths.getCurrentVoxelPosition();
 			
@@ -119,23 +121,15 @@ public class Camera {
 			int blockY = (int)(currentPoint.y);
 			int blockZ = (int)(currentPoint.z);
 			
-			System.out.println("blockPos[X="+blockX+",Y="+blockY+",Z="+blockZ+"]");
+			System.out.println("blockPos[X="+blockX+",Y="+blockY+",Z="+blockZ+"] " + yeah);
 			
 			Vector3f blockPos = new Vector3f(blockX,blockY,blockZ);
 			
 			if(Mouse.isButtonDown(1)) {
 				if(!mouseClickRight) {
-					Block block1 = Main.theWorld.getBlock(blockPos);
 					if(Main.inGameGUI.getSelectedItem() != null) {
-						if(block1 == null) {
-							if(Main.theWorld.blockHasNeighbours(blockPos)) {
-								Main.theWorld.setBlock(blockPos, Main.inGameGUI.getSelectedItem());
-							}
-						} else {
-							picker.distance -= 1;
-							if(Main.theWorld.blockHasNeighbours(picker.getPointRounded(picker.distance))) {
-								Main.theWorld.setBlock(picker.getPointRounded(picker.distance), Main.inGameGUI.getSelectedItem());
-							}
+						if(Main.theWorld.blockHasNeighbours(blockPos)) {
+							Main.theWorld.setBlock(blockPos, Main.inGameGUI.getSelectedItem());
 						}
 					}
 					
@@ -188,6 +182,21 @@ public class Camera {
 
 		this.move();
 	}
+	
+	private void updateVectors() {
+		this.forward.x = FastMath.cos(yaw) * FastMath.cos(pitch);
+		this.forward.y = FastMath.sin(pitch);
+		this.forward.z = FastMath.sin(yaw) * FastMath.cos(pitch);
+		this.forward.normalise();
+		
+		Vector3f crossForward = new Vector3f();
+		Vector3f.cross(forward, new Vector3f(0,1,0), crossForward);
+		crossForward.normalise(right);
+		Vector3f crossRF = new Vector3f();
+		Vector3f.cross(right, forward, crossRF);
+		crossRF.normalise(this.up);
+	}
+	
 	
 	public TargetedAABB getAABB() {
 		return aabb;

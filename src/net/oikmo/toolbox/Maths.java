@@ -109,34 +109,43 @@ public class Maths {
 		dest.put(offset + 15, m.m33);
 	}
 
-	static Vector3f currentVoxelPos = new Vector3f(0,0,0);
+	static Vector3f currentVoxelPos = new Vector3f(0,-1,0);
 	static Vector3f voxelNormal;
-	public static boolean raycast(World theWorld, Vector3f startPoint, Vector3f endPoint) {
-		Vector3f roundedStart = Maths.roundVectorTo(startPoint);
-		Vector3f roundedEnd = Maths.roundVectorTo(endPoint);
-		currentVoxelPos = new Vector3f(roundedStart);
+	static final int MAX_RAY_DIST = 5;
+	public static boolean raycast(Camera camera) {
+		Vector3f roundedStart = camera.getPosition();
+		Vector3f currentVoxelPos = roundedStart;
 		
 		voxelNormal = new Vector3f(0,0,0);
 		int stepDir = -1;
-
-		int xSum = (int)roundedEnd.x - (int)roundedStart.x;
-		int dx = FastMath.sign(xSum);
-		float deltaX = dx != 0 ? Math.min(dx / xSum, 10000000.0F) : 10000000.0F;
-		float maxX = (dx > 0 ? deltaX * (FRAC1(roundedStart.x)) : deltaX * FRAC0(roundedStart.x));
+		
+		Vector3f rayVector = new Vector3f(camera.forward);
+		rayVector.x *= MAX_RAY_DIST;
+		rayVector.y *= MAX_RAY_DIST;
+		rayVector.z *= MAX_RAY_DIST;
+		
+		Vector3f roundedEnd = Vector3f.add(camera.getPosition(), rayVector, new Vector3f());
+		
+		float dx = FastMath.sign(roundedEnd.x - roundedStart.x);
+		float deltaX = dx != 0 ? Math.min(dx / (roundedEnd.x - roundedStart.x), 10000000.0F) : 10000000.0F;
+		float maxX = (dx > 0 ? deltaX * (1f-fract(roundedStart.x)) : deltaX * fract(roundedStart.x));
 
 		int ySum = (int)roundedEnd.y - (int)roundedStart.y;
 		int dy = FastMath.sign(ySum);
 		float deltaY = dy != 0 ? Math.min(dy / ySum, 10000000.0F) : 10000000.0F;
-		float maxY = (dy > 0 ? deltaY * (FRAC1(roundedStart.y)) : deltaY * FRAC0(roundedStart.y));
+		float maxY = (dy > 0 ? deltaY * (FRAC1(roundedStart.y)) : deltaY * fract(roundedStart.y));
 
 		int zSum = (int)roundedEnd.z - (int)roundedStart.z;
 		int dz = FastMath.sign(zSum);
 		float deltaZ = dz != 0 ? Math.min(dz / zSum, 10000000.0F) : 10000000.0F;
-		float maxZ = (dz > 0 ? deltaZ * (FRAC1(roundedStart.z)) : deltaZ * FRAC0(roundedStart.z));
+		float maxZ = (dz > 0 ? deltaZ * (FRAC1(roundedStart.z)) : deltaZ * fract(roundedStart.z));
 		
-		while (!(maxX > 1.0F && maxY > 1.0F && maxZ > 1.0F) && !(maxX < 0F && maxY < 0F && maxZ < 0F)) {
-			if(theWorld == null) { break;}
-			if(theWorld.getBlock(currentVoxelPos) != null) {
+		boolean result = false;
+		
+		while (!(maxX > 1.0F && maxY > 1.0F && maxZ > 1.0F)) {
+			if(Main.theWorld == null) { System.out.println("break!"); break;}
+			if(Main.theWorld.getBlock(currentVoxelPos) != null) {
+				Maths.currentVoxelPos = currentVoxelPos;
 				if(stepDir == 0) {
 					voxelNormal.x = -dx;
 				} else if(stepDir == 1) {
@@ -144,7 +153,9 @@ public class Maths {
 				} else {
 					voxelNormal.z = -dz;
 				}
-				return true;
+				
+				result = true;
+				break;
 			}
 			
 			if(maxX < maxY) {
@@ -168,12 +179,14 @@ public class Maths {
 					stepDir = 2;
 				}
 			}
+			
+			
 		}
-
-		return false;
+		
+		return result;
 	}
 
-	private static float FRAC0(float x) {
+	private static float fract(float x) {
 		return x - FastMath.floor(x);
 	}
 
