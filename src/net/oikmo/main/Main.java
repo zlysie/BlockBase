@@ -190,26 +190,20 @@ public class Main extends Gui {
 				frame.add(new CanvasLogo("iconx128"), "Center");
 			}
 			
-			
 			frame.setVisible(true);
 			downloadResources();
 			long lastTime = System.currentTimeMillis();
 			long sum =  System.currentTimeMillis() - lastTime;
 			while(sum < 2000) {
-				sum = System.currentTimeMillis() - lastTime;
-				
+				sum = System.currentTimeMillis() - lastTime;	
 			}
 			
-			
 			jmode = jcode.contains("jerma");
-			System.out.println(jmode);
+			System.out.println("jmode: " + jmode);
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
 			DisplayManager.createDisplay(frame, gameCanvas);
-			frame.setBackground(new Color(0.4f, 0.7f, 1.0f, 1));
 			CubeModel.setup();
-			
 			SoundMaster.init();
-
 			InputManager im = new InputManager();
 			
 			shouldTick = false; 
@@ -219,7 +213,6 @@ public class Main extends Gui {
 			} else {
 				splashes = Maths.fileToArray("jermasplashes.txt");
 			}
-			
 			splashText = splashes[new Random().nextInt(splashes.length)];
 			
 			currentScreen = new GuiMainMenu(splashText);
@@ -504,14 +497,14 @@ public class Main extends Gui {
 		try {
 			File versionTXT = new File(getResources() + "/resourcesVersion.txt");
 			if (versionTXT.createNewFile()) {
-				System.out.println("File created: " + versionTXT.getName());
+				System.out.println("resourcesVersion.txt is created");
 				FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
 
 				myWriter.write(Integer.toString(resourceVersion));
 				myWriter.close();
 
 			} else {
-				System.out.println("File already exists.");
+				System.out.println("resourcesVersion.txt already exists.");
 
 				BufferedReader brr = new BufferedReader(new FileReader(getResources() + "/resourcesVersion.txt"));     
 				String temp = brr.readLine();

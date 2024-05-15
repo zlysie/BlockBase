@@ -109,9 +109,82 @@ public class Maths {
 		dest.put(offset + 15, m.m33);
 	}
 
+	static Vector3f currentVoxelPos = new Vector3f(0,0,0);
+	static Vector3f voxelNormal;
+	public static boolean raycast(World theWorld, Vector3f startPoint, Vector3f endPoint) {
+		Vector3f roundedStart = Maths.roundVectorTo(startPoint);
+		Vector3f roundedEnd = Maths.roundVectorTo(endPoint);
+		currentVoxelPos = new Vector3f(roundedStart);
+		
+		voxelNormal = new Vector3f(0,0,0);
+		int stepDir = -1;
+
+		int xSum = (int)roundedEnd.x - (int)roundedStart.x;
+		int dx = FastMath.sign(xSum);
+		float deltaX = dx != 0 ? Math.min(dx / xSum, 10000000.0F) : 10000000.0F;
+		float maxX = (dx > 0 ? deltaX * (FRAC1(roundedStart.x)) : deltaX * FRAC0(roundedStart.x));
+
+		int ySum = (int)roundedEnd.y - (int)roundedStart.y;
+		int dy = FastMath.sign(ySum);
+		float deltaY = dy != 0 ? Math.min(dy / ySum, 10000000.0F) : 10000000.0F;
+		float maxY = (dy > 0 ? deltaY * (FRAC1(roundedStart.y)) : deltaY * FRAC0(roundedStart.y));
+
+		int zSum = (int)roundedEnd.z - (int)roundedStart.z;
+		int dz = FastMath.sign(zSum);
+		float deltaZ = dz != 0 ? Math.min(dz / zSum, 10000000.0F) : 10000000.0F;
+		float maxZ = (dz > 0 ? deltaZ * (FRAC1(roundedStart.z)) : deltaZ * FRAC0(roundedStart.z));
+		
+		while (!(maxX > 1.0F && maxY > 1.0F && maxZ > 1.0F) && !(maxX < 0F && maxY < 0F && maxZ < 0F)) {
+			if(theWorld == null) { break;}
+			if(theWorld.getBlock(currentVoxelPos) != null) {
+				if(stepDir == 0) {
+					voxelNormal.x = -dx;
+				} else if(stepDir == 1) {
+					voxelNormal.y = -dy;
+				} else {
+					voxelNormal.z = -dz;
+				}
+				return true;
+			}
+			
+			if(maxX < maxY) {
+				if(maxX < maxZ) {
+					currentVoxelPos.x += dx;
+					maxX += deltaX;
+					stepDir = 0;
+				} else {
+					currentVoxelPos.z += dz;
+					maxZ += deltaZ;
+					stepDir = 2;
+				}
+			} else {
+				if (maxY < maxZ) {
+					currentVoxelPos.y += dy;
+					maxY += deltaY;
+					stepDir = 1;
+				} else {
+					currentVoxelPos.z += dz;
+					maxZ += deltaZ;
+					stepDir = 2;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private static float FRAC0(float x) {
+		return x - FastMath.floor(x);
+	}
+
+
+	private static float FRAC1(float x) {
+		return 1 - x + FastMath.floor(x);
+	}
+
 	public static int roundFloat(float number) {
 		int rounded;
-		if (number - (int) number >= 0.0 && number - (int) number < 1.0) {
+		if (number - (int) number >= 0.0 && number - (int) number < 1F) {
 			rounded = (int) FastMath.round(number - 0.1f);
 		} else {
 			rounded = (int) FastMath.round(number);
@@ -121,22 +194,22 @@ public class Maths {
 
 	public static Vector3f roundVectorTo(Vector3f vector) {
 		Vector3f vec = new Vector3f(vector);
-		vec.x = Maths.roundFloat(vector.x);
-		vec.y = Maths.roundFloat(vector.y);
-		vec.z = Maths.roundFloat(vector.z);
+		vec.x = FastMath.round(vector.x);
+		vec.y = FastMath.round(vector.y);
+		vec.z = FastMath.round(vector.z);
 		return vec;
 	}
 
 	public static void roundVector(Vector3f vector) {
-		vector.x = Maths.roundFloat(vector.x);
-		vector.y = Maths.roundFloat(vector.y);
-		vector.z = Maths.roundFloat(vector.z);
+		vector.x = FastMath.round(vector.x);
+		vector.y = FastMath.round(vector.y);
+		vector.z = FastMath.round(vector.z);
 	}
 
 	public static void roundVector(Vector3f input, Vector3f output) {
-		output.x = Maths.roundFloat(input.x);
-		output.y = Maths.roundFloat(input.y);
-		output.z = Maths.roundFloat(input.z);
+		output.x = FastMath.round(input.x);
+		output.y = FastMath.round(input.y);
+		output.z = FastMath.round(input.z);
 	}
 
 	public static Vector3f getBlockPositionFromCalculatedChunk(int x, int y, int z) {
@@ -191,7 +264,7 @@ public class Maths {
 			if(input.x >= -16) {
 				output.x = (int)-1*16;
 			} else {
-				float x = Maths.roundFloat(input.x+1);
+				float x = FastMath.round(input.x+1);
 				output.x = (int) ((x / Chunk.CHUNK_SIZE)-1)*16;
 
 			}
@@ -203,7 +276,7 @@ public class Maths {
 			if(input.z >= -16) {
 				output.z = (int)-1 * 16;
 			} else {
-				float z = Maths.roundFloat(input.z+1);
+				float z = FastMath.round(input.z+1);
 				output.z = (int) ((z / Chunk.CHUNK_SIZE)-1)*16;
 			}
 		}
@@ -320,24 +393,28 @@ public class Maths {
 			// Successful connection means the port is taken.
 			result = false;
 		} catch (IOException e) {
-			
+
 		}
 		return result;
 	}
-	
+
 	public static byte[] readExactly(InputStream input, int size) throws IOException
 	{
-	    byte[] data = new byte[size];
-	    int index = 0;
-	    while (index < size)
-	    {
-	        int bytesRead = input.read(data, index, size - index);
-	        if (bytesRead < 0)
-	        {
-	            throw new IOException("Insufficient data in stream");
-	        }
-	        index += bytesRead;
-	    }
-	    return data;
+		byte[] data = new byte[size];
+		int index = 0;
+		while (index < size)
+		{
+			int bytesRead = input.read(data, index, size - index);
+			if (bytesRead < 0)
+			{
+				throw new IOException("Insufficient data in stream");
+			}
+			index += bytesRead;
+		}
+		return data;
+	}
+
+	public static Vector3f getCurrentVoxelPosition() {
+		return Maths.currentVoxelPos;
 	}
 }

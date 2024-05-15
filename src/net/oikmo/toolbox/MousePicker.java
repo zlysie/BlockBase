@@ -37,16 +37,7 @@ public class MousePicker {
 		return binarySearch(0, distance, currentRay);
 	}
 	
-	public Vector3f getPointRounded() {
-		Vector3f point =  binarySearch(0, distance, currentRay);
-		point.x = Maths.roundFloat(point.x);
-		point.y = Maths.roundFloat(point.y);
-		point.z = Maths.roundFloat(point.z);
-		
-		return point;
-	}
-	
-	public Vector3f getPointRounded(int distance) {
+	public Vector3f getPointRounded(float distance) {
 		Vector3f point =  binarySearch(0, distance, currentRay);
 		point.x = Maths.roundFloat(point.x);
 		point.y = Maths.roundFloat(point.y);

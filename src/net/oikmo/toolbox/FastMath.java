@@ -121,7 +121,6 @@ final public class FastMath {
 	}
 	
 	public static float round(float d) {
-
 	    if (d > 0) {
 	        return (float) (d + 0.5f);
 	    } else {
