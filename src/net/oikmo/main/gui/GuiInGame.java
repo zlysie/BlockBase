@@ -14,6 +14,7 @@ import net.oikmo.engine.inventory.Container;
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.inventory.Slot;
 import net.oikmo.engine.renderers.MasterRenderer;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.PacketUpdateWithheldBlock;
@@ -32,6 +33,8 @@ public class GuiInGame extends GuiScreen {
 	}
 	
 	public void onInit() {
+		GuiMainMenu.stopMusic();
+		SoundMaster.doMusic();
 		MasterRenderer.getInstance().FOV = Float.parseFloat(OptionsHandler.getInstance().translateKey("graphics.fov"));
 		MasterRenderer.getInstance().updateProjectionMatrix();
 		this.hotbar = Gui.guiAtlas.getSubImage(0, 0, 182, 22);

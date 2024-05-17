@@ -147,14 +147,17 @@ public class GuiPauseMenu extends GuiScreen {
 		if(!dontLock) {
 			if(Main.theNetwork != null) {
 				if(Main.thePlayer != null) {
-					Main.thePlayer.getCamera().setMouseLock(false);
+					Main.thePlayer.getCamera().setMouseLock(true);
 				} else {
 					Main.disconnect(false, Main.lang.translateKey("network.disconnect.u"));
 				}
 				
 			} else {
-				Main.thePlayer.getCamera().setMouseLock(true);
-				Main.shouldTick = true;
+				if(Main.thePlayer != null) {
+					Main.thePlayer.getCamera().setMouseLock(true);
+					Main.shouldTick = true;
+				}
+				
 			}
 		}
 		this.optionsButton.onCleanUp();

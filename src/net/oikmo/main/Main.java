@@ -9,6 +9,8 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -30,9 +32,14 @@ import java.util.List;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.SharedDrawable;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.mojang.minecraft.Timer;
@@ -76,48 +83,53 @@ import net.oikmo.toolbox.properties.OptionsHandler;
  * @author Oikmo
  */
 public class Main extends Gui {
-	
+
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
 	public static final String version = "a0.1.9";
 	public static final String gameVersion = gameName + " " + version;
-	
+
 	public static boolean displayRequest = false;
 	public static int WIDTH = 854;
 	public static int HEIGHT = 480;																
-	
+
 	public static Frame frame;
 	public static Canvas gameCanvas;
-	
+
 	private static PanelCrashReport report;
 	private static boolean hasErrored = false;
-	
+
 	public static GuiInGame inGameGUI;
 	public static GuiScreen currentScreen;
-	
+
 	public static String currentlyPlayingWorld;
-	
+
 	public static World theWorld;
 	public static Player thePlayer;
-	
+
 	public static float elapsedTime = 0;
-	
+
 	public static Vector3f camPos = new Vector3f(0,0,0);
-	
+
 	public static boolean shouldTick = true;
 
 	private static String[] splashes;
 	public static String splashText;
-	
+
 	public static NetworkHandler theNetwork;
 	public static String playerName = null;
-	
+
 	private static boolean realClose = false;
 	private static List<Character> lastChars = new ArrayList<>();
 	private static String jcode = "";
-	
+
 	public static LanguageHandler lang = LanguageHandler.getInstance();
-	
+
+	private static Frame nameFrame;
+	private static volatile boolean frameLock = true;
+
+	public static SharedDrawable shared;
+
 	public static boolean jmode = false;
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
@@ -132,7 +144,7 @@ public class Main extends Gui {
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
 		Timer timer = new Timer(60f);
-		
+
 		try {
 			if(!new File(getDir()+"/resources/custom").exists()) {
 				new File(getDir()+"/resources/custom").mkdirs();
@@ -143,30 +155,31 @@ public class Main extends Gui {
 			if(!new File(getResources() + "/sfx").exists()) {
 				new File(getResources() + "/sfx").mkdirs();
 			}
-			
+
 			if(!new File(getDir()+"/options.txt").exists()) {
 				new File(getDir()+"/options.txt").createNewFile();
 				OptionsHandler.getInstance().insertKey("graphics.fov", 70+"");
 				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
+				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
 			}
-			
+
 			frame = new Frame(Main.gameName);
 			frame.setFocusable(true);
 			frame.setFocusTraversalKeysEnabled(false);
 			Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
 
-			    @Override
-			    public void eventDispatched(AWTEvent event) {
-			        if (event instanceof KeyEvent) {
-			            KeyEvent ke = (KeyEvent) event;
-			            if(!lastChars.contains(ke.getKeyChar())) {
-			            	lastChars.add(ke.getKeyChar());
-			            	jcode += ke.getKeyChar();
-			            }
-			           
-			            
-			        }
-			    }
+				@Override
+				public void eventDispatched(AWTEvent event) {
+					if (event instanceof KeyEvent) {
+						KeyEvent ke = (KeyEvent) event;
+						if(!lastChars.contains(ke.getKeyChar())) {
+							lastChars.add(ke.getKeyChar());
+							jcode += ke.getKeyChar();
+						}
+
+
+					}
+				}
 			}, AWTEvent.KEY_EVENT_MASK);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
@@ -177,7 +190,7 @@ public class Main extends Gui {
 					}
 				}
 			});
-			
+
 			gameCanvas = new Canvas();
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
@@ -188,7 +201,7 @@ public class Main extends Gui {
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
 			frame.removeAll();
-			
+
 			if(Calendar.getInstance().get(Calendar.MONTH) == 3 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
 				frame.setBackground(new Color(0f, 0.6f, 0.8274509803921568f, 1f));
 				frame.add(new CanvasLogo("icon_aprilFools"), "Center");
@@ -196,15 +209,68 @@ public class Main extends Gui {
 				frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
 				frame.add(new CanvasLogo("iconx128"), "Center");
 			}
-			
+
 			frame.setVisible(true);
 			downloadResources();
+
+			nameFrame = new Frame();
+
+			nameFrame = new Frame();
+			nameFrame.setSize(300, 125);
+			nameFrame.setLocationRelativeTo(null);
+			nameFrame.addWindowListener(new WindowAdapter(){  
+				public void windowClosing(WindowEvent e) {  
+					frameLock = false;
+					nameFrame.dispose(); 
+				}  
+			});
+			nameFrame.setIconImage(icon.getImage());
+			nameFrame.setName("BlockBase name chooser");
+			nameFrame.setTitle("BlockBase name chooser");
+
+			JLabel label = new JLabel("Name:");
+			JPanel panel = new JPanel();
+			nameFrame.add(panel);
+			panel.add(label);
+
+			final JTextField input = new JTextField(25);
+			panel.add(input);
+
+			JButton button = new JButton("Submit");
+			panel.add(button);
+
+			final JLabel output = new JLabel();
+			panel.add(output);
+
+			button.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if(!input.getText().trim().isEmpty()) {
+						String text = input.getText().trim().replace(" ", "_");
+						
+						if(text.length() > 20) {
+							Main.playerName = text.substring(0, 20);
+						} else {
+							Main.playerName = text;
+						}
+						
+						frameLock = false;
+						nameFrame.dispose();
+					}
+				}
+			});
+
+			nameFrame.setVisible(true);
+
 			long lastTime = System.currentTimeMillis();
 			long sum =  System.currentTimeMillis() - lastTime;
 			while(sum < 2000) {
-				sum = System.currentTimeMillis() - lastTime;	
+				if(frameLock) {
+					lastTime = System.currentTimeMillis();
+				} else {
+					sum = System.currentTimeMillis() - lastTime;
+				}
 			}
-			
+
 			jmode = jcode.contains("jerma");
 			System.out.println("jmode: " + jmode);
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
@@ -212,58 +278,67 @@ public class Main extends Gui {
 			CubeModel.setup();
 			SoundMaster.init();
 			InputManager im = new InputManager();
-			
+
+			shared = new SharedDrawable(Display.getDrawable());
+
 			shouldTick = false; 
-			
+
 			if(!jmode) {
 				splashes = Maths.fileToArray("splashes.txt");
 			} else {
 				splashes = Maths.fileToArray("jermasplashes.txt");
 			}
 			splashText = splashes[new Random().nextInt(splashes.length)];
-			
+
 			currentScreen = new GuiMainMenu(splashText);
-			
+
 			try {
 				GameSettings.globalVolume = Float.parseFloat(OptionsHandler.getInstance().translateKey("audio.volume"));
 			} catch(NumberFormatException e) {
 				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
 			}
-			
-			
+
+			try {
+				GameSettings.sensitivity = Float.parseFloat(OptionsHandler.getInstance().translateKey("input.sensitivity"));
+			} catch(NumberFormatException e) {
+				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
+			}
+
+
+
 			/*Main.shouldTick = true;
 			Main.loadWorld("world1");*/
-			
+
 			SoundMaster.setVolume();
-			
+
 			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			while(!Display.isCloseRequested() && !realClose) {
 				timer.updateTimer();				
-				
+
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
 				}
-				
+
 				slayyyTick = false;
 				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
-					
+
 					if(Main.currentScreen != null) {
 						Main.currentScreen.onTick();
 					}
-					
+
 					if(theNetwork != null && thePlayer != null) {
 						theNetwork.tick();
 					}
-					
+
 					if(shouldTick) {
 						tick();
 					}
 				}
-				
+
 				if(theNetwork != null) {
 					for(OtherPlayer p : Main.theNetwork.players.values()) {
-						Vector3f position = new Vector3f(p.x,p.y,p.z);
+						Vector3f position = new Vector3f(p.x-0.5f,p.y-0.5f,p.z-0.5f);
 						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
 						Entity entity = new Entity(obsidian, position, rotation, 1f);
 						if(p.block != -1) {
@@ -272,11 +347,11 @@ public class Main extends Gui {
 							Entity block = new Entity(new TexturedModel(CubeModel.getRawModel(Block.getBlockFromOrdinal(p.block)), MasterRenderer.currentTexturePack), pos, new Vector3f(p.rotZ,-p.rotY,0), 0.4f);
 							MasterRenderer.getInstance().addEntity(block);
 						}
-						
+
 						MasterRenderer.getInstance().addEntity(entity);
 					}
 				}
-				
+
 				if(theWorld != null && thePlayer != null) {
 					if(!(Main.currentScreen instanceof GuiConnecting) && !(Main.currentScreen instanceof GuiDisconnected) && !Main.thePlayer.tick) {
 						Main.currentScreen = new GuiConnecting();
@@ -288,26 +363,26 @@ public class Main extends Gui {
 					}
 					theWorld.update(thePlayer.getCamera());
 				}
-				
+
 				if(inGameGUI != null) {				
 					inGameGUI.update();
 				}
-				
+
 				if(Main.currentScreen != null) {
 					Main.currentScreen.update();
 				}
-				
+
 				im.handleInput();
-				
+
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {
 			Main.error("Runtime Error!", e);
 		}
-		
+
 		close();
 	}
-	
+
 	/**
 	 * Disconnects the player from a server.
 	 * @param kick
@@ -318,7 +393,7 @@ public class Main extends Gui {
 		if(Main.thePlayer != null) {
 			Main.thePlayer.getCamera().setMouseLock(false);
 		}
-		
+
 		Main.thePlayer = null;
 		if(Main.theWorld != null) {
 			Main.theWorld.quitWorld();
@@ -334,15 +409,15 @@ public class Main extends Gui {
 				Main.theNetwork.players.clear();
 			}
 		}
-		
+
 		Main.theNetwork = null;
 		if(Main.currentScreen != null) {
 			Main.currentScreen.prepareCleanUp();
 		}
 		Main.currentScreen = new GuiDisconnected(kick, message);
-		
+
 	}
-	
+
 	public static boolean isInValidRange(Vector3f origin) {
 		return isInValidRange(1, origin);
 	}
@@ -356,20 +431,20 @@ public class Main extends Gui {
 
 		return false;
 	}
-	
+
 	public static String getRandomSplash() {
 		return splashes[new Random().nextInt(splashes.length)];
 	}
-	
+
 	private static boolean hasSaved = false;
-	
+
 	public static void loadWorld(String worldName) {
 		currentlyPlayingWorld = worldName;
 		SoundMaster.stopMusic();
 		SoundMaster.doMusic();
-		
+
 		inGameGUI = new GuiInGame();
-		
+
 		if(SaveSystem.load(worldName) != null) {
 			theWorld = World.loadWorld(worldName);
 		} else {
@@ -378,7 +453,7 @@ public class Main extends Gui {
 			theWorld.startChunkCreator();
 		}
 	}
-	
+
 	private static boolean tick;
 	public static void shouldTick() {
 		if(Main.theNetwork == null) {
@@ -387,27 +462,27 @@ public class Main extends Gui {
 		} else {
 			tick = !tick;
 		}
-		
+
 		if(Main.thePlayer != null) {
-			
+
 			Main.thePlayer.getCamera().setMouseLock(tick);
 		}	
 	}
-	
+
 	public static boolean isPaused() {
 		return shouldTick == false;
 	}
-	
+
 	public static boolean slayyyTick = false;
-	
+
 	/**
 	 * Every 1/60th this method is ran. This handles movement.
 	 */
 	private static void tick() {
 		slayyyTick = true;
-		
+
 		if(Main.theNetwork == null) {
-			
+
 			if(theWorld != null) {
 				theWorld.tick();
 			}
@@ -418,9 +493,9 @@ public class Main extends Gui {
 					hasSaved = true;
 				}
 			}
-			
+
 		} else {
-			
+
 			if(thePlayer != null) {
 				camPos = new Vector3f(thePlayer.getCamera().getPosition());
 				if(theWorld != null) {
@@ -430,7 +505,7 @@ public class Main extends Gui {
 			}
 		}	
 	}
-	
+
 	/**
 	 * Closes the game.
 	 */
@@ -441,7 +516,7 @@ public class Main extends Gui {
 		SoundMaster.cleanUp();
 		ResourceLoader.cleanUp();
 		DisplayManager.closeDisplay();
-		
+
 		System.exit(0);
 	}
 
@@ -456,7 +531,7 @@ public class Main extends Gui {
 			if(theNetwork != null) {
 				theNetwork.disconnect();
 			}
-			
+
 			displayRequest = true;
 			Logger.saveLog();
 			DisplayManager.closeDisplay();
@@ -558,8 +633,8 @@ public class Main extends Gui {
 							if(options == -1) {
 								System.exit(0);
 							}
-							
-							
+
+
 							if(!new File(getResources() + "/music").exists()) {
 								new File(getResources() + "/music").mkdirs();
 							}
@@ -653,7 +728,7 @@ public class Main extends Gui {
 			return folder;
 		}
 	}
-	
+
 	/**
 	 * Downloads xip from URL
 	 * @param urlStr

@@ -14,8 +14,11 @@ options.title=Options
 options.fov.low=telescope
 options.fov.normal=Normal
 options.fov.high=QUAKE FOV!!!
-options.volume=Volume
 options.fov=FOV
+options.sensitivity.low=*yawn*
+options.sensitivity.high=hyperspeed!!!
+options.sensitivity=Sensitivity
+options.volume=Volume
 
 inventory.title=Blocks
 

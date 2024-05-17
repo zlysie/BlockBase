@@ -91,20 +91,23 @@ public class Entity {
 		int posX = (int)(position.x);
 		int posY = (int)(position.y)-1;
 		int posZ = (int)(position.z);
-		Block block = Main.theWorld.getBlock(new Vector3f(posX,posY,posZ));
-		if(distanceWalkedModified > (float)nextStepDistance && block != null) {
-			nextStepDistance++;
-			SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
-			if(Main.theNetwork != null) {
-				PacketPlaySoundAt packet = new PacketPlaySoundAt();
-				packet.place = true;
-				packet.blockID = block.getByteType();
-				packet.x = posX;
-				packet.y = posY;
-				packet.z = posZ;
-				Main.theNetwork.client.sendTCP(packet);
+		if(Main.theWorld != null) {
+			Block block = Main.theWorld.getBlock(new Vector3f(posX,posY,posZ));
+			if(distanceWalkedModified > (float)nextStepDistance && block != null) {
+				nextStepDistance++;
+				SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
+				if(Main.theNetwork != null) {
+					PacketPlaySoundAt packet = new PacketPlaySoundAt();
+					packet.place = true;
+					packet.blockID = block.getByteType();
+					packet.x = posX;
+					packet.y = posY;
+					packet.z = posZ;
+					Main.theNetwork.client.sendTCP(packet);
+				}
 			}
 		}
+		
 	}
 	
 	public void moveWithoutSound(float xa, float ya, float za, int size) {
@@ -162,7 +165,10 @@ public class Entity {
 		int x = (int)this.position.x;
 		int y = (int)(this.position.y + this.heightOffset / 2.0F);
 		int z = (int)this.position.z;
-		return Main.theWorld.getChunkFromPosition(getCurrentChunkPosition()).getChunk().getBrightness(x, y, z);
+		if(Main.theWorld.getChunkFromPosition(getCurrentChunkPosition()) != null) {
+			return Main.theWorld.getChunkFromPosition(getCurrentChunkPosition()).getChunk().getBrightness(x, y, z);
+		}
+		return 1;
 	}
 
 	/**

@@ -3,6 +3,7 @@ package net.oikmo.network.client;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -39,6 +40,8 @@ import net.oikmo.toolbox.Maths;
 
 public class PlayerClientListener extends Listener {
 
+	public static World theWorld;
+	
 	public void received(Connection connection, Object object){
 		//System.out.println(object);
 
@@ -175,7 +178,7 @@ public class PlayerClientListener extends Listener {
 			}
 		} 
 		else if(object instanceof PacketUpdateRotY){
-
+			
 			PacketUpdateRotY packet = (PacketUpdateRotY) object;
 			if(Main.theNetwork.players.get(packet.id) != null) {
 				Main.theNetwork.players.get(packet.id).rotY = packet.y;
@@ -210,25 +213,27 @@ public class PlayerClientListener extends Listener {
 			}
 			Vector3f chunkPos = new Vector3f(packet.x, 0, packet.z);
 
-
-			Main.theWorld.addChunk(new MasterChunk(chunkPos, blocks));
+			theWorld.addChunk(new MasterChunk(chunkPos, blocks));
 		}
 		else if(object instanceof PacketModifyChunk) {
 			PacketModifyChunk packet = (PacketModifyChunk) object;
 			Vector3f blockPos = new Vector3f(packet.x,packet.y,packet.z);
 			Block block = Block.getBlockFromOrdinal(packet.block);
 			
-			if(packet.refresh) {
-				Main.theWorld.setBlockNoNet(blockPos, block);
-			} else {
-				Main.theWorld.setBlockNoUpdateNoNet(blockPos, block);
-			}
 			
-
+			
+			System.out.println(blockPos + " " + block);
+			
+			if(packet.refresh) {
+				theWorld.setBlockNoNet(blockPos, block);
+			} else {
+				theWorld.setBlockNoUpdateNoNet(blockPos, block);
+			}
 		}
 		else if(object instanceof PacketWorldJoin) {
 			PacketWorldJoin packet = (PacketWorldJoin) object;
-			Main.theWorld = new World(packet.seed);
+			theWorld = new World(packet.seed);
+			Main.theWorld = theWorld;
 			if(Main.thePlayer == null) {
 				Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
 			}
@@ -240,7 +245,6 @@ public class PlayerClientListener extends Listener {
 			PacketTickPlayer packet = (PacketTickPlayer) object;
 			Main.thePlayer.tick = packet.shouldTick;
 		}
-
 		else if(object instanceof PacketPlaySoundAt) {
 			PacketPlaySoundAt packet = (PacketPlaySoundAt) object;
 			Block block = Block.getBlockFromOrdinal(packet.blockID);
@@ -259,9 +263,12 @@ public class PlayerClientListener extends Listener {
 		else if(object instanceof PacketChatMessage) {
 			PacketChatMessage packet = (PacketChatMessage) object;
 			Main.theNetwork.rawMessages.add(new ChatMessage(packet.message, false));
-			if(Main.theNetwork.players.get(packet.id).userName == null) {
-				Main.theNetwork.players.get(packet.id).userName =  packet.message.split(">")[0].replace("<", "").replace(">","").trim();
+			if(!packet.message.startsWith(" [SERVER]")) {
+				if(Main.theNetwork.players.get(packet.id).userName == null) {
+					Main.theNetwork.players.get(packet.id).userName =  packet.message.split(">")[0].replace("<", "").replace(">","").trim();
+				}
 			}
+			
 			if(Main.currentScreen instanceof GuiChat) {
 				((GuiChat)Main.currentScreen).updateMessages();
 			}

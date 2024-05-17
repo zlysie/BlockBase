@@ -93,7 +93,10 @@ public class World {
 											TexturedModel texModel = new TexturedModel(raw, MasterRenderer.currentTexturePack);
 											Entity entity = new Entity(texModel, master.getOrigin(), new Vector3f(0,0,0),1);
 											master.setEntity(entity);
-											master.getMesh().removeMeshInfo();
+											if(master.getMesh() != null) {
+												master.getMesh().removeMeshInfo();
+											}
+											
 										}
 									} else {
 										master.createMesh();
@@ -111,25 +114,29 @@ public class World {
 				}	
 			}
 		}
+		
+		if(Main.theNetwork != null) {
+			try {
+				for(int m = 0; m < chunkMap.values().size(); m++) {
+					MasterChunk master = (MasterChunk) chunkMap.values().toArray()[m];
 
-		for(int m = 0; m < chunkMap.values().size(); m++) {
-			MasterChunk master = (MasterChunk) chunkMap.values().toArray()[m];
-
-			if(master != null) {
-				if(!isInValidRange(master.getOrigin())) {
-					if(Main.theNetwork != null) {
-						if(master.timer > 0) {
-							master.timer--;
-						}
-						if(master.timer <= 0) {
-							System.out.println("removing chunk at " + master.getOrigin() + " as 5s has passed");
-							chunkMap.remove(master.getOrigin());
-							hasAsked.remove(master.getOrigin());
+					if(master != null) {
+						if(!isInValidRange(master.getOrigin())) {
+							if(master.timer > 0) {
+								master.timer--;
+							}
+							if(master.timer <= 0) {
+								System.out.println("removing chunk at " + master.getOrigin() + " as 5s has passed");
+								chunkMap.remove(master.getOrigin());
+								hasAsked.remove(master.getOrigin());
+							}
 						}
 					}
 				}
-			}
+			} catch(java.util.ConcurrentModificationException e) {}
+			
 		}
+		
 
 		for(MasterChunk master : currentMasterChunks) {
 			if(master.getEntity() != null) {
@@ -150,7 +157,7 @@ public class World {
 			Main.thePlayer.tick();
 		}
 		particleEngine.tick();
-
+		
 		ItemEntity.updateOscillation();
 		synchronized(entities) {
 			for(int i = 0; i < entities.size(); i++) {
@@ -439,7 +446,7 @@ public class World {
 		}
 		for(MasterChunk m : chunksToRefresh) {
 			refreshChunk(m);
-			setBlock(new Vector3f(m.getOrigin().x, -1, m.getOrigin().z),null);
+			//setBlock(new Vector3f(m.getOrigin().x, -1, m.getOrigin().z),null);
 		}
 	}
 
@@ -536,7 +543,7 @@ public class World {
 	}	
 
 	public void refreshChunk(MasterChunk master) {
-		master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
+		//master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
 		if(master.getMesh() != null) {
 			master.getMesh().removeMeshInfo();
 			master.destroyMesh();

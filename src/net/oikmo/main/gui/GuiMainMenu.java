@@ -62,6 +62,7 @@ public class GuiMainMenu extends GuiScreen {
 		
 		MasterRenderer.getInstance().FOV = 90f;
 		MasterRenderer.getInstance().updateProjectionMatrix();
+		SoundMaster.stopMusic();
 		
 		Camera mainMenuCamera = new Camera();
 		this.mainMenuCamera = mainMenuCamera;
@@ -96,7 +97,7 @@ public class GuiMainMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = (Display.getHeight()/2)-offsetY;
+				y = (Display.getHeight()/2);
 			}
 		});
 		
@@ -112,7 +113,7 @@ public class GuiMainMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = (Display.getHeight()/2);
+				y = (Display.getHeight()/2)+offsetY*2;
 			}
 		});
 
@@ -127,7 +128,7 @@ public class GuiMainMenu extends GuiScreen {
 			@Override
 			public void update() {
 					x = Display.getWidth()/2;
-				y = (Display.getHeight()/2)+offsetY*2f;
+				y = (Display.getHeight()/2)+offsetY*4f;
 			}
 		});
 		

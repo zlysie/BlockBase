@@ -191,7 +191,7 @@ public class GuiServer extends Gui implements GuiComponent {
 	public void tick(boolean delete, boolean shouldTicky) {
 		
 		if(useImage) {
-			if(imageFile.exists() && imageFile.length() != 0) {
+			if(imageFile != null && imageFile.exists() && imageFile.length() != 0) {
 				try {
 					image = TextureLoader.getTexture("PNG", new FileInputStream(imageFile), Image.FILTER_NEAREST);
 				} catch (Exception e) {

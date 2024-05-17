@@ -48,11 +48,10 @@ public class GuiAddServer extends GuiScreen {
 			public void invoke() {
 				if(!serverName.getInputText().trim().isEmpty() && !serverAddress.getInputText().trim().isEmpty()) {
 					GuiServerList.servers.add(new Server(serverName.getInputText().trim(), serverAddress.getInputText().trim()));
+					prepareCleanUp();
+					Gui.cleanUp();
+					Main.currentScreen = new GuiServerList();
 				}
-				
-				prepareCleanUp();
-				Gui.cleanUp();
-				Main.currentScreen = new GuiServerList();
 			}
 			
 			@Override

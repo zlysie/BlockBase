@@ -41,7 +41,6 @@ import net.oikmo.network.shared.PacketUserName;
 import net.oikmo.network.shared.PacketWorldJoin;
 import net.oikmo.network.shared.RandomNumber;
 import net.oikmo.toolbox.Logger;
-import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.Logger.LogLevel;
 
 public class NetworkHandler {
@@ -145,7 +144,7 @@ public class NetworkHandler {
 			tickTimer++;
 		} else {
 			tickTimer = 0;
-			if(!InputManager.hasMouseMoved()) {
+			if(!InputManager.isMoving()) {
 				Vector3f rot = Main.thePlayer.getCamera().getRotation();
 				player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
 				
@@ -158,9 +157,6 @@ public class NetworkHandler {
 				PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
 				packetRotZ.z = player.rotZ;
 				client.sendUDP(packetRotZ);
-			}
-			if(!InputManager.isMoving()) {
-				
 				Vector3f pos = Main.thePlayer.getCamera().getPosition();
 				player.updatePosition(pos.x, pos.y, pos.z);
 				PacketUpdateX packetX = new PacketUpdateX();
@@ -203,9 +199,6 @@ public class NetworkHandler {
 		float x = player.x;
 		float y = player.y;
 		float z = player.z;
-		float rotX = player.rotX;
-		float rotY = player.rotY-degreesOffsetX;
-		float rotZ = player.rotZ;
 		Vector3f pos = Main.thePlayer.getCamera().getPosition();
 		Vector3f rot = Main.thePlayer.getCamera().getRotation();
 		player.updatePosition(pos.x, pos.y, pos.z);
@@ -228,40 +221,17 @@ public class NetworkHandler {
 			packetZ.z = player.z;
 			client.sendUDP(packetZ);
 		}
-		
-		if(rotX != player.rotX) {
-			PacketUpdateRotX packetX = new PacketUpdateRotX();
-			packetX.x = player.rotX;
-			client.sendUDP(packetX);
-		}
-		if(rotY != player.rotY) {
-			PacketUpdateRotY packetY = new PacketUpdateRotY();
-			packetY.y = player.rotY;
-			client.sendUDP(packetY);
-		}
-		if(rotZ != player.rotZ) {
-			PacketUpdateRotZ packetZ = new PacketUpdateRotZ();
-			packetZ.z = player.rotZ;
-			client.sendUDP(packetZ);
-		}	
 	}
-
 	
-	Vector3f lastRecordedPosition = new Vector3f();
-	byte lastBlock;
 	public void updateChunk(Vector3f position, Block block, boolean refresh) {
 		byte b = block != null ? block.getByteType() : -1;
-		
-		if(!Maths.isVectorEqualTo(lastRecordedPosition, position) && b != lastBlock) {
-			PacketModifyChunk packet = new PacketModifyChunk();
-			packet.refresh = refresh;
-			packet.x = (int) position.x;
-			packet.y = (int) position.y;
-			packet.z = (int) position.z;
-			packet.block = b;
-			client.sendTCP(packet);
-		}
-		
+		PacketModifyChunk packet = new PacketModifyChunk();
+		packet.refresh = refresh;
+		packet.x = (int) position.x;
+		packet.y = (int) position.y;
+		packet.z = (int) position.z;
+		packet.block = b;
+		client.sendTCP(packet);
 	}
 
 	public void connect(String ip) throws Exception {

@@ -57,6 +57,10 @@ public class PrimedTNT extends Entity {
 			this.setWhiteOffset(0);
 		}
 		
+		if(getPosition().y < 0) {
+			remove = true;
+		}
+		
 		if(timer >= 60*5 && !remove) {
 			if(actuallyExplode) {
 				Main.theWorld.createRadiusFromBlock(5, null, x, y, z);

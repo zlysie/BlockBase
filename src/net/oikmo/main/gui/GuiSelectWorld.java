@@ -195,7 +195,7 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = (Display.getHeight()/2)-offsetY+20;
+				y = (Display.getHeight()/2)-offsetY+60;
 			}
 		});
 		

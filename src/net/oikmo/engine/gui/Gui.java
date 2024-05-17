@@ -191,6 +191,7 @@ public class Gui {
 	}
 
 	protected void drawImage(Image image, float x, float y, float width, float height) {
+		if(image == null) { return; }
 		setupGL();
 		image.draw(x-width/2, y-height/2, width, height);
 		dropGL();

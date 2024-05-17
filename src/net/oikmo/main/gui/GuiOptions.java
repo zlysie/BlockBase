@@ -24,11 +24,12 @@ public class GuiOptions extends GuiScreen {
 	}
 	
 	private GuiSlider volume;
+	private GuiSlider sensitivity;
 	private GuiSlider fov;
 	private GuiButton backButton;
 	
 	public void onInit() {
-		fov = new GuiSlider((Display.getWidth()/2)+125, Display.getHeight()/2, 200, 30, Main.lang.translateKey("options.fov")+": "+(int)(MasterRenderer.getInstance().FOV));
+		fov = new GuiSlider((Display.getWidth()/2)+125, (Display.getHeight()/2)-20, 200, 30, Main.lang.translateKey("options.fov")+": "+(int)(MasterRenderer.getInstance().FOV));
 		fov.setGuiCommand(new GuiCommand() {
 			public void invoke(float value) {
 				
@@ -41,12 +42,13 @@ public class GuiOptions extends GuiScreen {
 			}
 			
 			public void update() {
-				x = (Display.getWidth()/2)-125;
+				x = (Display.getWidth()/2)+125;
+				y = Display.getHeight()/2;
 			}
 		});
 		this.updateFOVText();
 		
-		volume = new GuiSlider((Display.getWidth()/2)-125, Display.getHeight()/2, 200, 30, Main.lang.translateKey("options.volume")+": "+(int)(GameSettings.globalVolume*100f)+"%");
+		volume = new GuiSlider((Display.getWidth()/2)-125, (Display.getHeight()/2)-20, 200, 30, Main.lang.translateKey("options.volume")+": "+(int)(GameSettings.globalVolume*100f)+"%");
 		volume.setGuiCommand(new GuiCommand() {
 			public void invoke(float value) {
 				int percievedValue = (int)(value*100f);
@@ -59,9 +61,24 @@ public class GuiOptions extends GuiScreen {
 			
 			public void update() {
 				x = (Display.getWidth()/2)-125;
+				y = Display.getHeight()/2;
 			}
 		});
 		volume.setSliderValue(GameSettings.globalVolume, 0, 1);
+		
+		sensitivity = new GuiSlider((Display.getWidth()/2),(Display.getHeight()/2)+20, 200, 30, Main.lang.translateKey("options.volume")+": "+(int)(GameSettings.globalVolume*100f)+"%");
+		sensitivity.setGuiCommand(new GuiCommand() {
+			public void invoke(float value) {
+				updateSensitivityText();
+			}
+			
+			public void update() {
+				x = (Display.getWidth()/2)-125;
+				y = Display.getHeight()/2;
+			}
+		});
+		sensitivity.setSliderValue(GameSettings.sensitivity, 0, 0.4f);
+		updateSensitivityText();
 		
 		backButton = new GuiButton(Display.getWidth()/2, (Display.getHeight())-60, 200, 30, Main.lang.translateKey("gui.done"));
 		backButton.setGuiCommand(new GuiCommand() {
@@ -99,6 +116,21 @@ public class GuiOptions extends GuiScreen {
 		}
 	}
 	
+	public void updateSensitivityText() {
+		int sensitivityFull = (int)(sensitivity.getValue()*100f);
+		float actualValue = (sensitivity.getValue())*0.4f;
+		GameSettings.sensitivity = actualValue;
+		
+		String sensitivityText = Main.lang.translateKey("options.sensitivity")+": ";
+		if(sensitivityFull <= 15) {
+			sensitivity.setText(sensitivityText + Main.lang.translateKey("options.sensitivity.low"));
+		} else if(sensitivityFull >= 90) {
+			sensitivity.setText(sensitivityText + Main.lang.translateKey("options.sensitivity.high"));
+		} else {
+			sensitivity.setText(sensitivityText + sensitivityFull+"%");
+		}
+	}
+	
 	public void onUpdate() {
 		if(!mainmenu) {
 			drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
@@ -110,6 +142,7 @@ public class GuiOptions extends GuiScreen {
 		
 		fov.tick();
 		volume.tick();
+		sensitivity.tick();
 		backButton.tick();
 	}
 	
@@ -126,6 +159,7 @@ public class GuiOptions extends GuiScreen {
 		}
 		OptionsHandler.getInstance().insertKey("graphics.fov", MasterRenderer.getInstance().FOV+"");
 		OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
+		OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
 		Gui.cleanUp();
 		volume.onCleanUp();
 		backButton.onCleanUp();
