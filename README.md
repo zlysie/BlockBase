@@ -19,3 +19,8 @@
 - F2 - take screenshot
 - F3 - toggle debug ui
 - F11 - toggle fullscreen
+
+Credits
+- Reon Fourie voxel engine tutorials (head start)
+- ThinMatrix (for the reason I know how to make these)
+- Mojang for the assets (and erm particles)
