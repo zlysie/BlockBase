@@ -65,6 +65,7 @@ import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.PTextField;
+import net.oikmo.toolbox.TokenBucketRateLimiter;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
 
@@ -87,7 +88,7 @@ public class MainServer {
 
 	public static World theWorld;
 
-	private static String version = "S0.0.8";
+	private static String version = "S0.0.9";
 	public static final int NETWORK_PROTOCOL = 4;
 
 	private static Thread saveThread;
@@ -207,6 +208,7 @@ public class MainServer {
 					run();
 				} catch(Exception e) {
 					e.printStackTrace();
+					run();
 				}
 			}
 
@@ -445,9 +447,15 @@ public class MainServer {
 			}
 		} else if(cmd.contentEquals("chunks")) {
 			logPanel.append("Server has a total chunk size of: " + theWorld.chunkMap.size() + "\n");
+		} else if(command.startsWith("say ")) {
+			String message = command.substring(4);
+			PacketChatMessage packet = new PacketChatMessage();
+			packet.message=" [SERVER] " + message;
+			server.sendToAllUDP(packet);
+			logPanel.append(packet.message+"\n");
 		} else {
 			logPanel.append("Command \""+ cmd + "\" was not recognized!\n");
-		} 
+		}
 	}
 
 	public static void main(String args[]) {

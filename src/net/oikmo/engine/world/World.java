@@ -102,6 +102,7 @@ public class World {
 	}
 	public Vector3f getPosition(Vector3f pos) {
 		Vector3f result = null;
+		if(pos == null) { return null; }
 		synchronized(usedPositions) {
 			for(int i = 0; i < usedPositions.size(); i++) {
 				if(usedPositions.get(i) != null) {

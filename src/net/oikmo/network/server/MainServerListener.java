@@ -79,8 +79,32 @@ public class MainServerListener extends Listener {
 		}
 		
 	}
-
+	
+	private long lastSentTime = System.currentTimeMillis();
+	
+	private Map<Long, PacketModifyChunk> toBeProcessed = new HashMap<>();
+	
 	public void received(Connection connection, Object object) {
+		if(object.getClass().getName().contains("PacketModifyChunk")) {
+			if(System.currentTimeMillis() - lastSentTime > 250) {
+				System.out.println((System.currentTimeMillis() - lastSentTime) +" " + object);
+				lastSentTime = System.currentTimeMillis();
+				for(Long time : toBeProcessed.keySet()) {
+					if(System.currentTimeMillis() - time > 250) {
+						PacketModifyChunk packet = toBeProcessed.get(time);
+						MainServer.theWorld.setBlock(new Vector3f(packet.x,packet.y,packet.z), packet.block);
+						System.out.println(new Vector3f(packet.x,packet.y,packet.z) + " " + packet.block + " processed");
+						MainServer.server.sendToAllUDP(packet);
+						toBeProcessed.remove(time);
+					}
+				}
+			} else {
+				toBeProcessed.put(lastSentTime, (PacketModifyChunk)object);
+			}
+			
+		}
+		
+		
 		if(object instanceof LoginRequest) {
 			LoginRequest request = (LoginRequest) object;
 			LoginResponse response = new LoginResponse();
@@ -111,6 +135,13 @@ public class MainServerListener extends Listener {
 				String ip = connection.getRemoteAddressTCP().getHostString();
 				PlayersPositionData data = SaveSystem.loadPlayerPositions();
 				System.out.println(data + " data");
+				
+				if(request.getUserName().length() > 20) {
+					response.PROTOCOL = -1;
+					response.setResponseText("not ok!");
+					connection.sendTCP(response);
+				}
+				
 				if(data != null) {
 					Vector3f playerPos = data.positions.get(ip);
 					if(playerPos != null) {
@@ -280,12 +311,6 @@ public class MainServerListener extends Listener {
 			}
 			
 		}
-		else if(object instanceof PacketChunk) {
-			PacketChunk packet = (PacketChunk) object;
-			packet.id = connection.getID();
-			
-			
-		}
 		else if(object instanceof PacketPlaySoundAt) {
 			PacketPlaySoundAt packet = (PacketPlaySoundAt) object;
 			packet.id = connection.getID();
@@ -294,6 +319,7 @@ public class MainServerListener extends Listener {
 		else if(object instanceof PacketChatMessage) {
 			PacketChatMessage packet = (PacketChatMessage) object;
 			packet.id = connection.getID();
+			MainServer.logPanel.append(packet.message+"\n");
 			MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
 		}
 	}
