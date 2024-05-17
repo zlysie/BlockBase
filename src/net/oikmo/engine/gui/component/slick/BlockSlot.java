@@ -76,5 +76,8 @@ public class BlockSlot extends Gui implements GuiComponent {
 	@Override
 	public void onCleanUp() {}
 
-	
+	public static void dropCurrent() {
+		currentlyHoveringSlot = null;
+		lockedRightNow = false;
+	}
 }

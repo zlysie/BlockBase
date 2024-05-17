@@ -130,6 +130,7 @@ public class GuiInventory extends GuiScreen {
 		for(BlockSlot slot : slots) {
 			slot.onCleanUp();
 		}
+		BlockSlot.dropCurrent();
 		InventorySlot.dropCurrent();
 	}
 }
