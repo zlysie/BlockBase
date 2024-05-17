@@ -34,7 +34,7 @@ public class GuiDisconnected extends GuiScreen {
 			Main.shouldTick();
 		}
 		
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+40, 200, 30, "Back to main menu");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+40, 200, 30, Main.lang.translateKey("gui.quit"));
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -67,7 +67,7 @@ public class GuiDisconnected extends GuiScreen {
 		if(Main.inGameGUI != null) {
 			Main.inGameGUI.prepareCleanUp();
 			Main.inGameGUI = null;
-			Main.disconnect(false, "network was null");
+			Main.disconnect(false, Main.lang.translateKey("network.disconnect.n"));
 			if(Main.thePlayer != null) {
 				Main.thePlayer.getCamera().setMouseLock(false);
 				Main.thePlayer = null;
@@ -80,7 +80,7 @@ public class GuiDisconnected extends GuiScreen {
 		
 
 		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
-		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), (!kick ? "Disconnected: " : "Kicked: ") + message);
+		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), (!kick ? Main.lang.translateKey("network.quit.d") : Main.lang.translateKey("network.quit.k") + message));
 		quitButton.tick(lockTick);
 	}
 	

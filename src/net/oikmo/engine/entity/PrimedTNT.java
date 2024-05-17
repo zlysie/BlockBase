@@ -1,7 +1,5 @@
 package net.oikmo.engine.entity;
 
-import java.util.Random;
-
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.models.CubeModel;
@@ -18,14 +16,14 @@ public class PrimedTNT extends Entity {
 	private boolean actuallyExplode;
 	
 	public PrimedTNT(Vector3f position, float xa, float ya, float za, boolean actuallyExplode) {
-		super(new TexturedModel(CubeModel.getRawModel(Block.tnt),MasterRenderer.currentTexturePack), position, new Vector3f(), 1);
-		this.setSize(1, 1);
-		this.setRotation(0.0f, new Random().nextInt(4)*90, 0.0f);
-		this.heightOffset = 0.5f;
+		super(new TexturedModel(CubeModel.getRawModel(Block.tnt),MasterRenderer.currentTexturePack), new Vector3f(position), new Vector3f(), 1);
+		int x = (int) (position.x);
+		int y = (int) (position.y);
+		int z = (int) (position.z);
+		this.setSize(1f, 1f);
+		//this.setRotation(0.0f, new Random().nextInt(4)*90, 0.0f);
 		motion.y = ya;
-		int x = (int) getPosition().x;
-		int y = (int) getPosition().y;
-		int z = (int) getPosition().z;
+		
 		//this.moveRelative(xa, za, this.isOnGround() ? 0.015F : 0.005F);
 		if(actuallyExplode) {
 			SoundMaster.playSFX("entity.tnt.primed");
@@ -47,13 +45,11 @@ public class PrimedTNT extends Entity {
 		timer++;
 		
 		this.motion.y = (float)((double)this.motion.y - 0.008D);
-		this.move(this.motion.x, this.motion.y, this.motion.z,1);
+		this.moveWithoutSound(this.motion.x, this.motion.y, this.motion.z,1);
 		
 		int x = (int) getPosition().x;
 		int y = (int) getPosition().y;
 		int z = (int) getPosition().z;
-		
-		//System.out.println((timer % 30f)/30f);
 		
 		if((timer % 45f)/45f <= 0.5f) {
 			this.setWhiteOffset(15);

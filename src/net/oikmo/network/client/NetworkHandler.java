@@ -184,7 +184,7 @@ public class NetworkHandler {
 		}
 		if(!client.isConnected()) {
 			this.disconnect();
-			Main.disconnect(false, "Unknown (Wrong protocol?)");
+			Main.disconnect(false, Main.lang.translateKey("network.disconnect.ux"));
 			return;
 		}
 		if(Main.theWorld != null) {

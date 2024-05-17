@@ -127,7 +127,6 @@ public class World {
 							hasAsked.remove(master.getOrigin());
 						}
 					}
-
 				}
 			}
 		}
@@ -164,7 +163,6 @@ public class World {
 					} else {
 						entities.remove(entity);
 					}
-
 				}
 			}
 		}
@@ -175,7 +173,6 @@ public class World {
 	}
 
 	public List<AABB> getSurroundingAABBsPhys(AABB aabb, int aabbOffset) {
-
 		List<AABB> surroundingAABBs = new ArrayList<>();
 
 		int x0 = Maths.roundFloat(aabb.minX - aabbOffset);
@@ -189,18 +186,87 @@ public class World {
 			for(int y = y0; y < y1; ++y) {
 				for(int z = z0; z < z1; ++z) {
 					if(getBlock(new Vector3f(x,y,z)) != null) {
-						AABB other = new AABB(x-0.5f, y-0.5f, z-0.5f, x+0.5f, y+0.5f, z+0.5f);
+						AABB other = new AABB(x, y, z, x+1f, y+1f, z+1f);
 						surroundingAABBs.add(other);
 					}
 
 				}
 			}
 		}
-
-
+		
 		return surroundingAABBs;
 	}
+	
+	public Vector3f raycast(Vector3f position, Vector3f direction, float distance, boolean isPlace) {
+        float xPos = (float) Math.floor(position.x);
+        float yPos = (float) Math.floor(position.y);
+        float zPos = (float) Math.floor(position.z);
 
+        if (direction.length() == 0)
+            return null;
+
+        direction = (Vector3f)direction.normalise();
+
+        int stepX = Maths.signum(direction.x);
+        int stepY = Maths.signum(direction.y);
+        int stepZ = Maths.signum(direction.z);
+        Vector3f tMax = new Vector3f(Maths.intbound(position.x, direction.x), Maths.intbound(position.y, direction.y), Maths.intbound(position.z, direction.z));
+        Vector3f tDelta = new Vector3f((float)stepX / direction.x, (float)stepY / direction.y, (float)stepZ / direction.z);
+        float faceX = 0;
+        float faceY = 0;
+        float faceZ = 0;
+
+        do {
+            if (getBlock((int)xPos, (int)yPos, (int)zPos) != null) {
+                if (!isPlace) {
+                    return new Vector3f(xPos, yPos, zPos);
+                } else {
+                    return new Vector3f((int)(xPos + faceX), (int)(yPos + faceY), (int)(zPos + faceZ));
+                }
+            }
+            if (tMax.x < tMax.y) {
+                if (tMax.x < tMax.z) {
+                    if (tMax.x > distance) break;
+
+                    xPos += stepX;
+                    tMax.x += tDelta.x;
+
+                    faceX = -stepX;
+                    faceY = 0;
+                    faceZ = 0;
+                } else {
+                    if (tMax.z > distance) break;
+                    zPos += stepZ;
+                    tMax.z += tDelta.z;
+                    faceX = 0;
+                    faceY = 0;
+                    faceZ = -stepZ;
+                }
+            } else {
+                if (tMax.y < tMax.z) {
+                    if (tMax.y > distance) break;
+                    yPos += stepY;
+                    tMax.y += tDelta.y;
+                    faceX = 0;
+                    faceY = -stepY;
+                    faceZ = 0;
+                } else {
+                    if (tMax.z > distance) break;
+                    zPos += stepZ;
+                    tMax.z += tDelta.z;
+                    faceX = 0;
+                    faceY = 0;
+                    faceZ = -stepZ;
+                }
+            }
+        } while (true);
+
+        return null;
+    }
+	
+	private Block getBlock(int xPos, int yPos, int zPos) {
+		return getBlock(new Vector3f(xPos, yPos, zPos));
+	}
 	/*  if(entity instanceof ItemEntity) {
 			if(!((ItemEntity)entity).dontTick && entity.getPosition().y > 0) {
 				entity.tick();
@@ -271,7 +337,7 @@ public class World {
 		Maths.calculateChunkPosition(position, chunkPos);
 		MasterChunk m = getChunkFromPosition(chunkPos);
 		if(m != null) {
-			m.setBlock(position, block);
+			m.setBlock(position, block, true);
 			if(Main.theNetwork != null) {
 				Main.theNetwork.updateChunk(position,block, true);
 			}
@@ -284,7 +350,7 @@ public class World {
 		Maths.calculateChunkPosition(position, chunkPos);
 		MasterChunk m = getChunkFromPosition(chunkPos);
 		if(m != null) {
-			m.setBlock(position, block);
+			m.setBlock(position, block, false);
 			return true;
 		}
 		return false;
@@ -360,6 +426,9 @@ public class World {
 						holder.x = tx+x;
 						holder.y = ty+y;
 						holder.z =  tz+z;
+						if(getBlock(holder) != null && getBlock(holder).getStrength() == Integer.MAX_VALUE) {
+							continue;
+						}
 						MasterChunk m = setBlockNoUpdate(holder,null);
 						if(!chunksToRefresh.contains(m)) {
 							chunksToRefresh.add(m);
@@ -450,8 +519,10 @@ public class World {
 		if(Main.thePlayer == null) {
 			Main.thePlayer = new Player(new Vector3f(data.x, data.y, data.z), new Vector3f(data.rotX, data.rotY, data.rotZ));
 		}
-
-		Main.thePlayer.setInventory(Container.loadSavedContainer(data.cont));
+		
+		if(data.cont != null) {
+			Main.thePlayer.setInventory(Container.loadSavedContainer(data.cont));
+		}
 		Main.thePlayer.resetMotion();
 
 		Vector3f v = Main.thePlayer.getPosition();

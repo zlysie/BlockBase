@@ -15,6 +15,6 @@ public class BlockGlass extends Block {
 	}
 	
 	public boolean blocksLight() {
-		return true;
+		return false;
 	}
 }

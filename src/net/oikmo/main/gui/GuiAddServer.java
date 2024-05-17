@@ -24,7 +24,7 @@ public class GuiAddServer extends GuiScreen {
 	
 	public void onInit() {
 		
-		serverName = new GuiTextField("Name of server here...",Display.getWidth()/2, (Display.getHeight()/2)-55, 200, 30);
+		serverName = new GuiTextField(Main.lang.translateKey("network.servers.add.input.name"),Display.getWidth()/2, (Display.getHeight()/2)-55, 200, 30);
 		serverName.setGuiCommand(new GuiCommand() {
 			@Override
 			public void update() {
@@ -32,8 +32,9 @@ public class GuiAddServer extends GuiScreen {
 				y = (Display.getHeight()/2)-15;
 			}
 		});
+		serverName.setInputText("BlockBase Server");
 		
-		serverAddress = new GuiTextField("IP of server here...",Display.getWidth()/2, (Display.getHeight()/2)-15, 200, 30);
+		serverAddress = new GuiTextField(Main.lang.translateKey("network.servers.add.input.ip"),Display.getWidth()/2, (Display.getHeight()/2)-15, 200, 30);
 		serverAddress.setGuiCommand(new GuiCommand() {
 			@Override
 			public void update() {
@@ -42,7 +43,7 @@ public class GuiAddServer extends GuiScreen {
 			}
 		});
 		
-		saveButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+25, 200, 30, "Add server");
+		saveButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+25, 200, 30, Main.lang.translateKey("network.servers.add.save"));
 		saveButton.setGuiCommand(new GuiCommand() {
 			public void invoke() {
 				if(!serverName.getInputText().trim().isEmpty() && !serverAddress.getInputText().trim().isEmpty()) {
@@ -61,7 +62,7 @@ public class GuiAddServer extends GuiScreen {
 			}
 		});
 		
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+65, 200, 30, "Back to server list");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+65, 200, 30, Main.lang.translateKey("network.servers.add.quit"));
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -95,7 +96,7 @@ public class GuiAddServer extends GuiScreen {
 	public void onUpdate() {
 		if(Main.isPaused()) {
 			drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
-			drawShadowStringCentered((Display.getWidth()/2), (Display.getHeight()/2)-85, "Type in server...");
+			drawShadowStringCentered((Display.getWidth()/2), (Display.getHeight()/2)-85, Main.lang.translateKey("network.servers.add.title"));
 			serverAddress.tick();
 			serverName.tick();
 			saveButton.tick(lockTick);

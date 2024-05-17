@@ -11,7 +11,7 @@ public class BlockBedrock extends Block {
 	}
 	
 	public float getStrength() {
-		return 1f;
+		return Integer.MAX_VALUE;
 	}
 	
 	public boolean blocksLight() {

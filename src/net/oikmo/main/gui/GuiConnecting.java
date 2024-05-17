@@ -8,6 +8,7 @@ import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
 import net.oikmo.main.Main;
+import net.oikmo.toolbox.properties.LanguageHandler;
 
 public class GuiConnecting extends GuiScreen {
 	
@@ -24,7 +25,7 @@ public class GuiConnecting extends GuiScreen {
 			Main.shouldTick();
 		}
 		
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+40, 200, 30, "Quit");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+40, 200, 30, LanguageHandler.getInstance().translateKey("gui.quit"));
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -55,8 +56,6 @@ public class GuiConnecting extends GuiScreen {
 			elipsis += ".";
 		}
 		
-		System.out.println((ticksToWait % 60));
-		
 		long count = elipsis.chars().filter(ch -> ch == '.').count();
 		if(count >= 3) {
 			elipsis = "";
@@ -69,7 +68,7 @@ public class GuiConnecting extends GuiScreen {
 	
 	public void onUpdate() {
 		drawTiledBackground(ResourceLoader.loadUITexture("dirtTex"), 48);
-		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), "Connecting" + elipsis);
+		drawShadowStringCentered(Display.getWidth()/2, (Display.getHeight()/2), Main.lang.translateKey("network.connecting") + elipsis);
 		quitButton.tick(lockTick);
 		
 		if(Main.thePlayer != null) {

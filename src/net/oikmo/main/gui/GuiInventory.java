@@ -50,7 +50,7 @@ public class GuiInventory extends GuiScreen {
 		yPos = (Display.getHeight()/2)-height/2;
 		drawSquareFilled(Color.lightGray, xPos, yPos, width, height);
 		drawSquare(Color.gray, 4, xPos, yPos, width, height);
-		drawShadowStringCentered(xPos+(width/2), yPos+10, "Blocks");		
+		drawShadowStringCentered(xPos+(width/2), yPos+10, Main.lang.translateKey("inventory.title"));		
 		
 		for(int i = 0; i < slots.size(); i++) {
 			slots.get(i).tick();
@@ -96,10 +96,6 @@ public class GuiInventory extends GuiScreen {
 				} else {
 					break;
 				}
-				
-				
-				
-				//System.out.println(xOff + " " + y);
 			}
 			xOffset = 0;
 		}

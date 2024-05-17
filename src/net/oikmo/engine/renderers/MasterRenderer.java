@@ -162,7 +162,7 @@ public class MasterRenderer {
 		
 		float wb2 = 0.501f, hb2 =  0.501f;
 		GL11.glColor3f(0, 0, 0);
-		GL11.glTranslatef(ent.getPosition().x, ent.getPosition().y, ent.getPosition().z);
+		GL11.glTranslatef(ent.getPosition().x+0.5f, ent.getPosition().y+0.5f, ent.getPosition().z+0.5f);
 		GL11.glBegin(GL11.GL_LINE_STRIP);
 		GL11.glVertex3f(-wb2, -hb2, -wb2);
 		GL11.glVertex3f(-wb2, -hb2, wb2);
@@ -187,7 +187,7 @@ public class MasterRenderer {
 		GL11.glVertex3f(wb2, hb2, -wb2);
 		GL11.glVertex3f(-wb2, hb2, -wb2);
 		GL11.glEnd();
-		GL11.glTranslatef(-ent.getPosition().x, -ent.getPosition().y, -ent.getPosition().z);
+		GL11.glTranslatef(-(ent.getPosition().x+0.5f), -(ent.getPosition().y+0.5f), -(ent.getPosition().z+0.5f));
 	}
 	
 	public void addEntity(Entity entity) {

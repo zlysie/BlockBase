@@ -13,11 +13,12 @@ import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiChat;
 
 public class Player extends Entity {
+	public boolean tick = true;
 	
 	private Camera camera;
 	private Container inventory;
 	
-	public boolean tick = true;
+	public int reachDistance = 5;
 	
 	public Player(Vector3f position, Vector3f rotation) {
 		super(new TexturedModel(CubeModel.getRawModel(Block.obsidian), ModelTexture.create("textures/transparent")), position, rotation,1f);
@@ -62,7 +63,6 @@ public class Player extends Entity {
 		if(this.getPosition().y < 0 && Main.theNetwork == null) {
 			resetPos();
 		}
-		//System.out.println(xa + " " + za);
 		
 		this.motion.x *= 0.91F;
 		this.motion.y *= 0.98F;
@@ -79,7 +79,7 @@ public class Player extends Entity {
 
 	public void updateCamera() {
 		if(tick)
-			camera.update(new Vector3f(getPosition()), heightOffset);
+			camera.update(this);
 	}
 	
 	public void resetPos() {

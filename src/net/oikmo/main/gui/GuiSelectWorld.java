@@ -33,11 +33,12 @@ public class GuiSelectWorld extends GuiScreen {
 	public void onInit() {
 		float offsetY = -(6*30)/2;
 		
-		world1Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-150-5, 200, 30, "Create new world...");
+		world1Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-150-5, 200, 30, Main.lang.translateKey("world.select.create"));
 		world1Button.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				if(!delete) {
+					GuiMainMenu.stopMusic();
 					SoundMaster.stopMusic();
 					SoundMaster.doMusic();
 					Main.loadWorld("world1");
@@ -58,11 +59,12 @@ public class GuiSelectWorld extends GuiScreen {
 			}
 		});
 		
-		world2Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-120, 200, 30, "Create new world...");
+		world2Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-120, 200, 30, Main.lang.translateKey("world.select.create"));
 		world2Button.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				if(!delete) {
+					GuiMainMenu.stopMusic();
 					SoundMaster.stopMusic();
 					SoundMaster.doMusic();
 					Main.loadWorld("world2");
@@ -83,11 +85,12 @@ public class GuiSelectWorld extends GuiScreen {
 			}
 		});
 		
-		world3Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-90+5, 200, 30, "Create new world...");
+		world3Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-90+5, 200, 30, Main.lang.translateKey("world.select.create"));
 		world3Button.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				if(!delete) {
+					GuiMainMenu.stopMusic();
 					SoundMaster.stopMusic();
 					SoundMaster.doMusic();
 					Main.loadWorld("world3");
@@ -108,11 +111,12 @@ public class GuiSelectWorld extends GuiScreen {
 			}
 		});
 		
-		world4Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-60+10, 200, 30, "Create new world...");
+		world4Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-60+10, 200, 30, Main.lang.translateKey("world.select.create"));
 		world4Button.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				if(!delete) {
+					GuiMainMenu.stopMusic();
 					SoundMaster.stopMusic();
 					SoundMaster.doMusic();
 					Main.loadWorld("world4");
@@ -134,11 +138,12 @@ public class GuiSelectWorld extends GuiScreen {
 			}
 		});
 		
-		world5Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-30+15, 200, 30, "Create new world...");
+		world5Button = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY-30+15, 200, 30, Main.lang.translateKey("world.select.create"));
 		world5Button.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				if(!delete) {
+					GuiMainMenu.stopMusic();
 					SoundMaster.stopMusic();
 					SoundMaster.doMusic();
 					Main.loadWorld("world5");
@@ -160,15 +165,15 @@ public class GuiSelectWorld extends GuiScreen {
 			}
 		});
 		
-		deleteButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY+20, 200, 30, "Delete");
+		deleteButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY+20, 200, 30, Main.lang.translateKey("gui.delete"));
 		deleteButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
 				delete = !delete;
 				if(delete) {
-					deleteButton.setText("Cancel");
+					deleteButton.setText(Main.lang.translateKey("gui.cancel"));
 				} else {
-					deleteButton.setText("Delete");
+					deleteButton.setText(Main.lang.translateKey("gui.delete"));
 				}
 			}
 
@@ -179,7 +184,7 @@ public class GuiSelectWorld extends GuiScreen {
 			}
 		});
 		
-		backButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY+60, 200, 30, "Back");
+		backButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY+60, 200, 30, Main.lang.translateKey("gui.quit"));
 		backButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -207,27 +212,27 @@ public class GuiSelectWorld extends GuiScreen {
 		if(SaveSystem.load("world1") != null) {
 			world1Button.setText("World 1 ("+ String.format("%.1f", Maths.getWorldSize("world1")/1024f) +"KB)");
 		} else {
-			world1Button.setText("Create new world...");
+			world1Button.setText(Main.lang.translateKey("world.select.create"));
 		}
 		if(SaveSystem.load("world2") != null) {
 			world2Button.setText("World 2 ("+ String.format("%.1f", Maths.getWorldSize("world2")/1024f) +"KB)");
 		} else {
-			world2Button.setText("Create new world...");
+			world2Button.setText(Main.lang.translateKey("world.select.create"));
 		}
 		if(SaveSystem.load("world3") != null) {
 			world3Button.setText("World 3 ("+ String.format("%.1f", Maths.getWorldSize("world3")/1024f) +"KB)");
 		} else {
-			world3Button.setText("Create new world...");
+			world3Button.setText(Main.lang.translateKey("world.select.create"));
 		}
 		if(SaveSystem.load("world4") != null) {
 			world4Button.setText("World 4 ("+ String.format("%.1f", Maths.getWorldSize("world4")/1024f) +"KB)");
 		} else {
-			world4Button.setText("Create new world...");
+			world4Button.setText(Main.lang.translateKey("world.select.create"));
 		}
 		if(SaveSystem.load("world5") != null) {
 			world5Button.setText("World 5 ("+ String.format("%.1f", Maths.getWorldSize("world5")/1024f) +"KB)");
 		} else {
-			world5Button.setText("Create new world...");
+			world5Button.setText(Main.lang.translateKey("world.select.create"));
 		}
 	}
 	

@@ -21,52 +21,52 @@ public class CubeModel {
 	static Vector3f[][] VERTS;
 	
 	public static Vector3f[] PX_POS = {
-			new Vector3f(0.5f,0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,0.5f),
-			new Vector3f(0.5f,-0.5f,0.5f),
-			new Vector3f(0.5f,0.5f,0.5f),
-			new Vector3f(0.5f,0.5f,-0.5f)
+			new Vector3f(1f,1f,0f),
+			new Vector3f(1f,0f,0f),
+			new Vector3f(1f,0f,1f),
+			new Vector3f(1f,0f,1f),
+			new Vector3f(1f,1f,1f),
+			new Vector3f(1f,1f,0f)
 	};
 	public static Vector3f[] NX_POS = {
-			new Vector3f(-0.5f,0.5f,-0.5f),
-			new Vector3f(-0.5f,-0.5f,-0.5f),
-			new Vector3f(-0.5f,-0.5f,0.5f),
-			new Vector3f(-0.5f,-0.5f,0.5f),
-			new Vector3f(-0.5f,0.5f,0.5f),
-			new Vector3f(-0.5f,0.5f,-0.5f)
+			new Vector3f(0f,1f,0f),
+			new Vector3f(0f,0f,0f),
+			new Vector3f(0f,0f,1f),
+			new Vector3f(0f,0f,1f),
+			new Vector3f(0f,1f,1f),
+			new Vector3f(0f,1f,0f)
 	};
 	public static Vector3f[] PY_POS = {
-			new Vector3f(-0.5f,0.5f,0.5f),
-			new Vector3f(-0.5f,0.5f,-0.5f),
-			new Vector3f(0.5f,0.5f,-0.5f),
-			new Vector3f(0.5f,0.5f,-0.5f),
-			new Vector3f(0.5f,0.5f,0.5f),
-			new Vector3f(-0.5f,0.5f,0.5f)
+			new Vector3f(0f,1f,1f),
+			new Vector3f(0f,1f,0f),
+			new Vector3f(1f,1f,0f),
+			new Vector3f(1f,1f,0f),
+			new Vector3f(1f,1f,1f),
+			new Vector3f(0f,1f,1f)
 	};
 	public static Vector3f[] NY_POS = {
-			new Vector3f(-0.5f,-0.5f,0.5f),
-			new Vector3f(-0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,0.5f),
-			new Vector3f(-0.5f,-0.5f,0.5f)
+			new Vector3f(0f,0f,1f),
+			new Vector3f(0f,0f,0f),
+			new Vector3f(1f,0f,0f),
+			new Vector3f(1f,0f,0f),
+			new Vector3f(1f,0f,1f),
+			new Vector3f(0f,0f,1f)
 	};
 	public static Vector3f[] PZ_POS = {
-			new Vector3f(-0.5f,0.5f,0.5f),
-			new Vector3f(-0.5f,-0.5f,0.5f),
-			new Vector3f(0.5f,-0.5f,0.5f),
-			new Vector3f(0.5f,-0.5f,0.5f),
-			new Vector3f(0.5f,0.5f,0.5f),
-			new Vector3f(-0.5f,0.5f,0.5f)
+			new Vector3f(0f,1f,1f),
+			new Vector3f(0f,0f,1f),
+			new Vector3f(1f,0f,1f),
+			new Vector3f(1f,0f,1f),
+			new Vector3f(1f,1f,1f),
+			new Vector3f(0f,1f,1f)
 	};
 	public static Vector3f[] NZ_POS = {
-			new Vector3f(-0.5f,0.5f,-0.5f),
-			new Vector3f(-0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,-0.5f,-0.5f),
-			new Vector3f(0.5f,0.5f,-0.5f),
-			new Vector3f(-0.5f,0.5f,-0.5f)
+			new Vector3f(0f,1f,0f),
+			new Vector3f(0f,0f,0f),
+			new Vector3f(1f,0f,0f),
+			new Vector3f(1f,0f,0f),
+			new Vector3f(1f,1f,0f),
+			new Vector3f(0f,1f,0f)
 	};
 
 	public static Vector2f[] UV_PX;
@@ -98,12 +98,12 @@ public class CubeModel {
 			1f, 1f, 1f,
 			1f, 1f, 1f,
 			
-			0.5f, 0.5f, 0.5f,
-			0.5f, 0.5f, 0.5f,
-			0.5f, 0.5f, 0.5f,
-			0.5f, 0.5f, 0.5f,
-			0.5f, 0.5f, 0.5f,
-			0.5f, 0.5f, 0.5f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
+			1f, 1f, 1f,
 			
 			0.8f, 0.8f, 0.8f,
 			0.8f, 0.8f, 0.8f,

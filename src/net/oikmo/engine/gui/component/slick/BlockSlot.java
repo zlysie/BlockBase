@@ -10,6 +10,11 @@ import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 
 public class BlockSlot extends Gui implements GuiComponent {
+	public static BlockSlot currentlyHoveringSlot;
+	private static boolean lockedRightNow = false;
+	
+	private boolean isHovering;
+	
 	private Item item;
 	
 	private float x, y, width=32, height=32;
@@ -31,7 +36,7 @@ public class BlockSlot extends Gui implements GuiComponent {
 		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
 
 		if(y + height/2 > mouseY && y-height/2 < mouseY && x + width/2 > mouseX && x-width/2 < mouseX) {
-			
+			isHovering = true;
 			if(Mouse.isButtonDown(0)) {
 				if(!lockButton) {
 					SoundMaster.playSFX("ui.button.click");
@@ -41,6 +46,18 @@ public class BlockSlot extends Gui implements GuiComponent {
 			} else {
 				lockButton = false;
 			}
+		} else {
+			isHovering = false;
+		}
+		
+		if(isHovering && !lockedRightNow && currentlyHoveringSlot != this) {
+			currentlyHoveringSlot = this;
+			lockedRightNow = true;
+		}
+		
+		if(!isHovering && lockedRightNow && currentlyHoveringSlot == this) {
+			currentlyHoveringSlot = null;
+			lockedRightNow = false;
 		}
 		
 		drawSquareFilled(Color.black, x-(width/2), y-(height/2), width, height);

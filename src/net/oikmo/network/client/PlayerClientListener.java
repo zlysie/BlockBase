@@ -50,9 +50,9 @@ public class PlayerClientListener extends Listener {
 				Main.theNetwork.disconnect();
 				System.out.println(response.PROTOCOL + " " + NetworkHandler.NETWORK_PROTOCOL);
 				if(response.PROTOCOL != NetworkHandler.NETWORK_PROTOCOL) {
-					Main.disconnect(false, "Wrong protocol!");
+					Main.disconnect(false, Main.lang.translateKey("network.disconnect.p").replace("%s", ""+response.PROTOCOL));
 				} else {
-					Main.disconnect(false, "Login failed.");
+					Main.disconnect(false, Main.lang.translateKey("network.disconnect.l"));
 				}
 
 				Logger.log(LogLevel.WARN,"Login failed");
@@ -65,7 +65,7 @@ public class PlayerClientListener extends Listener {
 			OtherPlayer newPlayer = new OtherPlayer();
 			System.out.println(Main.theNetwork + " network is?");
 			if(Main.theNetwork == null) {
-				Main.disconnect(false, "disconnected");
+				Main.disconnect(false, Main.lang.translateKey("network.disconnect.g"));
 			} else {
 				if(!Main.theNetwork.players.containsKey(packet.id)) {
 					Main.theNetwork.players.put(packet.id, newPlayer);
@@ -97,7 +97,7 @@ public class PlayerClientListener extends Listener {
 			PacketUserName packet = (PacketUserName) object;
 			if(Main.theNetwork == null) {
 				Main.theNetwork.disconnect();
-				Main.disconnect(false, "Unknown");
+				Main.disconnect(false, Main.lang.translateKey("network.disconnect.u"));
 			} else if(Main.theNetwork.players == null) {
 				Main.theNetwork.players = new HashMap<>();
 			}

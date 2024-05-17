@@ -21,10 +21,10 @@ public final class ParticleEngine {
 
 	public final void tick() {
 		for(int var1 = 0; var1 < this.particles.size(); ++var1) {
-			Particle var2 = (Particle)this.particles.get(var1);
-			var2.tick();
+			Particle particle = (Particle)this.particles.get(var1);
+			particle.tick();
 			//System.out.println(particles.size() + " " + var2.remove);
-			if(var2.remove) {
+			if(particle.remove) {
 				this.particles.remove(var1--);
 			}
 		}

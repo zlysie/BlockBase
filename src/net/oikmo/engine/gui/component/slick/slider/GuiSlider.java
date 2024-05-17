@@ -43,20 +43,6 @@ public class GuiSlider  extends Gui implements GuiComponent {
 		}
 	}
 
-	public GuiSlider(float x, float y, float width, float height, String text, GuiCommand command) {
-		onInit();
-		this.text = text;
-		this.command = command;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-
-		this.width2 = 8;
-		this.x2 = x-(width/2)+width2/2;
-		components.add(this);
-	}
-
 	public GuiSlider(float x, float y, float width, float height, String text) {
 		onInit();
 		this.text = text;
@@ -92,7 +78,7 @@ public class GuiSlider  extends Gui implements GuiComponent {
 						}
 						
 					}
-					command.invoke(sliderValue);
+					
 				}
 			} else {
 				lockButton = false;
@@ -105,7 +91,7 @@ public class GuiSlider  extends Gui implements GuiComponent {
 
 		if (grabbing && Mouse.isButtonDown(0)) {
 			isHovering = true;
-			
+			command.invoke(sliderValue);
 			float handleHalfWidth = width2 / 2;
 			float minSliderX = x - (width / 2) + handleHalfWidth;
 			
@@ -179,6 +165,15 @@ public class GuiSlider  extends Gui implements GuiComponent {
 
 	public String getText() {
 		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+		
+	}
+
+	public float getValue() {
+		return sliderValue;
 	}
 
 

@@ -18,6 +18,21 @@ public class Cursor extends Gui implements GuiComponent {
 	public void tick() {
 		x = Mouse.getX() + 10;
 		
+		
+		if(BlockSlot.currentlyHoveringSlot != null) {
+			String name = BlockSlot.currentlyHoveringSlot.getItem().getName();
+			int width = font.getWidth(name) + 12;
+			
+			int nameHeight = font.getHeight(name);
+			int height = nameHeight + 4;
+			
+			y = Math.abs(Display.getHeight()-Mouse.getY()) -2-height;
+			
+			this.drawSquareFilled(x, y, width, height+4);
+			this.drawSquare(Color.white, 5f, x, y, width, height+4);
+			this.drawString(x+4, y+2, name);
+		}
+		
 		if(InventorySlot.currentlyHoveringSlot != null) {
 			String name = InventorySlot.currentlyHoveringSlot.getSlot().getItem().getName()+ " (" +  InventorySlot.currentlyHoveringSlot.getSlot().getCurrentAmount() + ")";
 			List<String> strings = splitEqually(InventorySlot.currentlyHoveringSlot.getSlot().getItem().getDescription(), 16);

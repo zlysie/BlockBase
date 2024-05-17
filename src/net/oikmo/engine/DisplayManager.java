@@ -168,6 +168,7 @@ public class DisplayManager {
 	 * Destroys the display (not the program)
 	 */
 	public static void closeDisplay() {
+		activeDisplay = false;
 		Display.destroy();
 	}	
 

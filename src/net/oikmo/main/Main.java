@@ -67,6 +67,8 @@ import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
 import net.oikmo.toolbox.os.EnumOSMappingHelper;
+import net.oikmo.toolbox.properties.LanguageHandler;
+import net.oikmo.toolbox.properties.OptionsHandler;
 
 /**
  * Main class. Starts the engine, handles logic.
@@ -77,7 +79,7 @@ public class Main extends Gui {
 	
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.8";
+	public static final String version = "a0.1.9";
 	public static final String gameVersion = gameName + " " + version;
 	
 	public static boolean displayRequest = false;
@@ -113,6 +115,9 @@ public class Main extends Gui {
 	private static boolean realClose = false;
 	private static List<Character> lastChars = new ArrayList<>();
 	private static String jcode = "";
+	
+	public static LanguageHandler lang = LanguageHandler.getInstance();
+	
 	public static boolean jmode = false;
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
@@ -137,6 +142,12 @@ public class Main extends Gui {
 			}
 			if(!new File(getResources() + "/sfx").exists()) {
 				new File(getResources() + "/sfx").mkdirs();
+			}
+			
+			if(!new File(getDir()+"/options.txt").exists()) {
+				new File(getDir()+"/options.txt").createNewFile();
+				OptionsHandler.getInstance().insertKey("graphics.fov", 70+"");
+				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
 			}
 			
 			frame = new Frame(Main.gameName);
@@ -167,8 +178,6 @@ public class Main extends Gui {
 				}
 			});
 			
-			
-			
 			gameCanvas = new Canvas();
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
@@ -179,8 +188,6 @@ public class Main extends Gui {
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
 			frame.removeAll();
-			
-			
 			
 			if(Calendar.getInstance().get(Calendar.MONTH) == 3 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
 				frame.setBackground(new Color(0f, 0.6f, 0.8274509803921568f, 1f));
@@ -217,6 +224,18 @@ public class Main extends Gui {
 			
 			currentScreen = new GuiMainMenu(splashText);
 			
+			try {
+				GameSettings.globalVolume = Float.parseFloat(OptionsHandler.getInstance().translateKey("audio.volume"));
+			} catch(NumberFormatException e) {
+				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
+			}
+			
+			
+			/*Main.shouldTick = true;
+			Main.loadWorld("world1");*/
+			
+			SoundMaster.setVolume();
+			
 			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			while(!Display.isCloseRequested() && !realClose) {
 				timer.updateTimer();				
@@ -225,6 +244,7 @@ public class Main extends Gui {
 					Main.thePlayer.updateCamera();
 				}
 				
+				slayyyTick = false;
 				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
 					
@@ -378,10 +398,14 @@ public class Main extends Gui {
 		return shouldTick == false;
 	}
 	
+	public static boolean slayyyTick = false;
+	
 	/**
 	 * Every 1/60th this method is ran. This handles movement.
 	 */
 	private static void tick() {
+		slayyyTick = true;
+		
 		if(Main.theNetwork == null) {
 			
 			if(theWorld != null) {
@@ -411,6 +435,7 @@ public class Main extends Gui {
 	 * Closes the game.
 	 */
 	public static void close() {
+		OptionsHandler.getInstance().save();
 		Logger.saveLog();
 		displayRequest = true;
 		SoundMaster.cleanUp();

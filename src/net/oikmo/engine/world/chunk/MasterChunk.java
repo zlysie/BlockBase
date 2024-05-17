@@ -77,16 +77,23 @@ public class MasterChunk {
 					}
 				}
 			} else {
-				if(chunk.blocks[localX][localY][localZ] != -1) {
+				if(chunk.blocks[localX][localY][localZ] != -1 && chunk.blocks[localX][localY][localZ] != Block.bedrock.getByteType()) {
 					chunk.blocks[localX][localY][localZ] = -1;
 				}
 			}
 		}
 	}
 	
-	public void setBlock(Vector3f position, Block block) {
+	/**
+	 * Sets block and refreshes this chunk if operation was successful.
+	 * If the block broken was not the owner then create a PrimedTNT entity.
+	 * 
+	 * @param position
+	 * @param block
+	 * @param owner
+	 */
+	public void setBlock(Vector3f position, Block block, boolean owner) {
 		Chunk chunk = getChunk();
-		//Main.theWorld.refreshChunk(this);
 		int x = (int)position.x;
 		int y = (int)position.y;
 		int z = (int)position.z;
@@ -108,12 +115,13 @@ public class MasterChunk {
 		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
-				if (chunk.blocks[localX][localY][localZ] == -1) {
+				if (chunk.blocks[localX][localY][localZ] == -1 ) {
 					if(chunk.blocks[localX][localY][localZ] != block.getByteType()) {
 						chunk.blocks[localX][localY][localZ] = block.getByteType();
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
 							chunk.recalculateHeight(localX, localZ);
 						}
+						
 						SoundMaster.playBlockPlaceSFX(block, x, y, z);
 						if(Main.theNetwork != null) {
 							PacketPlaySoundAt packet = new PacketPlaySoundAt();
@@ -132,38 +140,42 @@ public class MasterChunk {
 					return;
 				}
 			} else {
-				Block whatUsedToBeThere = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
-				SoundMaster.playBlockBreakSFX(whatUsedToBeThere, x,y,z);
-				if(Main.theNetwork != null) {
-					PacketPlaySoundAt packet = new PacketPlaySoundAt();
-					packet.blockID = whatUsedToBeThere.getByteType();
-					packet.x = x;
-					packet.y = y;
-					packet.z = z;
-					Main.theNetwork.client.sendTCP(packet);
-				}
-				for(int px = 0; px < 4; ++px) {
-					for(int py = 0; py < 4; ++py) {
-						for(int pz = 0; pz < 4; ++pz) {
-							float particleX = (float)x + ((float)px) / (float)4;
-							float particleY = (float)y + ((float)py) / (float)4;
-							float particleZ = (float)z + ((float)pz) / (float)4;
-							Particle particle = new Particle(particleX-0.5f, particleY-0.5f, particleZ-0.5f, particleX - (float)x, particleY - (float)y, particleZ - (float)z, whatUsedToBeThere);
-							Main.theWorld.spawnParticle(particle);
+				if(chunk.blocks[localX][localY][localZ] != Block.bedrock.getByteType()) {
+					Block whatUsedToBeThere = Block.getBlockFromOrdinal(chunk.blocks[localX][localY][localZ]);
+					if(chunk.blocks[localX][localY][localZ] != -1) {
+						chunk.blocks[localX][localY][localZ] = -1;
+					}
+					SoundMaster.playBlockBreakSFX(whatUsedToBeThere, x,y,z);
+					if(Main.theNetwork != null) {
+						PacketPlaySoundAt packet = new PacketPlaySoundAt();
+						packet.blockID = whatUsedToBeThere.getByteType();
+						packet.x = x;
+						packet.y = y;
+						packet.z = z;
+						Main.theNetwork.client.sendTCP(packet);
+					}
+					for(int px = 0; px < 4; ++px) {
+						for(int py = 0; py < 4; ++py) {
+							for(int pz = 0; pz < 4; ++pz) {
+								float particleX = (float)x + ((float)px) / (float)4;
+								float particleY = (float)y + ((float)py) / (float)4;
+								float particleZ = (float)z + ((float)pz) / (float)4;
+								Particle particle = new Particle(particleX+0.125f, particleY+0.125f, particleZ+0.125f, particleX - (float)x, particleY - (float)y, particleZ - (float)z, whatUsedToBeThere);
+								Main.theWorld.spawnParticle(particle);
+							}
 						}
 					}
-				}
-				if(Main.theNetwork != null) {
-					if(whatUsedToBeThere.getByteType() == Block.tnt.getType()) {
-						Main.theWorld.addEntity(new PrimedTNT(new Vector3f(x,y,z), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, false));
+					if(Main.theNetwork != null && !owner) {
+						if(whatUsedToBeThere.getByteType() == Block.tnt.getType()) {
+							Main.theWorld.addEntity(new PrimedTNT(new Vector3f(x,y,z), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, false));
+						}
 					}
+					
+					
+					getChunk().calcLightDepths(localX, localZ, 1, 1);
+					Main.theWorld.refreshChunk(this);
 				}
 				
-				if(chunk.blocks[localX][localY][localZ] != -1) {
-					chunk.blocks[localX][localY][localZ] = -1;
-				}
-				getChunk().calcLightDepths(localX, localZ, 1, 1);
-				Main.theWorld.refreshChunk(this);
 			}
 		}
 	}

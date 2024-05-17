@@ -59,18 +59,18 @@ public class Entity {
 		float x = position.x;
 		float y = position.y;
 		float z = position.z;
-		float w = this.getBBWidth() / 2.0F;
-		float h = this.getBBHeight() / 2.0F;
-		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
+		float w = this.getBBWidth() / 1.0F;
+		float h = this.getBBHeight() / 1.0F;
+		this.aabb = new AABB(x, y, z, x + w, y + h, z + w);
 	}
 
 	public void setPos(float x, float y, float z) {
 		this.position.x = x;
 		this.position.y = y;
 		this.position.z = z;
-		float w = this.getBBWidth() / 2.0F;
-		float h = this.getBBHeight() / 2.0F;
-		this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
+		float w = this.getBBWidth() / 1.0F;
+		float h = this.getBBHeight() / 1.0F;
+		this.aabb = new AABB(x, y, z, x + w, y + h, z + w);
 	}
 
 	/**
@@ -83,6 +83,31 @@ public class Entity {
 	public void move(float xa, float ya, float za, int size) {
 		double prevX = position.x;
 		double prevZ = position.z;
+		moveWithoutSound(xa,ya,za, size);
+		
+		double offsetX = position.x - prevX;
+		double offsetZ = position.z - prevZ;
+		distanceWalkedModified += (double)FastMath.sqrt((float) (offsetX * offsetX + offsetZ * offsetZ)) * 0.7D;
+		int posX = (int)(position.x);
+		int posY = (int)(position.y)-1;
+		int posZ = (int)(position.z);
+		Block block = Main.theWorld.getBlock(new Vector3f(posX,posY,posZ));
+		if(distanceWalkedModified > (float)nextStepDistance && block != null) {
+			nextStepDistance++;
+			SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
+			if(Main.theNetwork != null) {
+				PacketPlaySoundAt packet = new PacketPlaySoundAt();
+				packet.place = true;
+				packet.blockID = block.getByteType();
+				packet.x = posX;
+				packet.y = posY;
+				packet.z = posZ;
+				Main.theNetwork.client.sendTCP(packet);
+			}
+		}
+	}
+	
+	public void moveWithoutSound(float xa, float ya, float za, int size) {
 		float xaOrg = xa;
 		float yaOrg = ya;
 		float zaOrg = za;
@@ -121,32 +146,18 @@ public class Entity {
 				this.motion.z = 0.0F;
 			}
 		}
-
-		this.position.x = (this.aabb.minX + this.aabb.maxX) / 2.0F;
-		this.position.y = this.aabb.minY + this.heightOffset;
-		this.position.z = (this.aabb.minZ + this.aabb.maxZ) / 2.0F;
-		double offsetX = position.x - prevX;
-		double offsetZ = position.z - prevZ;
-		distanceWalkedModified += (double)FastMath.sqrt((float) (offsetX * offsetX + offsetZ * offsetZ)) * 0.7D;
-		int posX = FastMath.floor_double(position.x);
-		int posY = Maths.roundFloat(position.y)-1;
-		int posZ = FastMath.floor_double(position.z);
-		Block block = Main.theWorld.getBlock(new Vector3f(posX,posY,posZ));
-		if(distanceWalkedModified > (float)nextStepDistance && block != null) {
-			nextStepDistance++;
-			SoundMaster.playBlockPlaceSFX(block, posX, posY, posZ);
-			if(Main.theNetwork != null) {
-				PacketPlaySoundAt packet = new PacketPlaySoundAt();
-				packet.place = true;
-				packet.blockID = block.getByteType();
-				packet.x = posX;
-				packet.y = posY;
-				packet.z = posZ;
-				Main.theNetwork.client.sendTCP(packet);
-			}
+		
+		if(this instanceof Player) {
+			this.position.x = ((this.aabb.minX + this.aabb.maxX) / 2.0F);
+			this.position.y = this.aabb.minY + this.heightOffset;
+			this.position.z = ((this.aabb.minZ + this.aabb.maxZ) / 2.0F);
+		} else {
+			this.position.x = ((this.aabb.minX + this.aabb.maxX) / 2.0F)-0.5f;
+			this.position.y = this.aabb.minY + this.heightOffset;
+			this.position.z = ((this.aabb.minZ + this.aabb.maxZ) / 2.0F)-0.5f;
 		}
+		
 	}
-	
 	public float getBrightness() {
 		int x = (int)this.position.x;
 		int y = (int)(this.position.y + this.heightOffset / 2.0F);

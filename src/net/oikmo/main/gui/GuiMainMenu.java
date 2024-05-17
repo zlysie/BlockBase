@@ -22,6 +22,7 @@ import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
+import net.oikmo.toolbox.properties.OptionsHandler;
 
 public class GuiMainMenu extends GuiScreen {
 
@@ -30,10 +31,11 @@ public class GuiMainMenu extends GuiScreen {
 		this.splashText = splashText;
 	}
 
-	private Thread musicThread;	
+	private static Thread musicThread;	
 	
 	private GuiButton playButton;
 	private GuiButton multiplayerButton;
+	private GuiButton optionsButton;
 	private GuiButton quitButton;
 
 	private String[] menuIDS;
@@ -66,7 +68,7 @@ public class GuiMainMenu extends GuiScreen {
 		
 		float offsetY = 20f;
 		
-		playButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY*2f, 200, 30, "Play game");
+		playButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-offsetY*2f, 200, 30, Main.lang.translateKey("title.singleplayer"));
 		playButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -82,7 +84,7 @@ public class GuiMainMenu extends GuiScreen {
 			}
 		});
 		
-		multiplayerButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Multiplayer");
+		multiplayerButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, Main.lang.translateKey("title.multiplayer"));
 		multiplayerButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -94,11 +96,27 @@ public class GuiMainMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
+				y = (Display.getHeight()/2)-offsetY;
+			}
+		});
+		
+		optionsButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+offsetY*2, 200, 30, Main.lang.translateKey("options.title"));
+		optionsButton.setGuiCommand(new GuiCommand() {
+			@Override
+			public void invoke() {
+				prepareCleanUp();
+				Gui.cleanUp();
+				Main.currentScreen = new GuiOptions(true);
+			}
+
+			@Override
+			public void update() {
+				x = Display.getWidth()/2;
 				y = (Display.getHeight()/2);
 			}
 		});
 
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+offsetY*2f, 200, 30, "Quit game");
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+offsetY*4f, 200, 30, Main.lang.translateKey("title.quit"));
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
@@ -108,7 +126,7 @@ public class GuiMainMenu extends GuiScreen {
 
 			@Override
 			public void update() {
-				x = Display.getWidth()/2;
+					x = Display.getWidth()/2;
 				y = (Display.getHeight()/2)+offsetY*2f;
 			}
 		});
@@ -117,6 +135,13 @@ public class GuiMainMenu extends GuiScreen {
 			if(Main.theNetwork.players != null) {
 				Main.theNetwork.players.clear();
 				Main.theNetwork.disconnect();
+			}
+		}
+		if(musicThread == null) {
+			this.doRandomMusic();
+		} else {
+			if(!musicThread.isAlive()) {
+				this.doRandomMusic();
 			}
 		}
 	}
@@ -182,8 +207,10 @@ public class GuiMainMenu extends GuiScreen {
 			MasterRenderer.getInstance().render(mainMenuCamera);
 			drawTexture(Main.jmode ? ResourceLoader.loadUITexture("ui/title_j") : ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+20), splashText);
+			drawShadowStringCentered(font.getWidth("Created by Oikmo")/2,Display.getHeight()-fontSize/2, "Created by Oikmo");
 			playButton.tick(lockTick);
 			multiplayerButton.tick(lockTick);
+			optionsButton.tick(lockTick);
 			quitButton.tick(lockTick);
 		}
 	}
@@ -201,14 +228,21 @@ public class GuiMainMenu extends GuiScreen {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void onClose() {
-		
-		MasterRenderer.getInstance().FOV = 60f;
-		MasterRenderer.getInstance().updateProjectionMatrix();
-		if(this.musicThread != null) {
+	public static void stopMusic() {
+		if(musicThread != null) {
 			musicThread.interrupt();
 			musicThread.stop();
 		}
+	}
+
+	public void onClose() {
+		try {
+			MasterRenderer.getInstance().FOV = Float.parseFloat(OptionsHandler.getInstance().translateKey("graphics.fov"));	
+		} catch(NumberFormatException e) {
+			OptionsHandler.getInstance().insertKey("graphics.fov", 70+"");
+		}
+		MasterRenderer.getInstance().updateProjectionMatrix();
+		
 		playButton.onCleanUp();
 		multiplayerButton.onCleanUp();
 		quitButton.onCleanUp();

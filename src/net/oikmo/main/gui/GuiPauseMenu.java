@@ -18,24 +18,47 @@ public class GuiPauseMenu extends GuiScreen {
 		super("Pause Menu");
 	}
 	
+	private GuiButton optionsButton;
 	private GuiButton quitButton;
+	private boolean dontLock = false;
+	
 	
 	public void onInit() {
 		if(Main.theNetwork != null) {
 			if(Main.thePlayer != null) {
 				Main.thePlayer.getCamera().setMouseLock(false);
 			} else {
-				Main.disconnect(false, "Unknown");
+				Main.disconnect(false, Main.lang.translateKey("network.disconnect.u"));
 			}
 			
 		} else {
-			Main.shouldTick();
+			Main.thePlayer.getCamera().setMouseLock(false);
+			Main.shouldTick = false;
 		}
 		
-		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2), 200, 30, "Quit world...");
+		optionsButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)-20, 200, 30, Main.lang.translateKey("options.title"));
+		optionsButton.setGuiCommand(new GuiCommand() {
+			@Override
+			public void invoke() {
+				dontLock = true;
+				prepareCleanUp();
+				
+				Main.currentScreen = new GuiOptions(false);
+			}
+			
+			@Override
+			public void update() {
+				x = Display.getWidth()/2;
+				y = (Display.getHeight()/2)-20;
+			}
+		});
+		
+		quitButton = new GuiButton(Display.getWidth()/2, (Display.getHeight()/2)+20, 200, 30, Main.lang.translateKey("gui.quit"));
 		quitButton.setGuiCommand(new GuiCommand() {
 			@Override
 			public void invoke() {
+				dontLock = true;
+				prepareCleanUp();
 				Main.inGameGUI = null;
 				if(Main.theNetwork == null) {
 					Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
@@ -49,7 +72,7 @@ public class GuiPauseMenu extends GuiScreen {
 				} else {
 					Main.shouldTick();
 				}
-				prepareCleanUp();
+				
 				SoundMaster.stopMusic();
 				Main.currentScreen = new GuiMainMenu(Main.getRandomSplash());
 			}
@@ -57,18 +80,20 @@ public class GuiPauseMenu extends GuiScreen {
 			@Override
 			public void update() {
 				x = Display.getWidth()/2;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)+20;
 			}
 		});
+		
+		
 	}
 	private int width = 200;
 	public void onUpdate() {
-		
-		
 		drawBackground(ResourceLoader.loadUITexture("ui/ui_background3"));
 		
+		drawShadowStringCentered(Display.getWidth()/2,fontSize*2,Main.lang.translateKey("pause.title"));
+		
 		if(Main.theNetwork != null) {
-			int height =  (fontSize *2)+5;
+			int height = (fontSize*2)+5;
 			boolean flag = false;
 			
 			for(OtherPlayer p : Main.theNetwork.players.values()) {
@@ -89,10 +114,11 @@ public class GuiPauseMenu extends GuiScreen {
 			
 			this.drawSquareFilled(Color.gray, xPos, yPos, width, height);
 			this.drawSquare(Color.lightGray, 2, xPos, yPos, width, height);
-			drawShadowStringCentered(xPos+(width/2), yPos+10, "Players");	
+			drawShadowStringCentered(xPos+(width/2), yPos+10, Main.lang.translateKey("pause.players.title"));
+			
 			height = fontSize+10;
 			if(!flag) {
-				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.theNetwork.player.userName + " (You)");
+				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.theNetwork.player.userName + " ("+Main.lang.translateKey("pause.players.identifier")+")");
 			}
 			for(OtherPlayer p : Main.theNetwork.players.values()) {
 				if(p.userName != null) {
@@ -103,7 +129,7 @@ public class GuiPauseMenu extends GuiScreen {
 					} else {
 						if(flag) {
 							height += fontSize + 5;
-							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " (You)");
+							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " ("+Main.lang.translateKey("pause.players.identifier")+")");
 						}
 						
 					}
@@ -113,18 +139,25 @@ public class GuiPauseMenu extends GuiScreen {
 			}
 		}
 		
-		
+		this.optionsButton.tick();
 		quitButton.tick();
 	}
 	
 	public void onClose() {
-		if(Main.theNetwork != null) {
-			if(Main.thePlayer != null) {
+		if(!dontLock) {
+			if(Main.theNetwork != null) {
+				if(Main.thePlayer != null) {
+					Main.thePlayer.getCamera().setMouseLock(false);
+				} else {
+					Main.disconnect(false, Main.lang.translateKey("network.disconnect.u"));
+				}
+				
+			} else {
 				Main.thePlayer.getCamera().setMouseLock(true);
+				Main.shouldTick = true;
 			}
-		} else {
-			Main.shouldTick();
 		}
+		this.optionsButton.onCleanUp();
 		quitButton.onCleanUp();
 		Gui.cleanUp();
 	}

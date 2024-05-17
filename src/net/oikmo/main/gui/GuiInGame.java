@@ -13,9 +13,11 @@ import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.inventory.Container;
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.inventory.Slot;
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.PacketUpdateWithheldBlock;
+import net.oikmo.toolbox.properties.OptionsHandler;
 
 public class GuiInGame extends GuiScreen {
 	
@@ -30,6 +32,8 @@ public class GuiInGame extends GuiScreen {
 	}
 	
 	public void onInit() {
+		MasterRenderer.getInstance().FOV = Float.parseFloat(OptionsHandler.getInstance().translateKey("graphics.fov"));
+		MasterRenderer.getInstance().updateProjectionMatrix();
 		this.hotbar = Gui.guiAtlas.getSubImage(0, 0, 182, 22);
 		this.hotbar.setFilter(Image.FILTER_NEAREST);
 		this.hotbarSelector = Gui.guiAtlas.getSubImage(0, 22, 24, 24);
@@ -47,7 +51,8 @@ public class GuiInGame extends GuiScreen {
 		if(literallyUpdate) {
 			drawShadowString(0, fontSize, "FPS: " + DisplayManager.getFPSCount());
 			Vector3f v = Main.thePlayer.getRoundedPosition();
-			drawShadowString(0, Display.getHeight()-fontSize, "X: "+ (int)v.x + " Y: "+ (int)v.y + " Z: "+ (int)v.z +" ");
+			drawShadowString(0, Display.getHeight()-fontSize, "X: "+ (int)(v.x-0.5f) + " Y: "+ (int)(v.y-0.5f) + " Z: "+ (int)(v.z-0.5f));
+			drawShadowString(0, Display.getHeight()-fontSize, "X: "+ (int)(v.x-0.5f) + " Y: "+ (int)(v.y-0.5f) + " Z: "+ (int)(v.z-0.5f));
 		}
 		
 		drawImage(crosshair, Display.getWidth()/2, Display.getHeight()/2, 20f, 20f);
@@ -65,8 +70,6 @@ public class GuiInGame extends GuiScreen {
 		}
 		
 		drawImage(hotbarSelector, calculateXPosition(selectedIndex), Display.getHeight()-28, 48,48);
-		
-		
 		
 		int previousIndex = selectedIndex;
 		if(!(Main.currentScreen instanceof GuiChat)) {

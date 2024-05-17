@@ -61,7 +61,7 @@ public class GuiServerList extends GuiScreen {
 			}
 		}
 		
-		add = new GuiButton(((Display.getWidth()/2)-200/2)-10, Display.getHeight()-30*2, 200, 30, "Add");
+		add = new GuiButton(((Display.getWidth()/2)-200/2)-10, Display.getHeight()-30*2, 200, 30, Main.lang.translateKey("network.servers.add"));
 		add.setGuiCommand(new GuiCommand() {
 			public void invoke() {
 				prepareCleanUp();
@@ -75,14 +75,14 @@ public class GuiServerList extends GuiScreen {
 			}
 		});
 		
-		delete = new GuiButton(((Display.getWidth()/2)+200/2)+10, Display.getHeight()-30*2, 200, 30, "Delete...");
+		delete = new GuiButton(((Display.getWidth()/2)+200/2)+10, Display.getHeight()-30*2, 200, 30, Main.lang.translateKey("gui.delete"));
 		delete.setGuiCommand(new GuiCommand() {
 			public void invoke() {
 				deleteMode = !deleteMode;
 				if(deleteMode) {
-					delete.setText("Cancel");
+					delete.setText(Main.lang.translateKey("gui.cancel"));
 				} else {
-					delete.setText("Delete...");
+					delete.setText(Main.lang.translateKey("gui.delete"));
 				}
 			}
 			
@@ -92,7 +92,7 @@ public class GuiServerList extends GuiScreen {
 			}
 		});
 		
-		refresh = new GuiButton(((Display.getWidth()/2)-200/2)-10, Display.getHeight()-25, 200, 30, "Refresh");
+		refresh = new GuiButton(((Display.getWidth()/2)-200/2)-10, Display.getHeight()-25, 200, 30, Main.lang.translateKey("network.servers.refresh"));
 		refresh.setGuiCommand(new GuiCommand() {
 			public void invoke() {
 				for(GuiServer s : guis) {
@@ -106,7 +106,7 @@ public class GuiServerList extends GuiScreen {
 			}
 		});
 		
-		quit = new GuiButton(((Display.getWidth()/2)+200/2)+10, Display.getHeight()-25, 200, 30, "Back to main menu");
+		quit = new GuiButton(((Display.getWidth()/2)+200/2)+10, Display.getHeight()-25, 200, 30, Main.lang.translateKey("gui.quit"));
 		quit.setGuiCommand(new GuiCommand() {
 			public void invoke() {
 				prepareCleanUp();
@@ -156,7 +156,7 @@ public class GuiServerList extends GuiScreen {
 		}
 		
 		if(errorMode) {
-			drawShadowStringCentered(Color.red, (Display.getWidth()/2), 0+font.getHeight(errorReason), errorReason);
+			drawShadowStringCentered(Color.red, (Display.getWidth()/2), fontSize, errorReason);
 		}
 		
 		add.tick();
@@ -190,7 +190,7 @@ public class GuiServerList extends GuiScreen {
 						hasErrored = true;
 						Logger.log(LogLevel.WARN, "Couldn't connect to host!");
 						e.printStackTrace();
-						errorReason = "Couldn't connect to server!";
+						errorReason = Main.lang.translateKey("network.error.server");
 					}
 					
 					if(!hasErrored) {
@@ -216,7 +216,7 @@ public class GuiServerList extends GuiScreen {
 					} else {
 						errorMode = true;
 						if(s.getIP().isEmpty()) {
-							errorReason = "No input given!";
+							errorReason = Main.lang.translateKey("network.error.noinput");
 						}
 					}
 				}
