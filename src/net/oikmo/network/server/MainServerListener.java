@@ -86,6 +86,7 @@ public class MainServerListener extends Listener {
 	
 	public void received(Connection connection, Object object) {
 		if(object.getClass().getName().contains("PacketModifyChunk")) {
+			
 			if(System.currentTimeMillis() - lastSentTime > 250) {
 				System.out.println((System.currentTimeMillis() - lastSentTime) +" " + object);
 				lastSentTime = System.currentTimeMillis();
