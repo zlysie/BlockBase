@@ -64,7 +64,7 @@ public class NetworkHandler {
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
 	
 	private int tickTimer = 0;
-	public static final int NETWORK_PROTOCOL = 4;
+	public static final int NETWORK_PROTOCOL = 5;
 	
 	private static void registerKryoClasses() {
 		kryo.register(LoginRequest.class);

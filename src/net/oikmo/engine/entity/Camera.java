@@ -112,7 +112,7 @@ public class Camera {
 							ItemBlock item = new ItemBlock(block, v);
 							Main.theWorld.addEntity(item);*/
 							Vector3f pos = new Vector3f(currentPoint);
-							if(block.getByteType() == Block.tnt.getType()) {
+							if(block.getByteType() == Block.tnt.getType() && Main.theNetwork == null) {
 								Main.theWorld.addEntity(new PrimedTNT(pos, new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, true));
 							}
 							Main.theWorld.setBlock(blockPos, null);

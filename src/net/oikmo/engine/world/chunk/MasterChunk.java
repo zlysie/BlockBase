@@ -156,6 +156,12 @@ public class MasterChunk {
 						}
 					}
 					
+					if(!owner && Main.theNetwork == null) {
+						if(whatUsedToBeThere.getByteType() == Block.tnt.getType() && Main.theNetwork == null) {
+							Main.theWorld.addEntity(new PrimedTNT(new Vector3f(localX, localY, localZ), new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, true));
+						}
+					}
+					
 					getChunk().calcLightDepths(localX, localZ, 1, 1);
 					Main.theWorld.refreshChunk(this);
 				}
