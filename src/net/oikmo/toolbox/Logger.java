@@ -48,7 +48,7 @@ public class Logger {
 	 */
 	public static void saveLog() {
 		if(completeLog.isEmpty()) { return; }
-		File saveDirectory =  new File(Main.getDir() + "/logs/");
+		File saveDirectory =  new File(Main.getWorkingDirectory() + "/logs/");
 		if (!saveDirectory.exists()) {
 	        try {
 	        	saveDirectory.mkdir();

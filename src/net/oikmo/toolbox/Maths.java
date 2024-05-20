@@ -268,7 +268,7 @@ public class Maths {
 	}
 
 	public static float getWorldSize(String fileDir) {
-		return new File(Main.getDir()+"/saves/"+fileDir+".dat").length();
+		return new File(Main.getWorkingDirectory()+"/saves/"+fileDir+".dat").length();
 	}
 
 	public static String humanReadableByteCountBin(long bytes) {

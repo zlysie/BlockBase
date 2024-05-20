@@ -15,7 +15,7 @@ public class SaveSystem {
 	
 	public static void save(String name, SaveData data) {
 	    try {
-	    	File directory = new File(Main.getDir()+ "/saves/");
+	    	File directory = new File(Main.getWorkingDirectory()+ "/saves/");
 	    	if(!directory.exists()) {
 	    		directory.mkdir();
 	    	}
@@ -35,7 +35,7 @@ public class SaveSystem {
 	}
 	
 	public static SaveData load(String name) {
-		File directory = new File(Main.getDir()+ "/saves/");
+		File directory = new File(Main.getWorkingDirectory()+ "/saves/");
 		
 		if(directory.exists()) {
 			File save = new File(directory + "/" + name + ".dat");
@@ -65,7 +65,7 @@ public class SaveSystem {
 	
 	public static void saveServers(ServerListData data) {
 	    try {
-	    	File directory = Main.getDir();
+	    	File directory = Main.getWorkingDirectory();
 	    	
 	    	File save = new File(directory + "/servers.dat");
 	    	save.delete();
@@ -82,7 +82,7 @@ public class SaveSystem {
 	}
 	
 	public static ServerListData loadServers() {
-		File directory = Main.getDir();
+		File directory = Main.getWorkingDirectory();
     	
     	File save = new File(directory + "/servers.dat");
 		

@@ -19,7 +19,6 @@ public abstract class Block {
 	public static final Block goldBlock = new BlockGoldBlock(Type.GOLDBLOCK);
 	public static final Block diamondBlock = new BlockDiamondBlock(Type.DIAMONDBLOCK);
 	public static final Block tnt = new BlockTNT(Type.TNT);
-	public static final Block obsidianPlayer = new BlockObsidian(Type.OBSIDIANPLAYER);
 	
 	public static enum Type {
 		GRASS, 
@@ -39,7 +38,6 @@ public abstract class Block {
 		IRONBLOCK,
 		GOLDBLOCK,
 		DIAMONDBLOCK, 
-		OBSIDIANPLAYER,
 	};
 	
 	public Type type;

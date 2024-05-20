@@ -9,8 +9,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -32,11 +30,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.SharedDrawable;
@@ -46,12 +40,13 @@ import com.mojang.minecraft.Timer;
 
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
+import net.oikmo.engine.PlayerSkin;
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.Player;
-import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.models.CubeModel;
+import net.oikmo.engine.models.PlayerModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.save.SaveSystem;
@@ -79,10 +74,9 @@ import net.oikmo.toolbox.properties.OptionsHandler;
 
 /**
  * Main class. Starts the engine, handles logic.
- * 
  * @author Oikmo
  */
-public class Main extends Gui {
+public class Main {
 
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
@@ -124,10 +118,7 @@ public class Main extends Gui {
 	private static String jcode = "";
 
 	public static LanguageHandler lang = LanguageHandler.getInstance();
-
-	private static Frame nameFrame;
-	private static volatile boolean frameLock = true;
-
+	
 	public static SharedDrawable shared;
 
 	public static boolean jmode = false;
@@ -141,13 +132,32 @@ public class Main extends Gui {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		for(String arg : args) {
+			//System.out.println(arg);
+			if(arg.startsWith("u=")) {
+				playerName = arg.split("=")[1];
+				System.out.println(playerName);
+			} else if(arg.startsWith("w=")) {
+				try {
+					WIDTH = Integer.parseInt(arg.split("=")[1]);
+				} catch(NumberFormatException e) {}
+				
+				System.out.println(WIDTH);
+			} else if(arg.startsWith("h=")) {
+				try {
+					HEIGHT = Integer.parseInt(arg.split("=")[1]);
+				} catch(NumberFormatException e) {}
+				System.out.println(HEIGHT);
+			}
+		}
+		
 		Thread.currentThread().setName("Main Thread");
 		removeHSPIDERR();
 		Timer timer = new Timer(60f);
 
 		try {
-			if(!new File(getDir()+"/resources/custom").exists()) {
-				new File(getDir()+"/resources/custom").mkdirs();
+			if(!new File(getWorkingDirectory()+"/resources/custom").exists()) {
+				new File(getWorkingDirectory()+"/resources/custom").mkdirs();
 			}
 			if(!new File(getResources() + "/music").exists()) {
 				new File(getResources() + "/music").mkdirs();
@@ -156,8 +166,8 @@ public class Main extends Gui {
 				new File(getResources() + "/sfx").mkdirs();
 			}
 
-			if(!new File(getDir()+"/options.txt").exists()) {
-				new File(getDir()+"/options.txt").createNewFile();
+			if(!new File(getWorkingDirectory()+"/options.txt").exists()) {
+				new File(getWorkingDirectory()+"/options.txt").createNewFile();
 				OptionsHandler.getInstance().insertKey("graphics.fov", 70+"");
 				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
@@ -213,62 +223,10 @@ public class Main extends Gui {
 			frame.setVisible(true);
 			downloadResources();
 
-			nameFrame = new Frame();
-
-			nameFrame = new Frame();
-			nameFrame.setSize(300, 125);
-			nameFrame.setLocationRelativeTo(null);
-			nameFrame.addWindowListener(new WindowAdapter(){  
-				public void windowClosing(WindowEvent e) {  
-					frameLock = false;
-					nameFrame.dispose(); 
-				}  
-			});
-			nameFrame.setIconImage(icon.getImage());
-			nameFrame.setName("BlockBase name chooser");
-			nameFrame.setTitle("BlockBase name chooser");
-
-			JLabel label = new JLabel("Name:");
-			JPanel panel = new JPanel();
-			nameFrame.add(panel);
-			panel.add(label);
-
-			final JTextField input = new JTextField(25);
-			panel.add(input);
-
-			JButton button = new JButton("Submit");
-			panel.add(button);
-
-			final JLabel output = new JLabel();
-			panel.add(output);
-
-			button.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if(!input.getText().trim().isEmpty()) {
-						String text = input.getText().trim().replace(" ", "_");
-						
-						if(text.length() > 20) {
-							Main.playerName = text.substring(0, 20);
-						} else {
-							Main.playerName = text;
-						}
-						
-						frameLock = false;
-						nameFrame.dispose();
-					}
-				}
-			});
-
-			nameFrame.setVisible(true);
-
 			long lastTime = System.currentTimeMillis();
 			long sum =  System.currentTimeMillis() - lastTime;
 			while(sum < 2000) {
-				if(frameLock) {
-					lastTime = System.currentTimeMillis();
-				} else {
-					sum = System.currentTimeMillis() - lastTime;
-				}
+				sum = System.currentTimeMillis() - lastTime;
 			}
 
 			jmode = jcode.contains("jerma");
@@ -276,6 +234,7 @@ public class Main extends Gui {
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
 			DisplayManager.createDisplay(frame, gameCanvas);
 			CubeModel.setup();
+			PlayerModel.setup();
 			SoundMaster.init();
 			InputManager im = new InputManager();
 
@@ -311,7 +270,6 @@ public class Main extends Gui {
 
 			SoundMaster.setVolume();
 
-			TexturedModel obsidian = new TexturedModel(CubeModel.getRawModel(Block.obsidianPlayer), MasterRenderer.currentTexturePack);
 			while(!Display.isCloseRequested() && !realClose) {
 				timer.updateTimer();				
 
@@ -340,15 +298,28 @@ public class Main extends Gui {
 					for(OtherPlayer p : Main.theNetwork.players.values()) {
 						Vector3f position = new Vector3f(p.x-0.5f,p.y-0.5f,p.z-0.5f);
 						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
-						Entity entity = new Entity(obsidian, position, rotation, 1f);
-						if(p.block != -1) {
-							Vector3f pos = new Vector3f(position);
-							pos.y += 0.85f;
-							Entity block = new Entity(new TexturedModel(CubeModel.getRawModel(Block.getBlockFromOrdinal(p.block)), MasterRenderer.currentTexturePack), pos, new Vector3f(p.rotZ,-p.rotY,0), 0.4f);
-							MasterRenderer.getInstance().addEntity(block);
-						}
+						
+						TexturedModel model = null;
+						
+						if(p.userName != null) {
+							if(p.userName.contentEquals("Oikmo")) {
+								model = PlayerSkin.oikmo.getModel();
+							} else {
+								model = PlayerSkin.none.getModel();
+							}
+							
+							Entity entity = new Entity(model, position, rotation, 1f);
+							if(p.block != -1) {
+								Vector3f pos = new Vector3f(position);
+								pos.y += 0.85f;
+								Entity block = new Entity(new TexturedModel(CubeModel.getRawModel(Block.getBlockFromOrdinal(p.block)), MasterRenderer.currentTexturePack), pos, new Vector3f(p.rotZ,-p.rotY,0), 0.4f);
+								MasterRenderer.getInstance().addEntity(block);
+							}
 
-						MasterRenderer.getInstance().addEntity(entity);
+							MasterRenderer.getInstance().addEntity(entity);
+						}
+						
+						
 					}
 				}
 
@@ -571,7 +542,7 @@ public class Main extends Gui {
 
 	private static void downloadResources() throws IOException {
 		File dir = getResources();
-		File tmp = new File(getDir() + "/tmp");
+		File tmp = new File(getWorkingDirectory() + "/tmp");
 		File txt = new File(getResources() + "/resourcesVersion.txt");
 
 
@@ -681,15 +652,15 @@ public class Main extends Gui {
 	}
 
 	public static File getResources() {
-		return new File(getDir()+"/resources");
+		return new File(getWorkingDirectory()+"/resources");
 	}
 
 	/**
 	 * Retrieves data directory of .blockbase/ using {@code Main.getAppDir(String)}
 	 * @return Directory (File)
 	 */
-	public static File getDir() {
-		return getAppDir("blockbase");
+	public static File getWorkingDirectory() {
+		return getWorkingDirectory("blockbase");
 	}
 
 	/**
@@ -699,7 +670,7 @@ public class Main extends Gui {
 	 * @param name (String)
 	 * @return Directory (File)
 	 */
-	public static File getAppDir(String name) {
+	public static File getWorkingDirectory(String name) {
 		String userDir = System.getProperty("user.home", ".");
 		File folder;
 		switch(EnumOSMappingHelper.os[EnumOS.getOS().ordinal()]) {
@@ -730,7 +701,7 @@ public class Main extends Gui {
 	}
 
 	/**
-	 * Downloads xip from URL
+	 * Downloads zip from URL
 	 * @param urlStr
 	 * @param file
 	 * @throws IOException

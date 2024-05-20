@@ -46,7 +46,7 @@ public class GuiSelectWorld extends GuiScreen {
 					Gui.cleanUp();
 					Main.currentScreen = null;
 				} else {
-					File world = new File(Main.getDir()+"/saves/world1.dat");
+					File world = new File(Main.getWorkingDirectory()+"/saves/world1.dat");
 					world.delete();
 				}
 				
@@ -72,7 +72,7 @@ public class GuiSelectWorld extends GuiScreen {
 					Gui.cleanUp();
 					Main.currentScreen = null;
 				} else {
-					File world = new File(Main.getDir()+"/saves/world2.dat");
+					File world = new File(Main.getWorkingDirectory()+"/saves/world2.dat");
 					world.delete();
 					updateButtons();
 				}
@@ -98,7 +98,7 @@ public class GuiSelectWorld extends GuiScreen {
 					Gui.cleanUp();
 					Main.currentScreen = null;
 				} else {
-					File world = new File(Main.getDir()+"/saves/world3.dat");
+					File world = new File(Main.getWorkingDirectory()+"/saves/world3.dat");
 					world.delete();
 					updateButtons();
 				}
@@ -124,7 +124,7 @@ public class GuiSelectWorld extends GuiScreen {
 					Gui.cleanUp();
 					Main.currentScreen = null;
 				} else {
-					File world = new File(Main.getDir()+"/saves/world4.dat");
+					File world = new File(Main.getWorkingDirectory()+"/saves/world4.dat");
 					world.delete();
 					updateButtons();
 				}
@@ -151,7 +151,7 @@ public class GuiSelectWorld extends GuiScreen {
 					Gui.cleanUp();
 					Main.currentScreen = null;
 				} else {
-					File world = new File(Main.getDir()+"/saves/world5.dat");
+					File world = new File(Main.getWorkingDirectory()+"/saves/world5.dat");
 					world.delete();
 					updateButtons();
 				}

@@ -101,7 +101,7 @@ public class PanelCrashReport extends Panel {
 		add(new CanvasLogo("SHUTUP", 1, (byte)85), "South");
 		add(textArea, "Center");
 		
-		File crashLogs = new File(Main.getDir()+"/crash-logs");
+		File crashLogs = new File(Main.getWorkingDirectory()+"/crash-logs");
 		if(!crashLogs.exists()) {
 			crashLogs.mkdir();
 		}

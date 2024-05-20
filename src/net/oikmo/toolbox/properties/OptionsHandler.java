@@ -14,7 +14,7 @@ public class OptionsHandler {
 	
 	protected OptionsHandler() {
 		try {
-			this.filePath = Main.getDir()+"/options.txt";
+			this.filePath = Main.getWorkingDirectory()+"/options.txt";
 			properties.load(new FileInputStream(filePath));
 		} catch (IOException var2) {
 			var2.printStackTrace();
