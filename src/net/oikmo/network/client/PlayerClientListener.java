@@ -1,17 +1,28 @@
 package net.oikmo.network.client;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 
-import org.lwjgl.LWJGLException;
+import javax.imageio.ImageIO;
+
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.ImageBuffer;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.gui.ChatMessage;
+import net.oikmo.engine.models.PlayerModel;
+import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.sound.SoundMaster;
+import net.oikmo.engine.textures.ModelTexture;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
@@ -109,6 +120,33 @@ public class PlayerClientListener extends Listener {
 				Main.theNetwork.players.put(packet.id, new OtherPlayer());
 				OtherPlayer p = Main.theNetwork.players.get(packet.id);
 				p.userName = packet.userName;
+				
+				BufferedImage image = null;
+				try {
+					URL url = new URL("http://afs.gurdit.com/users/skin_"+ packet.userName + ".png");
+					URLConnection conn = url.openConnection();
+					InputStream in = conn.getInputStream();
+					image = ImageIO.read(in);
+				} catch(Exception e) {}
+				
+				ImageBuffer buf = new ImageBuffer(64,64);
+				
+				if(image != null) {
+					for(int x = 0; x < 64; x++) {
+						for(int y = 0; y < 64; y++) {
+							java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
+							buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+						}
+					}
+					
+					Main.theNetwork.playerSkinImages.put(p, new Image(buf).getTexture().getTextureID());
+				} else {
+					Main.theNetwork.playerSkinImages.put(p, new Image(ResourceLoader.loadUITexture("default_skin")).getTexture().getTextureID());
+				}
+				
+				p.id = connection.getID();
+				
+				
 				if(Main.thePlayer != null) {
 					if(packet.userName != null) {
 						if(!Main.theNetwork.players.get(packet.id).userName.contentEquals(Main.theNetwork.player.userName)) {

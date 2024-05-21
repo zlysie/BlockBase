@@ -18,9 +18,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -32,6 +35,7 @@ import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.SharedDrawable;
 import org.lwjgl.util.vector.Vector3f;
@@ -40,7 +44,6 @@ import com.mojang.minecraft.Timer;
 
 import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.InputManager;
-import net.oikmo.engine.PlayerSkin;
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.Player;
@@ -122,6 +125,9 @@ public class Main {
 	public static SharedDrawable shared;
 
 	public static boolean jmode = false;
+	
+	public static boolean disableNetworking = false;
+	
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
 	 * then it creates the window and checks wether or not the last<br>
@@ -130,25 +136,55 @@ public class Main {
 	 * the version. Then it enters the game loop in which that handles<br>
 	 * logic and rendering.
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		String password = null;
 		for(String arg : args) {
-			//System.out.println(arg);
+			
 			if(arg.startsWith("u=")) {
-				playerName = arg.split("=")[1];
+				try {
+					playerName = arg.split("=")[1];
+				} catch(ArrayIndexOutOfBoundsException e) {}
+				
 				System.out.println(playerName);
+			} else if(arg.startsWith("p=")) { 
+				try {
+					password = arg.split("=")[1];
+				} catch(ArrayIndexOutOfBoundsException e) {}
+				System.out.println(password);
 			} else if(arg.startsWith("w=")) {
 				try {
 					WIDTH = Integer.parseInt(arg.split("=")[1]);
-				} catch(NumberFormatException e) {}
+				} catch(NumberFormatException | ArrayIndexOutOfBoundsException e) {}
 				
 				System.out.println(WIDTH);
 			} else if(arg.startsWith("h=")) {
 				try {
 					HEIGHT = Integer.parseInt(arg.split("=")[1]);
-				} catch(NumberFormatException e) {}
+				} catch(NumberFormatException | ArrayIndexOutOfBoundsException e) {}
 				System.out.println(HEIGHT);
 			}
+		}
+		
+		if(playerName != null && password != null) {
+			
+			String urlString = String.format("http://afs.gurdit.com/api.php?username=%s&password=%s", playerName, password);
+			System.out.println(urlString);
+			URL url = new URL(urlString);
+			URLConnection conn = url.openConnection();
+			InputStream is;
+			is = conn.getInputStream();
+			String content = IOUtils.toString(is, StandardCharsets.UTF_8);
+			
+			System.out.println(content);
+			
+			if(content.contains("\"result\":false")) {
+				disableNetworking = true;
+				playerName = null;
+			}
+		} else {
+			disableNetworking = true;
 		}
 		
 		Thread.currentThread().setName("Main Thread");
@@ -296,19 +332,16 @@ public class Main {
 
 				if(theNetwork != null) {
 					for(OtherPlayer p : Main.theNetwork.players.values()) {
-						Vector3f position = new Vector3f(p.x-0.5f,p.y-0.5f,p.z-0.5f);
+						Vector3f position = new Vector3f(p.x+0.5f,p.y+0.5f,p.z+0.5f);
 						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
 						
-						TexturedModel model = null;
-						
 						if(p.userName != null) {
-							if(p.userName.contentEquals("Oikmo")) {
-								model = PlayerSkin.oikmo.getModel();
-							} else {
-								model = PlayerSkin.none.getModel();
-							}
+							System.out.println(theNetwork.playerSkinImages.get(p));
 							
-							Entity entity = new Entity(model, position, rotation, 1f);
+							
+							
+							/**
+							Entity entity = new Entity(theNetwork.playerSkins.get(p.userName), position, rotation, 1f);
 							if(p.block != -1) {
 								Vector3f pos = new Vector3f(position);
 								pos.y += 0.85f;
@@ -316,7 +349,7 @@ public class Main {
 								MasterRenderer.getInstance().addEntity(block);
 							}
 
-							MasterRenderer.getInstance().addEntity(entity);
+							MasterRenderer.getInstance().addEntity(entity);**/
 						}
 						
 						

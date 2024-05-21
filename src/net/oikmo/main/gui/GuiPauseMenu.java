@@ -120,23 +120,25 @@ public class GuiPauseMenu extends GuiScreen {
 			if(!flag) {
 				drawShadowStringCentered(xPos+(width/2), yPos+height, Main.theNetwork.player.userName + " ("+Main.lang.translateKey("pause.players.identifier")+")");
 			}
-			for(OtherPlayer p : Main.theNetwork.players.values()) {
-				if(p.userName != null) {
-					
-					if(!p.userName.contentEquals(Main.theNetwork.player.userName)) {
-						height += fontSize + 5;
-						drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName);
-					} else {
-						if(flag) {
+			try {
+				for(OtherPlayer p : Main.theNetwork.players.values()) {
+					if(p.userName != null) {
+						if(!p.userName.contentEquals(Main.theNetwork.player.userName)) {
 							height += fontSize + 5;
-							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " ("+Main.lang.translateKey("pause.players.identifier")+")");
+							drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName);
+						} else {
+							if(flag) {
+								height += fontSize + 5;
+								drawShadowStringCentered(xPos+(width/2), yPos+height, p.userName + " ("+Main.lang.translateKey("pause.players.identifier")+")");
+							}
+							
 						}
 						
 					}
 					
 				}
-				
-			}
+			} catch(java.util.ConcurrentModificationException e) {}
+			
 		}
 		
 		this.optionsButton.tick();

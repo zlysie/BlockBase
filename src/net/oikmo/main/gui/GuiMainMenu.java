@@ -1,13 +1,21 @@
 package net.oikmo.main.gui;
 
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.FilenameUtils;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.ImageBuffer;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
@@ -207,10 +215,11 @@ public class GuiMainMenu extends GuiScreen {
 			
 			MasterRenderer.getInstance().render(mainMenuCamera);
 			drawTexture(Main.jmode ? ResourceLoader.loadUITexture("ui/title_j") : ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
+			
 			drawShadowStringCentered(Color.yellow, x,((y+height/2)+20), splashText);
 			drawShadowStringCentered(font.getWidth("Created by Oikmo")/2,Display.getHeight()-fontSize/2, "Created by Oikmo");
 			playButton.tick(lockTick);
-			multiplayerButton.tick(lockTick);
+			multiplayerButton.tick(lockTick && !Main.disableNetworking);
 			optionsButton.tick(lockTick);
 			quitButton.tick(lockTick);
 		}

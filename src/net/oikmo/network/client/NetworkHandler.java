@@ -13,8 +13,8 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 
-import net.oikmo.engine.InputManager;
 import net.oikmo.engine.gui.ChatMessage;
+import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.LoginRequest;
@@ -62,6 +62,8 @@ public class NetworkHandler {
 	public Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
 	public List<ChatMessage> rawMessages = new ArrayList<>();
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
+	public Map<String, TexturedModel> playerSkins = new HashMap<>();
+	public Map<OtherPlayer, Integer> playerSkinImages = new HashMap<>();
 	
 	private int tickTimer = 0;
 	public static final int NETWORK_PROTOCOL = 5;

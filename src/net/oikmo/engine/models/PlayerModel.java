@@ -1,23 +1,14 @@
 package net.oikmo.engine.models;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.Loader;
-import net.oikmo.engine.PlayerSkin;
-import net.oikmo.engine.ResourceLoader;
-import net.oikmo.engine.textures.ModelTexture;
-import net.oikmo.engine.world.blocks.Block;
 
 public class PlayerModel {
-	
-	private static int blockCount = Block.blocks.length;
 	private static int texturesPerBlock = 6;
-	private static float sizeOfAtlas = 16f;
-
+	private static float sizeOfAtlas = 4f;
+	
 	public static float[] vertices;
 
 	static Vector2f[][] UVS;
@@ -123,90 +114,45 @@ public class PlayerModel {
 			0.65f, 0.65f, 0.65f,
 	};
 	
+	private static RawModel model;
+	
 	public static void setup() {
-		UV_PX = setupUVPX(); //side
-		UV_NX = setupUVNX(); //side
-		UV_PY = setupUVPY(); //top
-		UV_NY = setupUVNY(); //bottom
-		UV_PZ = setupUVPZ(); //side
-		UV_NZ = setupUVNZ(); //side
+		
+		UV_PX = new Vector2f[texturesPerBlock];
+		UV_NX = new Vector2f[texturesPerBlock];
+		UV_PY = new Vector2f[texturesPerBlock];
+		UV_NY = new Vector2f[texturesPerBlock];
+		UV_PZ = new Vector2f[texturesPerBlock];
+		UV_NZ = new Vector2f[texturesPerBlock];
+		addTextureFromXY(UV_PX, 1, 0);
+		addTextureFromXY(UV_NX, 0, 0);
+		addTextureFromXY(UV_PY, 1, 0);
+		addTextureFromXY(UV_NY, 1, 0);
+		addTextureFromXY(UV_PZ, 1, 0);
+		addTextureFromXY(UV_NZ, 1, 0);
+		
+		
+		
+		System.out.println(UV_PX);
+		
 		createVertices();
 		
-		for(PlayerSkin skin : PlayerSkin.players) {
-			if(skin != null) {
-				skin.setModel(new TexturedModel(getRawModel(skin), new ModelTexture(ResourceLoader.loadTexture("textures/players"))));
-			}
-		}
+		model = Loader.loadToVAO(vertices, getUVs(), normals);
+		
+		System.out.println(model);
 	}
 	
-	
-	public static Vector2f[] setupUVPX() {
-		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
-
-		addTextureFromXY(uvArray, PlayerSkin.none.getType(), 1, 0);
-		addTextureFromXY(uvArray, PlayerSkin.dev.getType(), 4, 0);
-		addTextureFromXY(uvArray, PlayerSkin.oikmo.getType(), 6, 0);
-		
-		return uvArray;
+	public static RawModel getRawModel() {
+		return model;
 	}
-	
-	public static Vector2f[] setupUVNX() {
-		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
 
-		addTextureFromXY(uvArray, PlayerSkin.none.getType(), 0, 0);
-		addTextureFromXY(uvArray, PlayerSkin.dev.getType(), 2, 0);
-		addTextureFromXY(uvArray, PlayerSkin.oikmo.getType(), 5, 0);
-		
-		return uvArray;
-	}	
-	
-	
-	public static Vector2f[] setupUVPY() {
-		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
-		
-		addTextureFromXY(uvArray, PlayerSkin.none.getType(), 1, 0);
-		addTextureFromXY(uvArray, PlayerSkin.dev.getType(), 4, 0);
-		addTextureFromXY(uvArray, PlayerSkin.oikmo.getType(), 6, 0);
-		
-		return uvArray;
-	}
-	public static Vector2f[] setupUVNY() { 
-		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
-		
-		addTextureFromXY(uvArray, PlayerSkin.none.getType(), 1, 0);
-		addTextureFromXY(uvArray, PlayerSkin.dev.getType(), 4, 0);
-		addTextureFromXY(uvArray, PlayerSkin.oikmo.getType(), 6, 0);
-		
-		return uvArray;
-	}
-	
-	public static Vector2f[] setupUVPZ() {
-		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
-
-		addTextureFromXY(uvArray, PlayerSkin.none.getType(), 1, 0);
-		addTextureFromXY(uvArray, PlayerSkin.dev.getType(), 3, 0);
-		addTextureFromXY(uvArray, PlayerSkin.oikmo.getType(), 6, 0);
-		
-		return uvArray;
-	}	
-	public static Vector2f[] setupUVNZ() {
-		Vector2f[] uvArray = new Vector2f[blockCount * texturesPerBlock];
-
-		addTextureFromXY(uvArray, PlayerSkin.none.getType(), 1, 0);
-		addTextureFromXY(uvArray, PlayerSkin.dev.getType(), 3, 0);
-		addTextureFromXY(uvArray, PlayerSkin.oikmo.getType(), 6, 0);
-		
-		return uvArray;
-	}
-	
-
-	public static float[] getUVs(int is) {
+	public static float[] getUVs() {
 		UVS = UVS == null ? new Vector2f[][]{PlayerModel.UV_PX, PlayerModel.UV_NX, PlayerModel.UV_PY, PlayerModel.UV_NY, PlayerModel.UV_PZ, PlayerModel.UV_NZ} : UVS;
 		int totalLength = UVS.length * 6 * 2; // 5 vectors for each array
 
 		float[] result = new float[totalLength];
 		int index = 0;
-		int startIndex = is * 6;
+		int startIndex = 0;
 
 		for (Vector2f[] uvArray : UVS) {
 			for (int i = startIndex; i < startIndex + 6; i++) {
@@ -236,26 +182,16 @@ public class PlayerModel {
 		}
 	}
 
-	public static int addTextureFromXY(Vector2f[] uv, int index, int x, int y) {
+	public static void addTextureFromXY(Vector2f[] uv, int x, int y) {
+	
 		float xOffset = (float) x / 16.f;
 		float yOffset = (float) y / 16.f;
-		int privIndex = new Integer(index*6);
+		int privIndex = 0;
 		uv[privIndex++] = new Vector2f(xOffset, yOffset);
 		uv[privIndex++] = new Vector2f(xOffset, (float) (y + 1) / sizeOfAtlas);
 		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, (float) (y + 1) / sizeOfAtlas);
 		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, (float) (y + 1) / sizeOfAtlas);
 		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, yOffset);
 		uv[privIndex++] = new Vector2f(xOffset, yOffset);
-
-		return index;
-	}
-	
-	private static Map<PlayerSkin, RawModel> models = new HashMap<>();
-
-	public static RawModel getRawModel(PlayerSkin block) {
-		if(models.get(block) == null) {
-			models.put(block, Loader.loadToVAO(vertices, getUVs(block.getByteType()), normals));
-		}
-		return models.get(block);
 	}
 }
