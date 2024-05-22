@@ -87,7 +87,7 @@ public class MainServer {
 
 	public static World theWorld;
 
-	private static String version = "S0.0.9";
+	private static String version = "S0.1.0";
 	public static final int NETWORK_PROTOCOL = 6;
 
 	private static Thread saveThread;
