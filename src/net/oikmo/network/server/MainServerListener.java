@@ -115,6 +115,23 @@ public class MainServerListener extends Listener {
 				response.setResponseText("ok");
 				connection.sendTCP(response);
 				
+				for(OtherPlayer p : players.values()) {
+					if(p.userName != null) {
+						if(p.userName.contentEquals(request.getUserName())) {
+							PacketRemovePlayer packetKick = new PacketRemovePlayer();
+							packetKick.id = connection.getID();
+							packetKick.kick = true;
+							packetKick.message = "You are already on here!";
+							MainServer.server.sendToAllTCP(packetKick);
+							players.remove(connection.getID());
+							
+							MainServer.logPanel.append("Kicked " + packetKick.id + " from the server. (Already exists)\n");
+							return;
+						}
+					}
+					
+				}
+				
 				PacketUserName packetUserName = new PacketUserName();
 				packetUserName.id = connection.getID();
 				packetUserName.userName = request.getUserName();
@@ -291,26 +308,24 @@ public class MainServerListener extends Listener {
 			packet.id = connection.getID();
 			
 			MainServer.theWorld.setBlock(new Vector3f(packet.x,packet.y,packet.z), packet.block);
-			System.out.println(new Vector3f(packet.x,packet.y,packet.z) + " " + packet.block);
 			MainServer.server.sendToAllExceptUDP(connection.getID(), packet);
 		} else if(object instanceof PacketSavePlayerPosition) {
 			PacketSavePlayerPosition packet = (PacketSavePlayerPosition) object;
-			String ip = connection.getRemoteAddressTCP().getHostString();
+			String username = packet.userName;
 			PlayersPositionData data = SaveSystem.loadPlayerPositions();
 			if(data == null) {
 				data = new PlayersPositionData();
 				
-				data.positions.put(ip, new Vector3f(packet.x,packet.y,packet.z));
+				data.positions.put(username, new Vector3f(packet.x,packet.y,packet.z));
 				SaveSystem.savePlayerPositions(data);
 			} else {
-				if(data.positions.get(ip) == null) {
-					data.positions.put(ip, new Vector3f(packet.x,packet.y,packet.z));
+				if(data.positions.get(username) == null) {
+					data.positions.put(username, new Vector3f(packet.x,packet.y,packet.z));
 				} else {
-					data.positions.replace(ip, new Vector3f(packet.x,packet.y,packet.z));
+					data.positions.replace(username, new Vector3f(packet.x,packet.y,packet.z));
 					SaveSystem.savePlayerPositions(data);
 				}
-			}
-			
+			}	
 		}
 		else if(object instanceof PacketPlaySoundAt) {
 			PacketPlaySoundAt packet = (PacketPlaySoundAt) object;

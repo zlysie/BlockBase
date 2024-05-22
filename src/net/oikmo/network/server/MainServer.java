@@ -88,7 +88,7 @@ public class MainServer {
 	public static World theWorld;
 
 	private static String version = "S0.0.9";
-	public static final int NETWORK_PROTOCOL = 5;
+	public static final int NETWORK_PROTOCOL = 6;
 
 	private static Thread saveThread;
 
@@ -382,7 +382,7 @@ public class MainServer {
 
 				logPanel.append("Successfully set spawn position to: [X="+xSpawn+", Z="+zSpawn+"]!");
 			} else {
-				logPanel.append("Unable to set spawn position as inputted values were invalid.");
+				logPanel.append("Unable to set spawn position as inputted values were invalid.\n");
 			}
 		} else if(command.contentEquals("seed")) {
 			logPanel.append("World seed is: " + theWorld.getSeed());
@@ -439,10 +439,10 @@ public class MainServer {
 				packetKick.message = reason;
 				MainServer.server.sendToAllTCP(packetKick);
 
-				logPanel.append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.");
+				logPanel.append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.\n");
 
 			} else {
-				logPanel.append("ID was not valid / Reason was not supplied");
+				logPanel.append("ID was not valid / Reason was not supplied\n");
 			}
 		} else if(cmd.contentEquals("chunks")) {
 			logPanel.append("Server has a total chunk size of: " + theWorld.chunkMap.size() + "\n");
