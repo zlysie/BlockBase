@@ -10,8 +10,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.FloatBuffer;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
@@ -20,12 +18,6 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.TagException;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -229,24 +221,7 @@ public class Maths {
 	public static float lerp(float start, float end, float amount) {
 		return start + (amount)* (end - start);
 	}
-
-	public static long getDurationOfOGG(URL file) {
-		long length = -1;
-		try {
-			AudioFile audioFile = AudioFileIO.read(new File(file.toURI()));
-
-			// Extract the length of the OGG file in milliseconds
-			length = audioFile.getAudioHeader().getTrackLength()*1000;
-		} catch (IOException | CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return length;
-	}
-
+	
 	public static String[] fileToArray(String fileLoc) {
 		try {
 			List<String> listOfStrings = new ArrayList<String>();

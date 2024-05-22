@@ -8,12 +8,15 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.ItemBlock;
 import net.oikmo.engine.entity.ItemEntity;
+import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.toolbox.Maths;
 
 public class EntityRenderer {
@@ -31,6 +34,9 @@ public class EntityRenderer {
 		synchronized(entities) {
 
 			for(TexturedModel model : entities.keySet()) {
+				if(model.getTexture().getTextureID() == MasterRenderer.invisibleTexture) { 
+					continue;
+				}
 				shader.start();
 				shader.loadViewMatrix(camera);
 				GL30.glBindVertexArray(model.getRawModel().getVaoID());
@@ -46,7 +52,22 @@ public class EntityRenderer {
 					
 					Entity entity = batch.get(i);
 					
-					Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotation(), entity.getScale());
+					Vector3f position = entity.getPosition();
+					Vector3f rotation = entity.getRotation();
+					
+					if(entity instanceof Player) {
+						Vector3f playerModelPosition = ((Player)entity).getModelPosition();
+						if(playerModelPosition != null) {
+							position = playerModelPosition;
+						}
+						
+						Vector3f playerModelRotation = ((Player)entity).getModelRotation();
+						if(playerModelRotation != null) {
+							rotation = playerModelRotation;
+						}
+					}
+					
+					Matrix4f transformationMatrix = Maths.createTransformationMatrix(position, rotation, entity.getScale());
 					shader.loadTransformationMatrix(transformationMatrix);
 					shader.loadWhiteOffset(entity.getWhiteOffset()/10);
 					if(entity instanceof ItemEntity || entity instanceof ItemBlock) {

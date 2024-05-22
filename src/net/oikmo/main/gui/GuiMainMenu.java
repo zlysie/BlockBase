@@ -171,12 +171,12 @@ public class GuiMainMenu extends GuiScreen {
 
 				for(SoundByte musicByte : bytes) {
 					SoundMaster.playMusic(musicByte.getID());
-					long duration = Maths.getDurationOfOGG(musicByte.getFileLocation());
-					long randomLong = new Random().nextInt(24000);
+					long duration = 120000;
+					long randomLong = new Random().nextInt(12000);
 					long sum = duration + randomLong;
-
+					
 					Logger.log(LogLevel.INFO, "Playing " + FilenameUtils.getName(musicByte.getFileLocation().getPath()) + " (" + musicByte.getID() + ") and sleeping for " + duration + "ms with (random) " + randomLong + "+ ms with the sum of: " + (sum) + "ms");
-
+					
 					try {
 						Thread.sleep(sum);
 					} catch (InterruptedException e) {}

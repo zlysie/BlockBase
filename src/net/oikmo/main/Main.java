@@ -12,6 +12,7 @@ import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,6 +33,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
@@ -40,6 +42,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.SharedDrawable;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.ImageBuffer;
 
 import com.mojang.minecraft.Timer;
 
@@ -84,7 +87,7 @@ public class Main {
 
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.1.9";
+	public static final String version = "a0.2.0 [DEV]";
 	public static final String gameVersion = gameName + " " + version;
 
 	public static boolean displayRequest = false;
@@ -129,6 +132,9 @@ public class Main {
 	
 	public static boolean disableNetworking = false;
 	
+	public static int playerSkin;
+	
+	
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
 	 * then it creates the window and checks wether or not the last<br>
@@ -162,10 +168,10 @@ public class Main {
 			}
 		}
 		
-		System.out.println(playerName);
+		
 		
 		if(playerName != null && password != null) {
-			
+			System.out.println(playerName);
 			String urlString = String.format("http://afs.gurdit.com/api.php?username=%s&password=%s", playerName, password);
 			URL url = new URL(urlString);
 			URLConnection conn = url.openConnection();
@@ -255,7 +261,7 @@ public class Main {
 
 			long lastTime = System.currentTimeMillis();
 			long sum =  System.currentTimeMillis() - lastTime;
-			while(sum < 000) {
+			while(sum < 1500) {
 				sum = System.currentTimeMillis() - lastTime;
 			}
 
@@ -266,10 +272,33 @@ public class Main {
 			CubeModel.setup();
 			PlayerModel.setup();
 			SoundMaster.init();
+			
 			InputManager im = new InputManager();
-
-			shared = new SharedDrawable(Display.getDrawable());
-
+			
+			BufferedImage image = null;
+			try {
+				URL url = new URL("http://afs.gurdit.com/users/"+playerName+"/skin_"+ playerName + ".png");
+				URLConnection conn = url.openConnection();
+				InputStream in = conn.getInputStream();
+				image = ImageIO.read(in);
+			} catch(Exception e) {}
+			
+			ImageBuffer buf = new ImageBuffer(64,64);
+			
+			if(image != null) {
+				for(int x = 0; x < 64; x++) {
+					for(int y = 0; y < 64; y++) {
+						java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
+						buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+					}
+				}
+				Image skin = new Image(buf);
+				skin.setFilter(Image.FILTER_NEAREST);
+				playerSkin = skin.getTexture().getTextureID();
+			} else {
+				playerSkin = ResourceLoader.loadTexture("textures/default_skin");
+			}
+			
 			shouldTick = false; 
 
 			if(!jmode) {
@@ -305,6 +334,9 @@ public class Main {
 
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
+					if(Main.thePlayer.getCamera().isPerspective()) {
+						MasterRenderer.getInstance().addEntity(Main.thePlayer);
+					}
 				} else {
 					//MasterRenderer.getInstance().addEntity(test);
 				}

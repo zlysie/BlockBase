@@ -2,6 +2,7 @@ package net.oikmo.engine.entity;
 
 import java.util.Random;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -36,6 +37,8 @@ public class Camera {
 	
 	public Vector3f forward;
 	
+	private boolean perspective = false;
+	
 	/**
 	 * Camera constructor. Sets position and rotation.
 	 * 
@@ -63,89 +66,104 @@ public class Camera {
 	boolean mouseClickLeft = false;
 	boolean mouseClickRight = false;
 	boolean shouldRenderAABB = false;
+	boolean perspectiveLock = false;
 	
 	/**
 	 * Fly cam
 	 * @param heightOffset 
 	 */
 	public void update(Player player) {
-		Vector3f position = new Vector3f(player.getPosition());
-		this.position = position;
-		this.prevPosition = new Vector3f(position);
-		this.position.x = Maths.lerp(this.position.x, position.x, 0.1f);
-		this.position.z = Maths.lerp(this.position.z, position.z, 0.1f);
-		this.position.y = position.y + player.heightOffset;
-		int reachDistance = player.reachDistance;
-		this.prevYaw = yaw;
-		if(mouseLocked && Main.theWorld != null && Main.thePlayer.tick) {
-			this.updateVectors();
-			
-			Vector3f currentPoint = Main.theWorld.raycast(getPosition(), forward, reachDistance, false);  
-			
-			if(currentPoint != null) {
-				int blockX = (int)(currentPoint.x);
-				int blockY = (int)(currentPoint.y);
-				int blockZ = (int)(currentPoint.z);
-				Vector3f blockPos = new Vector3f(blockX,blockY,blockZ);
+		
+		
+		if(Keyboard.isKeyDown(Keyboard.KEY_F5)) {
+			if(!perspectiveLock) {
+				perspective = !perspective;
+				perspectiveLock = true;
+			}
+		} else {
+			perspectiveLock = false;
+		}
+		
+		if(!perspective) {
+			Vector3f position = new Vector3f(player.getPosition());
+			this.position = position;
+			this.prevPosition = new Vector3f(position);
+			this.position.x = Maths.lerp(this.position.x, position.x, 0.1f);
+			this.position.z = Maths.lerp(this.position.z, position.z, 0.1f);
+			this.position.y = position.y + player.heightOffset;
+			int reachDistance = player.reachDistance;
+			this.prevYaw = yaw;
+			if(mouseLocked && Main.theWorld != null && Main.thePlayer.tick) {
+				this.updateVectors();
 				
-				if(Mouse.isButtonDown(1)) {
-					if(!mouseClickRight) {
-						if(Main.inGameGUI.getSelectedItem() != null) {
-							Vector3f point = Main.theWorld.raycast(getPosition(), forward, reachDistance, true);
-							int bx = (int)(point.x);
-							int by = (int)(point.y);
-							int bz = (int)(point.z);
-							Main.theWorld.setBlock(new Vector3f(bx,by,bz), Main.inGameGUI.getSelectedItem());
-						}
-						mouseClickRight = true;
-					}
-				} else {
-					mouseClickRight = false;
-				}
-
-				if(Mouse.isButtonDown(0)) {
-					if(!mouseClickLeft) {
-						Block block = Main.theWorld.getBlock(blockPos);
-						if(block != null) {
-							/*Vector3f v = new Vector3f(picker.getPointRounded());
-							v.y += 1f;
-							ItemBlock item = new ItemBlock(block, v);
-							Main.theWorld.addEntity(item);*/
-							Vector3f pos = new Vector3f(currentPoint);
-							if(block.getByteType() == Block.tnt.getType() && Main.theNetwork == null) {
-								Main.theWorld.addEntity(new PrimedTNT(pos, new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, true));
+				Vector3f currentPoint = Main.theWorld.raycast(getPosition(), forward, reachDistance, false);  
+				
+				if(currentPoint != null) {
+					int blockX = (int)(currentPoint.x);
+					int blockY = (int)(currentPoint.y);
+					int blockZ = (int)(currentPoint.z);
+					Vector3f blockPos = new Vector3f(blockX,blockY,blockZ);
+					
+					if(Mouse.isButtonDown(1)) {
+						if(!mouseClickRight) {
+							if(Main.inGameGUI.getSelectedItem() != null) {
+								Vector3f point = Main.theWorld.raycast(getPosition(), forward, reachDistance, true);
+								int bx = (int)(point.x);
+								int by = (int)(point.y);
+								int bz = (int)(point.z);
+								Main.theWorld.setBlock(new Vector3f(bx,by,bz), Main.inGameGUI.getSelectedItem());
 							}
-							Main.theWorld.setBlock(blockPos, null);
-							
+							mouseClickRight = true;
 						}
-						mouseClickLeft = true;
+					} else {
+						mouseClickRight = false;
 					}
-				} else {
-					mouseClickLeft = false;
-				}
-				
-				if(Mouse.isButtonDown(2)) {
-					Block toBeSelected = Main.theWorld.getBlock(blockPos);
-					if(toBeSelected != null) {
-						Main.inGameGUI.setSelectedItem(Item.blockToItem(toBeSelected));
+
+					if(Mouse.isButtonDown(0)) {
+						if(!mouseClickLeft) {
+							Block block = Main.theWorld.getBlock(blockPos);
+							if(block != null) {
+								/*Vector3f v = new Vector3f(picker.getPointRounded());
+								v.y += 1f;
+								ItemBlock item = new ItemBlock(block, v);
+								Main.theWorld.addEntity(item);*/
+								Vector3f pos = new Vector3f(currentPoint);
+								if(block.getByteType() == Block.tnt.getType() && Main.theNetwork == null) {
+									Main.theWorld.addEntity(new PrimedTNT(pos, new Random().nextInt(10)/10f, 0.1f, new Random().nextInt(10)/10f, true));
+								}
+								Main.theWorld.setBlock(blockPos, null);
+								
+							}
+							mouseClickLeft = true;
+						}
+					} else {
+						mouseClickLeft = false;
 					}
-				}
-				
-				Block thatBlock = Main.theWorld.getBlock(blockPos);
-				if(thatBlock != null) {
-					aabb.setPosition(blockPos);
-					shouldRenderAABB = true;
+					
+					if(Mouse.isButtonDown(2)) {
+						Block toBeSelected = Main.theWorld.getBlock(blockPos);
+						if(toBeSelected != null) {
+							Main.inGameGUI.setSelectedItem(Item.blockToItem(toBeSelected));
+						}
+					}
+					
+					Block thatBlock = Main.theWorld.getBlock(blockPos);
+					if(thatBlock != null) {
+						aabb.setPosition(blockPos);
+						shouldRenderAABB = true;
+					} else {
+						shouldRenderAABB = false;
+					}
+					
 				} else {
 					shouldRenderAABB = false;
 				}
-				
-			} else {
-				shouldRenderAABB = false;
-			}
 
+			}
 		}
+		
 			
-		this.move();
+		this.move(player);
 	}
 	
 	private void updateVectors() {
@@ -165,6 +183,10 @@ public class Camera {
 		return aabb;
 	}
 	
+	public boolean isPerspective() {
+		return perspective;
+	}
+	
 	public void toggleMouseLock() {
 		if(!lockInCam) {
 			mouseLocked = !mouseLocked;
@@ -179,13 +201,13 @@ public class Camera {
 		}
 	}
 	
-	private void move() {
+	private void move(Player player) {
 		/*if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			toggleMouseLock();
 		} else {
 			lockInCam = false;
 		}*/
-
+		
 		if(Mouse.isGrabbed() != mouseLocked) {
 			Mouse.setGrabbed(mouseLocked);
 		}
@@ -197,7 +219,18 @@ public class Camera {
 			}else if(pitch > maxVerticalTurn){
 				pitch = maxVerticalTurn;
 			}
+			
+			if(perspective) {
+				calculateAngleAroundPlayer();
+				float horizontalDistance = calculateHorizontalDistance();
+				float verticalDistance = calculateVerticalDistance();
+				calculateCameraPosition(player, horizontalDistance, verticalDistance);
+				shouldRenderAABB = false;
+			}
+			
 			yaw += Mouse.getDX() * GameSettings.sensitivity;
+		} else {
+			shouldRenderAABB = false;
 		}
 	}
 
@@ -267,6 +300,39 @@ public class Camera {
 
 	public boolean isLocked() {
 		return mouseLocked;
+	}
+	
+	public float distanceFromPlayer = 5;
+	public float angleAroundPlayer = 0;
+	
+	private void calculateCameraPosition(Player player, float horizDistance, float verticDistance){
+		
+		float yOffset = player.heightOffset;
+		
+		// substitute in commented-out RotY lines to make the camera rotate when the player does
+		//float theta = player.getRotY() + angleAroundPlayer;
+		float theta = angleAroundPlayer;
+		float offsetX = (float) (horizDistance * Math.sin(Math.toRadians(theta)));
+		float offsetZ = (float) (horizDistance * Math.cos(Math.toRadians(theta)));
+		position.x = player.getPosition().x - offsetX;
+		position.z = player.getPosition().z - offsetZ;
+		
+		position.y = player.getPosition().y + verticDistance + yOffset;
+		//this.yaw = 180 - (player.getRotY() + angleAroundPlayer);
+		this.yaw = 180 - angleAroundPlayer;
+	}
+	
+	private float calculateHorizontalDistance(){
+		return (float) (distanceFromPlayer * Math.cos(Math.toRadians(pitch+2)));
+	}
+	
+	private float calculateVerticalDistance(){
+		return (float) (distanceFromPlayer * Math.sin(Math.toRadians(pitch+2)));
+	}
+	
+	private void calculateAngleAroundPlayer() {
+		float angleChange = Mouse.getDX() * GameSettings.sensitivity;
+		angleAroundPlayer -= angleChange;
 	}
 	
 	public static class TargetedAABB {

@@ -40,7 +40,7 @@ public class SoundMaster {
 	private static int ticksBeforeMusic;
 
 	public static void init() {
-		ticksBeforeMusic = new Random().nextInt(12000);
+		ticksBeforeMusic = 12000 + new Random().nextInt(12000);
 		//Initalises soundsystem
 		try {
 			SoundSystemConfig.addLibrary(LibraryLWJGLOpenAL.class);
