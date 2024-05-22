@@ -63,7 +63,7 @@ public class NetworkHandler {
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
 	
 	private int tickTimer = 0;
-	public static final int NETWORK_PROTOCOL = 5;
+	public static final int NETWORK_PROTOCOL = 6;
 	
 	private static void registerKryoClasses() {
 		kryo.register(LoginRequest.class);
@@ -224,6 +224,7 @@ public class NetworkHandler {
 	public void disconnect()  {
 		if(Main.thePlayer != null) {
 			PacketSavePlayerPosition data = new PacketSavePlayerPosition();
+			data.userName = Main.playerName;
 			data.x = (int) Main.thePlayer.getPosition().x;
 			data.y = (int) Main.thePlayer.getPosition().y+1;
 			data.z = (int) Main.thePlayer.getPosition().z;
