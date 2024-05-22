@@ -14,7 +14,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 
 import net.oikmo.engine.gui.ChatMessage;
-import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.LoginRequest;
@@ -62,8 +61,6 @@ public class NetworkHandler {
 	public Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
 	public List<ChatMessage> rawMessages = new ArrayList<>();
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
-	public Map<String, TexturedModel> playerSkins = new HashMap<>();
-	public Map<OtherPlayer, Integer> playerSkinImages = new HashMap<>();
 	
 	private int tickTimer = 0;
 	public static final int NETWORK_PROTOCOL = 5;
@@ -134,6 +131,9 @@ public class NetworkHandler {
 		Logger.log(LogLevel.INFO, "Test disconnected.");
 	}
 	
+	
+	private float degreesOffsetX = -90;
+	
 	public void tick() {
 		synchronized(currentlyShownMessages) {
 			for(int i = 0; i < currentlyShownMessages.size(); i++) {
@@ -172,7 +172,7 @@ public class NetworkHandler {
 		}
 	}
 	
-	private float degreesOffsetX = -90;
+	
 	public void update() {
 		if(!client.isConnected()) {
 			System.out.println("Yeahhh");

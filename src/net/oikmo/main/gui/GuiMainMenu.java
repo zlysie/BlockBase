@@ -226,6 +226,7 @@ public class GuiMainMenu extends GuiScreen {
 	}
 	
 	public void onTick() {
+		//mainMenuCamera.pitch = 90;
 		mainMenuCamera.yaw += 0.1f;
 		
 		if(ticksToWait < maxCoolDown) {

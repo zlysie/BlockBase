@@ -39,6 +39,7 @@ import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.SharedDrawable;
 import org.lwjgl.util.vector.Vector3f;
+import org.newdawn.slick.Image;
 
 import com.mojang.minecraft.Timer;
 
@@ -141,43 +142,36 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		String password = null;
 		for(String arg : args) {
-			
 			if(arg.startsWith("u=")) {
 				try {
 					playerName = arg.split("=")[1];
 				} catch(ArrayIndexOutOfBoundsException e) {}
-				
-				System.out.println(playerName);
 			} else if(arg.startsWith("p=")) { 
 				try {
 					password = arg.split("=")[1];
 				} catch(ArrayIndexOutOfBoundsException e) {}
-				System.out.println(password);
 			} else if(arg.startsWith("w=")) {
 				try {
 					WIDTH = Integer.parseInt(arg.split("=")[1]);
 				} catch(NumberFormatException | ArrayIndexOutOfBoundsException e) {}
 				
-				System.out.println(WIDTH);
 			} else if(arg.startsWith("h=")) {
 				try {
 					HEIGHT = Integer.parseInt(arg.split("=")[1]);
 				} catch(NumberFormatException | ArrayIndexOutOfBoundsException e) {}
-				System.out.println(HEIGHT);
 			}
 		}
+		
+		System.out.println(playerName);
 		
 		if(playerName != null && password != null) {
 			
 			String urlString = String.format("http://afs.gurdit.com/api.php?username=%s&password=%s", playerName, password);
-			System.out.println(urlString);
 			URL url = new URL(urlString);
 			URLConnection conn = url.openConnection();
 			InputStream is;
 			is = conn.getInputStream();
 			String content = IOUtils.toString(is, StandardCharsets.UTF_8);
-			
-			System.out.println(content);
 			
 			if(content.contains("\"result\":false")) {
 				disableNetworking = true;
@@ -261,7 +255,7 @@ public class Main {
 
 			long lastTime = System.currentTimeMillis();
 			long sum =  System.currentTimeMillis() - lastTime;
-			while(sum < 2000) {
+			while(sum < 000) {
 				sum = System.currentTimeMillis() - lastTime;
 			}
 
@@ -286,7 +280,7 @@ public class Main {
 			splashText = splashes[new Random().nextInt(splashes.length)];
 
 			currentScreen = new GuiMainMenu(splashText);
-
+			
 			try {
 				GameSettings.globalVolume = Float.parseFloat(OptionsHandler.getInstance().translateKey("audio.volume"));
 			} catch(NumberFormatException e) {
@@ -299,8 +293,8 @@ public class Main {
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
 			}
 
-
-
+			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
+			
 			/*Main.shouldTick = true;
 			Main.loadWorld("world1");*/
 
@@ -311,6 +305,8 @@ public class Main {
 
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
+				} else {
+					//MasterRenderer.getInstance().addEntity(test);
 				}
 
 				slayyyTick = false;
@@ -332,24 +328,34 @@ public class Main {
 
 				if(theNetwork != null) {
 					for(OtherPlayer p : Main.theNetwork.players.values()) {
-						Vector3f position = new Vector3f(p.x+0.5f,p.y+0.5f,p.z+0.5f);
-						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY,p.rotX);
+						Vector3f position = new Vector3f(p.x,p.y,p.z);
+						Vector3f rotation = new Vector3f(p.rotZ,-p.rotY+90,p.rotX);
 						
-						if(p.userName != null) {
-							System.out.println(theNetwork.playerSkinImages.get(p));
-							
-							
-							
-							/**
-							Entity entity = new Entity(theNetwork.playerSkins.get(p.userName), position, rotation, 1f);
-							if(p.block != -1) {
-								Vector3f pos = new Vector3f(position);
-								pos.y += 0.85f;
-								Entity block = new Entity(new TexturedModel(CubeModel.getRawModel(Block.getBlockFromOrdinal(p.block)), MasterRenderer.currentTexturePack), pos, new Vector3f(p.rotZ,-p.rotY,0), 0.4f);
-								MasterRenderer.getInstance().addEntity(block);
-							}
+						if(p.userName != null ) {
+							if(p.model != null) {
+								if(p.buffer != null && p.model.getTexture().getTextureID() == ResourceLoader.loadTexture("textures/default_skin")) {
+									Image skinTex = new Image(p.buffer);
+									skinTex.setFilter(Image.FILTER_NEAREST);
+									p.model = new TexturedModel(PlayerModel.getRawModel(), skinTex.getTexture().getTextureID());
+								}
+								Entity entity = new Entity(p.model, position, rotation, 1f);
+								if(p.block != -1) {
+									Vector3f pos = new Vector3f(position);
+									pos.y += 0.85f;
+									Entity block = new Entity(new TexturedModel(CubeModel.getRawModel(Block.getBlockFromOrdinal(p.block)), MasterRenderer.currentTexturePack), pos, new Vector3f(p.rotZ,-p.rotY,0), 0.4f);
+									MasterRenderer.getInstance().addEntity(block);
+								}
 
-							MasterRenderer.getInstance().addEntity(entity);**/
+								MasterRenderer.getInstance().addEntity(entity);
+							} else {
+								if(p.buffer != null) {
+									Image skinTex = new Image(p.buffer);
+									skinTex.setFilter(Image.FILTER_NEAREST);
+									p.model = new TexturedModel(PlayerModel.getRawModel(), skinTex.getTexture().getTextureID());
+								} else {
+									p.model = new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/default_skin"));	
+								}
+							}
 						}
 						
 						

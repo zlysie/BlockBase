@@ -1,6 +1,10 @@
 package net.oikmo.network.client;
 
+import org.newdawn.slick.ImageBuffer;
+
 import com.esotericsoftware.kryonet.Connection;
+
+import net.oikmo.engine.models.TexturedModel;
 
 public class OtherPlayer {
 	
@@ -11,6 +15,9 @@ public class OtherPlayer {
 	
 	public float x, y, z;
 	public float rotX, rotY, rotZ;
+	
+	public ImageBuffer buffer;
+	public TexturedModel model;
 	
 	public byte block = -1;
 	

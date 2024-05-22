@@ -15,52 +15,53 @@ public class PlayerModel {
 	static Vector3f[][] VERTS;
 	
 	public static Vector3f[] PX_POS = {
-			new Vector3f(1f,1f,0f),
-			new Vector3f(1f,0f,0f),
-			new Vector3f(1f,0f,1f),
-			new Vector3f(1f,0f,1f),
-			new Vector3f(1f,1f,1f),
-			new Vector3f(1f,1f,0f)
+			new Vector3f(0.5f,0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,0.5f),
+			new Vector3f(0.5f,-0.5f,0.5f),
+			new Vector3f(0.5f,0.5f,0.5f),
+			new Vector3f(0.5f,0.5f,-0.5f)
 	};
 	public static Vector3f[] NX_POS = {
-			new Vector3f(0f,1f,0f),
-			new Vector3f(0f,0f,0f),
-			new Vector3f(0f,0f,1f),
-			new Vector3f(0f,0f,1f),
-			new Vector3f(0f,1f,1f),
-			new Vector3f(0f,1f,0f)
+			new Vector3f(-0.5f,0.5f,-0.5f),
+			new Vector3f(-0.5f,-0.5f,-0.5f),
+			new Vector3f(-0.5f,-0.5f,0.5f),
+			new Vector3f(-0.5f,-0.5f,0.5f),
+			new Vector3f(-0.5f,0.5f,0.5f),
+			new Vector3f(-0.5f,0.5f,-0.5f)
 	};
 	public static Vector3f[] PY_POS = {
-			new Vector3f(0f,1f,1f),
-			new Vector3f(0f,1f,0f),
-			new Vector3f(1f,1f,0f),
-			new Vector3f(1f,1f,0f),
-			new Vector3f(1f,1f,1f),
-			new Vector3f(0f,1f,1f)
+			new Vector3f(0.5f,0.5f,-0.5f),
+			new Vector3f(0.5f,0.5f,0.5f),
+			new Vector3f(-0.5f,0.5f,0.5f),
+			new Vector3f(-0.5f,0.5f,0.5f),
+			new Vector3f(-0.5f,0.5f,-0.5f),
+			new Vector3f(0.5f,0.5f,-0.5f),
+			
 	};
 	public static Vector3f[] NY_POS = {
-			new Vector3f(0f,0f,1f),
-			new Vector3f(0f,0f,0f),
-			new Vector3f(1f,0f,0f),
-			new Vector3f(1f,0f,0f),
-			new Vector3f(1f,0f,1f),
-			new Vector3f(0f,0f,1f)
+			new Vector3f(-0.5f,-0.5f,0.5f),
+			new Vector3f(-0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,0.5f),
+			new Vector3f(-0.5f,-0.5f,0.5f)
 	};
 	public static Vector3f[] PZ_POS = {
-			new Vector3f(0f,1f,1f),
-			new Vector3f(0f,0f,1f),
-			new Vector3f(1f,0f,1f),
-			new Vector3f(1f,0f,1f),
-			new Vector3f(1f,1f,1f),
-			new Vector3f(0f,1f,1f)
+			new Vector3f(-0.5f,0.5f,0.5f),
+			new Vector3f(-0.5f,-0.5f,0.5f),
+			new Vector3f(0.5f,-0.5f,0.5f),
+			new Vector3f(0.5f,-0.5f,0.5f),
+			new Vector3f(0.5f,0.5f,0.5f),
+			new Vector3f(-0.5f,0.5f,0.5f)
 	};
 	public static Vector3f[] NZ_POS = {
-			new Vector3f(0f,1f,0f),
-			new Vector3f(0f,0f,0f),
-			new Vector3f(1f,0f,0f),
-			new Vector3f(1f,0f,0f),
-			new Vector3f(1f,1f,0f),
-			new Vector3f(0f,1f,0f)
+			new Vector3f(-0.5f,0.5f,-0.5f),
+			new Vector3f(-0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,-0.5f,-0.5f),
+			new Vector3f(0.5f,0.5f,-0.5f),
+			new Vector3f(-0.5f,0.5f,-0.5f)
 	};
 
 	public static Vector2f[] UV_PX;
@@ -85,19 +86,19 @@ public class PlayerModel {
 			0.65f, 0.65f, 0.65f,
 			0.65f, 0.65f, 0.65f,
 			
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
 			
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
-			1f, 1f, 1f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
 			
 			0.8f, 0.8f, 0.8f,
 			0.8f, 0.8f, 0.8f,
@@ -124,22 +125,18 @@ public class PlayerModel {
 		UV_NY = new Vector2f[texturesPerBlock];
 		UV_PZ = new Vector2f[texturesPerBlock];
 		UV_NZ = new Vector2f[texturesPerBlock];
-		addTextureFromXY(UV_PX, 1, 0);
-		addTextureFromXY(UV_NX, 0, 0);
-		addTextureFromXY(UV_PY, 1, 0);
-		addTextureFromXY(UV_NY, 1, 0);
-		addTextureFromXY(UV_PZ, 1, 0);
-		addTextureFromXY(UV_NZ, 1, 0);
 		
+		addTextureFromXY(UV_PX, 0, 1); //back
+		addTextureFromXY(UV_NX, 2, 1); //front
+		addTextureFromXY(UV_PY, 2, 0); //top
+		addTextureFromXY(UV_NY, 2, 2); //bottom
+		addTextureFromXY(UV_PZ, 3, 1); //right
+		addTextureFromXY(UV_NZ, 1, 1); //left
 		
-		
-		System.out.println(UV_PX);
 		
 		createVertices();
 		
 		model = Loader.loadToVAO(vertices, getUVs(), normals);
-		
-		System.out.println(model);
 	}
 	
 	public static RawModel getRawModel() {
@@ -184,8 +181,8 @@ public class PlayerModel {
 
 	public static void addTextureFromXY(Vector2f[] uv, int x, int y) {
 	
-		float xOffset = (float) x / 16.f;
-		float yOffset = (float) y / 16.f;
+		float xOffset = (float) x / 4.f;
+		float yOffset = (float) y / 4.f;
 		int privIndex = 0;
 		uv[privIndex++] = new Vector2f(xOffset, yOffset);
 		uv[privIndex++] = new Vector2f(xOffset, (float) (y + 1) / sizeOfAtlas);
