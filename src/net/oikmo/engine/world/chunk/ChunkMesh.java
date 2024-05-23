@@ -14,7 +14,8 @@ import net.oikmo.engine.world.blocks.Block;
 public class ChunkMesh {
 	private List<Vertex> vertices;
 	private HashMap<Vector3f, Vertex> uniqueVertices = new HashMap<>();
-	public float[] positions, uvs, normals;
+	public int[] positions;
+	public float[] uvs, normals;
 
 	public ChunkMesh(Chunk chunk) {
 		vertices = new ArrayList<Vertex>();
@@ -154,6 +155,8 @@ public class ChunkMesh {
 		this.positions = null;
 		this.uvs = null;
 		this.normals = null;
+		//System.gc();
+		
 	}
 
 	public boolean hasMeshInfo() {
@@ -162,20 +165,20 @@ public class ChunkMesh {
 
 	private void populateLists() {
 		int numVertices = vertices.size();
-		positions = new float[numVertices * 3]; // Each vertex has 3 position components
+		positions = new int[numVertices]; // Each vertex has 3 position components
 		uvs = new float[numVertices * 2]; // Each vertex has 2 uv components
 		normals = new float[numVertices * 3]; // Each vertex has 3 normal components
 
 		for(int i = 0; i < numVertices; i++) {
 			Vertex vertex = vertices.get(i);
-			int positionIndex = i * 3;
+			int positionIndex = i;
 			int uvIndex = i * 2;
 			int normalIndex = i * 3;
-
-			positions[positionIndex] = vertex.positions.x;
-			positions[positionIndex + 1] = vertex.positions.y;
-			positions[positionIndex + 2] = vertex.positions.z;
-
+			
+			positions[positionIndex] = vertex.posX;
+			positions[positionIndex] += (vertex.posY << 8);
+			positions[positionIndex] += (vertex.posZ << 16);
+			
 			uvs[uvIndex] = vertex.uvs.x;
 			uvs[uvIndex + 1] = vertex.uvs.y;
 
@@ -183,5 +186,10 @@ public class ChunkMesh {
 			normals[normalIndex + 1] = vertex.normals.y;
 			normals[normalIndex + 2] = vertex.normals.z;
 		}
+		
+		this.uniqueVertices.clear();
+		this.uniqueVertices = null;
+		this.vertices.clear();
+		this.vertices = null;
 	}
 } 

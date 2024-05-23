@@ -209,14 +209,14 @@ public class GuiMainMenu extends GuiScreen {
 			}*/
 			
 			float x = (Display.getWidth()/2);
-			float y = (Display.getHeight()/2)-140;
+			float y = (Display.getHeight()/2)-130;
 			float width = (256+128)+64+64;
 			float height = 64+32;
 			
 			MasterRenderer.getInstance().render(mainMenuCamera);
 			drawTexture(Main.jmode ? ResourceLoader.loadUITexture("ui/title_j") : ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			
-			drawShadowStringCentered(Color.yellow, x,((y+height/2)+20), splashText);
+			drawShadowStringCentered(Color.yellow, x,(y+height/2)+5, splashText);
 			drawShadowStringCentered(font.getWidth("Created by Oikmo")/2,Display.getHeight()-fontSize/2, "Created by Oikmo");
 			playButton.tick(lockTick);
 			multiplayerButton.tick(lockTick && !Main.disableNetworking);

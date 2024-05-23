@@ -81,14 +81,9 @@ public class SoundMaster {
 		registerMusic();
 		registerSFX();
 	}
-
-	public static void doMusic() {
-		soundSystem.activate("music");
-		doRandomMusic();
-	}
-
+	
 	private static void registerMusic() {
-		//registerMusicByte("music.jackblack", "jackblock.ogg");
+		registerMusicByte("music.jackblack", "jackblock.ogg");
 
 		registerMusicByte("music.minecraft", "calm1.ogg");
 		registerMusicByte("music.clark", "calm2.ogg");
@@ -135,62 +130,36 @@ public class SoundMaster {
 		registerSFX("block.wood.break", "dig/wood");
 		registerSFX("block.glass.break", "dig/glass");
 	}
-
-
-	private static void doRandomMusic() {
-		List<SoundByte> bytes = new ArrayList<>();
-		for(Map.Entry<String, SoundByte> entry : music.entrySet()) {
-			SoundByte b = entry.getValue();
-			if(!b.getFileName().contains("menu")) {
-				bytes.add(entry.getValue());
-			}
-
-		}
-		Collections.shuffle(bytes);
-
-		musicThread = new Thread(new Runnable(){
-			public void run() {
-				while(DisplayManager.activeDisplay) {
-					if(Main.slayyyTick) {
-						playRandomMusicIfReady();
-					}
-				}
-			}
-		});
-		musicThread.setName("Music Player (BG)");
-		musicThread.start();
-	}
 	
-	
-	
-	@SuppressWarnings("static-access")
-	private static void playRandomMusicIfReady() {
+	public static void playRandomMusicIfReady() {
 		if(GameSettings.globalVolume == 0.0F) {
 			return;
 		}
 		if(!soundSystem.playing("music")) {
 			if(ticksBeforeMusic > 0) {
 				ticksBeforeMusic--;
-				return;
-			}
-			List<SoundByte> bytes = new ArrayList<>();
-			for(Map.Entry<String, SoundByte> entry : music.entrySet()) {
-				SoundByte b = entry.getValue();
-				if(!b.getFileName().contains("menu")) {
-					bytes.add(entry.getValue());
-				}
+			} else {
+				List<SoundByte> bytes = new ArrayList<>();
+				for(Map.Entry<String, SoundByte> entry : music.entrySet()) {
+					SoundByte b = entry.getValue();
+					if(!b.getFileName().contains("menu")) {
+						bytes.add(entry.getValue());
+					}
 
+				}
+				Collections.shuffle(bytes);
+				
+				SoundByte music = bytes.get(0);
+				ticksBeforeMusic = new Random().nextInt(12000) + 12000;
+				soundSystem.backgroundMusic("music", music.getFileLocation(), music.getFileName(), false);
+				soundSystem.setVolume("music", GameSettings.globalVolume);
+				soundSystem.play("music");
+				Logger.log(LogLevel.INFO, (String.format("Playing {0} ({1})", music.getFileName(),music.getID())));
 			}
-			Collections.shuffle(bytes);
 			
-			SoundByte music = bytes.get(0);
-			ticksBeforeMusic = new Random().nextInt(12000) + 12000;
-			soundSystem.backgroundMusic("music", music.getFileLocation(), music.getFileName(), false);
-			soundSystem.setVolume("music", GameSettings.globalVolume);
-			soundSystem.play("music");
-			Logger.log(LogLevel.INFO, ("Playing {0} ({1})".format("", music.getFileName(),music.getID())));
 		}
 	}
+	
 
 	private static float lastVolume = -1;
 	public static void setVolume() {

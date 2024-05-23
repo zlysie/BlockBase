@@ -38,9 +38,6 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					GuiMainMenu.stopMusic();
-					SoundMaster.stopMusic();
-					SoundMaster.doMusic();
 					Main.loadWorld("world1");
 					Main.shouldTick();
 					Gui.cleanUp();
@@ -64,9 +61,6 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					GuiMainMenu.stopMusic();
-					SoundMaster.stopMusic();
-					SoundMaster.doMusic();
 					Main.loadWorld("world2");
 					Main.shouldTick();
 					Gui.cleanUp();
@@ -90,9 +84,6 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					GuiMainMenu.stopMusic();
-					SoundMaster.stopMusic();
-					SoundMaster.doMusic();
 					Main.loadWorld("world3");
 					Main.shouldTick();
 					Gui.cleanUp();
@@ -116,9 +107,6 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					GuiMainMenu.stopMusic();
-					SoundMaster.stopMusic();
-					SoundMaster.doMusic();
 					Main.loadWorld("world4");
 					Main.shouldTick();
 					Gui.cleanUp();
@@ -143,9 +131,6 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					GuiMainMenu.stopMusic();
-					SoundMaster.stopMusic();
-					SoundMaster.doMusic();
 					Main.loadWorld("world5");
 					Main.shouldTick();
 					Gui.cleanUp();

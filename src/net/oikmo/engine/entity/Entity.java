@@ -11,6 +11,7 @@ import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.toolbox.FastMath;
@@ -290,12 +291,10 @@ public class Entity {
 
 	public MasterChunk getCurrentChunk() {
 		if(chunkPos == null) { chunkPos = new Vector3f(); }
-		Maths.calculateChunkPosition(getPosition(), chunkPos);
+		ChunkCoordinates chunkPos = Maths.calculateChunkPosition(position);
 		if(Main.theWorld != null) {
 			synchronized(Main.theWorld.chunkMap) {
-				synchronized(Main.theWorld.usedPositions) {
-					return Main.theWorld.getChunkFromPosition(chunkPos);
-				}
+				return Main.theWorld.getChunkFromPosition(chunkPos);
 			}
 		}
 		return null;

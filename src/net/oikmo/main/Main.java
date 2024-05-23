@@ -204,10 +204,12 @@ public class Main {
 
 			if(!new File(getWorkingDirectory()+"/options.txt").exists()) {
 				new File(getWorkingDirectory()+"/options.txt").createNewFile();
+				OptionsHandler.getInstance().insertKey("graphics.distance", 2+"");
 				OptionsHandler.getInstance().insertKey("graphics.fov", 70+"");
 				OptionsHandler.getInstance().insertKey("graphics.vsync", Boolean.toString(true));
 				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
+				
 			}
 
 			frame = new Frame(Main.gameName);
@@ -323,6 +325,12 @@ public class Main {
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
 			}
 			
+			try {
+				World.updateRenderSize(Integer.parseInt(OptionsHandler.getInstance().translateKey("graphics.distance"))*2);
+			} catch(NumberFormatException e) {
+				OptionsHandler.getInstance().insertKey("graphics.distance", 2+"");
+			}
+			
 			Display.setVSyncEnabled(Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync")));
 			
 			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
@@ -348,6 +356,11 @@ public class Main {
 				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
 
+					
+					if(inGameGUI != null && theWorld != null) {
+						SoundMaster.playRandomMusicIfReady();
+					}
+					
 					if(Main.currentScreen != null) {
 						Main.currentScreen.onTick();
 					}
@@ -485,8 +498,9 @@ public class Main {
 
 	public static void loadWorld(String worldName) {
 		currentlyPlayingWorld = worldName;
+		
+		GuiMainMenu.stopMusic();
 		SoundMaster.stopMusic();
-		SoundMaster.doMusic();
 
 		inGameGUI = new GuiInGame();
 
@@ -555,6 +569,14 @@ public class Main {
 	 * Closes the game.
 	 */
 	public static void close() {
+		if(Main.theNetwork != null) {
+			Main.disconnect(false, "");
+		} else {
+			if(Main.theWorld != null) {
+				Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
+			}
+		}
+		
 		OptionsHandler.getInstance().save();
 		Logger.saveLog();
 		displayRequest = true;

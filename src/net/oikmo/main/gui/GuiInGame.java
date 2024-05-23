@@ -34,7 +34,6 @@ public class GuiInGame extends GuiScreen {
 	
 	public void onInit() {
 		GuiMainMenu.stopMusic();
-		SoundMaster.doMusic();
 		MasterRenderer.getInstance().FOV = Float.parseFloat(OptionsHandler.getInstance().translateKey("graphics.fov"));
 		MasterRenderer.getInstance().updateProjectionMatrix();
 		this.hotbar = Gui.guiAtlas.getSubImage(0, 0, 182, 22);

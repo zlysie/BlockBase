@@ -7,6 +7,7 @@ import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiChat;
 import net.oikmo.main.gui.GuiInventory;
+import net.oikmo.main.gui.GuiOptions;
 import net.oikmo.main.gui.GuiPauseMenu;
 
 public class InputManager {
@@ -114,13 +115,18 @@ public class InputManager {
 			}
 		}
 		
-		if((Main.inGameGUI != null) && (Main.currentScreen instanceof GuiPauseMenu || Main.currentScreen instanceof GuiInventory || Main.currentScreen == null || Main.currentScreen instanceof GuiChat)) {
+		if((Main.inGameGUI != null) && (Main.currentScreen instanceof GuiPauseMenu || Main.currentScreen instanceof GuiInventory || Main.currentScreen == null || Main.currentScreen instanceof GuiChat || Main.currentScreen instanceof GuiOptions)) {
 			if(!lockInPause) {
 				if(Keyboard.isKeyDown(pauseEscapeKey)) {
-					
 					if(Main.currentScreen != null) {
-						Main.currentScreen.prepareCleanUp();
-						Main.currentScreen = null;
+						if(Main.currentScreen instanceof GuiOptions)  {
+							Main.currentScreen.prepareCleanUp();
+							Main.currentScreen = new GuiPauseMenu();
+						} else {
+							Main.currentScreen.prepareCleanUp();
+							Main.currentScreen = null;
+						}
+						
 					} else {
 						Main.currentScreen = new GuiPauseMenu();
 					}

@@ -7,30 +7,36 @@ import org.lwjgl.util.vector.Vector3f;
 
 import com.mojang.minecraft.particle.Particle;
 
-import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.entity.PrimedTNT;
+import net.oikmo.engine.renderers.chunk.ChunkEntity;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.PacketPlaySoundAt;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class MasterChunk {
-	private Vector3f origin;
+	private ChunkCoordinates origin;
 	private Chunk chunk;
 	private ChunkMesh mesh;
-	private Entity entity;
+	private ChunkEntity entity;
 	public static final int maxTime = 60*(5);
 	public int timer = maxTime;
 	
-	public MasterChunk(OpenSimplexNoise noiseGen, Vector3f origin) {
+	public MasterChunk(OpenSimplexNoise noiseGen, ChunkCoordinates origin) {
 		this.origin = origin;
 		this.chunk = new Chunk(noiseGen, origin);
 	}
 	
-	public MasterChunk(Vector3f origin, byte[][][] blocks) {
+	public MasterChunk(ChunkCoordinates origin, byte[][][] blocks) {
+		this.origin = origin;
+		this.chunk = new Chunk(blocks);
+	}
+	
+	public MasterChunk(ChunkCoordinates origin, byte[] blocks) {
 		this.origin = origin;
 		this.chunk = new Chunk(blocks);
 	}
@@ -200,7 +206,7 @@ public class MasterChunk {
 		this.entity = null;
 	}
 	
-	public Vector3f getOrigin() {
+	public ChunkCoordinates getOrigin() {
 		return origin;
 	}
 	
@@ -220,11 +226,11 @@ public class MasterChunk {
 		this.mesh = new ChunkMesh(this.chunk);
 	}
 	
-	public Entity getEntity() {
+	public ChunkEntity getEntity() {
 		return entity;
 	}
 	
-	public void setEntity(Entity entity) {
+	public void setEntity(ChunkEntity entity) {
 		this.entity = entity;
 	}
 }

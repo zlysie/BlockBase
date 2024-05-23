@@ -162,7 +162,6 @@ public class Camera {
 
 			}
 		}
-		
 			
 		this.move(player);
 	}

@@ -210,7 +210,7 @@ public class GuiServerList extends GuiScreen {
 							Main.thePlayer.getCamera().setMouseLock(true);
 						}
 						SoundMaster.stopMusic();
-						SoundMaster.doMusic();
+						GuiMainMenu.stopMusic();
 						Main.shouldTick = true;
 						Main.currentScreen = null;
 					} else {

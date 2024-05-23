@@ -20,6 +20,11 @@ options.sensitivity.high=hyperspeed!!!
 options.sensitivity=Sensitivity
 options.vsync=VSYNC
 options.volume=Volume
+options.distance=View Distance
+options.distance.tiny=TINY
+options.distance.small=SMALL
+options.distance.normal=NORMAL
+options.distance.far=FAR
 
 inventory.title=Blocks
 

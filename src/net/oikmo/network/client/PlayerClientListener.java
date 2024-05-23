@@ -21,6 +21,8 @@ import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiChat;
 import net.oikmo.network.shared.LoginResponse;
@@ -264,8 +266,9 @@ public class PlayerClientListener extends Listener {
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 			}
-			Vector3f chunkPos = new Vector3f(packet.x, 0, packet.z);
+			ChunkCoordinates chunkPos = ChunkCoordHelper.create(packet.x, packet.z);
 
+			
 			theWorld.addChunk(new MasterChunk(chunkPos, blocks));
 		}
 		else if(object instanceof PacketModifyChunk) {

@@ -10,6 +10,7 @@ import net.oikmo.engine.gui.component.slick.button.GuiButton;
 import net.oikmo.engine.gui.component.slick.slider.GuiSlider;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.sound.SoundMaster;
+import net.oikmo.engine.world.World;
 import net.oikmo.main.GameSettings;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.properties.OptionsHandler;
@@ -28,11 +29,16 @@ public class GuiOptions extends GuiScreen {
 	private GuiSlider volume;
 	private GuiSlider sensitivity;
 	private GuiButton vsyncButton;
+	private GuiButton renderDistanceButton;
 	private GuiSlider fov;
 	private GuiButton backButton;
 	
+	private int renderDistance = 1;
+	
 	public void onInit() {
 		vsync = Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync"));
+		
+		renderDistance = Integer.parseInt(OptionsHandler.getInstance().translateKey("graphics.distance"));
 		
 		fov = new GuiSlider((Display.getWidth()/2)+125, (Display.getHeight()/2)-20, 200, 30, Main.lang.translateKey("options.fov")+": "+(int)(MasterRenderer.getInstance().FOV));
 		fov.setGuiCommand(new GuiCommand() {
@@ -46,7 +52,7 @@ public class GuiOptions extends GuiScreen {
 			
 			public void update() {
 				x = (Display.getWidth()/2)+125;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)-20;
 			}
 		});
 		this.updateFOVText();
@@ -63,7 +69,7 @@ public class GuiOptions extends GuiScreen {
 			
 			public void update() {
 				x = (Display.getWidth()/2)-125;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)-20;
 			}
 		});
 		volume.setSliderValue(GameSettings.globalVolume, 0, 1);
@@ -96,6 +102,19 @@ public class GuiOptions extends GuiScreen {
 			}
 		});
 		
+		renderDistanceButton = new GuiButton((Display.getWidth()/2),(Display.getHeight()/2)+65, 225, 30, Main.lang.translateKey("options.distance")+": ");
+		renderDistanceButton.setGuiCommand(new GuiCommand() {
+			public void invoke() {
+				updateRenderDistanceText();
+			}
+			
+			public void update() {
+				x = (Display.getWidth()/2);
+				y = (Display.getHeight()/2)+65;
+			}
+		});
+		updateRenderDistanceText();
+		
 		backButton = new GuiButton(Display.getWidth()/2, (Display.getHeight())-60, 200, 30, Main.lang.translateKey("gui.done"));
 		backButton.setGuiCommand(new GuiCommand() {
 			@Override
@@ -122,12 +141,39 @@ public class GuiOptions extends GuiScreen {
 		String fovText = Main.lang.translateKey("options.fov")+": ";
 		if(fovFull == 70) {
 			fov.setText(fovText + Main.lang.translateKey("options.fov.normal"));
-		} else if(fovFull == 30) {
+		} else if(fovFull <= 40) {
 			fov.setText(fovText + Main.lang.translateKey("options.fov.low"));
-		} else if(fovFull == 110) {
+		} else if(fovFull >= 100) {
 			fov.setText(fovText + Main.lang.translateKey("options.fov.high"));
 		} else {
 			fov.setText(fovText + fovFull);
+		}
+	}
+	
+	public void updateRenderDistanceText() {
+		if(renderDistance < 4) {
+			renderDistance++;
+		} else if(renderDistance >= 4) {
+			renderDistance = 1;
+		}
+		
+		String text = Main.lang.translateKey("options.distance")+": ";
+		
+		World.updateRenderSize(renderDistance*2);
+		
+		switch(renderDistance) {
+		case 1:
+			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.tiny"));
+			break;
+		case 2:
+			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.small"));
+			break;
+		case 3:
+			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.normal"));
+			break;
+		case 4:
+			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.far"));
+			break;
 		}
 	}
 	
@@ -159,6 +205,9 @@ public class GuiOptions extends GuiScreen {
 		volume.tick();
 		sensitivity.tick();
 		vsyncButton.tick();
+		if(Main.theNetwork == null) {
+			renderDistanceButton.tick();
+		}
 		backButton.tick();
 	}
 	
@@ -173,6 +222,7 @@ public class GuiOptions extends GuiScreen {
 		} else {
 			Main.shouldTick();
 		}
+		OptionsHandler.getInstance().insertKey("graphics.distance", renderDistance+"");
 		OptionsHandler.getInstance().insertKey("graphics.fov", MasterRenderer.getInstance().FOV+"");
 		OptionsHandler.getInstance().insertKey("graphics.vsync", Boolean.toString(vsync));
 		OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
@@ -183,6 +233,7 @@ public class GuiOptions extends GuiScreen {
 		volume.onCleanUp();
 		sensitivity.onCleanUp();
 		vsyncButton.onCleanUp();
+		renderDistanceButton.onCleanUp();
 		backButton.onCleanUp();
 	}
 }

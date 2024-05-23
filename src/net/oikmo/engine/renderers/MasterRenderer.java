@@ -24,6 +24,8 @@ import net.oikmo.engine.entity.Camera.TargetedAABB;
 import net.oikmo.engine.entity.Entity;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.renderers.chunk.ChunkEntity;
+import net.oikmo.engine.renderers.chunk.ChunkRenderer;
 import net.oikmo.engine.renderers.entity.EntityRenderer;
 import net.oikmo.engine.renderers.skybox.SkyBoxRenderer;
 import net.oikmo.engine.textures.ModelTexture;
@@ -50,6 +52,7 @@ public class MasterRenderer {
 	
 	private SkyBoxRenderer skyboxRenderer;
 	private EntityRenderer entityRenderer;
+	private ChunkRenderer chunkRenderer;
 	
 	public static ModelTexture currentTexturePack;
 	public static int defaultTexturePack;
@@ -58,6 +61,7 @@ public class MasterRenderer {
 	public static int invisibleTexture;
 	
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
+	private Map<TexturedModel, List<ChunkEntity>> chunkEntities = new HashMap<TexturedModel, List<ChunkEntity>>();
 	
 	public MasterRenderer() {
 		createProjectionMatrix();
@@ -66,6 +70,7 @@ public class MasterRenderer {
 		
 		skyboxRenderer = new SkyBoxRenderer((Main.jmode ? "jerma" : "panorama"), projectionMatrix);
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
+		chunkRenderer = new ChunkRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		defaultTexturePack = ResourceLoader.loadTexture("textures/terrain");
 		invisibleTexture = ResourceLoader.loadTexture("textures/invisible");
 		
@@ -133,13 +138,17 @@ public class MasterRenderer {
 			skyboxRenderer.render(camera, projectionMatrix, 0.4f, 0.7f, 1.0f);
 		}
 		
-		entityRenderer.render(entities, camera);
 		if(Main.thePlayer != null) {
 			initGL();
 			if(Main.thePlayer.getCamera().shouldRenderAABB() && Main.thePlayer != null) {
 				MasterRenderer.getInstance().renderAABB(Main.thePlayer.getCamera().getAABB());
 			}
 		}
+		
+		entityRenderer.render(entities, camera);
+		chunkRenderer.render(chunkEntities, camera);
+		
+		chunkEntities.clear();
 		entities.clear();
 	}
 	
@@ -160,8 +169,7 @@ public class MasterRenderer {
 		GL11.glTranslatef(-position.x, -position.y, -position.z);
 	}
 	
-	public void renderAABB(TargetedAABB ent) {
-		
+	public void renderAABB(TargetedAABB ent) {	
 		float wb2 = 0.501f, hb2 =  0.501f;
 		GL11.glColor3f(0, 0, 0);
 		GL11.glTranslatef(ent.getPosition().x+0.5f, ent.getPosition().y+0.5f, ent.getPosition().z+0.5f);
@@ -208,6 +216,22 @@ public class MasterRenderer {
 		}
 	}
 	
+	public void addChunkEntity(ChunkEntity entity) {
+		TexturedModel model = entity.getModel();
+		
+		List<ChunkEntity> batch = chunkEntities.get(model);
+		
+		if(batch != null) {
+			if(!batch.contains(entity)) {
+				batch.add(entity);
+			}
+		} else {
+			List<ChunkEntity> newBatch = new ArrayList<>();
+			newBatch.add(entity);
+			chunkEntities.put(model, newBatch);
+		}
+	}
+	
 	public void createProjectionMatrix() {
 		projectionMatrix = new Matrix4f();
 		
@@ -229,6 +253,7 @@ public class MasterRenderer {
 	public void updateProjectionMatrix() {
 		createProjectionMatrix();
 		entityRenderer.updateProjectionMatrix(projectionMatrix);
+		chunkRenderer.updateProjectionMatrix(projectionMatrix);
 	}
 	
 	public Matrix4f getProjectionMatrix() {
