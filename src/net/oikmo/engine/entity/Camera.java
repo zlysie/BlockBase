@@ -8,6 +8,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import com.mojang.minecraft.phys.AABB;
 
+import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
@@ -279,7 +280,7 @@ public class Camera {
 	public void setPosition(Vector3f v) {
 		this.position = v;
 	}
-
+	
 	public Vector3f getPosition() {
 		return position;
 	}
@@ -314,11 +315,11 @@ public class Camera {
 		float theta = angleAroundPlayer;
 		float offsetX = (float) (horizDistance * Math.sin(Math.toRadians(theta)));
 		float offsetZ = (float) (horizDistance * Math.cos(Math.toRadians(theta)));
-		position.x = player.getPosition().x - offsetX;
-		position.z = player.getPosition().z - offsetZ;
+		position.x = Maths.lerp(position.x, player.getPosition().x - offsetX, 10f * DisplayManager.getFrameTimeSeconds());
+		position.z = Maths.lerp(position.z, player.getPosition().z - offsetZ, 10f * DisplayManager.getFrameTimeSeconds());
 		
-		position.y = player.getPosition().y + verticDistance + yOffset;
-		//this.yaw = 180 - (player.getRotY() + angleAroundPlayer);
+		position.y = Maths.lerp(position.y, player.getPosition().y + verticDistance + yOffset, 10f * DisplayManager.getFrameTimeSeconds());
+		//this.yaw = 180 - (player.getRotation().y + angleAroundPlayer);
 		this.yaw = 180 - angleAroundPlayer;
 	}
 	

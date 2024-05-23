@@ -191,4 +191,18 @@ public class PlayerModel {
 		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, yOffset);
 		uv[privIndex++] = new Vector2f(xOffset, yOffset);
 	}
+	
+	public static void addTextureFromXYReversed(Vector2f[] uv, int x, int y) {
+		
+		float xOffset = (float) x / 4.f;
+		float yOffset = (float) y / 4.f;
+		int privIndex = 0;
+		
+		uv[privIndex++] = new Vector2f(xOffset, yOffset);
+		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, yOffset);
+		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, (float) (y + 1) / sizeOfAtlas);
+		uv[privIndex++] = new Vector2f((float) (x + 1) / sizeOfAtlas, (float) (y + 1) / sizeOfAtlas);
+		uv[privIndex++] = new Vector2f(xOffset, (float) (y + 1) / sizeOfAtlas);
+		uv[privIndex++] = new Vector2f(xOffset, yOffset);
+	}
 }

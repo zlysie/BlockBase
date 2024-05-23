@@ -205,6 +205,7 @@ public class Main {
 			if(!new File(getWorkingDirectory()+"/options.txt").exists()) {
 				new File(getWorkingDirectory()+"/options.txt").createNewFile();
 				OptionsHandler.getInstance().insertKey("graphics.fov", 70+"");
+				OptionsHandler.getInstance().insertKey("graphics.vsync", Boolean.toString(true));
 				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
 			}
@@ -321,7 +322,9 @@ public class Main {
 			} catch(NumberFormatException e) {
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
 			}
-
+			
+			Display.setVSyncEnabled(Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync")));
+			
 			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
 			
 			/*Main.shouldTick = true;

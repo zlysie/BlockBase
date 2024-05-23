@@ -1,0 +1,46 @@
+gui.done=Skończ
+gui.delete=Usuń
+gui.cancel=Powrót
+gui.quit=Wróć do menu głównego
+
+title.singleplayer=Jeden gracz
+title.multiplayer=Tryb wieloosobowy
+title.quit=Opuśc
+
+pause.title=Gra zamrożona
+pause.players.title=Gracze
+pause.players.identifier=Ty
+options.title=Opcje
+options.fov.low=Bardzo ciasne
+options.fov.normal=Normalne
+options.fov.high=Jakbyś grał w Quake'a
+options.volume=Dźwięk
+options.fov=Pole widzenia
+
+inventory.title=Bloki
+
+world.select.create=Stworzyć nowy świat...
+
+network.connecting=Łączysz się
+
+network.error.noinput=Nie podałeś adresu!
+network.error.server=Nie można połączyć się z serwerem!
+
+network.disconnect.l=Nie udało się zalogować
+network.disconnect.p=Zły protokół! (%s)
+network.disconnect.g=Rozłączyłeś się
+network.disconnect.u=Nieznane
+network.disconnect.ux=Nieznane (Zły protokół?)
+network.disconnect.n=Sieć nie działała!
+
+network.quit.d=Rozłączyłeś się: 
+network.quit.k=Wyrzucony z gry: 
+
+network.servers.add=Dodaj serwer
+network.servers.refresh=Odśwież
+
+network.servers.add.title=Zarejestruj serwer...
+network.servers.add.save=Dodaj serwer
+network.servers.add.input.name=Nazwa serwera tutaj...
+network.servers.add.input.ip=Adres serwera tutaj...
+network.servers.add.quit=Wracając do serwerów

@@ -13,11 +13,12 @@ pause.players.identifier=You
 options.title=Options
 options.fov.low=telescope
 options.fov.normal=Normal
-options.fov.high=QUAKE FOV!!!
+options.fov.high=QUAKE PRO!!!
 options.fov=FOV
 options.sensitivity.low=*yawn*
 options.sensitivity.high=hyperspeed!!!
 options.sensitivity=Sensitivity
+options.vsync=VSYNC
 options.volume=Volume
 
 inventory.title=Blocks

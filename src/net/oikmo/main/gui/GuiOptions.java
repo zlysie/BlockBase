@@ -23,22 +23,25 @@ public class GuiOptions extends GuiScreen {
 		this.mainmenu = mainmenu;
 	}
 	
+	private boolean vsync;
+	
 	private GuiSlider volume;
 	private GuiSlider sensitivity;
+	private GuiButton vsyncButton;
 	private GuiSlider fov;
 	private GuiButton backButton;
 	
 	public void onInit() {
+		vsync = Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync"));
+		
 		fov = new GuiSlider((Display.getWidth()/2)+125, (Display.getHeight()/2)-20, 200, 30, Main.lang.translateKey("options.fov")+": "+(int)(MasterRenderer.getInstance().FOV));
 		fov.setGuiCommand(new GuiCommand() {
 			public void invoke(float value) {
-				
 				int fovFull = (int) (30+(value*80));
 				MasterRenderer.getInstance().FOV = fovFull;
 				updateFOVText();
 				
 				MasterRenderer.getInstance().updateProjectionMatrix();
-				
 			}
 			
 			public void update() {
@@ -55,7 +58,6 @@ public class GuiOptions extends GuiScreen {
 				float actualValue = percievedValue/100f;
 				GameSettings.globalVolume = actualValue;
 				SoundMaster.setVolume();
-				
 				volume.setText(Main.lang.translateKey("options.volume")+": " + percievedValue+"%");
 			}
 			
@@ -66,7 +68,7 @@ public class GuiOptions extends GuiScreen {
 		});
 		volume.setSliderValue(GameSettings.globalVolume, 0, 1);
 		
-		sensitivity = new GuiSlider((Display.getWidth()/2),(Display.getHeight()/2)+20, 200, 30, Main.lang.translateKey("options.volume")+": "+(int)(GameSettings.globalVolume*100f)+"%");
+		sensitivity = new GuiSlider((Display.getWidth()/2)-125,(Display.getHeight()/2)+20, 200, 30, Main.lang.translateKey("options.volume")+": "+(int)(GameSettings.globalVolume*100f)+"%");
 		sensitivity.setGuiCommand(new GuiCommand() {
 			public void invoke(float value) {
 				updateSensitivityText();
@@ -74,11 +76,25 @@ public class GuiOptions extends GuiScreen {
 			
 			public void update() {
 				x = (Display.getWidth()/2)-125;
-				y = Display.getHeight()/2;
+				y = (Display.getHeight()/2)+20;
 			}
 		});
 		sensitivity.setSliderValue(GameSettings.sensitivity, 0, 0.4f);
 		updateSensitivityText();
+		
+		vsyncButton = new GuiButton((Display.getWidth()/2)+125,(Display.getHeight()/2)+20, 200, 30, Main.lang.translateKey("options.vsync")+": "+vsync);
+		vsyncButton.setGuiCommand(new GuiCommand() {
+			public void invoke() {
+				vsync = !vsync;
+				vsyncButton.setText(Main.lang.translateKey("options.vsync")+": " + vsync);
+				Display.setVSyncEnabled(vsync);
+			}
+			
+			public void update() {
+				x = (Display.getWidth()/2)+125;
+				y = (Display.getHeight()/2)+20;
+			}
+		});
 		
 		backButton = new GuiButton(Display.getWidth()/2, (Display.getHeight())-60, 200, 30, Main.lang.translateKey("gui.done"));
 		backButton.setGuiCommand(new GuiCommand() {
@@ -90,7 +106,6 @@ public class GuiOptions extends GuiScreen {
 				} else {
 					Main.currentScreen = new GuiPauseMenu();
 				}
-				
 			}
 			
 			@Override
@@ -143,6 +158,7 @@ public class GuiOptions extends GuiScreen {
 		fov.tick();
 		volume.tick();
 		sensitivity.tick();
+		vsyncButton.tick();
 		backButton.tick();
 	}
 	
@@ -158,10 +174,15 @@ public class GuiOptions extends GuiScreen {
 			Main.shouldTick();
 		}
 		OptionsHandler.getInstance().insertKey("graphics.fov", MasterRenderer.getInstance().FOV+"");
-		OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
+		OptionsHandler.getInstance().insertKey("graphics.vsync", Boolean.toString(vsync));
 		OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
+		OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
+		
 		Gui.cleanUp();
+		fov.onCleanUp();
 		volume.onCleanUp();
+		sensitivity.onCleanUp();
+		vsyncButton.onCleanUp();
 		backButton.onCleanUp();
 	}
 }

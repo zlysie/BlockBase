@@ -142,33 +142,62 @@ public class NetworkHandler {
 		}
 			
 		
-		if(tickTimer <= 10) {
+		if(tickTimer <= 5) {
 			tickTimer++;
 		} else {
 			tickTimer = 0;
-			Vector3f rot = Main.thePlayer.getCamera().getRotation();
-			player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
 			
-			PacketUpdateRotX packetRotX = new PacketUpdateRotX();
-			packetRotX.x = player.rotX;
-			client.sendUDP(packetRotX);
-			PacketUpdateRotY packetRotY = new PacketUpdateRotY();
-			packetRotY.y = player.rotY-degreesOffsetX;
-			client.sendUDP(packetRotY);
-			PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
-			packetRotZ.z = player.rotZ;
-			client.sendUDP(packetRotZ);
-			Vector3f pos = Main.thePlayer.getCamera().getPosition();
-			player.updatePosition(pos.x, pos.y, pos.z);
-			PacketUpdateX packetX = new PacketUpdateX();
-			packetX.x = player.x;
-			client.sendUDP(packetX);
-			PacketUpdateY packetY = new PacketUpdateY();
-			packetY.y = player.y;
-			client.sendUDP(packetY);
-			PacketUpdateZ packetZ = new PacketUpdateZ();
-			packetZ.z = player.z;
-			client.sendUDP(packetZ);
+			if(!Main.thePlayer.getCamera().isPerspective()) {
+				Vector3f rot = Main.thePlayer.getCamera().getRotation();
+				player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
+				
+				PacketUpdateRotX packetRotX = new PacketUpdateRotX();
+				packetRotX.x = player.rotX;
+				client.sendUDP(packetRotX);
+				PacketUpdateRotY packetRotY = new PacketUpdateRotY();
+				packetRotY.y = player.rotY-degreesOffsetX;
+				client.sendUDP(packetRotY);
+				PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
+				packetRotZ.z = player.rotZ;
+				client.sendUDP(packetRotZ);
+				
+				Vector3f pos = Main.thePlayer.getCamera().getPosition();
+				player.updatePosition(pos.x, pos.y, pos.z);
+				PacketUpdateX packetX = new PacketUpdateX();
+				packetX.x = player.x;
+				client.sendUDP(packetX);
+				PacketUpdateY packetY = new PacketUpdateY();
+				packetY.y = player.y;
+				client.sendUDP(packetY);
+				PacketUpdateZ packetZ = new PacketUpdateZ();
+				packetZ.z = player.z;
+				client.sendUDP(packetZ);
+			} else {
+				Vector3f rot = Main.thePlayer.getModelRotation();
+				player.updateRotation(rot.x, rot.y-degreesOffsetX, rot.z);
+				
+				PacketUpdateRotX packetRotX = new PacketUpdateRotX();
+				packetRotX.x = player.rotX;
+				client.sendUDP(packetRotX);
+				PacketUpdateRotY packetRotY = new PacketUpdateRotY();
+				packetRotY.y = player.rotY-degreesOffsetX;
+				client.sendUDP(packetRotY);
+				PacketUpdateRotZ packetRotZ = new PacketUpdateRotZ();
+				packetRotZ.z = player.rotZ;
+				client.sendUDP(packetRotZ);
+				
+				Vector3f pos = Main.thePlayer.getModelPosition();
+				player.updatePosition(pos.x, pos.y, pos.z);
+				PacketUpdateX packetX = new PacketUpdateX();
+				packetX.x = player.x;
+				client.sendUDP(packetX);
+				PacketUpdateY packetY = new PacketUpdateY();
+				packetY.y = player.y;
+				client.sendUDP(packetY);
+				PacketUpdateZ packetZ = new PacketUpdateZ();
+				packetZ.z = player.z;
+				client.sendUDP(packetZ);
+			}
 		}
 	}
 	
@@ -193,6 +222,56 @@ public class NetworkHandler {
 				players.remove(player.c.getID());
 			}
 		}
+		
+		float x = player.x;
+		float y = player.y;
+		float z = player.z;
+		if(!Main.thePlayer.getCamera().isPerspective()) {
+			Vector3f pos = Main.thePlayer.getCamera().getPosition();
+			player.updatePosition(pos.x, pos.y, pos.z);
+			
+			if(x != player.x) {
+				PacketUpdateX packetX = new PacketUpdateX();
+				packetX.x = player.x;
+				client.sendUDP(packetX);
+			}
+			
+			if(y != player.y) {	
+				PacketUpdateY packetY = new PacketUpdateY();
+				packetY.y = player.y;
+				client.sendUDP(packetY);
+			}
+			
+			if(z != player.z) {
+				PacketUpdateZ packetZ = new PacketUpdateZ();
+				packetZ.z = player.z;
+				client.sendUDP(packetZ);
+			}
+		} else {
+			Vector3f pos = Main.thePlayer.getModelPosition();
+			player.updatePosition(pos.x, pos.y, pos.z);
+			
+			if(x != player.x) {
+				PacketUpdateX packetX = new PacketUpdateX();
+				packetX.x = player.x;
+				client.sendUDP(packetX);
+			}
+			
+			if(y != player.y) {	
+				PacketUpdateY packetY = new PacketUpdateY();
+				packetY.y = player.y;
+				client.sendUDP(packetY);
+			}
+			
+			if(z != player.z) {
+				PacketUpdateZ packetZ = new PacketUpdateZ();
+				packetZ.z = player.z;
+				client.sendUDP(packetZ);
+			}
+		}
+		
+		
+		
 	}
 	
 	public void updateChunk(Vector3f position, Block block, boolean refresh) {
