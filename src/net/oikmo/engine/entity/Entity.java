@@ -89,9 +89,9 @@ public class Entity {
 		double offsetX = position.x - prevX;
 		double offsetZ = position.z - prevZ;
 		distanceWalkedModified += (double)FastMath.sqrt((float) (offsetX * offsetX + offsetZ * offsetZ)) * 0.7D;
-		int posX = (int)(position.x);
+		int posX = (int)(position.x-0.5f);
 		int posY = (int)(position.y)-1;
-		int posZ = (int)(position.z);
+		int posZ = (int)(position.z-0.5f);
 		if(Main.theWorld != null) {
 			Block block = Main.theWorld.getBlock(new Vector3f(posX,posY,posZ));
 			if(distanceWalkedModified > (float)nextStepDistance && block != null) {

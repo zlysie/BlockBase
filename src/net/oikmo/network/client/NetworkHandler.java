@@ -14,9 +14,11 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 
 import net.oikmo.engine.gui.ChatMessage;
+import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
+import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
 import net.oikmo.network.shared.Message;
@@ -109,6 +111,8 @@ public class NetworkHandler {
 		kryo = client.getKryo();
 		registerKryoClasses();
 		World.updateRenderSize(4);
+		GuiMainMenu.stopMusic();
+		SoundMaster.stopMusic();
 		connect(ip);
 	}
 	

@@ -3,7 +3,6 @@ package net.oikmo.network.shared;
 public class PacketChunk {
 
 	public int id;
-	public int x;
-	public int z;
+	public int x,z;
 	public byte[] data;
 }

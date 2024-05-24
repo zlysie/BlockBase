@@ -352,7 +352,7 @@ public class Main {
 					//MasterRenderer.getInstance().addEntity(test);
 				}
 
-				slayyyTick = false;
+				runTick = false;
 				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
 
@@ -532,13 +532,13 @@ public class Main {
 		return shouldTick == false;
 	}
 
-	public static boolean slayyyTick = false;
+	public static boolean runTick = false;
 
 	/**
 	 * Every 1/60th this method is ran. This handles movement.
 	 */
 	private static void tick() {
-		slayyyTick = true;
+		runTick = true;
 
 		if(Main.theNetwork == null) {
 
