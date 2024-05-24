@@ -12,6 +12,8 @@ import net.oikmo.engine.save.ChunkSaveData;
 import net.oikmo.engine.save.SaveData;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.network.server.MainServer;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
@@ -24,8 +26,7 @@ public class World {
 	public static final int WORLD_HEIGHT = 128;
 	public static final int WORLD_SIZE = 4*8;
 
-	public Map<Vector3f, MasterChunk> chunkMap = new HashMap<>();
-	public List<Vector3f> usedPositions = new ArrayList<>();
+	public Map<ChunkCoordinates, MasterChunk> chunkMap = new HashMap<>();
 	
 	private long seed;
 	private OpenSimplexNoise noise;
@@ -47,27 +48,23 @@ public class World {
 		this.noise = new OpenSimplexNoise(this.seed);
 	}
 	
-	public void addChunk(Vector3f position) {
+	public void addChunk(ChunkCoordinates position) {
 		MasterChunk m = new MasterChunk(noise, position);
-		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
 	}
 	
 	public void addChunk(MasterChunk m) {
-		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
 	}
 	
-	public MasterChunk createAndAddChunk(Vector3f chunkPos) {
+	public MasterChunk createAndAddChunk(ChunkCoordinates chunkPos) {
 		MasterChunk m = new MasterChunk(this.noise, chunkPos);
-		usedPositions.add(m.getOrigin());
 		chunkMap.put(m.getOrigin(), m);
 		return m;
 	}
 	
 	public boolean setBlock(Vector3f position, byte block) {
-		Vector3f chunkPos = new Vector3f();
-		Maths.calculateChunkPosition(position, chunkPos);
+		ChunkCoordinates chunkPos = Maths.calculateChunkPosition(position);
 		MasterChunk m = getChunkFromPosition(chunkPos);
 		if(m != null) {
 			m.setBlock(position, block);
@@ -90,36 +87,14 @@ public class World {
 		return false;
 	}
 	
-	public MasterChunk getChunkFromPosition(Vector3f position) {
-		return chunkMap.get(getPosition(position));
+	public MasterChunk getChunkFromPosition(ChunkCoordinates position) {
+		return chunkMap.get(position);
 	}
-	public boolean isPositionUsed(Vector3f pos) {
-		boolean result = false;
-		synchronized(usedPositions) {
-			result = usedPositions.contains(new Vector3f(pos.x, 0, pos.z));
-		}
-		return result;
-	}
-	public Vector3f getPosition(Vector3f pos) {
-		Vector3f result = null;
-		if(pos == null) { return null; }
-		synchronized(usedPositions) {
-			for(int i = 0; i < usedPositions.size(); i++) {
-				if(usedPositions.get(i) != null) {
-					if((int)usedPositions.get(i).x == (int)pos.x && (int)usedPositions.get(i).z == (int)pos.z) {
-						result = usedPositions.get(i);
-					}
-				}
-				
-			}
-		}
-		return result;
-	}
-
+	
 	public void saveWorld(String world) {
 		List<ChunkSaveData> chunks = new ArrayList<>();
 		
-		for(Map.Entry<Vector3f, MasterChunk> entry : chunkMap.entrySet()) {
+		for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
 			MasterChunk master = entry.getValue();
 			
 			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
@@ -145,7 +120,7 @@ public class World {
 			World w = new World(data.seed);
 			
 			for(ChunkSaveData s : data.chunks) {
-				w.addChunk(new MasterChunk(new Vector3f(s.x,0,s.z), s.blocks));
+				w.addChunk(new MasterChunk(ChunkCoordHelper.create(s.x,s.z), s.blocks));
 			}
 			
 			return w;
@@ -164,12 +139,10 @@ public class World {
 				int chunkX = x * 16;
 				int chunkZ = z * 16;
 				
-				Vector3f chunkPos = new Vector3f(chunkX, 0, chunkZ);
-				synchronized(usedPositions) {
-					if(!isPositionUsed(chunkPos) && getChunkFromPosition(chunkPos) == null) {
-						MasterChunk m = new MasterChunk(noise, chunkPos);
-						addChunk(m);
-					}
+				ChunkCoordinates chunkPos = ChunkCoordHelper.create(chunkX, chunkZ);
+				if(getChunkFromPosition(chunkPos) == null) {
+					MasterChunk m = new MasterChunk(noise, chunkPos);
+					addChunk(m);
 				}
 			}
 		}

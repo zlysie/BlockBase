@@ -918,4 +918,12 @@ final public class FastMath {
 				| ((((f & 0x7f800000) - 0x38000000) >> 13) & 0x7c00)
 				| ((f >> 13) & 0x03ff));
 	}
+
+	public static float round(float d) {
+	    if (d > 0) {
+	        return (float) (d + 0.5f);
+	    } else {
+	        return (float) (d - 0.5f);
+	    }
+	}
 }

@@ -6,6 +6,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -19,7 +20,7 @@ public class Chunk {
 	public byte[][][] blocks;
 	public int[][] heights;
 	
-	public Chunk(OpenSimplexNoise noiseGen, Vector3f origin) {
+	public Chunk(OpenSimplexNoise noiseGen, ChunkCoordinates origin) {
 		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		generateChunk(origin, noiseGen);
@@ -37,7 +38,7 @@ public class Chunk {
 	 * @param origin
 	 * @param noiseGen
 	 */
-	private void generateChunk(Vector3f origin, OpenSimplexNoise noiseGen) {
+	private void generateChunk(ChunkCoordinates origin, OpenSimplexNoise noiseGen) {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
 				int actualX = (int) (origin.x + x);
@@ -226,7 +227,7 @@ public class Chunk {
 		}
 	}
 	
-	public int getHeightFromPosition(Vector3f origin, Vector3f position) {
+	public int getHeightFromPosition(ChunkCoordinates origin, Vector3f position) {
 		Vector3f rounded = Maths.roundVectorTo(position);
 		int x = (int) (rounded.x - origin.x);
 		if(x < 0) {x = 0;}

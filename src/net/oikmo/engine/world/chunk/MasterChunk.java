@@ -2,24 +2,25 @@ package net.oikmo.engine.world.chunk;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class MasterChunk {
-	private Vector3f origin;
+	private ChunkCoordinates origin;
 	private Chunk chunk;
 	
-	public MasterChunk(OpenSimplexNoise noiseGen, Vector3f origin) {
+	public MasterChunk(OpenSimplexNoise noiseGen, ChunkCoordinates origin) {
 		this.origin = origin;
 		this.chunk = new Chunk(noiseGen, origin);
 	}
 	
-	public MasterChunk(Vector3f origin, byte[][][] blocks) {
+	public MasterChunk(ChunkCoordinates origin, byte[][][] blocks) {
 		this.origin = origin;
 		this.chunk = new Chunk(blocks);
 	}
 	
-	public Vector3f getOrigin() {
+	public ChunkCoordinates getOrigin() {
 		return origin;
 	}
 	

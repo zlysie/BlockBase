@@ -2,7 +2,7 @@ package net.oikmo.engine.save;
 
 import java.io.Serializable;
 
-import org.lwjgl.util.vector.Vector3f;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 
 public class ChunkSaveData implements Serializable {
 
@@ -12,7 +12,7 @@ public class ChunkSaveData implements Serializable {
 	public int z;
 	public byte[][][] blocks;
 	
-	public ChunkSaveData(Vector3f vec, byte[][][] blocks) {
+	public ChunkSaveData(ChunkCoordinates vec, byte[][][] blocks) {
 		this.x = (int)vec.x;
 		this.z = (int)vec.z;
 		this.blocks = blocks;

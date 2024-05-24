@@ -12,6 +12,8 @@ import com.esotericsoftware.kryonet.Listener;
 import net.oikmo.engine.save.PlayersPositionData;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.world.chunk.MasterChunk;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.network.client.OtherPlayer;
 import net.oikmo.network.shared.LoginRequest;
 import net.oikmo.network.shared.LoginResponse;
@@ -170,18 +172,16 @@ public class MainServerListener extends Listener {
 					} else {
 						packetWorld.x = MainServer.xSpawn;
 						Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
-						Vector3f chunkPos = new Vector3f();
-						Maths.calculateChunkPosition(spawn, chunkPos);
-						MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+						ChunkCoordinates chunkPos = Maths.calculateChunkPosition(spawn);
+						MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(chunkPos);
 						packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
 						packetWorld.z = MainServer.zSpawn;
 					}
 				} else {
 					packetWorld.x = MainServer.xSpawn;
 					Vector3f spawn = new Vector3f(MainServer.xSpawn,0,MainServer.zSpawn);
-					Vector3f chunkPos = new Vector3f();
-					Maths.calculateChunkPosition(spawn, chunkPos);
-					MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+					ChunkCoordinates chunkPos = Maths.calculateChunkPosition(spawn);
+					MasterChunk spawnChunk = MainServer.theWorld.getChunkFromPosition(chunkPos);
 					packetWorld.y = spawnChunk.getChunk().getHeightFromPosition(chunkPos, spawn);
 					packetWorld.z = MainServer.zSpawn;
 				}
@@ -269,16 +269,16 @@ public class MainServerListener extends Listener {
 			
 			packet.id = connection.getID();
 			
-			Vector3f chunkPos = new Vector3f(packet.x, 0, packet.z);
+			ChunkCoordinates chunkPos = ChunkCoordHelper.create(packet.x,packet.z);
 			
 			MainServer.theWorld.addChunk(chunkPos);
 		} else if(object instanceof PacketRequestChunk) {
 			PacketRequestChunk packet = (PacketRequestChunk) object;
-			Vector3f chunkPos = new Vector3f(packet.x,0,packet.z);
-			MasterChunk master = MainServer.theWorld.getChunkFromPosition(MainServer.theWorld.getPosition(chunkPos));
+			ChunkCoordinates chunkPos = ChunkCoordHelper.create(packet.x,packet.z);
+			MasterChunk master = MainServer.theWorld.getChunkFromPosition(chunkPos);
 			
 			if(master == null) {
-				master = MainServer.theWorld.createAndAddChunk(new Vector3f(packet.x, 0, packet.z));
+				master = MainServer.theWorld.createAndAddChunk(ChunkCoordHelper.create(packet.x,packet.z));
 				MainServer.logPanel.append("Creating new chunk at: [X=" + packet.x + ", Z="+packet.z+"]");
 			}
 			

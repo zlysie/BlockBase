@@ -24,6 +24,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.network.server.MainServer;
 
 public class Maths {	
@@ -108,29 +110,32 @@ public class Maths {
 				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
 	}
 
-	public static void calculateChunkPosition(Vector3f input, Vector3f output) {
+	public static ChunkCoordinates calculateChunkPosition(Vector3f input) {
+		int outx, outz;
 		if(input.x >= 0) {
-			output.x = (int) (input.x / Chunk.CHUNK_SIZE)*16;
+			outx = (int) (input.x / Chunk.CHUNK_SIZE)*16;
 		} else {
 			if(input.x >= -16) {
-				output.x = (int)-1*16;
+				outx = (int)-1*16;
 			} else {
-				float x = Maths.roundFloat(input.x+1);
-				output.x = (int) ((x / Chunk.CHUNK_SIZE)-1)*16;
+				float x = FastMath.round(input.x+1);
+				outx = (int) ((x / Chunk.CHUNK_SIZE)-1)*16;
 
 			}
 		}
 
 		if(input.z >= 0) {
-			output.z = (int) (input.z / Chunk.CHUNK_SIZE) * 16;
+			outz = (int) (input.z / Chunk.CHUNK_SIZE) * 16;
 		} else {
 			if(input.z >= -16) {
-				output.z = (int)-1 * 16;
+				outz = (int)-1 * 16;
 			} else {
-				float z = Maths.roundFloat(input.z+1);
-				output.z = (int) ((z / Chunk.CHUNK_SIZE)-1)*16;
+				float z = FastMath.round(input.z+1);
+				outz = (int) ((z / Chunk.CHUNK_SIZE)-1)*16;
 			}
 		}
+		
+		return ChunkCoordHelper.create(outx, outz);
 	}
 
 	public static boolean isVectorEqualTo(Vector3f one, Vector3f two) {
