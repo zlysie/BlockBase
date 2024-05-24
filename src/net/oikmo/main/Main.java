@@ -87,7 +87,7 @@ public class Main {
 
 	private static final int resourceVersion = 4;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.2.0 [DEV]";
+	public static final String version = "a0.2.0 [1] [DEV]";
 	public static final String gameVersion = gameName + " " + version;
 
 	public static boolean displayRequest = false;

@@ -14,6 +14,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 
 import net.oikmo.engine.gui.ChatMessage;
+import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.LoginRequest;
@@ -41,6 +42,7 @@ import net.oikmo.network.shared.PacketWorldJoin;
 import net.oikmo.network.shared.RandomNumber;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
+import net.oikmo.toolbox.properties.OptionsHandler;
 
 public class NetworkHandler {
 	
@@ -101,15 +103,12 @@ public class NetworkHandler {
 		this.timeout = 500000;
 		players = new HashMap<Integer, OtherPlayer>();
 		player = new OtherPlayer();
-		String name = "Player"+new Random().nextInt(256);
-		if(Main.playerName == null ) {
-			Main.playerName = name;
-		}
 		player.userName = Main.playerName;
 		currentlyShownMessages = new ArrayList<>();
 		client = new Client();
 		kryo = client.getKryo();
 		registerKryoClasses();
+		World.updateRenderSize(4);
 		connect(ip);
 	}
 	
@@ -319,5 +318,10 @@ public class NetworkHandler {
 		Logger.log(LogLevel.INFO, "Disconnecting...");
 		client.stop();
 		Logger.log(LogLevel.INFO, "Disconnected.");
+		try {
+			World.updateRenderSize(Integer.parseInt(OptionsHandler.getInstance().translateKey("graphics.distance"))*2);
+		} catch(NumberFormatException e) {
+			OptionsHandler.getInstance().insertKey("graphics.distance", 2+"");
+		}
 	}
 }
