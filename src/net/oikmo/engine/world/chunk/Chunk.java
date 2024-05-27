@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
+import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
@@ -17,82 +18,89 @@ import net.oikmo.toolbox.noise.OpenSimplexNoise;
  */
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
-	public byte[][][] blocks;
+	
+	private byte[] blocks;
 	private int[][] heights;
 	private int[][][] lightDepths;
+	private ChunkCoordinates origin;
 	
 	public Chunk(OpenSimplexNoise noiseGen, ChunkCoordinates origin) {
-		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		blocks = new byte[32768];
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
-		generateChunk(origin, noiseGen);
+		this.origin = origin;
+		generateChunk(noiseGen);
 		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
 	}
 
-	public Chunk(byte[][][] blocks) {
+	public Chunk(byte[] blocks, ChunkCoordinates origin) {
 		this.blocks = blocks;
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		this.origin = origin;
 		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
-		calculateHeights();
-		calculateHeights();
+		calculateHeights();	
 	}
-	
-	public Chunk(byte[] blocks) {
-		this.blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		for (int x = 0 ; x != 16 ; x++) {
-		    for (int y = 0 ; y != 16 ; y++) {
-		        for (int z = 0 ; z != 16 ; z++) {
-		        	this.blocks[x][y][z] = blocks[CHUNK_SIZE*CHUNK_SIZE*x + World.WORLD_HEIGHT*y + z];
-		        }
-		    }
-		}
-		
-		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
-		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
-		calculateHeights();
-		calculateHeights();
-	}
-	
-
 
 	/**
 	 * Creates blocks from the top layer (given by {@link PerlinNoiseGenerator}) and is extended down to YLevel 0 in which it is refactored via {@link #calculateBlockType(int)}
 	 * @param origin
 	 * @param noiseGen
 	 */
-	private void generateChunk(ChunkCoordinates origin, OpenSimplexNoise noiseGen) {
+	private void generateChunk(OpenSimplexNoise noiseGen) {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
-				int actualX = (int) (origin.x + x);
-				int actualZ = (int) (origin.z + z);
-
-				int height = (int) ((noiseGen.noise(actualX/14f, actualZ/14f)*7f) + (noiseGen.noise((-actualZ)/16f,(-actualX)/16f)*12f) + (noiseGen.noise((actualZ)/6f,(actualX)/6f)*4f))+60;
-				blocks[x][height][z] = Block.grass.getByteType();
-				heights[x][z] = height+1;
-				for (int y = 0; y < World.WORLD_HEIGHT; y++) {
-					if(y < height) {
-						if(y > height - 4) {
-							blocks[x][y][z] = Block.dirt.getByteType();
-						}  else if(y == 0) {
-							blocks[x][y][z] = Block.bedrock.getByteType();
-						} else {
-							blocks[x][y][z] = Block.stone.getByteType();
-						}
-					} else {
-						if(y != height) {
-							blocks[x][y][z] = -1;
+				if(!Main.theWorld.superFlat) {
+					int actualX = origin.x + x;
+					int actualZ = origin.z + z;
+					
+					int height = (int) ((noiseGen.noise(actualX/14f, actualZ/14f)*7f) + (noiseGen.noise((-actualZ)/16f,(-actualX)/16f)*12f) + (noiseGen.noise((actualZ)/6f,(actualX)/6f)*4f))+60;
+					setBlock(x, height, z, Block.grass.getByteType());
+					heights[x][z] = height+1;
+					for (int y = 0; y < World.WORLD_HEIGHT; y++) {
+						if(y < height) {
+							if(y > height - 4) {
+								setBlock(x, y, z, Block.dirt.getByteType());
+							}  else if(y == 0) {
+								setBlock(x, y, z, Block.bedrock.getByteType());
+							} else {
+								setBlock(x, y, z, Block.stone.getByteType());
+							}
+						} else if(y != height) {
+							setBlock(x, y, z, -1);
 						}
 					}
+				} else {
+					setBlock(x, 3, z, Block.grass.getByteType());
+					heights[x][z] = 3+1;
+					for (int y = World.WORLD_HEIGHT; y > 3; y--) {
+						setBlock(x, y, z, -1);
+					}
+					setBlock(x, 2, z, Block.dirt.getByteType());
+					setBlock(x, 1, z, Block.dirt.getByteType());
+					setBlock(x, 0, z, Block.bedrock.getByteType());
 				}
+				
 			}
 		}
-		generateTrees(noiseGen.getSeed());
+		if(!Main.theWorld.superFlat) {
+			generateTrees(noiseGen.getSeed());
+		}
+		
 		calculateHeights();
 	}
 	
 	public float getBrightness(int x, int y, int z) {
+		if(x == -1 || y == -1 || z == -1 || x == CHUNK_SIZE || y == CHUNK_SIZE || z == CHUNK_SIZE) {
+			int actualX = origin.x + x;
+			int actualZ = origin.z + z;
+			ChunkCoordinates chunkPos = Maths.calculateChunkPosition(new Vector3f(actualX, y, actualZ));
+			MasterChunk m = Main.theWorld.getChunkFromPosition(chunkPos);
+			
+			if(m != null) {
+				return m.getChunk().isLit(actualX-chunkPos.x, y, actualZ-chunkPos.z) ? 1.0F : 0.6F;
+			}
+		}
 		return this.isLit(x, y, z) ? 1.0F : 0.6F;
 	}
 	
@@ -102,8 +110,8 @@ public class Chunk {
 				for(int y = 0; y < World.WORLD_HEIGHT; y++) {
 					int oldDepth = this.lightDepths[x][y][z];
 					int calculatedY;
-					for(calculatedY = World.WORLD_HEIGHT - 1; calculatedY > 0 && !this.isLightBlocker(x, calculatedY, z); --calculatedY) {
-					}
+					
+					for(calculatedY = World.WORLD_HEIGHT - 1; calculatedY > 0 && !this.isLightBlocker(x, calculatedY, z); --calculatedY) {}
 
 					this.lightDepths[x][y][z] = calculatedY;
 					if(oldDepth != y) {
@@ -139,12 +147,12 @@ public class Chunk {
 		if(x > 2 && x < CHUNK_SIZE-2 && z > 2 && z < CHUNK_SIZE-2) {
 			int height = heights[x][z];
 			if(!blockHasSpecificNeighbours(Block.oaklog, x,height,z)) {
-				blocks[x][height++][z] = Block.oaklog.getByteType();
-				blocks[x][height++][z] = Block.oaklog.getByteType();
-				blocks[x][height++][z] = Block.oaklog.getByteType();
-				blocks[x][height++][z] = Block.oaklog.getByteType();
+				setBlock(x, height++, z, Block.oaklog.getByteType());
+				setBlock(x, height++, z, Block.oaklog.getByteType());
+				setBlock(x, height++, z, Block.oaklog.getByteType());
+				setBlock(x, height++, z, Block.oaklog.getByteType());
 				for(int j = 0; j < new Random().nextInt(2);j++) {
-					blocks[x][height++][z] = Block.oaklog.getByteType();
+					setBlock(x, height++, z, Block.oaklog.getByteType());
 				}
 				int index = height;
 				setBlock(Block.oakleaf, x, index, z);
@@ -237,8 +245,8 @@ public class Chunk {
 	}
 	
 	private void setBlock(Block block, int x, int y, int z) {
-		if(blocks[x][y][z] == -1) {
-			blocks[x][y][z] = block.getByteType();
+		if(getBlock(x,y,z) == -1) {
+			setBlock(x,y,z, block.getByteType());
 		}
 	}
 
@@ -251,7 +259,7 @@ public class Chunk {
 					int checkerY = y + dy;
 					int checkerZ = z + dz;
 					
-					if(blocks[checkerX][checkerY][checkerZ] == block.getByteType()) {
+					if(getBlock(checkerX,checkerY,checkerZ) == block.getByteType()) {
 						return true;
 					}
 				}
@@ -264,7 +272,7 @@ public class Chunk {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
 				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-					if (blocks[x][y][z] != -1) {
+					if (getBlock(x,y,z) != -1) {
 						heights[x][z] = y;
 						break;
 					}
@@ -275,7 +283,7 @@ public class Chunk {
 	
 	public void recalculateHeight(int x, int z) {
 		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-			if (blocks[x][y][z] != -1) {
+			if (getBlock(x,y,z) != -1) {
 				heights[x][z] = y;
 				break;
 			}
@@ -296,21 +304,16 @@ public class Chunk {
 	public int getHeightFromPosition(int x, int z) {
 		return heights[x][z];
 	}
-
-	public int getBlock(int x, int y, int z) {
-		return blocks[x][y][z];
+	
+	public void setBlock(int x, int y, int z, int block) {
+		blocks[x << 11 | z << 7 | y] = (byte)block;
 	}
 	
-	public byte[] getByteArray() {
-		byte[] blocks = new byte[CHUNK_SIZE * CHUNK_SIZE * World.WORLD_HEIGHT];
-		
-		for (byte x = 0; x < CHUNK_SIZE; x++) {
-			for (byte z = 0; z < CHUNK_SIZE; z++) {
-				for (int y = 0; y < World.WORLD_HEIGHT; y++) {
-					blocks[x + CHUNK_SIZE * (y + CHUNK_SIZE * z)] = this.blocks[x][y][z];
-				}
-			}
-		}
+	public byte getBlock(int x, int y, int z) {
+        return blocks[x << 11 | z << 7 | y];
+    }
+
+	public byte[] getBlocks() {
 		return blocks;
 	}
 }

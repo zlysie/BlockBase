@@ -148,7 +148,7 @@ public class NBTTagCompound extends NBTBase
             return 0.0F;
         } else
         {
-            return ((NBTTagFloat)tagMap.get(s)).floatValue;
+            return ((NBTTagFloat)tagMap.get(s)).value;
         }
     }
 

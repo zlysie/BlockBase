@@ -1,6 +1,7 @@
 package net.oikmo.main.gui;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.OpenGLException;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
@@ -33,7 +34,7 @@ public class GuiOptions extends GuiScreen {
 	private GuiSlider fov;
 	private GuiButton backButton;
 	
-	private int renderDistance = 1;
+	private int renderDistance = 2;
 	
 	public void onInit() {
 		vsync = Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync"));
@@ -93,7 +94,13 @@ public class GuiOptions extends GuiScreen {
 			public void invoke() {
 				vsync = !vsync;
 				vsyncButton.setText(Main.lang.translateKey("options.vsync")+": " + vsync);
-				Display.setVSyncEnabled(vsync);
+				try {
+					Display.setVSyncEnabled(vsync);
+				} catch(OpenGLException e) {
+					vsync = !vsync;
+					vsyncButton.setText(Main.lang.translateKey("options.vsync")+": " + vsync);
+					
+				}
 			}
 			
 			public void update() {
@@ -105,6 +112,12 @@ public class GuiOptions extends GuiScreen {
 		renderDistanceButton = new GuiButton((Display.getWidth()/2),(Display.getHeight()/2)+65, 225, 30, Main.lang.translateKey("options.distance")+": ");
 		renderDistanceButton.setGuiCommand(new GuiCommand() {
 			public void invoke() {
+				updateRenderDistanceText();
+				renderDistance++;
+				if(renderDistance > 5) {
+					renderDistance = 2;
+				}
+				System.out.println(renderDistance);
 				updateRenderDistanceText();
 			}
 			
@@ -151,27 +164,21 @@ public class GuiOptions extends GuiScreen {
 	}
 	
 	public void updateRenderDistanceText() {
-		if(renderDistance < 4) {
-			renderDistance++;
-		} else if(renderDistance >= 4) {
-			renderDistance = 1;
-		}
-		
 		String text = Main.lang.translateKey("options.distance")+": ";
 		
 		World.updateRenderSize(renderDistance*2);
 		
 		switch(renderDistance) {
-		case 1:
+		case 2:
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.tiny"));
 			break;
-		case 2:
+		case 3:
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.small"));
 			break;
-		case 3:
+		case 4:
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.normal"));
 			break;
-		case 4:
+		case 5:
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.far"));
 			break;
 		}

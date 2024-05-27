@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,6 +24,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.entity.Camera;
+import net.oikmo.engine.nbt.NBTTagCompound;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
@@ -168,7 +171,7 @@ public class Maths {
 
 	public static boolean isWithinChunk(int localX, int localY, int localZ) {
 		return localX >= 0 && localX < Chunk.CHUNK_SIZE &&
-				localY >= 0 && localY < World.WORLD_HEIGHT-1 &&
+				localY >= 0 && localY < World.WORLD_HEIGHT &&
 				localZ >= 0 && localZ < Chunk.CHUNK_SIZE;
 	}
 
@@ -246,8 +249,10 @@ public class Maths {
 		return null;
 	}
 
-	public static float getWorldSize(String fileDir) {
-		return new File(Main.getWorkingDirectory()+"/saves/"+fileDir+".dat").length();
+	public static long getWorldSize(String fileDir) throws FileNotFoundException, IOException {
+		NBTTagCompound baseTag = CompressedStreamTools.readCompressed(new FileInputStream(new File(Main.getWorkingDirectory()+"/saves/"+fileDir+"/level.dat")));
+		NBTTagCompound nbttagcompound1 = baseTag.getCompoundTag("Data");
+		return nbttagcompound1.getLong("SizeOnDisk");
 	}
 
 	public static String humanReadableByteCountBin(long bytes) {

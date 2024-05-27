@@ -90,11 +90,11 @@ public class Loader {
 		return new RawModel(vaoID, positions.length);
 	}
 	
-	public static RawModel loadToVAO(int[] positions, float[] textureCoords, float[] normals) {
+	public static RawModel loadToVAO(int[] positions, float[] textureCoords, int[] normals) {
 		int vaoID = createVAO();
 		storeDataInAttributeList(positions, 0, 1);
 		storeDataInAttributeList(textureCoords, 1, 2);
-		storeDataInAttributeList(normals, 2, 3);
+		storeDataInAttributeList(normals, 2, 1);
 		unbindVAO();
 		return new RawModel(vaoID, positions.length);
 	}

@@ -1,7 +1,10 @@
 package net.oikmo.main.gui;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.lwjgl.opengl.Display;
 
 import net.oikmo.engine.ResourceLoader;
@@ -9,8 +12,6 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
-import net.oikmo.engine.save.SaveSystem;
-import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Maths;
 
@@ -38,13 +39,21 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					Main.loadWorld("world1");
-					Main.shouldTick();
+					String world = "world1";
+					prepareCleanUp();
 					Gui.cleanUp();
-					Main.currentScreen = null;
+					if(world1Button.getText().contentEquals(Main.lang.translateKey("world.select.create"))) {
+						Main.currentScreen = new GuiCreateWorld(world);
+					} else {
+						Main.loadWorld(world);
+						Main.shouldTick();
+						Main.currentScreen = null;
+					}
 				} else {
-					File world = new File(Main.getWorkingDirectory()+"/saves/world1.dat");
-					world.delete();
+					try {
+						FileUtils.deleteDirectory( new File(Main.getWorkingDirectory()+"/saves/world1/"));
+					} catch (IOException e) {}
+					updateButtons();
 				}
 				
 			}
@@ -61,13 +70,20 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					Main.loadWorld("world2");
-					Main.shouldTick();
+					String world = "world2";
+					prepareCleanUp();
 					Gui.cleanUp();
-					Main.currentScreen = null;
+					if(world2Button.getText().contentEquals(Main.lang.translateKey("world.select.create"))) {
+						Main.currentScreen = new GuiCreateWorld(world);
+					} else {
+						Main.loadWorld(world);
+						Main.shouldTick();
+						Main.currentScreen = null;
+					}
 				} else {
-					File world = new File(Main.getWorkingDirectory()+"/saves/world2.dat");
-					world.delete();
+					try {
+						FileUtils.deleteDirectory( new File(Main.getWorkingDirectory()+"/saves/world2/"));
+					} catch (IOException e) {}
 					updateButtons();
 				}
 			}
@@ -84,13 +100,20 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					Main.loadWorld("world3");
-					Main.shouldTick();
+					String world = "world3";
+					prepareCleanUp();
 					Gui.cleanUp();
-					Main.currentScreen = null;
+					if(world3Button.getText().contentEquals(Main.lang.translateKey("world.select.create"))) {
+						Main.currentScreen = new GuiCreateWorld(world);
+					} else {
+						Main.loadWorld(world);
+						Main.shouldTick();
+						Main.currentScreen = null;
+					}
 				} else {
-					File world = new File(Main.getWorkingDirectory()+"/saves/world3.dat");
-					world.delete();
+					try {
+						FileUtils.deleteDirectory( new File(Main.getWorkingDirectory()+"/saves/world3/"));
+					} catch (IOException e) {}
 					updateButtons();
 				}
 			}
@@ -107,13 +130,20 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					Main.loadWorld("world4");
-					Main.shouldTick();
+					String world = "world4";
+					prepareCleanUp();
 					Gui.cleanUp();
-					Main.currentScreen = null;
+					if(world4Button.getText().contentEquals(Main.lang.translateKey("world.select.create"))) {
+						Main.currentScreen = new GuiCreateWorld(world);
+					} else {
+						Main.loadWorld(world);
+						Main.shouldTick();
+						Main.currentScreen = null;
+					}
 				} else {
-					File world = new File(Main.getWorkingDirectory()+"/saves/world4.dat");
-					world.delete();
+					try {
+						FileUtils.deleteDirectory( new File(Main.getWorkingDirectory()+"/saves/world4/"));
+					} catch (IOException e) {}
 					updateButtons();
 				}
 			}
@@ -131,13 +161,20 @@ public class GuiSelectWorld extends GuiScreen {
 			@Override
 			public void invoke() {
 				if(!delete) {
-					Main.loadWorld("world5");
-					Main.shouldTick();
+					String world = "world5";
+					prepareCleanUp();
 					Gui.cleanUp();
-					Main.currentScreen = null;
+					if(world5Button.getText().contentEquals(Main.lang.translateKey("world.select.create"))) {
+						Main.currentScreen = new GuiCreateWorld(world);
+					} else {
+						Main.loadWorld(world);
+						Main.shouldTick();
+						Main.currentScreen = null;
+					}
 				} else {
-					File world = new File(Main.getWorkingDirectory()+"/saves/world5.dat");
-					world.delete();
+					try {
+						FileUtils.deleteDirectory( new File(Main.getWorkingDirectory()+"/saves/world5/"));
+					} catch (IOException e) {}
 					updateButtons();
 				}
 			}
@@ -194,30 +231,45 @@ public class GuiSelectWorld extends GuiScreen {
 		} else {
 			deleteButton.setText("Delete");
 		}
-		if(SaveSystem.load("world1") != null) {
+		
+		try {
 			world1Button.setText("World 1 ("+ String.format("%.1f", Maths.getWorldSize("world1")/1024f) +"KB)");
-		} else {
+		} catch (FileNotFoundException e) {
 			world1Button.setText(Main.lang.translateKey("world.select.create"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		if(SaveSystem.load("world2") != null) {
+		
+		try {
 			world2Button.setText("World 2 ("+ String.format("%.1f", Maths.getWorldSize("world2")/1024f) +"KB)");
-		} else {
+		} catch (FileNotFoundException e) {
 			world2Button.setText(Main.lang.translateKey("world.select.create"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		if(SaveSystem.load("world3") != null) {
+		
+		try {
 			world3Button.setText("World 3 ("+ String.format("%.1f", Maths.getWorldSize("world3")/1024f) +"KB)");
-		} else {
+		} catch (FileNotFoundException e) {
 			world3Button.setText(Main.lang.translateKey("world.select.create"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		if(SaveSystem.load("world4") != null) {
+		
+		try {
 			world4Button.setText("World 4 ("+ String.format("%.1f", Maths.getWorldSize("world4")/1024f) +"KB)");
-		} else {
+		} catch (FileNotFoundException e) {
 			world4Button.setText(Main.lang.translateKey("world.select.create"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		if(SaveSystem.load("world5") != null) {
+		
+		try {
 			world5Button.setText("World 5 ("+ String.format("%.1f", Maths.getWorldSize("world5")/1024f) +"KB)");
-		} else {
+		} catch (FileNotFoundException e) {
 			world5Button.setText(Main.lang.translateKey("world.select.create"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

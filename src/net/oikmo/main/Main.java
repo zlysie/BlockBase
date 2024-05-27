@@ -39,7 +39,6 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.SharedDrawable;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.ImageBuffer;
@@ -56,17 +55,16 @@ import net.oikmo.engine.models.CubeModel;
 import net.oikmo.engine.models.PlayerModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.renderers.MasterRenderer;
-import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
+import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
 import net.oikmo.main.gui.GuiConnecting;
 import net.oikmo.main.gui.GuiDisconnected;
 import net.oikmo.main.gui.GuiInGame;
 import net.oikmo.main.gui.GuiMainMenu;
 import net.oikmo.network.client.NetworkHandler;
 import net.oikmo.network.client.OtherPlayer;
-import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
 import net.oikmo.toolbox.Maths;
@@ -85,9 +83,9 @@ import net.oikmo.toolbox.properties.OptionsHandler;
  */
 public class Main {
 
-	private static final int resourceVersion = 4;
+	private static final int resourceVersion = 5;
 	public static final String gameName = "BlockBase";
-	public static final String version = "a0.2.0 [1] [DEV]";
+	public static final String version = "a0.2.0 [2] [DEV]";
 	public static final String gameVersion = gameName + " " + version;
 
 	public static boolean displayRequest = false;
@@ -126,8 +124,6 @@ public class Main {
 
 	public static LanguageHandler lang = LanguageHandler.getInstance();
 	
-	public static SharedDrawable shared;
-
 	public static boolean jmode = false;
 	
 	public static boolean disableNetworking = false;
@@ -209,14 +205,12 @@ public class Main {
 				OptionsHandler.getInstance().insertKey("graphics.vsync", Boolean.toString(true));
 				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
 				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
-				
 			}
 
 			frame = new Frame(Main.gameName);
 			frame.setFocusable(true);
 			frame.setFocusTraversalKeysEnabled(false);
 			Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-
 				@Override
 				public void eventDispatched(AWTEvent event) {
 					if (event instanceof KeyEvent) {
@@ -289,16 +283,22 @@ public class Main {
 			ImageBuffer buf = new ImageBuffer(64,64);
 			
 			if(image != null) {
-				for(int x = 0; x < 64; x++) {
-					for(int y = 0; y < 64; y++) {
-						java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
-						buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+				try {
+					for(int x = 0; x < 64; x++) {
+						for(int y = 0; y < 64; y++) {
+							java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
+							buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+						}
 					}
+					
+					Image skin = new Image(buf);
+					skin.setFilter(Image.FILTER_NEAREST);
+					playerSkin = skin.getTexture().getTextureID();
+				} catch(ArrayIndexOutOfBoundsException e) {
+					playerSkin = ResourceLoader.loadTexture("textures/default_skin");
 				}
-				Image skin = new Image(buf);
-				skin.setFilter(Image.FILTER_NEAREST);
-				playerSkin = skin.getTexture().getTextureID();
-			} else {
+				
+				} else {
 				playerSkin = ResourceLoader.loadTexture("textures/default_skin");
 			}
 			
@@ -343,6 +343,8 @@ public class Main {
 			while(!Display.isCloseRequested() && !realClose) {
 				timer.updateTimer();				
 
+				//System.out.println(theWorld);
+				
 				if(thePlayer != null) {
 					Main.thePlayer.updateCamera();
 					if(Main.thePlayer.getCamera().isPerspective()) {
@@ -411,7 +413,7 @@ public class Main {
 				}
 
 				if(theWorld != null && thePlayer != null) {
-					if(!(Main.currentScreen instanceof GuiConnecting) && !(Main.currentScreen instanceof GuiDisconnected) && !Main.thePlayer.tick) {
+					if(!(Main.currentScreen instanceof GuiConnecting) && !(Main.currentScreen instanceof GuiDisconnected) && !Main.thePlayer.tick && Main.theNetwork != null) {
 						Main.currentScreen = new GuiConnecting();
 					}
 					if(thePlayer != null) {
@@ -457,6 +459,8 @@ public class Main {
 			Main.theWorld.quitWorld();
 		}
 		Main.theWorld = null;
+		
+		ChunkCoordHelper.cleanUp();
 		if(Main.inGameGUI != null) {
 			Main.inGameGUI.prepareCleanUp();
 			Main.inGameGUI = null;
@@ -475,21 +479,7 @@ public class Main {
 		Main.currentScreen = new GuiDisconnected(kick, message);
 
 	}
-
-	public static boolean isInValidRange(Vector3f origin) {
-		return isInValidRange(1, origin);
-	}
-	public static boolean isInValidRange(int size, Vector3f origin) {
-		int distX = (int) FastMath.abs((Main.camPos.x * size) - origin.x);
-		int distZ = (int) FastMath.abs((Main.camPos.z * size) - origin.z);
-
-		if((distX <= World.WORLD_SIZE) && (distZ <= World.WORLD_SIZE)) {
-			return true;
-		}
-
-		return false;
-	}
-
+	
 	public static String getRandomSplash() {
 		return splashes[new Random().nextInt(splashes.length)];
 	}
@@ -497,20 +487,26 @@ public class Main {
 	private static boolean hasSaved = false;
 
 	public static void loadWorld(String worldName) {
+		loadWorld(worldName, null, false);
+	}
+	
+	public static void loadWorld(String worldName, String seed, boolean superflat) {
 		currentlyPlayingWorld = worldName;
 		
 		GuiMainMenu.stopMusic();
 		SoundMaster.stopMusic();
 
 		inGameGUI = new GuiInGame();
-
-		if(SaveSystem.load(worldName) != null) {
-			theWorld = World.loadWorld(worldName);
+		
+		if(seed != null) {
+			theWorld = new World(seed);
 		} else {
 			theWorld = new World();
-			thePlayer = new Player(new Vector3f(0,120,0), new Vector3f(0,0,0));
-			theWorld.startChunkCreator();
 		}
+		
+		theWorld.superFlat = superflat;
+		theWorld.initLevelLoader(worldName);
+		theWorld.startChunkCreator();
 	}
 
 	private static boolean tick;
@@ -546,9 +542,9 @@ public class Main {
 				theWorld.tick();
 			}
 			if(thePlayer != null) {
-				camPos = new Vector3f(thePlayer.getCamera().getPosition());
+				camPos = new Vector3f(thePlayer.getPosition());
 				if(!hasSaved && thePlayer.isOnGround()) {
-					theWorld.saveWorld(currentlyPlayingWorld);
+					theWorld.saveWorld();
 					hasSaved = true;
 				}
 			}
@@ -556,7 +552,7 @@ public class Main {
 		} else {
 
 			if(thePlayer != null) {
-				camPos = new Vector3f(thePlayer.getCamera().getPosition());
+				camPos = new Vector3f(thePlayer.getPosition());
 				if(theWorld != null) {
 					theWorld.tick();
 				}
@@ -573,7 +569,7 @@ public class Main {
 			Main.disconnect(false, "");
 		} else {
 			if(Main.theWorld != null) {
-				Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
+				Main.theWorld.saveWorldAndQuit();
 			}
 		}
 		
@@ -640,8 +636,7 @@ public class Main {
 		File dir = getResources();
 		File tmp = new File(getWorkingDirectory() + "/tmp");
 		File txt = new File(getResources() + "/resourcesVersion.txt");
-
-
+		
 		tmp.mkdir();
 		if(!txt.exists()) {
 
@@ -700,8 +695,7 @@ public class Main {
 							if(options == -1) {
 								System.exit(0);
 							}
-
-
+							
 							if(!new File(getResources() + "/music").exists()) {
 								new File(getResources() + "/music").mkdirs();
 							}
@@ -723,7 +717,6 @@ public class Main {
 							myWriter.close();
 						}
 					}
-
 				}
 
 				if(new File(getResources()+"/music/").list().length == 0) {
@@ -747,12 +740,18 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Returns the resources directory
+	 * 
+	 * %appdata%/.blockbase/resources
+	 * @return
+	 */
 	public static File getResources() {
 		return new File(getWorkingDirectory()+"/resources");
 	}
 
 	/**
-	 * Retrieves data directory of .blockbase/ using {@code Main.getAppDir(String)}
+	 * Retrieves data directory of .blockbase/ using {@code Main.getWorkingDirectory(String)}
 	 * @return Directory (File)
 	 */
 	public static File getWorkingDirectory() {
@@ -760,7 +759,7 @@ public class Main {
 	}
 
 	/**
-	 * Uses {@code Main.getOS} to locate an APPDATA directory in the system.
+	 * Uses {@link EnumOSMappingHelper} to locate an APPDATA directory in the system.
 	 * Then it creates a new directory based on the given name e.g <b>.name/</b>
 	 * 
 	 * @param name (String)
@@ -810,4 +809,6 @@ public class Main {
 		fos.close();
 		rbc.close();
 	}
+
+	
 }

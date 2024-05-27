@@ -61,9 +61,11 @@ public class GuiPauseMenu extends GuiScreen {
 				prepareCleanUp();
 				Main.inGameGUI = null;
 				if(Main.theNetwork == null) {
-					Main.theWorld.saveWorldAndQuit(Main.currentlyPlayingWorld);
+					Main.theWorld.saveWorldAndQuit();
 				} else {
 					Main.theNetwork.disconnect();
+					Main.theWorld.quitWorld();
+					Main.theWorld = null;
 					Main.theNetwork = null;
 				}
 				

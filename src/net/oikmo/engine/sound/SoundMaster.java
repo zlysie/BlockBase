@@ -12,7 +12,6 @@ import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.DisplayManager;
 import net.oikmo.engine.entity.Camera;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.GameSettings;
@@ -39,9 +38,12 @@ public class SoundMaster {
 	private static Thread musicThread;
 	private static int ticksBeforeMusic;
 
+	/**
+	 * Initalises soundsystem along
+	 */
 	public static void init() {
 		ticksBeforeMusic = 12000 + new Random().nextInt(12000);
-		//Initalises soundsystem
+		
 		try {
 			SoundSystemConfig.addLibrary(LibraryLWJGLOpenAL.class);
 			SoundSystemConfig.addLibrary(LibraryJavaSound.class);
@@ -82,7 +84,14 @@ public class SoundMaster {
 		registerSFX();
 	}
 	
+	
+	/**
+	 * Reads audio files from {@link Main#getResources()}/music/
+	 */
 	private static void registerMusic() {
+		
+		registerMusicByte("music.undecided", "menu/undecided.ogg");
+		
 		registerMusicByte("music.jackblack", "jackblock.ogg");
 
 		registerMusicByte("music.minecraft", "calm1.ogg");
@@ -145,7 +154,6 @@ public class SoundMaster {
 					if(!b.getFileName().contains("menu")) {
 						bytes.add(entry.getValue());
 					}
-
 				}
 				Collections.shuffle(bytes);
 				
@@ -155,8 +163,7 @@ public class SoundMaster {
 				soundSystem.setVolume("music", GameSettings.globalVolume);
 				soundSystem.play("music");
 				Logger.log(LogLevel.INFO, (String.format("Playing {0} ({1})", music.getFileName(),music.getID())));
-			}
-			
+			}	
 		}
 	}
 	

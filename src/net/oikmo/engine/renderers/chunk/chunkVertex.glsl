@@ -2,7 +2,7 @@
 
 in int position;
 in vec2 textureCoords;
-in vec3 normal;
+in int normal;
 
 out vec2 pass_textureCoords;
 out vec3 surfaceNormal;
@@ -22,6 +22,8 @@ void main(void) {
 	int posX = position & 0xFF;
 	int posY = position >> 8 & 0xFF;
 	int posZ = position >> 16 & 0xFF;
+	
+	float nor = normal/100.0f;
 
 	vec4 worldPosition = transformationMatrix * vec4(posX,posY,posZ,1.0);
 	vec4 positionRelativeToCam = viewMatrix * worldPosition;
@@ -30,11 +32,13 @@ void main(void) {
 	
 	pass_textureCoords = textureCoords;
 	
+	vec3 norm = vec3(nor, nor, nor);
+	
 	if(shouldFakeIt > 0.5) {
-		vec3 damn = normal + 1.5;
+		vec3 damn = norm + 1.5;
 		surfaceNormal = (transformationMatrix * vec4(damn, 0.0)).xyz;
 	} else {
-		surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
+		surfaceNormal = (transformationMatrix * vec4(norm, 0.0)).xyz;
 	}
 	
 	float distance = length(positionRelativeToCam.xyz);

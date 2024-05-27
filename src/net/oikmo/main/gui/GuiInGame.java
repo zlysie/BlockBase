@@ -14,7 +14,6 @@ import net.oikmo.engine.inventory.Container;
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.inventory.Slot;
 import net.oikmo.engine.renderers.MasterRenderer;
-import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
 import net.oikmo.network.shared.PacketUpdateWithheldBlock;
@@ -52,8 +51,11 @@ public class GuiInGame extends GuiScreen {
 		drawShadowString(0f, 0f, Main.gameVersion);
 		if(literallyUpdate) {
 			drawShadowString(0, fontSize, "FPS: " + DisplayManager.getFPSCount());
+			if(Main.theWorld != null) {
+				drawShadowString(0, fontSize*2, "total chunks: " + Main.theWorld.chunkMap.size());
+			}
+			
 			Vector3f v = Main.thePlayer.getRoundedPosition();
-			drawShadowString(0, Display.getHeight()-fontSize, "X: "+ (int)(v.x-0.5f) + " Y: "+ (int)(v.y-0.5f) + " Z: "+ (int)(v.z-0.5f));
 			drawShadowString(0, Display.getHeight()-fontSize, "X: "+ (int)(v.x-0.5f) + " Y: "+ (int)(v.y-0.5f) + " Z: "+ (int)(v.z-0.5f));
 		}
 		
@@ -82,7 +84,6 @@ public class GuiInGame extends GuiScreen {
 					int realY = ((size-y)*fontSize)+fontSize;
 					this.drawSquareFilled(c, 0, base-realY, Display.getWidth(), fontSize);
 					this.drawShadowString(Main.theNetwork.currentlyShownMessages.get(y).isSpecial() ? Color.yellow : Color.white, 0, base-realY, Main.theNetwork.currentlyShownMessages.get(y).getMessage());
-					
 				}
 			}
 			

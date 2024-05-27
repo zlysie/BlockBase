@@ -8,6 +8,9 @@ import com.mojang.minecraft.phys.AABB;
 
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.nbt.NBTTagCompound;
+import net.oikmo.engine.nbt.NBTTagFloat;
+import net.oikmo.engine.nbt.NBTTagList;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.MasterChunk;
@@ -34,9 +37,9 @@ public class Entity {
 	protected float heightOffset = 0.0F;
 	protected float bbWidth = 0.6F;
 	protected float bbHeight = 1.8F;
-	
+
 	protected boolean remove = false;
-	
+
 	public Entity(TexturedModel model, Vector3f position, Vector3f rotation, float scale) {
 		this.model = model;
 		this.position = position;
@@ -45,7 +48,7 @@ public class Entity {
 		this.scale = scale;
 		setPos(position.x, position.y, position.z);
 	}
-	
+
 	public Entity(Vector3f position, Vector3f rotation, float scale) {
 		this.position = position;
 		this.motion = new Vector3f();
@@ -85,7 +88,7 @@ public class Entity {
 		double prevX = position.x;
 		double prevZ = position.z;
 		moveWithoutSound(xa,ya,za, size);
-		
+
 		double offsetX = position.x - prevX;
 		double offsetZ = position.z - prevZ;
 		distanceWalkedModified += (double)FastMath.sqrt((float) (offsetX * offsetX + offsetZ * offsetZ)) * 0.7D;
@@ -108,9 +111,9 @@ public class Entity {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	public void moveWithoutSound(float xa, float ya, float za, int size) {
 		float xaOrg = xa;
 		float yaOrg = ya;
@@ -118,7 +121,7 @@ public class Entity {
 
 		if(Main.theWorld != null) {
 			List<AABB> aabbs = Main.theWorld.getSurroundingAABBsPhys(this.aabb, size);
-			
+
 			int i;
 			for(i = 0; i < aabbs.size(); ++i) {
 				ya = aabbs.get(i).clipYCollide(this.aabb, ya);
@@ -150,7 +153,7 @@ public class Entity {
 				this.motion.z = 0.0F;
 			}
 		}
-		
+
 		if(this instanceof Player) {
 			this.position.x = ((this.aabb.minX + this.aabb.maxX) / 2.0F);
 			this.position.y = this.aabb.minY + this.heightOffset;
@@ -160,8 +163,25 @@ public class Entity {
 			this.position.y = this.aabb.minY + this.heightOffset;
 			this.position.z = ((this.aabb.minZ + this.aabb.maxZ) / 2.0F)-0.5f;
 		}
-		
+		updateFallState(ya, onGround);
+
 	}
+
+	protected void fall(float distance) {}
+
+	protected void updateFallState(double d, boolean flag) {
+		if(flag) {
+			if(fallDistance > 0.0F) {
+				fall(fallDistance);
+				fallDistance = 0.0F;
+			}
+		} else {
+			if(d < 0.0D) {
+				fallDistance -= d;
+			}
+		}
+	}
+
 	public float getBrightness() {
 		int x = (int)this.position.x;
 		int y = (int)(this.position.y + this.heightOffset / 2.0F);
@@ -201,6 +221,53 @@ public class Entity {
 			this.motion.x += xa * cos - za * sin;
 			this.motion.z += za * cos + xa * sin;
 		}
+	}
+
+	public void writeToNBT(NBTTagCompound base) {
+		base.setTag("Position", newFloatNBTList(new float[] {
+				position.x, position.y, position.z
+		}));
+		base.setTag("Motion", newFloatNBTList(new float[] {
+				motion.x, motion.y, motion.z
+		}));
+		base.setFloat("FallDistance", fallDistance);
+		//nbttagcompound.setShort("Fire", (short)fire);
+		//nbttagcompound.setShort("Air", (short)air);
+		base.setBoolean("OnGround", onGround);
+		writeEntityToNBT(base);
+	}
+
+	public void readFromNBT(NBTTagCompound base) {
+		NBTTagList positionNBT = base.getTagList("Position");
+		NBTTagList motionNBT = base.getTagList("Motion");
+		motion.x = ((NBTTagFloat)motionNBT.tagAt(0)).value;
+		motion.y = ((NBTTagFloat)motionNBT.tagAt(1)).value;
+		motion.z = ((NBTTagFloat)motionNBT.tagAt(2)).value;
+		float posX = ((NBTTagFloat)positionNBT.tagAt(0)).value;
+		float posY = ((NBTTagFloat)positionNBT.tagAt(1)).value;
+		float posZ = ((NBTTagFloat)positionNBT.tagAt(2)).value;
+		fallDistance = base.getFloat("FallDistance");
+		//fire = nbttagcompound.getShort("Fire");
+		//air = nbttagcompound.getShort("Air");
+		onGround = base.getBoolean("OnGround");
+		setPos(posX, posY, posZ);
+		readEntityFromNBT(base);
+	}
+
+	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {}
+
+	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {}
+
+	protected NBTTagList newFloatNBTList(float af[]) {
+		NBTTagList nbttaglist = new NBTTagList();
+		float af1[] = af;
+		int i = af1.length;
+		for(int j = 0; j < i; j++) {
+			float f = af1[j];
+			nbttaglist.setTag(new NBTTagFloat(f));
+		}
+
+		return nbttaglist;
 	}
 
 	public void setRawModel(RawModel model) {
@@ -284,7 +351,7 @@ public class Entity {
 		Maths.roundVector(getPosition(), roundPos);
 		return roundPos;
 	}
-	
+
 	public boolean shouldBeRemoved() {
 		return remove;
 	}

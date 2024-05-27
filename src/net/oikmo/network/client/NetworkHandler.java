@@ -272,9 +272,6 @@ public class NetworkHandler {
 				client.sendUDP(packetZ);
 			}
 		}
-		
-		
-		
 	}
 	
 	public void updateChunk(Vector3f position, Block block, boolean refresh) {
@@ -307,9 +304,12 @@ public class NetworkHandler {
 		if(Main.thePlayer != null) {
 			PacketSavePlayerPosition data = new PacketSavePlayerPosition();
 			data.userName = Main.playerName;
-			data.x = (int) Main.thePlayer.getPosition().x;
-			data.y = (int) Main.thePlayer.getPosition().y+1;
-			data.z = (int) Main.thePlayer.getPosition().z;
+			data.x = Main.thePlayer.getPosition().x;
+			data.y = Main.thePlayer.getPosition().y+1;
+			data.z = Main.thePlayer.getPosition().z;
+			data.rotX = Main.thePlayer.getCamera().getPitch();
+			data.rotY = Main.thePlayer.getCamera().getYaw();
+			data.rotZ = Main.thePlayer.getCamera().getRoll();
 			client.sendTCP(data);
 		}
 		

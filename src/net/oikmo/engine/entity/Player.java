@@ -6,6 +6,9 @@ import org.lwjgl.util.vector.Vector3f;
 import net.oikmo.engine.inventory.Container;
 import net.oikmo.engine.models.PlayerModel;
 import net.oikmo.engine.models.TexturedModel;
+import net.oikmo.engine.nbt.NBTTagCompound;
+import net.oikmo.engine.nbt.NBTTagFloat;
+import net.oikmo.engine.nbt.NBTTagList;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.main.Main;
@@ -30,7 +33,7 @@ public class Player extends Entity {
 	}
 	
 	public void tick() {
-		if(!tick) {return;}
+		if(!tick) { return; }
 		
 		if(camera.isPerspective() && this.getModel().getTexture().getTextureID() != Main.playerSkin) { 
 			this.getModel().getTexture().setTextureID(Main.playerSkin);
@@ -81,7 +84,7 @@ public class Player extends Entity {
 		this.motion.y = (float)((double)this.motion.y - 0.008D);
 		this.move(this.motion.x, this.motion.y, this.motion.z);
 		if(this.getPosition().y < 0) {
-			resetPos();
+			//resetPos();
 		}
 		
 		this.motion.x *= 0.91F;
@@ -91,6 +94,19 @@ public class Player extends Entity {
 			this.motion.x *= 0.8F;
 			this.motion.z *= 0.8F;
 		}
+	}
+	
+	protected void writeEntityToNBT(NBTTagCompound base) {
+		base.setTag("Camera", newFloatNBTList(new float[] {
+				camera.getPitch(), camera.getYaw()
+		}));
+	}
+	
+	protected void readEntityFromNBT(NBTTagCompound base) {
+		NBTTagList cameraNBT = base.getTagList("Camera");
+		float crx = ((NBTTagFloat)cameraNBT.tagAt(0)).value;
+		float cry = ((NBTTagFloat)cameraNBT.tagAt(1)).value;
+		camera.setRotation(crx, cry, 0);
 	}
 	
 	public Vector3f getModelPosition() {

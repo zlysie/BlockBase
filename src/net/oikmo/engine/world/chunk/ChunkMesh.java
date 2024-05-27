@@ -14,8 +14,8 @@ import net.oikmo.engine.world.blocks.Block;
 public class ChunkMesh {
 	private List<Vertex> vertices;
 	private HashMap<Vector3f, Vertex> uniqueVertices = new HashMap<>();
-	public int[] positions;
-	public float[] uvs, normals;
+	public int[] positions, normals;
+	public float[] uvs;
 
 	public ChunkMesh(Chunk chunk) {
 		vertices = new ArrayList<Vertex>();
@@ -29,7 +29,7 @@ public class ChunkMesh {
 		for (byte x = 0; x < Chunk.CHUNK_SIZE; x++) {
 			for (int y = 0; y < World.WORLD_HEIGHT; y++) {
 				for (byte z = 0; z < Chunk.CHUNK_SIZE; z++) {
-					byte blockI = chunk.blocks[x][y][z];
+					byte blockI = chunk.getBlock(x, y, z);
 					boolean px = false, nx = false, py = false, ny = false, pz = false, nz = false;
 
 					if(blockI == -1) { continue; } //skip it
@@ -52,7 +52,7 @@ public class ChunkMesh {
 								if (neighborX >= 0 && neighborX < Chunk.CHUNK_SIZE &&
 										neighborY >= 0 && neighborY < World.WORLD_HEIGHT &&
 										neighborZ >= 0 && neighborZ < Chunk.CHUNK_SIZE) {
-									byte blockJ = chunk.blocks[neighborX][neighborY][neighborZ];
+									byte blockJ = chunk.getBlock(neighborX, neighborY, neighborZ);
 
 									if(blockJ == -1 || (blockI != Block.glass.getByteType() && blockJ == Block.glass.getByteType()) || (blockI == Block.oakleaf.getByteType() || blockJ == Block.oakleaf.getByteType())) { continue; } //skip it
 
@@ -93,38 +93,32 @@ public class ChunkMesh {
 					
 					if (!px) {
 						c = chunk.getBrightness(x+1,y,z);
-						Vector3f lightVec = new Vector3f(c3*c,c3*c,c3*c);
-						addFaceVertices(blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, lightVec);
+						addFaceVertices(blockI, x, y, z, CubeModel.PX_POS, CubeModel.UV_PX, c3*c);
 					}
 					
 					if (!nx) {
 						c = chunk.getBrightness(x-1,y,z);
-						Vector3f lightVec = new Vector3f(c*c3,c*c3,c*c3);
-						addFaceVertices(blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, lightVec);
+						addFaceVertices(blockI, x, y, z, CubeModel.NX_POS, CubeModel.UV_NX, c*c3);
 					}
 					
 					if (!py) {
 						c = chunk.getBrightness(x, y+1, z);
-						Vector3f lightVec = new Vector3f(c*1f,c*1f,c*1f);
-						addFaceVertices(blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, lightVec);
+						addFaceVertices(blockI, x, y, z, CubeModel.PY_POS, CubeModel.UV_PY, c*1f);
 					}
 					
 					if (!ny) {
 						c = chunk.getBrightness(x, y-1, z);
-						Vector3f lightVec = new Vector3f(c*c1,c*c1,c*c1);
-						addFaceVertices(blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, lightVec);
+						addFaceVertices(blockI, x, y, z, CubeModel.NY_POS, CubeModel.UV_NY, c*c1);
 					}
 					
 					if (!pz) {
 						c = chunk.getBrightness(x,y,z+1);
-						Vector3f lightVec = new Vector3f(c*c2,c*c2,c*c2);
-						addFaceVertices(blockI, x, y, z, CubeModel.PZ_POS, CubeModel.UV_PZ, lightVec);
+						addFaceVertices(blockI, x, y, z, CubeModel.PZ_POS, CubeModel.UV_PZ, c*c2);
 					}
 					
 					if (!nz) {
 						c = chunk.getBrightness(x,y,z-1);
-						Vector3f lightVec = new Vector3f(c*c2,c*c2,c*c2);
-						addFaceVertices(blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, lightVec);
+						addFaceVertices(blockI, x, y, z, CubeModel.NZ_POS, CubeModel.UV_NZ, c*c2);
 					}
 				}
 			}
@@ -133,7 +127,7 @@ public class ChunkMesh {
 	
 	
 
-	private void addFaceVertices(byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, Vector3f normals) {
+	private void addFaceVertices(byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, float normal) {
 		byte type = block;
 		int startIndex = type * 6;
 
@@ -142,7 +136,7 @@ public class ChunkMesh {
 			Vertex vertex = uniqueVertices.get(position);
 
 			if (vertex == null) {
-				vertex = new Vertex(position, normals, uvs[startIndex + k]);
+				vertex = new Vertex(position, normal, uvs[startIndex + k]);
 				uniqueVertices.put(position, vertex);
 				vertices.add(vertex);
 			}
@@ -154,9 +148,7 @@ public class ChunkMesh {
 	public void removeMeshInfo() {
 		this.positions = null;
 		this.uvs = null;
-		this.normals = null;
-		//System.gc();
-		
+		this.normals = null;		
 	}
 
 	public boolean hasMeshInfo() {
@@ -167,13 +159,13 @@ public class ChunkMesh {
 		int numVertices = vertices.size();
 		positions = new int[numVertices]; // Each vertex has 3 position components
 		uvs = new float[numVertices * 2]; // Each vertex has 2 uv components
-		normals = new float[numVertices * 3]; // Each vertex has 3 normal components
+		normals = new int[numVertices]; // Each vertex has 3 normal components
 
 		for(int i = 0; i < numVertices; i++) {
 			Vertex vertex = vertices.get(i);
 			int positionIndex = i;
 			int uvIndex = i * 2;
-			int normalIndex = i * 3;
+			int normalIndex = i;
 			
 			positions[positionIndex] = vertex.posX;
 			positions[positionIndex] += (vertex.posY << 8);
@@ -181,10 +173,8 @@ public class ChunkMesh {
 			
 			uvs[uvIndex] = vertex.uvs.x;
 			uvs[uvIndex + 1] = vertex.uvs.y;
-
-			normals[normalIndex] = vertex.normals.x;
-			normals[normalIndex + 1] = vertex.normals.y;
-			normals[normalIndex + 2] = vertex.normals.z;
+			
+			normals[normalIndex] = vertex.normal;
 		}
 		
 		this.uniqueVertices.clear();

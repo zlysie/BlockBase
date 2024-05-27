@@ -28,6 +28,9 @@ options.distance.far=FAR
 
 inventory.title=Blocks
 
+world.create.superflat=Superflat
+world.create.seed=Seed here...
+world.create=Create world
 world.select.create=Create new world...
 
 network.connecting=Connecting

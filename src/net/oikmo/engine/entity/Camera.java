@@ -309,15 +309,13 @@ public class Camera {
 		
 		float yOffset = player.heightOffset;
 		
-		// substitute in commented-out RotY lines to make the camera rotate when the player does
-		//float theta = player.getRotY() + angleAroundPlayer;
 		float theta = angleAroundPlayer;
 		float offsetX = (float) (horizDistance * Math.sin(Math.toRadians(theta)));
 		float offsetZ = (float) (horizDistance * Math.cos(Math.toRadians(theta)));
-		position.x = Maths.lerp(position.x, player.getPosition().x - offsetX, 10f * DisplayManager.getFrameTimeSeconds());
-		position.z = Maths.lerp(position.z, player.getPosition().z - offsetZ, 10f * DisplayManager.getFrameTimeSeconds());
+		position.x = Maths.lerp(position.x, player.getPosition().x - offsetX, 20f * DisplayManager.getFrameTimeSeconds());
+		position.z = Maths.lerp(position.z, player.getPosition().z - offsetZ, 20f * DisplayManager.getFrameTimeSeconds());
 		
-		position.y = Maths.lerp(position.y, player.getPosition().y + verticDistance + yOffset, 10f * DisplayManager.getFrameTimeSeconds());
+		position.y = Maths.lerp(position.y, player.getPosition().y + verticDistance + yOffset, 20f * DisplayManager.getFrameTimeSeconds());
 		//this.yaw = 180 - (player.getRotation().y + angleAroundPlayer);
 		this.yaw = 180 - angleAroundPlayer;
 	}

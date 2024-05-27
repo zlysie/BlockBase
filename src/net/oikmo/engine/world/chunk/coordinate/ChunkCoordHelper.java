@@ -17,4 +17,9 @@ public class ChunkCoordHelper {
 			return coord;
 		}
 	}
+	
+	public static void cleanUp() {
+		coords.clear();
+		System.gc();
+	}
 }

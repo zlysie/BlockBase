@@ -6,19 +6,24 @@ import java.io.FileOutputStream;
 
 import net.oikmo.engine.nbt.NBTTagCompound;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
+import net.oikmo.main.Main;
 import net.oikmo.toolbox.CompressedStreamTools;
 
 public class ChunkLoader {
 
 	public ChunkLoader(File saveDir, boolean createIfNecessary) {
 		this.saveDir = saveDir;
-		this.createIfNecessary = createIfNecessary;
+		if(!this.saveDir.exists()) {
+			this.saveDir.mkdirs();
+		}
+		this.createIfNecessary = !createIfNecessary;
 	}
 
 	private File chunkFileForXZ(int x, int z) {
 		String s = "c."+Integer.toString(x, 36)+"."+Integer.toString(z, 36)+".dat";
 		String s1 = Integer.toString(x & 0x3f, 36);
 		String s2 = Integer.toString(z & 0x3f, 36);
+		
 		File file = new File(saveDir, s1);
 		if(!file.exists()) {
 			if(createIfNecessary) {
@@ -73,8 +78,12 @@ public class ChunkLoader {
 	}
 
 	public void saveChunk(MasterChunk chunk) {
-		//world.checkSessionLock();
+		Main.theWorld.checkSessionLock();
 		File file = chunkFileForXZ((int)chunk.getOrigin().x, (int)chunk.getOrigin().z);
+		if(file != null && file.exists())
+        {
+            Main.theWorld.sizeOnDisk -= file.length();
+        }
 		try {
 			File file1 = new File(saveDir, "tmp_chunk.dat");
 			FileOutputStream fileoutputstream = new FileOutputStream(file1);
@@ -84,20 +93,23 @@ public class ChunkLoader {
 			storeChunkInCompound(chunk, nbttagcompound1);
 			CompressedStreamTools.writeGzippedCompoundToOutputStream(nbttagcompound, fileoutputstream);
 			fileoutputstream.close();
-			if(file.exists()) {
-				file.delete();
+			if(file != null) { 
+				if(file.exists()) {
+					file.delete();
+				}
+				file1.renameTo(file);
+				Main.theWorld.sizeOnDisk += file.length();
 			}
-			file1.renameTo(file);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void storeChunkInCompound(MasterChunk chunk, NBTTagCompound nbttagcompound) {
-		nbttagcompound.setInteger("xPos", (int)chunk.getOrigin().x);
-		nbttagcompound.setInteger("zPos", (int)chunk.getOrigin().z);
+		nbttagcompound.setInteger("xPos", chunk.getOrigin().x);
+		nbttagcompound.setInteger("zPos", chunk.getOrigin().z);
 
-		nbttagcompound.setByteArray("Blocks", chunk.getChunk().getByteArray());
+		nbttagcompound.setByteArray("Blocks", chunk.getChunk().getBlocks());
 
 		/*
         nbttagcompound.setLong("LastUpdate", world.worldTime);
@@ -143,7 +155,7 @@ public class ChunkLoader {
 	public static MasterChunk loadChunkIntoWorldFromCompound(NBTTagCompound nbttagcompound) {
 		int x = nbttagcompound.getInteger("xPos");
 		int z = nbttagcompound.getInteger("zPos");
-		
+
 		MasterChunk chunk = new MasterChunk(ChunkCoordHelper.create(x,z), nbttagcompound.getByteArray("Blocks"));
 
 		/*chunk.data = new NibbleArray(nbttagcompound.getByteArray("Data"));

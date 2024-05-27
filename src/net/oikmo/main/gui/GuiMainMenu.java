@@ -1,21 +1,13 @@
 package net.oikmo.main.gui;
 
-import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
-
 import org.apache.commons.io.FilenameUtils;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.ImageBuffer;
 
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.entity.Camera;
@@ -29,7 +21,6 @@ import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
-import net.oikmo.toolbox.Maths;
 import net.oikmo.toolbox.properties.OptionsHandler;
 
 public class GuiMainMenu extends GuiScreen {
@@ -59,12 +50,13 @@ public class GuiMainMenu extends GuiScreen {
 		}
 		Main.thePlayer = null;
 		Main.shouldTick = false;
-		Main.theWorld = null;
+		//Main.theWorld = null;
 		String[] menuIDS = {
 				"music.moogcity",
 				"music.mutation",
 				"music.beginning",
-				"music.floatingtrees"
+				"music.floatingtrees",
+				"music.undecided",
 		};
 		this.menuIDS = menuIDS;
 		

@@ -14,17 +14,17 @@ public class NBTTagFloat extends NBTBase
 
     public NBTTagFloat(float f)
     {
-        floatValue = f;
+        value = f;
     }
 
     void writeTagContents(DataOutput dataoutput) throws IOException
     {
-        dataoutput.writeFloat(floatValue);
+        dataoutput.writeFloat(value);
     }
 
     void readTagContents(DataInput datainput) throws IOException
     {
-        floatValue = datainput.readFloat();
+        value = datainput.readFloat();
     }
 
     public byte getType()
@@ -34,8 +34,8 @@ public class NBTTagFloat extends NBTBase
 
     public String toString()
     {
-        return (new StringBuilder()).append("").append(floatValue).toString();
+        return (new StringBuilder()).append("").append(value).toString();
     }
 
-    public float floatValue;
+    public float value;
 }

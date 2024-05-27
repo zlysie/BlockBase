@@ -260,14 +260,13 @@ public class PlayerClientListener extends Listener {
 		else if(object instanceof PacketChunk) {
 			PacketChunk packet = (PacketChunk) object;
 
-			byte[][][] blocks = new byte[1][1][1];
+			byte[] blocks = new byte[1];
 			try {
-				blocks = (byte[][][])Maths.uncompressStream(packet.data);
+				blocks = (byte[])Maths.uncompressStream(packet.data);
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 			}
 			ChunkCoordinates chunkPos = ChunkCoordHelper.create(packet.x, packet.z);
-
 			
 			theWorld.addChunk(new MasterChunk(chunkPos, blocks));
 		}
@@ -275,8 +274,6 @@ public class PlayerClientListener extends Listener {
 			PacketModifyChunk packet = (PacketModifyChunk) object;
 			Vector3f blockPos = new Vector3f(packet.x,packet.y,packet.z);
 			Block block = Block.getBlockFromOrdinal(packet.block);
-			
-			
 			
 			System.out.println(blockPos + " " + block);
 			
@@ -294,7 +291,9 @@ public class PlayerClientListener extends Listener {
 				Main.thePlayer = new Player(new Vector3f(0,120,0),new Vector3f(0,0,0));
 			}
 			Main.thePlayer.setPos(packet.x,packet.y,packet.z);
-
+			
+			Main.thePlayer.getCamera().setRotation(packet.rotX, packet.rotY, packet.rotZ);
+			
 			System.out.println("Server world seed:" + packet.seed + " pos:" + packet.x + " " + packet.y + " " + packet.z);
 		} 
 		else if(object instanceof PacketTickPlayer) {
