@@ -15,7 +15,7 @@ public class MasterChunk {
 		this.chunk = new Chunk(noiseGen, origin);
 	}
 	
-	public MasterChunk(ChunkCoordinates origin, byte[][][] blocks) {
+	public MasterChunk(ChunkCoordinates origin, byte[] blocks) {
 		this.origin = origin;
 		this.chunk = new Chunk(blocks);
 	}
@@ -26,11 +26,6 @@ public class MasterChunk {
 	
 	public Chunk getChunk() {
 		return chunk;
-	}
-
-	public void replaceBlocks(byte[][][] blocks) {
-		this.chunk.blocks = blocks;
-		this.chunk.calculateHeights();
 	}
 	
 	public void setBlock(Vector3f position, byte block) {
@@ -48,8 +43,8 @@ public class MasterChunk {
 		}
 		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
-			if(chunk.blocks[localX][localY][localZ] != block) {
-				chunk.blocks[localX][localY][localZ] = block;
+			if(chunk.getBlock(localX, localY, localZ) != block) {
+				chunk.setBlock(localX, localY, localZ, block);
 			}
 		}
 	}

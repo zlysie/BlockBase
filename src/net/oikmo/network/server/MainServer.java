@@ -102,15 +102,16 @@ public class MainServer {
 	}
 
 	public void startServer() {
-		if(SaveSystem.loadWorld("server-level") == null) {
+		if(!new File(MainServer.getWorkingDirectory()+"/saves/server-level/server-level.dat").exists()) {
 			theWorld = new World();
+			theWorld.initLevelLoader();
 			theWorld.createChunkRadius(8);
 			xSpawn = 0;
 			zSpawn = 0;
 			SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
 			logPanel.append("Created world at .blockbase-server/saves/server-level.dat!\n\n");
 		} else {
-			theWorld = World.loadWorld("server-level");
+			theWorld = World.loadWorld();
 			WorldPositionData data = SaveSystem.loadWorldPosition("server-level");
 			xSpawn = data.xSpawn;
 			zSpawn = data.zSpawn;
@@ -138,7 +139,7 @@ public class MainServer {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						MainServer.theWorld.saveWorld("server-level");
+						MainServer.theWorld.saveWorld();
 						System.gc();
 					}
 				}
@@ -175,7 +176,7 @@ public class MainServer {
 								break;
 							case 2: //request forimage
 								byte imgBytes[];
-								File packpng = new File(MainServer.getDir() + "/server-icon.png");
+								File packpng = new File(MainServer.getWorkingDirectory() + "/server-icon.png");
 								if(packpng.exists()) {
 									BufferedImage bimg = ImageIO.read(packpng);
 									if(bimg.getWidth() == 128 && bimg.getWidth() == bimg.getHeight()) {
@@ -219,7 +220,7 @@ public class MainServer {
 		Logger.log(LogLevel.INFO,"Server stopped");
 		logPanel.append("Server stopped.");
 		logPanel.append("\n");
-		theWorld.saveWorld("server-level");
+		theWorld.saveWorld();
 		for (OtherPlayer p : MainServerListener.players.values()) {
 			PacketRemovePlayer packetDisconnect = new PacketRemovePlayer();
 			packetDisconnect.id = p.c.getID();
@@ -387,7 +388,7 @@ public class MainServer {
 		} else if(command.contentEquals("seed")) {
 			logPanel.append("World seed is: " + theWorld.getSeed());
 		} else if(command.contentEquals("save")) {
-			theWorld.saveWorld("server-level");
+			theWorld.saveWorld();
 			logPanel.append("Saved world!");
 		} else if(command.startsWith("kick ")) {
 			String[] split = cmd.split(" ");
@@ -472,8 +473,8 @@ public class MainServer {
 	 * Retrieves data directory of .blockbase/ using {@code Main.getAppDir(String)}
 	 * @return Directory (File)
 	 */
-	public static File getDir() {
-		return getAppDir("blockbase-server");
+	public static File getWorkingDirectory() {
+		return getWorkingDirectory("blockbase-server");
 	}
 
 	/**
@@ -483,7 +484,7 @@ public class MainServer {
 	 * @param name (String)
 	 * @return Directory (File)
 	 */
-	public static File getAppDir(String name) {
+	public static File getWorkingDirectory(String name) {
 		String userDir = System.getProperty("user.home", ".");
 		File folder;
 		switch(EnumOSMappingHelper.os[EnumOS.getOS().ordinal()]) {

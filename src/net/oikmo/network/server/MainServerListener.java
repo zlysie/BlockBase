@@ -9,6 +9,7 @@ import org.lwjgl.util.vector.Vector3f;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import net.oikmo.engine.save.PlayerPositionData;
 import net.oikmo.engine.save.PlayersPositionData;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.world.chunk.MasterChunk;
@@ -77,37 +78,11 @@ public class MainServerListener extends Listener {
 		
 		MainServer.server.sendToAllUDP(removePacket);
 		if(username != null && !username.isEmpty()) {
-			MainServer.logPanel.append(username + " (ID="+connection.getID()+") left the server\n");
+			MainServer.logPanel.append(username + " left the server\n");
 		}
-		
 	}
 	
-	private long lastSentTime = System.currentTimeMillis();
-	
-	private Map<Long, PacketModifyChunk> toBeProcessed = new HashMap<>();
-	
-	public void received(Connection connection, Object object) {
-		if(object.getClass().getName().contains("PacketModifyChunk")) {
-			
-			if(System.currentTimeMillis() - lastSentTime > 250) {
-				System.out.println((System.currentTimeMillis() - lastSentTime) +" " + object);
-				lastSentTime = System.currentTimeMillis();
-				for(Long time : toBeProcessed.keySet()) {
-					if(System.currentTimeMillis() - time > 250) {
-						PacketModifyChunk packet = toBeProcessed.get(time);
-						MainServer.theWorld.setBlock(new Vector3f(packet.x,packet.y,packet.z), packet.block);
-						System.out.println(new Vector3f(packet.x,packet.y,packet.z) + " " + packet.block + " processed");
-						MainServer.server.sendToAllUDP(packet);
-						toBeProcessed.remove(time);
-					}
-				}
-			} else {
-				toBeProcessed.put(lastSentTime, (PacketModifyChunk)object);
-			}
-			
-		}
-		
-		
+	public void received(Connection connection, Object object) {		
 		if(object instanceof LoginRequest) {
 			LoginRequest request = (LoginRequest) object;
 			LoginResponse response = new LoginResponse();
@@ -145,14 +120,13 @@ public class MainServerListener extends Listener {
 				MainServer.refreshList();
 				
 				if(request.getUserName() != null && !request.getUserName().isEmpty()) {
-					MainServer.logPanel.append(request.getUserName() + " (ID="+connection.getID()+") joined the server\n");
+					MainServer.logPanel.append(request.getUserName() + " joined the server\n");
 				}
-				
 				
 				PacketWorldJoin packetWorld = new PacketWorldJoin();
 				packetWorld.seed = MainServer.theWorld.getSeed();
 				
-				String ip = connection.getRemoteAddressTCP().getHostString();
+				String ip = request.getUserName();
 				PlayersPositionData data = SaveSystem.loadPlayerPositions();
 				System.out.println(data + " data");
 				
@@ -163,11 +137,12 @@ public class MainServerListener extends Listener {
 				}
 				
 				if(data != null) {
-					Vector3f playerPos = data.positions.get(ip);
-					if(playerPos != null) {
-						packetWorld.x = playerPos.x;
-						packetWorld.y = playerPos.y;
-						packetWorld.z = playerPos.z;
+					PlayerPositionData playerData = data.positions.get(ip);
+					
+					if(playerData != null) {
+						packetWorld.x = playerData.x;
+						packetWorld.y = playerData.y;
+						packetWorld.z = playerData.z;
 						System.out.println(data.positions.get(ip) + " putting data");
 					} else {
 						packetWorld.x = MainServer.xSpawn;
@@ -206,7 +181,7 @@ public class MainServerListener extends Listener {
 				response.PROTOCOL = -1;
 				response.setResponseText("not ok!");
 				connection.sendTCP(response);
-				MainServer.logPanel.append("Player \" "+ request.getUserName() + " \" (ID=" + connection.getID() + ") could not join\nas they had a protocol version of " + request.PROTOCOL +" whilst server is " + MainServer.NETWORK_PROTOCOL + "\n");
+				MainServer.logPanel.append("Player \" "+ request.getUserName() + " \"  could not join\nas they had a protocol version of " + request.PROTOCOL +" whilst server is " + MainServer.NETWORK_PROTOCOL + "\n");
 			}
 			
 		}
@@ -288,7 +263,7 @@ public class MainServerListener extends Listener {
 			packetChunk.z = master.getOrigin().z;
 			
 			try {
-				packetChunk.data = Maths.compressObject(master.getChunk().blocks);
+				packetChunk.data = Maths.compressObject(master.getChunk().getBlocks());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -316,13 +291,19 @@ public class MainServerListener extends Listener {
 			if(data == null) {
 				data = new PlayersPositionData();
 				
-				data.positions.put(username, new Vector3f(packet.x,packet.y,packet.z));
+				PlayerPositionData playerData = new PlayerPositionData(packet.x, packet.y, packet.z, 0, 0, 0);
+				
+				data.positions.put(username, playerData);
 				SaveSystem.savePlayerPositions(data);
 			} else {
+				
+				PlayerPositionData playerData = new PlayerPositionData(packet.x, packet.y, packet.z, 0, 0, 0);
+				
+				
 				if(data.positions.get(username) == null) {
-					data.positions.put(username, new Vector3f(packet.x,packet.y,packet.z));
+					data.positions.put(username, playerData);
 				} else {
-					data.positions.replace(username, new Vector3f(packet.x,packet.y,packet.z));
+					data.positions.replace(username, playerData);
 					SaveSystem.savePlayerPositions(data);
 				}
 			}	

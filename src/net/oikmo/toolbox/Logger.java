@@ -53,7 +53,7 @@ public class Logger {
 	
 	public static void saveLog() {
 		if(completeLog.isEmpty()) { return; }
-		File saveDirectory =  new File(MainServer.getDir() + "/logs/");
+		File saveDirectory =  new File(MainServer.getWorkingDirectory() + "/logs/");
 		if (!saveDirectory.exists()) {
 	        try {
 	        	saveDirectory.mkdir();

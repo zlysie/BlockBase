@@ -1,20 +1,24 @@
 package net.oikmo.engine.world;
 
-import java.util.ArrayList;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import net.oikmo.engine.save.ChunkSaveData;
-import net.oikmo.engine.save.SaveData;
-import net.oikmo.engine.save.SaveSystem;
+import net.oikmo.engine.nbt.NBTTagCompound;
+import net.oikmo.engine.world.chunk.ChunkLoader;
 import net.oikmo.engine.world.chunk.MasterChunk;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.network.server.MainServer;
+import net.oikmo.toolbox.CompressedStreamTools;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
@@ -33,6 +37,11 @@ public class World {
 	
 	private Thread chunkCreator;
 	
+	private File worldDir;
+	private ChunkLoader provider;
+	
+	private long lockTimestamp;
+	
 	public World(String seed) {
 		init(Maths.getSeedFromName(seed));
 	}
@@ -46,6 +55,93 @@ public class World {
 	private void init(long seed) {
 		this.seed = seed;
 		this.noise = new OpenSimplexNoise(this.seed);
+	}
+	
+	public void initLevelLoader() {
+		String world = "server-level";
+		lockTimestamp = System.currentTimeMillis();
+		worldDir = new File(MainServer.getWorkingDirectory()+"/saves/"+world+"/");
+		System.out.println(worldDir);
+		worldDir.mkdirs();
+		try {
+			File file1 = new File(worldDir, "session.lock");
+			DataOutputStream dataoutputstream = new DataOutputStream(new FileOutputStream(file1));
+			try {
+				dataoutputstream.writeLong(lockTimestamp);
+			} finally {
+				dataoutputstream.close();
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Failed to check session lock, aborting");
+		}
+		File file2 = new File(worldDir, "level.dat");
+		boolean isNewWorld = !file2.exists();
+		System.out.println(isNewWorld);
+		if(file2.exists()) {
+			try {
+				NBTTagCompound baseTag = CompressedStreamTools.readCompressed(new FileInputStream(file2));
+				NBTTagCompound nbttagcompound1 = baseTag.getCompoundTag("Data");
+				this.seed = nbttagcompound1.getLong("Seed");
+				this.noise = new OpenSimplexNoise(this.seed);
+				
+				//worldTime = nbttagcompound1.getLong("Time");
+			} catch(Exception exception1) {
+				exception1.printStackTrace();
+			}
+		}
+		provider = new ChunkLoader(worldDir, !isNewWorld);
+	}
+	
+	private void saveLevel() {
+		checkSessionLock();
+		NBTTagCompound nbttagcompound = new NBTTagCompound();
+		nbttagcompound.setLong("Seed", seed);
+		
+		//nbttagcompound.setLong("Time", worldTime);*/
+		nbttagcompound.setLong("LastPlayed", System.currentTimeMillis());
+		/*EntityPlayer entityplayer = null;
+		if(playerEntities.size() > 0)
+		{
+			entityplayer = (EntityPlayer)playerEntities.get(0);
+		}*/
+		NBTTagCompound dataTag = new NBTTagCompound();
+		dataTag.setTag("Data", nbttagcompound);
+		try {
+			File newLevel = new File(worldDir, "level.dat_new");
+			File oldLevel = new File(worldDir, "level.dat_old");
+			File currentLevel = new File(worldDir, "level.dat");
+			CompressedStreamTools.writeGzippedCompoundToOutputStream(dataTag, new FileOutputStream(newLevel));
+			if(oldLevel.exists()) {
+				oldLevel.delete();
+			}
+			currentLevel.renameTo(oldLevel);
+			if(currentLevel.exists()) {
+				currentLevel.delete();
+			}
+			newLevel.renameTo(currentLevel);
+			if(newLevel.exists()) {
+				newLevel.delete();
+			}
+		} catch(Exception exception) {
+			exception.printStackTrace();
+		}
+	}
+	
+	public void checkSessionLock() {
+		try {
+			File file = new File(worldDir, "session.lock");
+			DataInputStream datainputstream = new DataInputStream(new FileInputStream(file));
+			try {
+				if(datainputstream.readLong() != lockTimestamp) {
+					System.err.print("The save is being accessed from another location, aborting");
+				}
+			} finally {
+				datainputstream.close();
+			}
+		} catch(IOException ioexception) {
+			System.err.print("Failed to check session lock, aborting");
+		}
 	}
 	
 	public void addChunk(ChunkCoordinates position) {
@@ -91,45 +187,36 @@ public class World {
 		return chunkMap.get(position);
 	}
 	
-	public void saveWorld(String world) {
-		List<ChunkSaveData> chunks = new ArrayList<>();
-		
-		for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
-			MasterChunk master = entry.getValue();
-			
-			chunks.add(new ChunkSaveData(master.getOrigin(), master.getChunk().blocks));
-		}
+	public void saveWorld() {
+		try {
+			for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
+				MasterChunk master = entry.getValue();
 
-		SaveSystem.saveWorld(world, new SaveData(seed, chunks));
-		chunks.clear();
-	}
-	@SuppressWarnings("deprecation")
-	public void saveWorldAndQuit(String world) {
-		saveWorld(world);
+				provider.saveChunk(master);
+			}
+		} catch(Exception e) {}
 		
+		saveLevel();
+	}
+	
+	public void saveWorldAndQuit() {
+		saveWorld();
+		quitWorld();
+	}
+	
+	public void quitWorld() {
 		this.chunkCreator.interrupt();
-		this.chunkCreator.stop();
 		MainServer.logPanel.append("Saving world!\n");
 		System.exit(0);
 	}
-	public static World loadWorld(String world) {
-		SaveData data = SaveSystem.loadWorld(world);
-		if(data != null) {
-			Logger.log(LogLevel.WARN, "Loading world!");
-			
-			World w = new World(data.seed);
-			
-			for(ChunkSaveData s : data.chunks) {
-				w.addChunk(new MasterChunk(ChunkCoordHelper.create(s.x,s.z), s.blocks));
-			}
-			
-			return w;
-		} else {
-			Logger.log(LogLevel.WARN, "World couldn't be loaded!");
-			World w = new World();
-			w.createChunkRadius(8);
-			return w;
-		}
+	public static World loadWorld() {
+		Logger.log(LogLevel.WARN, "Loading world!");
+
+		World w = null;
+		w = new World();
+		w.initLevelLoader();
+		
+		return w;
 	}
 	
 	public void createChunkRadius(int radius) {
@@ -146,7 +233,7 @@ public class World {
 				}
 			}
 		}
-		saveWorld("server-level");
+		saveWorld();
 	}
 	
 	public long getSeed() {

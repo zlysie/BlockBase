@@ -17,16 +17,16 @@ import net.oikmo.toolbox.noise.OpenSimplexNoise;
  */
 public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
-	public byte[][][] blocks;
+	private byte[] blocks;
 	public int[][] heights;
 	
 	public Chunk(OpenSimplexNoise noiseGen, ChunkCoordinates origin) {
-		blocks = new byte[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
+		blocks = new byte[32768];
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		generateChunk(origin, noiseGen);
 	}
 
-	public Chunk(byte[][][] blocks) {
+	public Chunk(byte[] blocks) {
 		this.blocks = blocks;
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		calculateHeights();
@@ -45,20 +45,20 @@ public class Chunk {
 				int actualZ = (int) (origin.z + z);
 
 				int height = (int) ((noiseGen.noise(actualX/14f, actualZ/14f)*7f) + (noiseGen.noise((-actualZ)/16f,(-actualX)/16f)*12f) + (noiseGen.noise((actualZ)/6f,(actualX)/6f)*4f))+60;
-				blocks[x][height][z] = Block.grass.getByteType();
+				setBlock(x, height, z, Block.grass.getByteType());
 				heights[x][z] = height+1;
 				for (int y = 0; y < World.WORLD_HEIGHT; y++) {
 					if(y < height) {
 						if(y > height - 4) {
-							blocks[x][y][z] = Block.dirt.getByteType();
+							setBlock(x, y, z, Block.dirt.getByteType());
 						}  else if(y == 0) {
-							blocks[x][y][z] = Block.bedrock.getByteType();
+							setBlock(x, y, z, Block.bedrock.getByteType());
 						} else {
-							blocks[x][y][z] = Block.stone.getByteType();
+							setBlock(x, y, z, Block.stone.getByteType());
 						}
 					} else {
 						if(y != height) {
-							blocks[x][y][z] = -1;
+							setBlock(x, y, z, -1);
 						}
 					}
 				}
@@ -84,12 +84,12 @@ public class Chunk {
 		if(x > 2 && x < CHUNK_SIZE-2 && z > 2 && z < CHUNK_SIZE-2) {
 			int height = heights[x][z];
 			if(!blockHasSpecificNeighbours(Block.oaklog, x,height,z)) {
-				blocks[x][height++][z] = Block.oaklog.getByteType();
-				blocks[x][height++][z] = Block.oaklog.getByteType();
-				blocks[x][height++][z] = Block.oaklog.getByteType();
-				blocks[x][height++][z] = Block.oaklog.getByteType();
+				setBlock(x, height++, z, Block.oaklog.getByteType());
+				setBlock(x, height++, z, Block.oaklog.getByteType());
+				setBlock(x, height++, z, Block.oaklog.getByteType());
+				setBlock(x, height++, z, Block.oaklog.getByteType());
 				for(int j = 0; j < new Random().nextInt(2);j++) {
-					blocks[x][height++][z] = Block.oaklog.getByteType();
+					setBlock(x, height++, z, Block.oaklog.getByteType());
 				}
 				int index = height;
 				setBlock(Block.oakleaf, x, index, z);
@@ -182,8 +182,8 @@ public class Chunk {
 	}
 	
 	private void setBlock(Block block, int x, int y, int z) {
-		if(blocks[x][y][z] == -1) {
-			blocks[x][y][z] = block.getByteType();
+		if(getBlock(x,y,z) == -1) {
+			setBlock(x,y,z, block.getByteType());
 		}
 	}
 
@@ -196,7 +196,7 @@ public class Chunk {
 					int checkerY = y + dy;
 					int checkerZ = z + dz;
 					
-					if(blocks[checkerX][checkerY][checkerZ] == block.getByteType()) {
+					if(getBlock(checkerX,checkerY,checkerZ) == block.getByteType()) {
 						return true;
 					}
 				}
@@ -205,11 +205,11 @@ public class Chunk {
 		return false;
 	}
 	
-	public void calculateHeights() {
+	private void calculateHeights() {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
 				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-					if (blocks[x][y][z] != -1) {
+					if (getBlock(x,y,z) != -1) {
 						heights[x][z] = y;
 						break;
 					}
@@ -220,7 +220,7 @@ public class Chunk {
 	
 	public void recalculateHeight(int x, int z) {
 		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-			if (blocks[x][y][z] != -1) {
+			if (getBlock(x,y,z) != -1) {
 				heights[x][z] = y;
 				break;
 			}
@@ -240,5 +240,17 @@ public class Chunk {
 	
 	public int getHeightFromPosition(int x, int z) {
 		return heights[x][z];
+	}
+	
+	public void setBlock(int x, int y, int z, int block) {
+		blocks[x << 11 | z << 7 | y] = (byte)block;
+	}
+	
+	public byte getBlock(int x, int y, int z) {
+        return blocks[x << 11 | z << 7 | y];
+    }
+
+	public byte[] getBlocks() {
+		return blocks;
 	}
 }

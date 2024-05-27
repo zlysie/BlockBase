@@ -6,5 +6,5 @@ public class PacketWorldJoin {
 	public long seed;
 	
 	public float x, y, z;
-	
+	public float rotX, rotY, rotZ;
 }

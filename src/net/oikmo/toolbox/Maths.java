@@ -4,14 +4,10 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.FloatBuffer;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -19,40 +15,14 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 
-import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.chunk.Chunk;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
-import net.oikmo.network.server.MainServer;
 
 public class Maths {	
-	public static void matrixToBuffer(Matrix4f m, FloatBuffer dest)
-    {
-        matrixToBuffer(m, 0, dest);
-    }
-    public static void matrixToBuffer(Matrix4f m, int offset, FloatBuffer dest)
-    {
-        dest.put(offset, m.m00);
-        dest.put(offset + 1, m.m01);
-        dest.put(offset + 2, m.m02);
-        dest.put(offset + 3, m.m03);
-        dest.put(offset + 4, m.m10);
-        dest.put(offset + 5, m.m11);
-        dest.put(offset + 6, m.m12);
-        dest.put(offset + 7, m.m13);
-        dest.put(offset + 8, m.m20);
-        dest.put(offset + 9, m.m21);
-        dest.put(offset + 10, m.m22);
-        dest.put(offset + 11, m.m23);
-        dest.put(offset + 12, m.m30);
-        dest.put(offset + 13, m.m31);
-        dest.put(offset + 14, m.m32);
-        dest.put(offset + 15, m.m33);
-    }
-
 	public static int roundFloat(float number) {
 		int rounded;
 		if (number - (int) number >= 0.0 && number - (int) number < 1.0) {
@@ -138,10 +108,6 @@ public class Maths {
 		return ChunkCoordHelper.create(outx, outz);
 	}
 
-	public static boolean isVectorEqualTo(Vector3f one, Vector3f two) {
-		return one.x == two.x && one.y == two.y && one.z == two.z;
-	}
-
 	public static String[] fileToArray(String fileLoc) {
 		try {
 			List<String> listOfStrings = new ArrayList<String>();
@@ -160,25 +126,6 @@ public class Maths {
 		}
 		
 		return null;
-	}
-	
-	public static float getWorldSize(String fileDir) {
-		return new File(MainServer.getDir()+"/saves/"+fileDir+".dat").length();
-	}
-	
-	public static String humanReadableByteCountBin(long bytes) {
-	    long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
-	    if (absB < 1024) {
-	        return bytes + " B";
-	    }
-	    long value = absB;
-	    CharacterIterator ci = new StringCharacterIterator("KMGTPE");
-	    for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
-	        value >>= 10;
-	        ci.next();
-	    }
-	    value *= Long.signum(bytes);
-	    return String.format("%.1f %ciB", value / 1024.0, ci.current());
 	}
 	
 	public static byte[] compressObject(Object object) throws IOException {
