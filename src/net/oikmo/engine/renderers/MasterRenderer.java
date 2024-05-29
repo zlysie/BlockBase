@@ -68,7 +68,6 @@ public class MasterRenderer {
 		
 		float offset = 0.2f;
 		
-		skyboxRenderer = new SkyBoxRenderer((Main.jmode ? "jerma" : "panorama"), projectionMatrix);
 		entityRenderer = new EntityRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		chunkRenderer = new ChunkRenderer(projectionMatrix, 0.4f+offset, 0.7f+offset, 1.0f+offset);
 		defaultTexturePack = ResourceLoader.loadTexture("textures/terrain");
@@ -119,6 +118,10 @@ public class MasterRenderer {
 		particleTexture = ResourceLoader.loadTexture("textures/particles/blocks");
 		currentTexturePack = new ModelTexture(defaultTexturePack);
 		Gui.initFont();
+	}
+	
+	public void setupSkybox() {
+		skyboxRenderer = new SkyBoxRenderer((Main.jmode ? "jerma" : "panorama"), projectionMatrix);
 	}
 	
 	public void setTexturePack(int texture) {

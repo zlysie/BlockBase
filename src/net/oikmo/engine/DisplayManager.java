@@ -137,9 +137,7 @@ public class DisplayManager {
 	 * @see getImage()
 	 */
 	public static void saveScreenshot() {
-
 		File saveDirectory =  new File(Main.getWorkingDirectory().getPath()+"/screenshots/");
-
 		if (!saveDirectory.exists()) {
 			try {
 				saveDirectory.mkdir();

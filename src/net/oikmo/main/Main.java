@@ -1,23 +1,13 @@
 package net.oikmo.main;
 
-import java.awt.AWTEvent;
-import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,17 +15,9 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.Display;
@@ -59,6 +41,7 @@ import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.engine.world.World;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
+import net.oikmo.main.gui.GuiComponentLoader;
 import net.oikmo.main.gui.GuiConnecting;
 import net.oikmo.main.gui.GuiDisconnected;
 import net.oikmo.main.gui.GuiInGame;
@@ -67,9 +50,6 @@ import net.oikmo.network.client.NetworkHandler;
 import net.oikmo.network.client.OtherPlayer;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
-import net.oikmo.toolbox.Maths;
-import net.oikmo.toolbox.UnzipUtility;
-import net.oikmo.toolbox.error.CanvasLogo;
 import net.oikmo.toolbox.error.PanelCrashReport;
 import net.oikmo.toolbox.error.UnexpectedThrowable;
 import net.oikmo.toolbox.os.EnumOS;
@@ -83,7 +63,7 @@ import net.oikmo.toolbox.properties.OptionsHandler;
  */
 public class Main {
 
-	private static final int resourceVersion = 5;
+	public static final int resourceVersion = 5;
 	public static final String gameName = "BlockBase";
 	public static final String version = "a0.2.0 [2] [DEV]";
 	public static final String gameVersion = gameName + " " + version;
@@ -94,6 +74,7 @@ public class Main {
 
 	public static Frame frame;
 	public static Canvas gameCanvas;
+	private static boolean realClose = false;
 
 	private static PanelCrashReport report;
 	private static boolean hasErrored = false;
@@ -111,25 +92,21 @@ public class Main {
 	public static Vector3f camPos = new Vector3f(0,0,0);
 
 	public static boolean shouldTick = true;
+	public static boolean runTick = false;
 
-	private static String[] splashes;
+	public static String[] splashes;
 	public static String splashText;
 
 	public static NetworkHandler theNetwork;
 	public static String playerName = null;
+	public static ImageBuffer playerSkinBuffer;
+	public static int playerSkin;
+	public static boolean disableNetworking = false;
 
-	private static boolean realClose = false;
-	private static List<Character> lastChars = new ArrayList<>();
-	private static String jcode = "";
-
-	public static LanguageHandler lang = LanguageHandler.getInstance();
-	
 	public static boolean jmode = false;
 	
-	public static boolean disableNetworking = false;
-	
-	public static int playerSkin;
-	
+	public static LanguageHandler lang = LanguageHandler.getInstance();
+	public static InputManager im;
 	
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
@@ -191,12 +168,6 @@ public class Main {
 			if(!new File(getWorkingDirectory()+"/resources/custom").exists()) {
 				new File(getWorkingDirectory()+"/resources/custom").mkdirs();
 			}
-			if(!new File(getResources() + "/music").exists()) {
-				new File(getResources() + "/music").mkdirs();
-			}
-			if(!new File(getResources() + "/sfx").exists()) {
-				new File(getResources() + "/sfx").mkdirs();
-			}
 
 			if(!new File(getWorkingDirectory()+"/options.txt").exists()) {
 				new File(getWorkingDirectory()+"/options.txt").createNewFile();
@@ -209,21 +180,6 @@ public class Main {
 
 			frame = new Frame(Main.gameName);
 			frame.setFocusable(true);
-			frame.setFocusTraversalKeysEnabled(false);
-			Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-				@Override
-				public void eventDispatched(AWTEvent event) {
-					if (event instanceof KeyEvent) {
-						KeyEvent ke = (KeyEvent) event;
-						if(!lastChars.contains(ke.getKeyChar())) {
-							lastChars.add(ke.getKeyChar());
-							jcode += ke.getKeyChar();
-						}
-
-
-					}
-				}
-			}, AWTEvent.KEY_EVENT_MASK);
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
 					realClose = true;
@@ -238,107 +194,26 @@ public class Main {
 			URL iconURL = Main.class.getResource("/assets/iconx32.png");
 			ImageIcon icon = new ImageIcon(iconURL);
 			frame.setIconImage(icon.getImage());
-			frame.setLayout(new BorderLayout());
 			frame.add(gameCanvas, "Center");
 			gameCanvas.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 			frame.pack();
 			frame.setLocationRelativeTo((Component)null);
-			frame.removeAll();
-
-			if(Calendar.getInstance().get(Calendar.MONTH) == 3 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
-				frame.setBackground(new Color(0f, 0.6f, 0.8274509803921568f, 1f));
-				frame.add(new CanvasLogo("icon_aprilFools"), "Center");
-			} else {
-				frame.setBackground(new Color(55f/256f, 51f/256f, 99f/256f, 256f/256f));
-				frame.add(new CanvasLogo("iconx128"), "Center");
-			}
-
 			frame.setVisible(true);
-			downloadResources();
-
-			long lastTime = System.currentTimeMillis();
-			long sum =  System.currentTimeMillis() - lastTime;
-			while(sum < 1500) {
-				sum = System.currentTimeMillis() - lastTime;
-			}
-
-			jmode = jcode.contains("jerma");
-			System.out.println("jmode: " + jmode);
+			
 			Logger.log(LogLevel.INFO, "Psst! I see you in the console! You can add your own custom resources to the game via the .blockbase/resources/custom folder!");
 			DisplayManager.createDisplay(frame, gameCanvas);
-			CubeModel.setup();
-			PlayerModel.setup();
+			Display.setVSyncEnabled(true);
+			Main.shouldTick = false; 
 			SoundMaster.init();
 			
-			InputManager im = new InputManager();
-			
-			BufferedImage image = null;
-			try {
-				URL url = new URL("http://afs.gurdit.com/users/"+playerName+"/skin_"+ playerName + ".png");
-				URLConnection conn = url.openConnection();
-				InputStream in = conn.getInputStream();
-				image = ImageIO.read(in);
-			} catch(Exception e) {}
-			
-			ImageBuffer buf = new ImageBuffer(64,64);
-			
-			if(image != null) {
-				try {
-					for(int x = 0; x < 64; x++) {
-						for(int y = 0; y < 64; y++) {
-							java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
-							buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
-						}
-					}
-					
-					Image skin = new Image(buf);
-					skin.setFilter(Image.FILTER_NEAREST);
-					playerSkin = skin.getTexture().getTextureID();
-				} catch(ArrayIndexOutOfBoundsException e) {
-					playerSkin = ResourceLoader.loadTexture("textures/default_skin");
-				}
-				
-				} else {
-				playerSkin = ResourceLoader.loadTexture("textures/default_skin");
-			}
-			
-			shouldTick = false; 
-
-			if(!jmode) {
-				splashes = Maths.fileToArray("splashes.txt");
-			} else {
-				splashes = Maths.fileToArray("jermasplashes.txt");
-			}
-			splashText = splashes[new Random().nextInt(splashes.length)];
-
-			currentScreen = new GuiMainMenu(splashText);
-			
-			try {
-				GameSettings.globalVolume = Float.parseFloat(OptionsHandler.getInstance().translateKey("audio.volume"));
-			} catch(NumberFormatException e) {
-				OptionsHandler.getInstance().insertKey("audio.volume", GameSettings.globalVolume+"");
-			}
-
-			try {
-				GameSettings.sensitivity = Float.parseFloat(OptionsHandler.getInstance().translateKey("input.sensitivity"));
-			} catch(NumberFormatException e) {
-				OptionsHandler.getInstance().insertKey("input.sensitivity", GameSettings.sensitivity+"");
-			}
-			
-			try {
-				World.updateRenderSize(Integer.parseInt(OptionsHandler.getInstance().translateKey("graphics.distance"))*2);
-			} catch(NumberFormatException e) {
-				OptionsHandler.getInstance().insertKey("graphics.distance", 2+"");
-			}
-			
-			Display.setVSyncEnabled(Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync")));
+			currentScreen = new GuiComponentLoader();
 			
 			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
-			
+
 			/*Main.shouldTick = true;
 			Main.loadWorld("world1");*/
-
-			SoundMaster.setVolume();
+			
+			Display.setVSyncEnabled(Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync")));
 
 			while(!Display.isCloseRequested() && !realClose) {
 				timer.updateTimer();				
@@ -353,7 +228,20 @@ public class Main {
 				} else {
 					//MasterRenderer.getInstance().addEntity(test);
 				}
-
+				
+				if(Main.currentScreen instanceof GuiComponentLoader) {
+					if(((GuiComponentLoader)Main.currentScreen).isDone) {
+						if(playerSkinBuffer != null) {
+							Image skin = new Image(playerSkinBuffer);
+							skin.setFilter(Image.FILTER_NEAREST);
+							Main.playerSkin = skin.getTexture().getTextureID();
+						
+						} else {
+							Main.playerSkin = ResourceLoader.loadTexture("textures/default_skin");
+						}
+					}
+				}
+				
 				runTick = false;
 				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
@@ -423,7 +311,7 @@ public class Main {
 					}
 					theWorld.update(thePlayer.getCamera());
 				}
-
+				
 				if(inGameGUI != null) {				
 					inGameGUI.update();
 				}
@@ -432,8 +320,10 @@ public class Main {
 					Main.currentScreen.update();
 				}
 
-				im.handleInput();
-
+				if(im != null) {
+					im.handleInput();
+				}
+				
 				DisplayManager.updateDisplay(gameCanvas);				
 			}
 		} catch(Exception e) {
@@ -528,7 +418,7 @@ public class Main {
 		return shouldTick == false;
 	}
 
-	public static boolean runTick = false;
+	
 
 	/**
 	 * Every 1/60th this method is ran. This handles movement.
@@ -594,7 +484,7 @@ public class Main {
 			if(theNetwork != null) {
 				theNetwork.disconnect();
 			}
-
+			
 			displayRequest = true;
 			Logger.saveLog();
 			DisplayManager.closeDisplay();
@@ -631,115 +521,7 @@ public class Main {
 			}
 		}
 	}
-
-	private static void downloadResources() throws IOException {
-		File dir = getResources();
-		File tmp = new File(getWorkingDirectory() + "/tmp");
-		File txt = new File(getResources() + "/resourcesVersion.txt");
-		
-		tmp.mkdir();
-		if(!txt.exists()) {
-
-			FileWriter resourceTxtWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
-
-			resourceTxtWriter.write(Integer.toString(resourceVersion));
-			resourceTxtWriter.close();
-
-			int options = JOptionPane.showConfirmDialog(frame, "Going to download resources based on resourceVersion: " + resourceVersion +  ".\nJust saying this will take a while depending on your connection or disk speeds.", "Resource Downloader Reminder", JOptionPane.PLAIN_MESSAGE);
-
-			if(options == -1) {
-				System.exit(0);
-			}
-			download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
-			UnzipUtility unzipper = new UnzipUtility();
-
-			unzipper.unzip(tmp + "/resources.zip", getResources()+"");
-		}
-
-		try {
-			File versionTXT = new File(getResources() + "/resourcesVersion.txt");
-			if (versionTXT.createNewFile()) {
-				System.out.println("resourcesVersion.txt is created");
-				FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
-
-				myWriter.write(Integer.toString(resourceVersion));
-				myWriter.close();
-
-			} else {
-				System.out.println("resourcesVersion.txt already exists.");
-
-				BufferedReader brr = new BufferedReader(new FileReader(getResources() + "/resourcesVersion.txt"));     
-				String temp = brr.readLine();
-				if (temp == null) {
-					FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
-					myWriter.write(Integer.toString(resourceVersion));
-					myWriter.close();
-				} else {
-					if(!temp.contentEquals(Integer.toString(resourceVersion))) {
-						int tempInt = Integer.parseInt(temp.trim());
-						if(tempInt < resourceVersion || tempInt > resourceVersion) {
-							if(dir.exists()) {
-								Files.walk(Paths.get(new File(getResources()+"/").getPath())).sorted(Comparator.reverseOrder()) .forEach(path -> {
-									try {
-										if(!path.toString().contains("custom")) {
-											Files.delete(path);  //delete each file or directory
-										}
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-								});
-							}
-
-							int options = JOptionPane.showConfirmDialog(frame, "Going to download resources based on resourceVersion: " + resourceVersion +  ".\nJust saying this will take a while depending on your connection or disk speeds.", "Resource Downloader Reminder", JOptionPane.PLAIN_MESSAGE);
-
-							if(options == -1) {
-								System.exit(0);
-							}
-							
-							if(!new File(getResources() + "/music").exists()) {
-								new File(getResources() + "/music").mkdirs();
-							}
-							if(!new File(getResources() + "/sfx").exists()) {
-								new File(getResources() + "/sfx").mkdirs();
-							}
-							if(new File(getResources()+"/music").list().length == 0) {
-								download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
-								UnzipUtility unzipper = new UnzipUtility();
-								unzipper.unzip(tmp+"/resources.zip", getResources()+"/");
-							}
-
-							download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
-							UnzipUtility unzipper = new UnzipUtility();
-							unzipper.unzip(tmp+"/resources.zip", getResources()+"/");
-
-							FileWriter myWriter = new FileWriter(getResources() + "/resourcesVersion.txt");
-							myWriter.write(Integer.toString(resourceVersion));
-							myWriter.close();
-						}
-					}
-				}
-
-				if(new File(getResources()+"/music/").list().length == 0) {
-					download("https://oikmo.github.io/resources/blockbase/resources"+resourceVersion+".zip", tmp + "/resources.zip");
-					UnzipUtility unzipper = new UnzipUtility();
-					unzipper.unzip(tmp+"/resources.zip", getResources()+"/");
-				}
-
-				brr.close();
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("[ERROR] Version could NOT be verified!");
-		}
-
-		File zipFile = tmp;
-		if(zipFile.exists()) {
-			new File(zipFile + "/resources.zip").delete();
-			zipFile.delete();
-		}
-	}
-
+	
 	/**
 	 * Returns the resources directory
 	 * 
@@ -794,21 +576,4 @@ public class Main {
 			return folder;
 		}
 	}
-
-	/**
-	 * Downloads zip from URL
-	 * @param urlStr
-	 * @param file
-	 * @throws IOException
-	 */
-	private static void download(String urlStr, String file) throws IOException {
-		URL url = new URL(urlStr);
-		ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-		FileOutputStream fos = new FileOutputStream(file);
-		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-		fos.close();
-		rbc.close();
-	}
-
-	
 }

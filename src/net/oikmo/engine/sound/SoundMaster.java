@@ -31,7 +31,7 @@ public class SoundMaster {
 	private static Map<String, SoundByte> music = new HashMap<>();
 	private static Map<String, SoundByte> sfx = new HashMap<>();
 	private static Map<String, SoundEffect> sfxCollection = new HashMap<>();
-	private static SoundSystem soundSystem = null;
+	public static SoundSystem soundSystem = null;
 
 	private static File customMusic = new File(Main.getResources()+"/custom/music");
 

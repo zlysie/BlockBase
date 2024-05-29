@@ -136,10 +136,13 @@ public class PlayerModel {
 		
 		createVertices();
 		
-		model = Loader.loadToVAO(vertices, getUVs(), normals);
+		//
 	}
 	
 	public static RawModel getRawModel() {
+		if(model == null) {
+			model = Loader.loadToVAO(vertices, getUVs(), normals);
+		}
 		return model;
 	}
 
