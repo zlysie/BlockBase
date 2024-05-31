@@ -35,7 +35,7 @@ public class Gui {
 	protected static UnicodeFont font;
 
 	private static Font awtFont = null;
-	protected static int fontSize = 18;
+	protected static int fontSize = 16;
 
 	protected static Cursor cursor;
 
