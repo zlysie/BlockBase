@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
@@ -89,14 +90,18 @@ public class MainServer {
 
 	private static String version = "S0.1.0";
 	public static final int NETWORK_PROTOCOL = 6;
+	
+	private static boolean nogui = false;
 
 	private static Thread saveThread;
 
-	public MainServer(int tcpPort, int udpPort) {
+	public MainServer(boolean nogui, int tcpPort, int udpPort) {
+		this.nogui = nogui;
 		this.tcpPort = tcpPort;
 		this.udpPort = udpPort;
 		server = new Server();
-
+		splashes = Maths.fileToArray("splashes.txt");
+		append(splashes[new Random().nextInt(splashes.length)]);
 		kryo = server.getKryo();
 		registerKryoClasses();
 	}
@@ -109,26 +114,26 @@ public class MainServer {
 			xSpawn = 0;
 			zSpawn = 0;
 			SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
-			logPanel.append("Created world at .blockbase-server/saves/server-level.dat!\n\n");
+			append("Created world at .blockbase-server/saves/server-level.dat!\n\n");
 		} else {
 			theWorld = World.loadWorld();
 			WorldPositionData data = SaveSystem.loadWorldPosition("server-level");
 			xSpawn = data.xSpawn;
 			zSpawn = data.zSpawn;
-			logPanel.append("Loaded world at .blockbase-server/saves/server-level.dat!\n\n");
+			append("Loaded world at .blockbase-server/saves/server-level.dat!\n\n");
 		}
 
 		Logger.log(LogLevel.INFO,"Starting Server");
-		logPanel.append("Starting Server...\n");
+		append("Starting Server...\n");
 		server.start();
 		try {
 			server.bind(tcpPort, udpPort);
 			server.addListener(listener);
-			logPanel.append("Server online! (PORT="+ tcpPort +")\n");
-			logPanel.append("Don't forget to port forward 25555 for server info!\n");
+			append("Server online! (PORT="+ tcpPort +")\n");
+			append("Don't forget to port forward 25555 for server info!\n");
 			Logger.log(LogLevel.INFO, "Server online! (PORT="+ tcpPort +")");
-			logPanel.append("----------------------------");
-			logPanel.append("\n");
+			append("----------------------------");
+			append("\n");
 			saveThread = new Thread(new Runnable() {
 				public void run() {
 					while(true) {
@@ -149,8 +154,8 @@ public class MainServer {
 
 		} catch (IOException e) {
 			Logger.log(LogLevel.INFO,"Port already used");
-			logPanel.append("Port already in use");
-			logPanel.append("\n");
+			append("Port already in use");
+			append("\n");
 			e.printStackTrace();
 		}
 		
@@ -213,13 +218,22 @@ public class MainServer {
 			}
 
 		}).start();
+		
+		if(nogui) {
+			@SuppressWarnings("resource")
+			Scanner scanner = new Scanner(System.in);
+			while(true) {
+				System.out.print("> ");
+				handleCommand(scanner.nextLine());
+			}
+		}
 	}
 
-	// Try changing this to non staic and see where this effects our game
+	// Try changing this to non static and see where this effects our game
 	public static void stopServer() {
 		Logger.log(LogLevel.INFO,"Server stopped");
-		logPanel.append("Server stopped.");
-		logPanel.append("\n");
+		append("Server stopped.");
+		append("\n");
 		theWorld.saveWorld();
 		for (OtherPlayer p : MainServerListener.players.values()) {
 			PacketRemovePlayer packetDisconnect = new PacketRemovePlayer();
@@ -263,7 +277,7 @@ public class MainServer {
 	}
 
 	public static void createServerInterface() {
-		splashes = Maths.fileToArray("splashes.txt");
+		
 		window = new JFrame("BlockBase Server Console");
 
 		URL iconURL = MainServer.class.getResource("/assets/iconx32.png");
@@ -276,9 +290,9 @@ public class MainServer {
 		logPanel = new JTextArea();
 		DefaultCaret caret = (DefaultCaret)logPanel.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		logPanel.append("<BlockBase " + version + ">\n");
-		logPanel.append("\n");
-		logPanel.append(getRandomSplash()+"\n");
+		append("<BlockBase " + version + ">\n");
+		append("\n");
+		append(getRandomSplash()+"\n");
 
 		logPanel.setLineWrap(false);
 		logPanel.setEditable(false);
@@ -348,12 +362,13 @@ public class MainServer {
 		String command = cmd.replace("/", "");
 
 		if(command.contentEquals("help")) {
-			logPanel.append("\n");
-			logPanel.append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
-			logPanel.append("seed - returns the seed of the world - (seed)\n");
-			logPanel.append("save - saves the world - (save)\n");
-			logPanel.append("kick - kicks a player from their ip - (kick <id> <reason>) or (kick <playerName> <reason>)\n");
-			logPanel.append("chunks - returns total chunk size of world - (chunks)\n");
+			append("\n");
+			append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
+			append("seed - returns the seed of the world - (seed)\n");
+			append("save - saves the world - (save)\n");
+			append("kick - kicks a player from their ip - (kick <id> <reason>) or (kick <playerName> <reason>)\n");
+			append("chunks - returns total chunk size of world - (chunks)\n");
+			append("players - see every player on server - (players)");
 		} else if(command.startsWith("setSpawn ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
@@ -381,15 +396,15 @@ public class MainServer {
 				zSpawn = tempZ;
 				SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
 
-				logPanel.append("Successfully set spawn position to: [X="+xSpawn+", Z="+zSpawn+"]!");
+				append("Successfully set spawn position to: [X="+xSpawn+", Z="+zSpawn+"]!");
 			} else {
-				logPanel.append("Unable to set spawn position as inputted values were invalid.\n");
+				append("Unable to set spawn position as inputted values were invalid.\n");
 			}
 		} else if(command.contentEquals("seed")) {
-			logPanel.append("World seed is: " + theWorld.getSeed());
+			append("World seed is: " + theWorld.getSeed());
 		} else if(command.contentEquals("save")) {
 			theWorld.saveWorld();
-			logPanel.append("Saved world!");
+			append("Saved world!");
 		} else if(command.startsWith("kick ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
@@ -440,31 +455,53 @@ public class MainServer {
 				packetKick.message = reason;
 				MainServer.server.sendToAllTCP(packetKick);
 
-				logPanel.append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.\n");
+				append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.\n");
 
 			} else {
-				logPanel.append("ID was not valid / Reason was not supplied\n");
+				append("ID was not valid / Reason was not supplied\n");
 			}
 		} else if(cmd.contentEquals("chunks")) {
-			logPanel.append("Server has a total chunk size of: " + theWorld.chunkMap.size() + "\n");
+			append("Server has a total chunk size of: " + theWorld.chunkMap.size() + "\n");
 		} else if(command.startsWith("say ")) {
 			String message = command.substring(4);
 			PacketChatMessage packet = new PacketChatMessage();
 			packet.message=" [SERVER] " + message;
 			server.sendToAllUDP(packet);
-			logPanel.append(packet.message+"\n");
+			append(packet.message+"\n");
+		} else if(command.contentEquals("players")) {
+			if(nogui) {
+				if(MainServerListener.players.size() != 0) {
+					for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
+						append(entry.getValue().userName + " ("+entry.getKey()+")");
+					}
+				} else {
+					append("No players!");
+				}
+			} else {
+				append("nogui only!");
+			}
+			
 		} else {
-			logPanel.append("Command \""+ cmd + "\" was not recognized!\n");
+			append("Command \""+ cmd + "\" was not recognized!\n");
 		}
 	}
 
 	public static void main(String args[]) {
+		boolean nogui = false;
+		for(String arg : args) {
+			if(arg.contentEquals("nogui")) {
+				nogui = true;
+			}
+		}
+		
 		Random rand = new Random();
 		randomFloatNumber = rand.nextFloat();
-		MainServer main = new MainServer(25565, 25565);
-		createServerInterface();
-		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setVisible(true);
+		MainServer main = new MainServer(nogui, 25565, 25565);
+		if(!nogui) {
+			createServerInterface();
+			window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			window.setVisible(true);
+		}
 		main.startServer();
 	}
 
@@ -513,6 +550,15 @@ public class MainServer {
 			return folder;
 		}
 	}
-
+	
+	public static void append(String toAppend) {
+		if(!nogui) {
+			logPanel.append(toAppend);
+		} else {
+			String toPrint = toAppend.replaceAll("\n", "").trim();
+			if(!toPrint.isEmpty())
+				Logger.log(LogLevel.INFO, toPrint);
+		}
+	}
 
 } // end total class

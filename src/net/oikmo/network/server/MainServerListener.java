@@ -78,7 +78,7 @@ public class MainServerListener extends Listener {
 		
 		MainServer.server.sendToAllUDP(removePacket);
 		if(username != null && !username.isEmpty()) {
-			MainServer.logPanel.append(username + " left the server\n");
+			MainServer.append(username + " left the server\n");
 		}
 	}
 	
@@ -102,7 +102,7 @@ public class MainServerListener extends Listener {
 							MainServer.server.sendToAllTCP(packetKick);
 							players.remove(connection.getID());
 							
-							MainServer.logPanel.append("Kicked " + packetKick.id + " from the server. (Already exists)\n");
+							MainServer.append("Kicked " + packetKick.id + " from the server. (Already exists)\n");
 							return;
 						}
 					}
@@ -120,7 +120,7 @@ public class MainServerListener extends Listener {
 				MainServer.refreshList();
 				
 				if(request.getUserName() != null && !request.getUserName().isEmpty()) {
-					MainServer.logPanel.append(request.getUserName() + " joined the server\n");
+					MainServer.append(request.getUserName() + " joined the server\n");
 				}
 				
 				PacketWorldJoin packetWorld = new PacketWorldJoin();
@@ -181,7 +181,7 @@ public class MainServerListener extends Listener {
 				response.PROTOCOL = -1;
 				response.setResponseText("not ok!");
 				connection.sendTCP(response);
-				MainServer.logPanel.append("Player \" "+ request.getUserName() + " \"  could not join\nas they had a protocol version of " + request.PROTOCOL +" whilst server is " + MainServer.NETWORK_PROTOCOL + "\n");
+				MainServer.append("Player \" "+ request.getUserName() + " \"  could not join\nas they had a protocol version of " + request.PROTOCOL +" whilst server is " + MainServer.NETWORK_PROTOCOL + "\n");
 			}
 			
 		}
@@ -254,7 +254,7 @@ public class MainServerListener extends Listener {
 			
 			if(master == null) {
 				master = MainServer.theWorld.createAndAddChunk(ChunkCoordHelper.create(packet.x,packet.z));
-				MainServer.logPanel.append("Creating new chunk at: [X=" + packet.x + ", Z="+packet.z+"]");
+				MainServer.append("Creating new chunk at: [X=" + packet.x + ", Z="+packet.z+"]");
 			}
 			
 			PacketChunk packetChunk = new PacketChunk();
@@ -316,7 +316,7 @@ public class MainServerListener extends Listener {
 		else if(object instanceof PacketChatMessage) {
 			PacketChatMessage packet = (PacketChatMessage) object;
 			packet.id = connection.getID();
-			MainServer.logPanel.append(packet.message+"\n");
+			MainServer.append(packet.message+"\n");
 			MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
 		}
 	}
