@@ -120,7 +120,7 @@ public class PlayerClientListener extends Listener {
 				
 				BufferedImage image = null;
 				try {
-					URL url = new URL("http://afs.gurdit.com/users/"+packet.userName+"/skin_"+ packet.userName + ".png");
+					URL url = new URL("http://blockbase.gurdit.com/users/"+packet.userName+"/skin_"+ packet.userName + ".png");
 					URLConnection conn = url.openConnection();
 					InputStream in = conn.getInputStream();
 					image = ImageIO.read(in);
@@ -164,7 +164,7 @@ public class PlayerClientListener extends Listener {
 				
 				BufferedImage image = null;
 				try {
-					URL url = new URL("http://afs.gurdit.com/users/"+packet.userName+"/skin_"+ packet.userName + ".png");
+					URL url = new URL("http://blockbase.gurdit.com/users/"+packet.userName+"/skin_"+ packet.userName + ".png");
 					URLConnection conn = url.openConnection();
 					InputStream in = conn.getInputStream();
 					image = ImageIO.read(in);

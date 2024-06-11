@@ -7,14 +7,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
@@ -41,8 +44,11 @@ import net.oikmo.toolbox.properties.OptionsHandler;
 
 public class GuiComponentLoader extends GuiScreen {
 
-	public GuiComponentLoader() {
+	private String password;
+	
+	public GuiComponentLoader(String password) {
 		super("Component Loader");
+		this.password = password;
 	}
 
 	private Texture icon;
@@ -51,7 +57,7 @@ public class GuiComponentLoader extends GuiScreen {
 	private Thread workingThread;
 
 	private int step = 0;
-	private int steps = 9;
+	private int steps = 10;
 
 	private String working = "";
 	private boolean runOnce = false;
@@ -62,7 +68,7 @@ public class GuiComponentLoader extends GuiScreen {
 	private int offset = 4;
 
 	private boolean skinStatusCheck = false;
-	private String skinStatus = "OFFLINE";
+	private String skinStatus = "ONLINE";
 
 	public boolean isDone = false;
 
@@ -139,13 +145,38 @@ public class GuiComponentLoader extends GuiScreen {
 	public void initialise() {
 		workingThread = new Thread(new Runnable() {
 			public void run() {
-				working = "Downloading resources";
+				working = "Downloading resources...";
 				try {
 					downloadResources();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				step++;
+				
+				working = "Checking profile...";
+				try {
+					if(Main.playerName != null && password != null) {
+						System.out.println(Main.playerName);
+						String urlString = String.format("http://blockbase.gurdit.com/api.php?username=%s&password=%s", Main.playerName, password);
+						URL url = new URL(urlString);
+						URLConnection conn = url.openConnection();
+						InputStream is;
+						is = conn.getInputStream();
+						String content = IOUtils.toString(is, StandardCharsets.UTF_8);
+						
+						if(content.contains("\"result\":false")) {
+							Main.disableNetworking = true;
+							Main.playerName = null;
+							skinStatus = "OFFLINE";
+						}
+					} else {
+						Main.disableNetworking = true;
+						skinStatus = "OFFLINE";
+					}
+				} catch(MalformedURLException e) {} catch (IOException e) {}
+				
+				
 				step++;
 				working = "Setting up models...";
 				CubeModel.setup();
@@ -158,7 +189,7 @@ public class GuiComponentLoader extends GuiScreen {
 				working = "Retriving player skin...";
 				BufferedImage image = null;
 				try {
-					URL url = new URL("http://afs.gurdit.com/users/"+Main.playerName+"/skin_"+ Main.playerName + ".png");
+					URL url = new URL("http://blockbase.gurdit.com/users/"+Main.playerName+"/skin_"+ Main.playerName + ".png");
 					URLConnection conn = url.openConnection();
 					InputStream in = conn.getInputStream();
 					image = ImageIO.read(in);
@@ -178,7 +209,7 @@ public class GuiComponentLoader extends GuiScreen {
 						}
 
 						Main.playerSkinBuffer = buf;
-						skinStatus = "ONLINE";
+						
 
 					} catch(ArrayIndexOutOfBoundsException e) {}
 				}
@@ -229,6 +260,7 @@ public class GuiComponentLoader extends GuiScreen {
 
 	@SuppressWarnings("resource")
 	private void downloadResources() throws IOException {
+		working = "Downloading resources...";
 		File dir = Main.getResources();
 		File tmp = new File(Main.getWorkingDirectory() + "/tmp");
 		File musicDir = new File(Main.getResources() + "/music");
@@ -326,7 +358,7 @@ public class GuiComponentLoader extends GuiScreen {
 			tmp.delete();
 		}
 		step = 1;
-		steps = 9;
+		steps = 10;
 	}
 
 	private void download(String urlStr, String file) throws IOException {

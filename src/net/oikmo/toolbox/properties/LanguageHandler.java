@@ -13,7 +13,7 @@ public class LanguageHandler {
 	
 	protected LanguageHandler() {
 		try {
-			this.filePath = Main.class.getResourceAsStream("/assets/lang/pl_PL.lang");
+			this.filePath = Main.class.getResourceAsStream("/assets/lang/en_GB.lang");
 			properties.load(filePath);
 		} catch (IOException var2) {
 			var2.printStackTrace();

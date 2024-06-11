@@ -107,7 +107,7 @@ public class Main {
 	
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
-	 * then it creates the window and checks wether or not the last<br>
+	 * then it creates the window and checks whether or not the last<br>
 	 * recorded resource version is equal to the current version. If<br>
 	 * not then attempt to download the required resources and update<br>
 	 * the version. Then it enters the game loop in which that handles<br>
@@ -136,25 +136,6 @@ public class Main {
 					HEIGHT = Integer.parseInt(arg.split("=")[1]);
 				} catch(NumberFormatException | ArrayIndexOutOfBoundsException e) {}
 			}
-		}
-		
-		
-		
-		if(playerName != null && password != null) {
-			System.out.println(playerName);
-			String urlString = String.format("http://afs.gurdit.com/api.php?username=%s&password=%s", playerName, password);
-			URL url = new URL(urlString);
-			URLConnection conn = url.openConnection();
-			InputStream is;
-			is = conn.getInputStream();
-			String content = IOUtils.toString(is, StandardCharsets.UTF_8);
-			
-			if(content.contains("\"result\":false")) {
-				disableNetworking = true;
-				playerName = null;
-			}
-		} else {
-			disableNetworking = true;
 		}
 		
 		Thread.currentThread().setName("Main Thread");
@@ -203,7 +184,7 @@ public class Main {
 			Main.shouldTick = false; 
 			SoundMaster.init();
 			
-			currentScreen = new GuiComponentLoader();
+			currentScreen = new GuiComponentLoader(password);
 			
 			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
 
