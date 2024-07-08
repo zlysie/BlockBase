@@ -32,7 +32,7 @@ public class ChunkMesh {
 					byte blockI = chunk.getBlock(x, y, z);
 					boolean px = false, nx = false, py = false, ny = false, pz = false, nz = false;
 
-					if(blockI == -1) { continue; } //skip it
+					if(blockI == Block.Type.AIR.ordinal()) { continue; } //skip it
 
 					// Loop through the neighbouring blocks
 					for (byte dx = -1; dx <= 1; dx++) {
@@ -53,8 +53,8 @@ public class ChunkMesh {
 										neighborY >= 0 && neighborY < World.WORLD_HEIGHT &&
 										neighborZ >= 0 && neighborZ < Chunk.CHUNK_SIZE) {
 									byte blockJ = chunk.getBlock(neighborX, neighborY, neighborZ);
-
-									if(blockJ == -1 || (blockI != Block.glass.getByteType() && blockJ == Block.glass.getByteType()) || (blockI == Block.oakleaf.getByteType() || blockJ == Block.oakleaf.getByteType())) { continue; } //skip it
+									
+									if(blockJ == Block.Type.AIR.ordinal() || (blockI != Block.glass.getByteType() && blockJ == Block.glass.getByteType()) || (blockI == Block.oakleaf.getByteType() || blockJ == Block.oakleaf.getByteType())) { continue; } //skip it
 
 									//PX
 									if(((x + 1) == (neighborX)) && ((y) == (neighborY)) && ((z) == (neighborZ))) {
@@ -80,6 +80,7 @@ public class ChunkMesh {
 									if(((x) == (neighborX)) && ((y) == (neighborY)) && ((z - 1) == (neighborZ))) {
 										nz = true;
 									}
+								} else { 
 								}
 							}
 						}

@@ -82,7 +82,7 @@ public class GuiInventory extends GuiScreen {
 				yOffset += 8;
 			}
 			for(int x = 0; x <= 6; x++) {
-				Item item = Item.blockToItem(Block.blocks[xOff]);
+				Item item = Item.blockToItem(Block.blocks[xOff+1]);
 				
 				if(x == 0) {
 					slots.add(new BlockSlot(item, xPos+(x*32)+8, yPos+(y*32)+8+yOffset));

@@ -77,14 +77,14 @@ public class MasterChunk {
 		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
-				if (chunk.getBlock(localX, localY, localZ) == -1) {
+				if (chunk.getBlock(localX, localY, localZ) == Block.Type.AIR.ordinal()) {
 					if(chunk.getBlock(localX, localY, localZ) != block.getByteType()) {
 						chunk.setBlock(localX, localY, localZ, block.getByteType());
 						dirty = true;
 					}
 				}
 			} else {
-				if(chunk.getBlock(localX, localY, localZ) != -1 && localY != 0) {
+				if(chunk.getBlock(localX, localY, localZ) != Block.Type.AIR.ordinal() && localY != 0) {
 					byte blockID = chunk.getBlock(localX, localY, localZ);
 					if(Main.theNetwork == null) {
 						if(blockID == Block.tnt.getType()) {
@@ -93,7 +93,7 @@ public class MasterChunk {
 					}
 					
 					
-					chunk.setBlock(localX, localY, localZ, -1);
+					chunk.setBlock(localX, localY, localZ, Block.Type.AIR.ordinal());
 					dirty = true;
 				}
 				
@@ -127,7 +127,7 @@ public class MasterChunk {
 		
 		if (Maths.isWithinChunk(localX, localY, localZ)) {
 			if (block != null) {
-				if(chunk.getBlock(localX, localY, localZ) == -1) {
+				if(chunk.getBlock(localX, localY, localZ) == Block.Type.AIR.ordinal()) {
 					if(chunk.getBlock(localX, localY, localZ) != block.getByteType()) {
 						chunk.setBlock(localX, localY, localZ, block.getByteType());
 						if(chunk.getHeightFromPosition(localX, localZ) < localY) {
@@ -154,8 +154,8 @@ public class MasterChunk {
 			} else {
 				if(localY != 0) {
 					byte blockID = chunk.getBlock(localX, localY, localZ);
-					if(chunk.getBlock(localX, localY, localZ) != -1) {
-						chunk.setBlock(localX, localY, localZ, -1);
+					if(chunk.getBlock(localX, localY, localZ) != Block.Type.AIR.ordinal()) {
+						chunk.setBlock(localX, localY, localZ, Block.Type.AIR.ordinal());
 					}
 					if(blockID != -1) {
 						SoundMaster.playBlockBreakSFX(Block.getBlockFromOrdinal(blockID), x,y,z);

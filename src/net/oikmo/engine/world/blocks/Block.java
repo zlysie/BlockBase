@@ -21,6 +21,7 @@ public abstract class Block {
 	public static final Block tnt = new BlockTNT(Type.TNT);
 	
 	public static enum Type {
+		AIR,
 		GRASS, 
 		DIRT, 
 		STONE,

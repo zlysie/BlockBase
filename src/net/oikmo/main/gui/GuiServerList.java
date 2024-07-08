@@ -1,5 +1,10 @@
 package net.oikmo.main.gui;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +21,17 @@ import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.GuiServer;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
+import net.oikmo.engine.nbt.NBTTagCompound;
 import net.oikmo.engine.save.SaveSystem;
 import net.oikmo.engine.save.ServerListData;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 import net.oikmo.network.client.NetworkHandler;
 import net.oikmo.network.client.Server;
+import net.oikmo.toolbox.CompressedStreamTools;
 import net.oikmo.toolbox.Logger;
 import net.oikmo.toolbox.Logger.LogLevel;
+import net.oikmo.toolbox.noise.OpenSimplexNoise;
 
 public class GuiServerList extends GuiScreen {
 	
@@ -53,12 +61,34 @@ public class GuiServerList extends GuiScreen {
 		guis = new ArrayList<>();
 		
 		if(servers ==  null) {
-			ServerListData data = SaveSystem.loadServers();
-			if(data != null) {
-				servers = data.servers;
-			} else {
-				servers = new ArrayList<>();
+			servers = new ArrayList<>();
+			File save = new File( Main.getWorkingDirectory(), "/servers.dat");
+			NBTTagCompound baseTag = null;
+			try {
+				baseTag = CompressedStreamTools.readCompressed(new FileInputStream(save));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			
+			for(int i = 0; i < 100; i++) {
+				NBTTagCompound nbttagcompound1 = baseTag.getCompoundTag("server-"+i);
+				if(nbttagcompound1 != null) {
+					if(nbttagcompound1.getString("IP").isEmpty()) {
+						break;
+					} else {
+						System.out.println(nbttagcompound1.getString("IP"));
+						servers.add(new Server(nbttagcompound1.getString("Name"),nbttagcompound1.getString("IP")));
+					}
+					
+				} else {
+					break;
+				}
+			}
+
 		}
 		
 		add = new GuiButton(((Display.getWidth()/2)-200/2)-10, Display.getHeight()-30*2, 200, 30, Main.lang.translateKey("network.servers.add"));
@@ -227,10 +257,27 @@ public class GuiServerList extends GuiScreen {
 			});
 			guis.add(g);
 		}
-		SaveSystem.saveServers(new ServerListData(servers));
 	}
 	
 	public void onClose() {
+		NBTTagCompound base = new NBTTagCompound();
+		for(int i = 0; i < servers.size(); i++) {
+			Server s = servers.get(i);
+			NBTTagCompound serverCompound = new NBTTagCompound();
+			serverCompound.setString("IP", s.getIP());
+			serverCompound.setString("Name", s.getName());
+			base.setCompoundTag("server-"+i, serverCompound);
+		}
+		File save = new File( Main.getWorkingDirectory(), "/servers.dat");
+		try {
+			CompressedStreamTools.writeGzippedCompoundToOutputStream(base, new FileOutputStream(save));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for(GuiServer g : guis) {
 			g.onCleanUp();
 		}

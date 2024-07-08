@@ -21,7 +21,7 @@ public class Particle extends Entity {
 
 	public Particle(float x, float y, float z, float velX, float var6, float var7, Block block) {
 		super(new Vector3f(), new Vector3f(), 0.2f);
-		this.tex = block.getType();
+		this.tex = block.getType()-1;
 		this.gravity = 0.5f;
 		this.setSize(0.2F, 0.2F);
 		this.heightOffset = this.bbHeight / 2.0F;

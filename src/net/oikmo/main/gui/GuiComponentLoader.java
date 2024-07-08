@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -68,7 +69,7 @@ public class GuiComponentLoader extends GuiScreen {
 	private int offset = 4;
 
 	private boolean skinStatusCheck = false;
-	private String skinStatus = "ONLINE";
+	private String skinStatus = "OFFLINE";
 
 	public boolean isDone = false;
 
@@ -157,19 +158,39 @@ public class GuiComponentLoader extends GuiScreen {
 				working = "Checking profile...";
 				try {
 					if(Main.playerName != null && password != null) {
+						boolean shouldBreak = false;
 						System.out.println(Main.playerName);
 						String urlString = String.format("http://blockbase.gurdit.com/api.php?username=%s&password=%s", Main.playerName, password);
-						URL url = new URL(urlString);
-						URLConnection conn = url.openConnection();
-						InputStream is;
-						is = conn.getInputStream();
-						String content = IOUtils.toString(is, StandardCharsets.UTF_8);
 						
-						if(content.contains("\"result\":false")) {
-							Main.disableNetworking = true;
+						HttpURLConnection urlConnection = (HttpURLConnection) new URL(urlString).openConnection();
+					    // Set timeouts 2000 in milliseconds and throw exception
+					    urlConnection.setConnectTimeout(10 * 1000);
+					    urlConnection.setReadTimeout(10 * 1000);
+					   
+					    if(urlConnection.getResponseCode() != 408) {
+					    	
+					    	URL url = new URL(urlString);
+							URLConnection conn = url.openConnection();
+							InputStream is;
+							is = conn.getInputStream();
+							String content = IOUtils.toString(is, StandardCharsets.UTF_8);
+							
+							if(content.contains("\"result\":false")) {
+								Main.disableNetworking = true;
+								Main.playerName = null;
+								skinStatus = "OFFLINE";
+							} else {
+								Main.disableNetworking = false;
+								
+								skinStatus = "ONLINE";
+							}
+					    } else {
+					    	Main.disableNetworking = true;
 							Main.playerName = null;
 							skinStatus = "OFFLINE";
-						}
+					    }
+						
+						
 					} else {
 						Main.disableNetworking = true;
 						skinStatus = "OFFLINE";
@@ -185,36 +206,48 @@ public class GuiComponentLoader extends GuiScreen {
 				working = "Setting up InputManager...";
 				Main.im = new InputManager();
 				step++;
-
-				working = "Retriving player skin...";
-				BufferedImage image = null;
-				try {
-					URL url = new URL("http://blockbase.gurdit.com/users/"+Main.playerName+"/skin_"+ Main.playerName + ".png");
-					URLConnection conn = url.openConnection();
-					InputStream in = conn.getInputStream();
-					image = ImageIO.read(in);
-				} catch(Exception e) {}
-				step++;
-
-				ImageBuffer buf = new ImageBuffer(64,64);
-
-				working = "Constructing player texture...";
-				if(image != null) {
+				
+				System.out.println(skinStatus);
+				
+				if(!skinStatus.contentEquals("OFFLINE")) {
+					working = "Retrieving player skin...";
+					BufferedImage image = null;
 					try {
-						for(int x = 0; x < 64; x++) {
-							for(int y = 0; y < 64; y++) {
-								java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
-								buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+						URL url = new URL("http://blockbase.gurdit.com/users/"+Main.playerName+"/skin_"+ Main.playerName + ".png");
+						URLConnection conn = url.openConnection();
+						InputStream in = conn.getInputStream();
+						image = ImageIO.read(in);
+					} catch(Exception e) {}
+					
+					step++;
+					
+					ImageBuffer buf = new ImageBuffer(64,64);
+
+					working = "Constructing player texture...";
+					if(image != null) {
+						try {
+							for(int x = 0; x < 64; x++) {
+								for(int y = 0; y < 64; y++) {
+									int rgba = image.getRGB(x, y);
+									if((rgba & 0xff000000) == 0) {
+										image.setRGB(x,y, (java.awt.Color.black.getRGB()));
+									}
+									java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
+									
+									buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+								}
 							}
-						}
 
-						Main.playerSkinBuffer = buf;
-						
+							Main.playerSkinBuffer = buf;
+							
 
-					} catch(ArrayIndexOutOfBoundsException e) {}
+						} catch(ArrayIndexOutOfBoundsException e) {}
+					}
+					skinStatusCheck = true;
+					step++;
+				} else {
+					step += 2;
 				}
-				skinStatusCheck = true;
-				step++;
 
 				working = "Loading splash texts...";
 				if(!Main.jmode) {

@@ -10,6 +10,9 @@ public class ChunkCoordHelper {
 		ChunkCoordinates coord = new ChunkCoordinates(x, z);
 		
 		if(coords.contains(coord)) {
+			if(coords.indexOf(coord) == -1) {
+				return coord;
+			}
 			return coords.get(coords.indexOf(coord));
 		} else {
 			//System.gc();

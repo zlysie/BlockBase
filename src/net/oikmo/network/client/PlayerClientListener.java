@@ -131,6 +131,10 @@ public class PlayerClientListener extends Listener {
 				if(image != null) {
 					for(int x = 0; x < 64; x++) {
 						for(int y = 0; y < 64; y++) {
+							int rgba = image.getRGB(x, y);
+							if((rgba & 0xff000000) == 0) {
+								image.setRGB(x,y, (java.awt.Color.black.getRGB()));
+							}
 							java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
 							buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
 						}
@@ -138,7 +142,6 @@ public class PlayerClientListener extends Listener {
 					p.buffer = buf;
 				}
 				p.id = connection.getID();
-				
 				
 				if(Main.thePlayer != null) {
 					if(packet.userName != null) {
@@ -175,6 +178,10 @@ public class PlayerClientListener extends Listener {
 				if(image != null) {
 					for(int x = 0; x < 64; x++) {
 						for(int y = 0; y < 64; y++) {
+							int rgba = image.getRGB(x, y);
+							if((rgba & 0xff000000) == 0) {
+								image.setRGB(x,y, (java.awt.Color.black.getRGB()));
+							}
 							java.awt.Color c = new java.awt.Color(image.getRGB(x, y), true);
 							buf.setRGBA(x, y, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
 						}

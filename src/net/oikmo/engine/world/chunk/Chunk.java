@@ -1,6 +1,7 @@
 package net.oikmo.engine.world.chunk;
 
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -32,9 +33,20 @@ public class Chunk {
 		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
 	}
-
+	
+	/**
+	 * Loads chunk from file using bytes
+	 * @param blocks
+	 * @param origin
+	 */
 	public Chunk(byte[] blocks, ChunkCoordinates origin) {
 		this.blocks = blocks;
+		if(Maths.indexOf(blocks, new byte[] { -1 }) != -1) { 
+			for(int i = 0; i < blocks.length; i++) {
+				blocks[i] = (byte) (blocks[i] + 1);
+			}
+		}
+		
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		this.origin = origin;
@@ -66,16 +78,12 @@ public class Chunk {
 							} else {
 								setBlock(x, y, z, Block.stone.getByteType());
 							}
-						} else if(y != height) {
-							setBlock(x, y, z, -1);
 						}
 					}
 				} else {
 					setBlock(x, 3, z, Block.grass.getByteType());
 					heights[x][z] = 3+1;
-					for (int y = World.WORLD_HEIGHT; y > 3; y--) {
-						setBlock(x, y, z, -1);
-					}
+					
 					setBlock(x, 2, z, Block.dirt.getByteType());
 					setBlock(x, 1, z, Block.dirt.getByteType());
 					setBlock(x, 0, z, Block.bedrock.getByteType());
@@ -245,7 +253,7 @@ public class Chunk {
 	}
 	
 	private void setBlock(Block block, int x, int y, int z) {
-		if(getBlock(x,y,z) == -1) {
+		if(getBlock(x,y,z) == Block.Type.AIR.ordinal()) {
 			setBlock(x,y,z, block.getByteType());
 		}
 	}
@@ -283,7 +291,7 @@ public class Chunk {
 	
 	public void recalculateHeight(int x, int z) {
 		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-			if (getBlock(x,y,z) != -1) {
+			if (getBlock(x,y,z) != Block.Type.AIR.ordinal()) {
 				heights[x][z] = y;
 				break;
 			}

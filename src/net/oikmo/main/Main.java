@@ -98,7 +98,7 @@ public class Main {
 	public static String playerName = null;
 	public static ImageBuffer playerSkinBuffer;
 	public static int playerSkin;
-	public static boolean disableNetworking = false;
+	public static boolean disableNetworking = true;
 
 	public static boolean jmode = false;
 	
