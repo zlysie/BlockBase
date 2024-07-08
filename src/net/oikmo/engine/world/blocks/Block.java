@@ -21,6 +21,7 @@ public abstract class Block {
 	public static final Block tnt = new BlockTNT(Type.TNT);
 	
 	public static enum Type {
+		AIR,
 		GRASS, 
 		DIRT, 
 		STONE,
@@ -43,7 +44,7 @@ public abstract class Block {
 	public Type type;
 	
 	public Block(Type type) {
-		blocks[type.ordinal()] = this;
+		blocks[type.ordinal()-1] = this;
 		this.type = type;
 	}
 	

@@ -30,7 +30,7 @@ public class MasterChunk {
 	
 	public void setBlock(Vector3f position, byte block) {
 		Chunk chunk = getChunk();
-		//Main.theWorld.refreshChunk(this);
+		
 		int localX = (int)(position.x + getOrigin().x)%16;
 		int localY = (int) position.y;
 		int localZ = (int)(position.z + getOrigin().z)%16;

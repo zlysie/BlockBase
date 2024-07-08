@@ -95,13 +95,16 @@ public class MainServer {
 
 	private static Thread saveThread;
 
+	@SuppressWarnings("static-access")
 	public MainServer(boolean nogui, int tcpPort, int udpPort) {
 		this.nogui = nogui;
 		this.tcpPort = tcpPort;
 		this.udpPort = udpPort;
 		server = new Server();
 		splashes = Maths.fileToArray("splashes.txt");
-		append(splashes[new Random().nextInt(splashes.length)]);
+		if(nogui) {
+			append(splashes[new Random().nextInt(splashes.length)]);
+		}
 		kryo = server.getKryo();
 		registerKryoClasses();
 	}
@@ -330,7 +333,10 @@ public class MainServer {
 				}
 			}
 		});
-
+		
+		if(!nogui) {
+			append(splashes[new Random().nextInt(splashes.length)]);
+		}
 
 		JScrollPane scrollPane = new JScrollPane(logPanel);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -350,12 +356,15 @@ public class MainServer {
 	}
 
 	public static void refreshList() {
-		DefaultListModel<String> listModel = new DefaultListModel<>();
-		listModel.addElement("PLAYERS");
-		for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
-			listModel.addElement(entry.getValue().userName + " ("+entry.getKey()+")");
+		if(!nogui) {		
+			DefaultListModel<String> listModel = new DefaultListModel<>();
+			listModel.addElement("PLAYERS");
+			for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
+				listModel.addElement(entry.getValue().userName + " ("+entry.getKey()+")");
+			}
+			playersPanel.setModel(listModel);
 		}
-		playersPanel.setModel(listModel);
+		
 	}
 
 	private static void handleCommand(String cmd) {

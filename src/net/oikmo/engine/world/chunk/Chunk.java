@@ -28,6 +28,13 @@ public class Chunk {
 
 	public Chunk(byte[] blocks) {
 		this.blocks = blocks;
+		
+		if(Maths.indexOf(blocks, new byte[] { -1 }) != -1) { 
+			for(int i = 0; i < blocks.length; i++) {
+				blocks[i] = (byte) (blocks[i] + 1);
+			}
+		}
+		
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		calculateHeights();
 		calculateHeights();
@@ -55,10 +62,6 @@ public class Chunk {
 							setBlock(x, y, z, Block.bedrock.getByteType());
 						} else {
 							setBlock(x, y, z, Block.stone.getByteType());
-						}
-					} else {
-						if(y != height) {
-							setBlock(x, y, z, -1);
 						}
 					}
 				}
@@ -182,7 +185,7 @@ public class Chunk {
 	}
 	
 	private void setBlock(Block block, int x, int y, int z) {
-		if(getBlock(x,y,z) == -1) {
+		if(getBlock(x,y,z) == Block.Type.AIR.ordinal()) {
 			setBlock(x,y,z, block.getByteType());
 		}
 	}
@@ -209,7 +212,7 @@ public class Chunk {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {
 			for (byte z = 0; z < CHUNK_SIZE; z++) {
 				for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-					if (getBlock(x,y,z) != -1) {
+					if (getBlock(x,y,z) != Block.Type.AIR.ordinal()) {
 						heights[x][z] = y;
 						break;
 					}
@@ -220,7 +223,7 @@ public class Chunk {
 	
 	public void recalculateHeight(int x, int z) {
 		for (int y = World.WORLD_HEIGHT - 1; y >= 0; y--) {
-			if (getBlock(x,y,z) != -1) {
+			if (getBlock(x,y,z) != Block.Type.AIR.ordinal()) {
 				heights[x][z] = y;
 				break;
 			}
