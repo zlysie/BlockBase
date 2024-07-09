@@ -59,28 +59,38 @@ import net.oikmo.toolbox.properties.OptionsHandler;
  * @author Oikmo
  */
 public class Main {
-
+	
+	/**  this specifies the version of the resource pulled from oikmo.github.io */
 	public static final int resourceVersion = 5;
+	/**  set as "BlockBase" used for UIs and windows */
 	public static final String gameName = "BlockBase";
+	/** used in the form of "xN.N" with x being type of version, a = alpha, b = beta and N.N being the version e.g 0.1.2 or 1.2.6 */
 	public static final String version = "a0.2.0 [2] [DEV]";
+	/** a combination of both gameName and version */
 	public static final String gameVersion = gameName + " " + version;
-
+	
+	/** this is used to control threads (in World class etc), false = window has not been requested to close, true... you get the idea. */
 	public static boolean displayRequest = false;
+	/** width of window, default 854 */
 	public static int WIDTH = 854;
-	public static int HEIGHT = 480;																
-
+	/** height of window, default 480 */
+	public static int HEIGHT = 480;												
+	
+	/** this is the window that stores the Game Display and Error Log */
 	public static Frame frame;
+	/** where the game window actually draws to in the frame */
 	public static Canvas gameCanvas;
+	/** this is to PROPERLY close the game and prevent error logs. True when frame is being closed. */
 	private static boolean realClose = false;
-
+	
+	/** The error log window. Used to store logs and not close the game :P */
 	private static PanelCrashReport report;
+	/** a check to prevent multiple windows at once */
 	private static boolean hasErrored = false;
-
+	
 	public static GuiInGame inGameGUI;
 	public static GuiScreen currentScreen;
-
-	public static String currentlyPlayingWorld;
-
+	
 	public static World theWorld;
 	public static Player thePlayer;
 
@@ -89,8 +99,8 @@ public class Main {
 	public static Vector3f camPos = new Vector3f(0,0,0);
 
 	public static boolean shouldTick = true;
-	public static boolean runTick = false;
-
+	private static boolean tick;
+	
 	public static String[] splashes;
 	public static String splashText;
 
@@ -104,6 +114,8 @@ public class Main {
 	
 	public static LanguageHandler lang = LanguageHandler.getInstance();
 	public static InputManager im;
+	
+	private static boolean hasSaved = false;
 	
 	/**
 	 * Basically, it creates the resources folder if they don't exist,<br>
@@ -220,7 +232,6 @@ public class Main {
 					}
 				}
 				
-				runTick = false;
 				for(int e = 0; e < timer.elapsedTicks; ++e) {
 					elapsedTime += 0.1f;
 
@@ -345,21 +356,17 @@ public class Main {
 			Main.currentScreen.prepareCleanUp();
 		}
 		Main.currentScreen = new GuiDisconnected(kick, message);
-
 	}
 	
 	public static String getRandomSplash() {
 		return splashes[new Random().nextInt(splashes.length)];
 	}
-
-	private static boolean hasSaved = false;
-
+	
 	public static void loadWorld(String worldName) {
 		loadWorld(worldName, null, false);
 	}
 	
 	public static void loadWorld(String worldName, String seed, boolean superflat) {
-		currentlyPlayingWorld = worldName;
 		
 		GuiMainMenu.stopMusic();
 		SoundMaster.stopMusic();
@@ -376,8 +383,7 @@ public class Main {
 		theWorld.initLevelLoader(worldName);
 		theWorld.startChunkCreator();
 	}
-
-	private static boolean tick;
+	
 	public static void shouldTick() {
 		if(Main.theNetwork == null) {
 			Main.shouldTick = !shouldTick;
@@ -396,16 +402,11 @@ public class Main {
 		return shouldTick == false;
 	}
 
-	
-
 	/**
 	 * Every 1/60th this method is ran. This handles movement.
 	 */
 	private static void tick() {
-		runTick = true;
-
 		if(Main.theNetwork == null) {
-
 			if(theWorld != null) {
 				theWorld.tick();
 			}
@@ -416,9 +417,7 @@ public class Main {
 					hasSaved = true;
 				}
 			}
-
 		} else {
-
 			if(thePlayer != null) {
 				camPos = new Vector3f(thePlayer.getPosition());
 				if(theWorld != null) {
@@ -489,6 +488,7 @@ public class Main {
 		}	
 	}
 
+	/** removes any HS_PID_ERR_XXX.log files found */
 	private static void removeHSPIDERR() {
 		File path = new File(".");
 		String[] files = path.list();
