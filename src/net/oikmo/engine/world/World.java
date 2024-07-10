@@ -720,7 +720,7 @@ public class World {
 
 		//int renderSize = size*RENDER_SIZE;
 
-		if((distX <= RENDER_SIZE*8*size) && (distZ <= RENDER_SIZE*8*size)) {
+		if((distX <= RENDER_SIZE*16*size) && (distZ <= RENDER_SIZE*16*size)) {
 			return true;
 		}
 
@@ -736,6 +736,7 @@ public class World {
 	}
 
 	public void saveWorld() {
+		this.chunkCreator.interrupt();
 		for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
 			MasterChunk master = entry.getValue();
 			provider.saveChunk(master);

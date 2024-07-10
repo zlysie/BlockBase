@@ -195,7 +195,7 @@ public class Main {
 			
 			currentScreen = new GuiComponentLoader(password);
 			
-			disableNetworking = false;
+			//disableNetworking = false;
 			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
 
 			/*Main.shouldTick = true;
