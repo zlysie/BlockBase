@@ -132,7 +132,7 @@ public class World {
 				e.printStackTrace();
 			}
 		} else {
-			Main.thePlayer = new Player(new Vector3f(12000000, 120, 12000000), new Vector3f());
+			Main.thePlayer = new Player(new Vector3f(0, 120, 0), new Vector3f());
 		}
 		provider = new ChunkLoader(worldDir, !isNewWorld);
 	}
