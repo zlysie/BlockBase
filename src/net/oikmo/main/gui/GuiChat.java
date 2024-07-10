@@ -57,6 +57,16 @@ public class GuiChat extends GuiScreen {
 		updateMessages();
 	}
 	
+	int ticks = 0;
+	boolean showMarker = true;
+	public void onTick() {
+		ticks++;
+		if(ticks > 30) {
+			showMarker = !showMarker;
+			ticks = 0;
+		}
+	}
+	
 	public void updateMessages() {
 		this.messages = new ArrayList<>(Main.theNetwork.rawMessages);
 		//Collections.reverse(messages);
@@ -72,6 +82,10 @@ public class GuiChat extends GuiScreen {
 		}
 		this.drawSquareFilled(c, 0, base, Display.getWidth(), fontSize);
 		this.drawShadowString(0, base, " > ");
+		if(showMarker) {
+			this.drawShadowString(font.getWidth(" > ") + font.getWidth(bar.getInputText()), base, "_");
+		}
+		
 		bar.tick();
 		if(messages.size() > limit) {
 			Main.theNetwork.rawMessages.remove(0);
@@ -82,7 +96,10 @@ public class GuiChat extends GuiScreen {
 	public void onClose() {
 		Keyboard.enableRepeatEvents(false);
 		Gui.cleanUp();
-		Main.thePlayer.getCamera().setMouseLock(true);
+		if(Main.thePlayer != null) {
+			Main.thePlayer.getCamera().setMouseLock(true);
+		}
+		
 		bar.onCleanUp();
 	}
 }

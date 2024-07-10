@@ -335,9 +335,8 @@ public class Entity {
 		return scale;
 	}
 
-	public Vector3f getCurrentChunkPosition() {
-		getCurrentChunk();
-		return chunkPos;
+	public ChunkCoordinates getCurrentChunkPosition() {
+		return Maths.calculateChunkPosition(position);
 	}
 
 	public void resetMotion() {

@@ -8,15 +8,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 
-import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Image;
@@ -198,6 +195,7 @@ public class Main {
 			
 			currentScreen = new GuiComponentLoader(password);
 			
+			disableNetworking = false;
 			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
 
 			/*Main.shouldTick = true;
@@ -320,6 +318,13 @@ public class Main {
 		}
 
 		close();
+	}
+	
+	public static void reportThreads() {
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		for(Thread thread : threadSet) {
+			System.out.println(thread.getName());
+		}
 	}
 
 	/**

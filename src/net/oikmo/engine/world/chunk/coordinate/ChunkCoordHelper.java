@@ -11,6 +11,7 @@ public class ChunkCoordHelper {
 		
 		if(coords.contains(coord)) {
 			if(coords.indexOf(coord) == -1) {
+				coords.add(coord);
 				return coord;
 			}
 			return coords.get(coords.indexOf(coord));

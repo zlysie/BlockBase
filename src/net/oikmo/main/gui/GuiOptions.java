@@ -34,7 +34,7 @@ public class GuiOptions extends GuiScreen {
 	private GuiSlider fov;
 	private GuiButton backButton;
 	
-	private int renderDistance = 2;
+	private static int renderDistance = 2;
 	
 	public void onInit() {
 		vsync = Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync"));
@@ -112,12 +112,11 @@ public class GuiOptions extends GuiScreen {
 		renderDistanceButton = new GuiButton((Display.getWidth()/2),(Display.getHeight()/2)+65, 225, 30, Main.lang.translateKey("options.distance")+": ");
 		renderDistanceButton.setGuiCommand(new GuiCommand() {
 			public void invoke() {
-				updateRenderDistanceText();
 				renderDistance++;
 				if(renderDistance > 5) {
 					renderDistance = 2;
 				}
-				System.out.println(renderDistance);
+				
 				updateRenderDistanceText();
 			}
 			

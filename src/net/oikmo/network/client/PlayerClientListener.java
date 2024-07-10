@@ -50,8 +50,14 @@ public class PlayerClientListener extends Listener {
 
 	public static World theWorld;
 	
+	
+	
 	public void received(Connection connection, Object object){
 		//System.out.println(object);
+		
+		if(!Thread.currentThread().getName().contentEquals("PlayerClientListener Thread")) {
+			Thread.currentThread().setName("PlayerClientListener Thread");
+		}
 
 		if(object instanceof LoginResponse){
 			LoginResponse response = (LoginResponse) object;
@@ -74,9 +80,8 @@ public class PlayerClientListener extends Listener {
 			PacketAddPlayer packet = (PacketAddPlayer) object;
 
 			OtherPlayer newPlayer = new OtherPlayer();
-			System.out.println(Main.theNetwork + " network is?");
 			if(Main.theNetwork == null) {
-				Main.disconnect(false, Main.lang.translateKey("network.disconnect.g"));
+				Main.disconnect(false, Main.lang.translateKey("network.disconnect.n"));
 			} else {
 				if(!Main.theNetwork.players.containsKey(packet.id)) {
 					Main.theNetwork.players.put(packet.id, newPlayer);
@@ -326,9 +331,12 @@ public class PlayerClientListener extends Listener {
 			PacketChatMessage packet = (PacketChatMessage) object;
 			Main.theNetwork.rawMessages.add(new ChatMessage(packet.message, false));
 			if(!packet.message.startsWith(" [SERVER]")) {
-				if(Main.theNetwork.players.get(packet.id).userName == null) {
-					Main.theNetwork.players.get(packet.id).userName =  packet.message.split(">")[0].replace("<", "").replace(">","").trim();
+				if(Main.theNetwork.players.get(packet.id) != null) {
+					if(Main.theNetwork.players.get(packet.id).userName == null) {
+						Main.theNetwork.players.get(packet.id).userName =  packet.message.split(">")[0].replace("<", "").replace(">","").trim();
+					}
 				}
+				
 			}
 			
 			if(Main.currentScreen instanceof GuiChat) {

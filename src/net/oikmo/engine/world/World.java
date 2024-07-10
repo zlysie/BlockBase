@@ -50,7 +50,6 @@ public class World {
 
 	public static final int WORLD_HEIGHT = 128;
 	public static int RENDER_SIZE = 4;
-	public static int WORLD_SIZE = RENDER_SIZE*8;
 
 	public Map<ChunkCoordinates, MasterChunk> chunkMap = new HashMap<>();
 
@@ -74,7 +73,6 @@ public class World {
 
 	public static void updateRenderSize(int size) {
 		RENDER_SIZE = size;
-		WORLD_SIZE = RENDER_SIZE*8;
 	}
 
 	public World(String seed) {
@@ -109,8 +107,8 @@ public class World {
 			} finally {
 				dos.close();
 			}
-		} catch(IOException ioexception) {
-			ioexception.printStackTrace();
+		} catch(IOException e) {
+			e.printStackTrace();
 			throw new RuntimeException("Failed to check session lock, aborting");
 		}
 		File level = new File(worldDir, "level.dat");
@@ -130,11 +128,11 @@ public class World {
 				Main.thePlayer.readFromNBT(nbttagcompound1.getCompoundTag("Player"));
 
 				//worldTime = nbttagcompound1.getLong("Time");
-			} catch(Exception exception1) {
-				exception1.printStackTrace();
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
 		} else {
-			Main.thePlayer = new Player(new Vector3f(0, 120, 0), new Vector3f());
+			Main.thePlayer = new Player(new Vector3f(12000000, 120, 12000000), new Vector3f());
 		}
 		provider = new ChunkLoader(worldDir, !isNewWorld);
 	}
@@ -199,52 +197,54 @@ public class World {
 
 	public void update(Camera camera) {
 		currentMasterChunks.clear();
-		for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
-			for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
-				int chunkX = x * 16;
-				int chunkZ = z * 16;
-				ChunkCoordinates chunkPos = ChunkCoordHelper.create(chunkX, chunkZ);
-
-				synchronized(chunkMap) {
-					if(chunkMap.get(chunkPos) != null) {
-						MasterChunk master = getChunkFromPosition(chunkPos);
-						if(master != null) {
-							if(isInValidRange(master.getOrigin())) {
-								if(Main.theNetwork != null) {
-									master.timer = MasterChunk.networkMaxTime;
-								} else {
-									master.timer = MasterChunk.localMaxTime;
-								}
-
-								if(master.dirty) {
-									if(master.getMesh() != null) {
-										if(master.getMesh().hasMeshInfo()) {
-											RawModel raw = Loader.loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
-											TexturedModel texModel = new TexturedModel(raw, MasterRenderer.currentTexturePack);
-											ChunkEntity entity = new ChunkEntity(texModel, master.getOrigin());
-											master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
-											master.setEntity(entity);
-											if(master.getMesh() != null) {
-												master.getMesh().removeMeshInfo();
-											}
-											master.destroyMesh();
-											master.dirty = false;
-										}
+		for (int x = -RENDER_SIZE; x < RENDER_SIZE; x++) {
+			for (int z = -RENDER_SIZE; z < RENDER_SIZE; z++) {
+				if(FastMath.abs(x) + FastMath.abs(z) > RENDER_SIZE) continue;
+				if(Main.thePlayer.getCurrentChunkPosition() != null) {
+					ChunkCoordinates playerChunk = Main.thePlayer.getCurrentChunkPosition();
+					ChunkCoordinates chunkPos = ChunkCoordHelper.create((int)(playerChunk.x + (x*16)), (int)(playerChunk.z + (z*16)));
+					
+					synchronized(chunkMap) {
+						if(chunkMap.get(chunkPos) != null) {
+							MasterChunk master = getChunkFromPosition(chunkPos);
+							if(master != null) {
+								if(isInValidRange(master.getOrigin())) {
+									if(Main.theNetwork != null) {
+										master.timer = MasterChunk.networkMaxTime;
 									} else {
-										master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
-										master.createMesh();
+										master.timer = MasterChunk.localMaxTime;
 									}
-								}
-							} 
-						}
 
-						if(master != null) {
-							if(!currentMasterChunks.contains(master)) {
-								currentMasterChunks.add(master);
+									if(master.dirty) {
+										if(master.getMesh() != null) {
+											if(master.getMesh().hasMeshInfo()) {
+												RawModel raw = Loader.loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
+												TexturedModel texModel = new TexturedModel(raw, MasterRenderer.currentTexturePack);
+												ChunkEntity entity = new ChunkEntity(texModel, master.getOrigin());
+												master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
+												master.setEntity(entity);
+												if(master.getMesh() != null) {
+													master.getMesh().removeMeshInfo();
+												}
+												master.destroyMesh();
+												master.dirty = false;
+											}
+										} else {
+											master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
+											master.createMesh();
+										}
+									}
+								} 
+							}
+
+							if(master != null) {
+								if(!currentMasterChunks.contains(master)) {
+									currentMasterChunks.add(master);
+								}
 							}
 						}
-					}
-				}	
+					}	
+				}
 			}
 		}
 
@@ -600,25 +600,25 @@ public class World {
 						if(Main.thePlayer != null && Main.thePlayer.getCurrentChunk() != null && !Main.thePlayer.tick) {
 							Main.thePlayer.tick = true;
 						}
-						for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
-							for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
-								int chunkX = x * 16;
-								int chunkZ = z * 16;
-
-								ChunkCoordinates chunkPos = ChunkCoordHelper.create(chunkX, chunkZ);
-								synchronized(chunkMap) {
-									if(chunkMap.get(chunkPos) == null && getChunkFromPosition(chunkPos) == null) {
-										if(provider.loadChunk(chunkX, chunkZ) != null) {
-											MasterChunk m = provider.loadChunk(chunkX, chunkZ);
-											addChunk(m);
-										} else {
-											//System.out.println(provider.loadChunk(chunkX, chunkZ) + " " + chunkX + " " + chunkZ);
-											MasterChunk m = new MasterChunk(noise, chunkPos);
-											addChunk(m);
+						for (int x = -RENDER_SIZE; x < RENDER_SIZE; x++) {
+							for (int z = -RENDER_SIZE; z < RENDER_SIZE; z++) {
+								if(FastMath.abs(x) + FastMath.abs(z) > RENDER_SIZE) continue;
+								if(Main.thePlayer.getCurrentChunkPosition() != null) {
+									ChunkCoordinates playerChunk = Main.thePlayer.getCurrentChunkPosition();
+									ChunkCoordinates chunkPos = ChunkCoordHelper.create((int)(playerChunk.x + (x*16)), (int)(playerChunk.z + (z*16)));
+									synchronized(chunkMap) {
+										if(chunkMap.get(chunkPos) == null && getChunkFromPosition(chunkPos) == null) {
+											if(provider.loadChunk(chunkPos.x, chunkPos.z) != null) {
+												MasterChunk m = provider.loadChunk(chunkPos.x, chunkPos.z);
+												addChunk(m);
+											} else {
+												MasterChunk m = new MasterChunk(noise, chunkPos);
+												addChunk(m);
+											}
 										}
 									}
-
 								}
+
 							}
 						}
 					}
@@ -637,28 +637,29 @@ public class World {
 							Main.thePlayer.tick = true;
 						}
 					}
-					
-					for (int x = (int) (Main.camPos.x - WORLD_SIZE) / 16; x < (Main.camPos.x + WORLD_SIZE) / 16; x++) {
-						for (int z = (int) (Main.camPos.z - WORLD_SIZE) / 16; z < (Main.camPos.z + WORLD_SIZE) / 16; z++) {
-							int chunkX = x * 16;
-							int chunkZ = z * 16;
 
-							ChunkCoordinates chunkPos = ChunkCoordHelper.create(chunkX, chunkZ);
-							synchronized(hasAsked) {
-								if(!hasAsked.contains(chunkPos)) {
-									hasAsked.add(chunkPos);
-									System.out.println(chunkPos);
-									PacketRequestChunk packet = new PacketRequestChunk();
-									packet.x = chunkX;
-									packet.z = chunkZ;
-									Main.theNetwork.client.sendTCP(packet);
-								} else {
-									continue;
-								}	
+					for (int x = -RENDER_SIZE; x < RENDER_SIZE; x++) {
+						for (int z = -RENDER_SIZE; z < RENDER_SIZE; z++) {
+							if(FastMath.abs(x) + FastMath.abs(z) > RENDER_SIZE) continue;
+							if(Main.thePlayer.getCurrentChunkPosition() != null) {
+								ChunkCoordinates playerChunk = Main.thePlayer.getCurrentChunkPosition();
+								ChunkCoordinates chunkPos = ChunkCoordHelper.create((int)(playerChunk.x + (x*16)), (int)(playerChunk.z + (z*16)));
+								synchronized(hasAsked) {
+									if(!hasAsked.contains(chunkPos)) {
+										hasAsked.add(chunkPos);
+
+										PacketRequestChunk packet = new PacketRequestChunk();
+										packet.x = chunkPos.x;
+										packet.z = chunkPos.z;
+										Main.theNetwork.client.sendTCP(packet);
+										//System.out.println("sent request for my pookie boo server");
+									} else {
+										continue;
+									}	
+								}
 							}
 						}
 					}
-
 				}
 			}
 		});
@@ -719,7 +720,7 @@ public class World {
 
 		//int renderSize = size*RENDER_SIZE;
 
-		if((distX <= WORLD_SIZE*size) && (distZ <= WORLD_SIZE*size)) {
+		if((distX <= RENDER_SIZE*8*size) && (distZ <= RENDER_SIZE*8*size)) {
 			return true;
 		}
 
@@ -730,7 +731,6 @@ public class World {
 		return getChunkFromPosition(ChunkCoordHelper.create((int)position.x, (int)position.z));
 	}
 
-
 	public MasterChunk getChunkFromPosition(ChunkCoordinates position) {
 		return chunkMap.get(position);
 	}
@@ -738,10 +738,9 @@ public class World {
 	public void saveWorld() {
 		for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
 			MasterChunk master = entry.getValue();
-			//System.out.println(master.getOrigin());
 			provider.saveChunk(master);
 		}
-		
+
 		saveLevel();
 	}
 
@@ -754,7 +753,7 @@ public class World {
 		if(this.chunkCreator != null) {
 			this.chunkCreator.interrupt();
 		}
-		
+
 		Main.inGameGUI = null;
 		Main.thePlayer = null;
 		ChunkCoordHelper.cleanUp();

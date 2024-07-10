@@ -67,7 +67,7 @@ public class NetworkHandler {
 	public List<ChatMessage> currentlyShownMessages = new ArrayList<ChatMessage>();
 	
 	private int tickTimer = 0;
-	public static final int NETWORK_PROTOCOL = 6;
+	public static final int NETWORK_PROTOCOL = 7;
 	
 	private static void registerKryoClasses() {
 		kryo.register(LoginRequest.class);
@@ -143,7 +143,6 @@ public class NetworkHandler {
 				currentlyShownMessages.get(i).tick();
 			}
 		}
-			
 		
 		if(tickTimer <= 5) {
 			tickTimer++;
@@ -207,10 +206,6 @@ public class NetworkHandler {
 	
 	public void update() {
 		if(!client.isConnected()) {
-			System.out.println("Yeahhh");
-		}
-		if(!client.isConnected()) {
-			this.disconnect();
 			Main.disconnect(false, Main.lang.translateKey("network.disconnect.ux"));
 			return;
 		}
@@ -316,9 +311,9 @@ public class NetworkHandler {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		Logger.log(LogLevel.INFO, "Disconnecting...");
 		client.stop();
 		Logger.log(LogLevel.INFO, "Disconnected.");

@@ -74,21 +74,22 @@ public class GuiServerList extends GuiScreen {
 				e.printStackTrace();
 			}
 			
-			for(int i = 0; i < 100; i++) {
-				NBTTagCompound nbttagcompound1 = baseTag.getCompoundTag("server-"+i);
-				if(nbttagcompound1 != null) {
-					if(nbttagcompound1.getString("IP").isEmpty()) {
-						break;
+			if(baseTag != null) {
+				for(int i = 0; i < 100; i++) {
+					NBTTagCompound nbttagcompound1 = baseTag.getCompoundTag("server-"+i);
+					if(nbttagcompound1 != null) {
+						if(nbttagcompound1.getString("IP").isEmpty()) {
+							break;
+						} else {
+							System.out.println(nbttagcompound1.getString("IP"));
+							servers.add(new Server(nbttagcompound1.getString("Name"),nbttagcompound1.getString("IP")));
+						}
+						
 					} else {
-						System.out.println(nbttagcompound1.getString("IP"));
-						servers.add(new Server(nbttagcompound1.getString("Name"),nbttagcompound1.getString("IP")));
+						break;
 					}
-					
-				} else {
-					break;
 				}
 			}
-
 		}
 		
 		add = new GuiButton(((Display.getWidth()/2)-200/2)-10, Display.getHeight()-30*2, 200, 30, Main.lang.translateKey("network.servers.add"));
