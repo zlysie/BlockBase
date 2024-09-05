@@ -17,6 +17,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
@@ -82,15 +84,16 @@ public class MainServer {
 	private static PTextField commandInputPanel;
 	public static JList<String> playersPanel;
 	static MainServerListener listener = new MainServerListener();
+	public static List<String> oppedPlayers = new ArrayList<>();
 	public static int xSpawn = 0,zSpawn = 0;
 
 	private static String[] splashes;
 
 	public static World theWorld;
 
-	private static String version = "S0.1.0";
-	public static final int NETWORK_PROTOCOL = 6;
-	
+	private static String version = "S0.1.1";
+	public static final int NETWORK_PROTOCOL = 7;
+
 	private static boolean nogui = false;
 
 	private static Thread saveThread;
@@ -110,20 +113,20 @@ public class MainServer {
 	}
 
 	public void startServer() {
-		if(!new File(MainServer.getWorkingDirectory()+"/saves/server-level/server-level.dat").exists()) {
+		if(!new File(MainServer.getWorkingDirectory()+"/saves/server-level/level.dat").exists()) {
 			theWorld = new World();
 			theWorld.initLevelLoader();
 			theWorld.createChunkRadius(8);
 			xSpawn = 0;
 			zSpawn = 0;
 			SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
-			append("Created world at .blockbase-server/saves/server-level.dat!\n\n");
+			append("Created new world!\n\n");
 		} else {
 			theWorld = World.loadWorld();
 			WorldPositionData data = SaveSystem.loadWorldPosition("server-level");
 			xSpawn = data.xSpawn;
 			zSpawn = data.zSpawn;
-			append("Loaded world at .blockbase-server/saves/server-level.dat!\n\n");
+			append("Loaded world at .blockbase-server/saves/level.dat!\n\n");
 		}
 
 		Logger.log(LogLevel.INFO,"Starting Server");
@@ -161,14 +164,14 @@ public class MainServer {
 			append("\n");
 			e.printStackTrace();
 		}
-		
+
 		new Thread(new Runnable() {
 
 			public void run() {    
 				try {
 					ServerSocket pingSocket = new ServerSocket(25555);
 					Socket socket = pingSocket.accept(); // Set up receive socket
-					
+
 					DataInputStream dIn = new DataInputStream(socket.getInputStream());
 					OutputStream out = socket.getOutputStream();
 					PrintWriter dOut = new PrintWriter(out, true);
@@ -176,39 +179,39 @@ public class MainServer {
 					boolean done = false;
 					while(!done) {
 						byte messageType = (byte) dIn.read();
-						
+
 						switch(messageType) {
-							case 1: // request for players
-								dOut.println(MainServerListener.players.size());
-								dOut.flush();
-								break;
-							case 2: //request forimage
-								byte imgBytes[];
-								File packpng = new File(MainServer.getWorkingDirectory() + "/server-icon.png");
-								if(packpng.exists()) {
-									BufferedImage bimg = ImageIO.read(packpng);
-									if(bimg.getWidth() == 128 && bimg.getWidth() == bimg.getHeight()) {
-										ImageIO.write(bimg,"PNG",baos);
-										System.out.println("sending picture!");
-									} else {
-										bimg = ImageIO.read(MainServer.class.getResourceAsStream("/assets/pack.png"));
-										ImageIO.write(bimg,"PNG",baos);
-									}
-								
+						case 1: // request for players
+							dOut.println(MainServerListener.players.size());
+							dOut.flush();
+							break;
+						case 2: //request forimage
+							byte imgBytes[];
+							File packpng = new File(MainServer.getWorkingDirectory() + "/server-icon.png");
+							if(packpng.exists()) {
+								BufferedImage bimg = ImageIO.read(packpng);
+								if(bimg.getWidth() == 128 && bimg.getWidth() == bimg.getHeight()) {
+									ImageIO.write(bimg,"PNG",baos);
+									System.out.println("sending picture!");
 								} else {
-									BufferedImage bimg = ImageIO.read(MainServer.class.getResourceAsStream("/assets/pack.png"));
+									bimg = ImageIO.read(MainServer.class.getResourceAsStream("/assets/pack.png"));
 									ImageIO.write(bimg,"PNG",baos);
 								}
-								imgBytes = baos.toByteArray();
-								baos.close();
-								out.write((Integer.toString(imgBytes.length)).getBytes());
-								out.write(imgBytes,0,imgBytes.length);
-								dOut.flush();
-								break;
-							default:
-								done = true;
+
+							} else {
+								BufferedImage bimg = ImageIO.read(MainServer.class.getResourceAsStream("/assets/pack.png"));
+								ImageIO.write(bimg,"PNG",baos);
+							}
+							imgBytes = baos.toByteArray();
+							baos.close();
+							out.write((Integer.toString(imgBytes.length)).getBytes());
+							out.write(imgBytes,0,imgBytes.length);
+							dOut.flush();
+							break;
+						default:
+							done = true;
 						}
-						
+
 					}
 					dOut.close();
 					dIn.close();
@@ -221,13 +224,13 @@ public class MainServer {
 			}
 
 		}).start();
-		
+
 		if(nogui) {
 			@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(System.in);
 			while(true) {
 				System.out.print("> ");
-				handleCommand(scanner.nextLine());
+				handleCommand(scanner.nextLine(), false);
 			}
 		}
 	}
@@ -280,7 +283,7 @@ public class MainServer {
 	}
 
 	public static void createServerInterface() {
-		
+
 		window = new JFrame("BlockBase Server Console");
 
 		URL iconURL = MainServer.class.getResource("/assets/iconx32.png");
@@ -327,13 +330,13 @@ public class MainServer {
 			public void actionPerformed(ActionEvent e) {
 				if(e.getID() == ActionEvent.ACTION_PERFORMED) {
 					if(!e.getActionCommand().contentEquals("")) {
-						handleCommand(e.getActionCommand());
+						handleCommand(e.getActionCommand(), false);
 					}
 					commandInputPanel.setText("");
 				}
 			}
 		});
-		
+
 		if(!nogui) {
 			append(splashes[new Random().nextInt(splashes.length)]);
 		}
@@ -364,20 +367,37 @@ public class MainServer {
 			}
 			playersPanel.setModel(listModel);
 		}
-		
+
 	}
 
-	private static void handleCommand(String cmd) {
+	public static String handleCommand(String cmd, boolean playerRan) {
 		String command = cmd.replace("/", "");
 
-		if(command.contentEquals("help")) {
-			append("\n");
-			append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
-			append("seed - returns the seed of the world - (seed)\n");
-			append("save - saves the world - (save)\n");
-			append("kick - kicks a player from their ip - (kick <id> <reason>) or (kick <playerName> <reason>)\n");
-			append("chunks - returns total chunk size of world - (chunks)\n");
-			append("players - see every player on server - (players)");
+		if(command.contentEquals("help")) {			
+			if(playerRan) {
+				return "setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n"
+						+ "seed - returns the seed of the world - (seed)\n"
+						+ "save - saves the world - (save)\n"
+						+ "kick - kicks a player from their ip - (kick <id> <reason>) or (kick <playerName> <reason>)\n"
+						+ "chunks - returns total chunk size of world - (chunks)\n"
+						+ "players - see every player on server - (players)\n"
+						+ "op - make player operator - (op <playerName>)\n"
+						+ "deop - remove operator perms from player - (deop <playerName>)\n"
+						+ "stop - stops server - (stop)";
+			} else {
+				append("\n");
+				append("setSpawn - sets spawn location of server - (setSpawn <x> <z>)\n");
+				append("seed - returns the seed of the world - (seed)\n");
+				append("save - saves the world - (save)\n");
+				append("kick - kicks a player from their ip - (kick <id> <reason>) or (kick <playerName> <reason>)\n");
+				append("chunks - returns total chunk size of world - (chunks)\n");
+				append("players - see every player on server - (players)\n");
+				append("op - make player operator - (op <playerName>)\n");
+				append("deop - remove operator perms from player - (deop <playerName>)\n");
+				append("stop - stops server - (stop)");
+				return null;
+			}
+
 		} else if(command.startsWith("setSpawn ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
@@ -404,16 +424,34 @@ public class MainServer {
 				xSpawn = tempX;
 				zSpawn = tempZ;
 				SaveSystem.saveWorldPosition("server-level", new WorldPositionData(xSpawn, zSpawn));
+				if(!playerRan) {
+					append("Successfully set spawn position to: [X="+xSpawn+", Z="+zSpawn+"]!\n");
+				} else {
+					return "[ Successfully set spawn position to: <X="+xSpawn+", Z="+zSpawn+">! ]";
+				}
 
-				append("Successfully set spawn position to: [X="+xSpawn+", Z="+zSpawn+"]!");
 			} else {
-				append("Unable to set spawn position as inputted values were invalid.\n");
+				if(!playerRan) {
+					append("Unable to set spawn position as inputted values were invalid.\n");
+				} else {
+					return "[ Unable to set spawn position as inputted values were invalid. ] ";
+				}
+				
 			}
 		} else if(command.contentEquals("seed")) {
-			append("World seed is: " + theWorld.getSeed());
+			if(!playerRan) {
+				append("World seed is: " + theWorld.getSeed()+"\n");
+			} else {
+				return "[ World seed is: " + theWorld.getSeed() +" ]";
+			}
 		} else if(command.contentEquals("save")) {
 			theWorld.saveWorld();
-			append("Saved world!");
+			if(!playerRan) {
+				append("Saved world!");
+			} else {
+				return "[ Saved world! ]";
+			}
+			
 		} else if(command.startsWith("kick ")) {
 			String[] split = cmd.split(" ");
 			boolean continueToDoStuff = true;
@@ -454,30 +492,48 @@ public class MainServer {
 			}
 
 			if(continueToDoStuff) {
-				System.out.println("kick " + (noIDGiven ? toID : playerID) + " ");
+				try {
+					String reason = cmd.split("kick " + (noIDGiven ? toID : playerID) + " ")[1];
 
-				String reason = cmd.split("kick " + (noIDGiven ? toID : playerID) + " ")[1];
-
-				PacketRemovePlayer packetKick = new PacketRemovePlayer();
-				packetKick.id = playerID;
-				packetKick.kick = true;
-				packetKick.message = reason;
-				MainServer.server.sendToAllTCP(packetKick);
-
-				append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.\n");
-
+					PacketRemovePlayer packetKick = new PacketRemovePlayer();
+					packetKick.id = playerID;
+					packetKick.kick = true;
+					packetKick.message = reason;
+					MainServer.server.sendToAllTCP(packetKick);
+					
+					if(!playerRan) {
+						append("Kicked " + (noIDGiven ? toID : playerID) + " from the server.\n");
+					} else {
+						return "[ Kicked " + (noIDGiven ? toID : playerID) + " from the server. ]";
+					}
+				} catch(ArrayIndexOutOfBoundsException e) {
+					if(!playerRan) {
+						append("err: reason not supplied!");
+					} else {
+						return "[ err: reason not supplied! ]";
+					}
+				}
+				
+				
 			} else {
-				append("ID was not valid / Reason was not supplied\n");
+				if(!playerRan) {
+					append("ID was not valid / Reason was not supplied.\n");
+				} else {
+					return "[ ID was not valid / Reason was not supplied. ]";
+				}
 			}
 		} else if(cmd.contentEquals("chunks")) {
+			if(playerRan) { return ""; }
 			append("Server has a total chunk size of: " + theWorld.chunkMap.size() + "\n");
 		} else if(command.startsWith("say ")) {
+			if(playerRan) { return ""; }
 			String message = command.substring(4);
 			PacketChatMessage packet = new PacketChatMessage();
 			packet.message=" [SERVER] " + message;
 			server.sendToAllUDP(packet);
 			append(packet.message+"\n");
 		} else if(command.contentEquals("players")) {
+			if(playerRan) { return ""; }
 			if(nogui) {
 				if(MainServerListener.players.size() != 0) {
 					for(Map.Entry<Integer, OtherPlayer> entry : MainServerListener.players.entrySet()) {
@@ -489,10 +545,59 @@ public class MainServer {
 			} else {
 				append("nogui only!");
 			}
-			
+
+		} else if(command.startsWith("op ")) {
+			String playerName = command.split("op ")[1];
+			boolean op = true;
+			for(String s : oppedPlayers) {
+				if(s.contentEquals(playerName)) {
+					op = false;
+					if(!playerRan) {
+						append("Player already opped!\n");
+					} else {
+						return "[ Player already opped! ]";
+					}
+					
+				}
+			}
+			if(op) {
+				oppedPlayers.add(playerName);
+				for(OtherPlayer p : MainServerListener.players.values()) {
+					if(p.userName != null) {
+						if(p.userName.contentEquals(playerName)) {
+							PacketChatMessage chat = new PacketChatMessage();
+							chat.message = "[ YOU ARE OP! ]";
+							p.c.sendTCP(chat);
+						}
+					}
+				}
+			}
+		} else if(command.startsWith("deop ")) {
+			String playerName = command.split("deop ")[1];
+			for(int i = 0; i < oppedPlayers.size(); i++) {
+				String s = oppedPlayers.get(i);
+				if(s.contentEquals(playerName)) {
+					oppedPlayers.remove(i);
+					if(!playerRan) {
+						append("Deopped: "+playerName+"!\n");
+					} else {
+						return "[ Deopped: "+playerName+"! ]";
+					}
+					
+				}
+			}
+		} else if(command.contentEquals("stop")) {
+			stopServer();
+			System.exit(0);
 		} else {
-			append("Command \""+ cmd + "\" was not recognized!\n");
+			if(!playerRan) {
+				append("Command \""+ cmd + "\" was not recognized!\n");
+			} else {
+				return "[ Command \""+ cmd + "\" was not recognized! ]";
+			}
+			
 		}
+		return null;
 	}
 
 	public static void main(String args[]) {
@@ -502,7 +607,7 @@ public class MainServer {
 				nogui = true;
 			}
 		}
-		
+
 		Random rand = new Random();
 		randomFloatNumber = rand.nextFloat();
 		MainServer main = new MainServer(nogui, 25565, 25565);
@@ -559,7 +664,7 @@ public class MainServer {
 			return folder;
 		}
 	}
-	
+
 	public static void append(String toAppend) {
 		if(!nogui) {
 			logPanel.append(toAppend);

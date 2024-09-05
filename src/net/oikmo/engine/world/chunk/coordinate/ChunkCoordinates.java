@@ -22,4 +22,8 @@ public final class ChunkCoordinates {
 	public int hashCode() {
 		return x << 16 ^ z;
 	}
+	
+	public String toString() {
+		return String.format("ChunkCoordinates[X=%s, Z=%s]", x, z);
+	}
 }

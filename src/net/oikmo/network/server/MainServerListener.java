@@ -1,6 +1,7 @@
 package net.oikmo.network.server;
 
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public class MainServerListener extends Listener {
 
 	public static Map<Integer, OtherPlayer> players = new HashMap<Integer, OtherPlayer>();
 
-	public void connected(Connection connection) {
+	public void connected(Connection connection) throws ConcurrentModificationException {
 		OtherPlayer player = new OtherPlayer();
 		player.c = connection;
 
@@ -161,7 +162,6 @@ public class MainServerListener extends Listener {
 					packetWorld.z = MainServer.zSpawn;
 				}
 				
-				
 				connection.sendUDP(packetWorld);
 				
 				PacketTickPlayer packetDisable = new PacketTickPlayer();
@@ -176,6 +176,14 @@ public class MainServerListener extends Listener {
 					System.out.println(p.userName + " " + p.c.getID());
 					// connection.sendTCP(packetUserName2);
 					connection.sendUDP(packetUserName2);
+				}
+				
+				for(String s : MainServer.oppedPlayers) {
+					if(s.contentEquals(request.getUserName())) {
+						PacketChatMessage chat = new PacketChatMessage();
+						chat.message = "[ YOU ARE OP! ]";
+						connection.sendTCP(chat);
+					}
 				}
 			} else {
 				response.PROTOCOL = -1;
@@ -316,8 +324,51 @@ public class MainServerListener extends Listener {
 		else if(object instanceof PacketChatMessage) {
 			PacketChatMessage packet = (PacketChatMessage) object;
 			packet.id = connection.getID();
-			MainServer.append(packet.message+"\n");
-			MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
+			String msg = packet.message.substring(packet.message.indexOf(">")+2);
+			System.out.println(msg);
+			if(msg.startsWith("/") && !msg.startsWith("/ ")) {
+				boolean senderr = true;
+				try {
+					for(String s : MainServer.oppedPlayers) {
+						if(s.contentEquals(players.get(packet.id).userName)) {
+							if(msg.contentEquals("/test")) {
+								PacketChatMessage chat = new PacketChatMessage();
+								chat.message = "[ and you get a test back! ]";
+								connection.sendTCP(chat);
+								senderr = false;
+							} else {
+								String output = MainServer.handleCommand(msg, true);
+								if(output.contains("\n")) {
+									for(String str : output.split("\n")) {
+										PacketChatMessage chat = new PacketChatMessage();
+										chat.message = str;
+										connection.sendTCP(chat);
+									}
+								} else {
+									PacketChatMessage chat = new PacketChatMessage();
+									chat.message = output;
+									connection.sendTCP(chat);
+								}
+								
+								
+								senderr = false;
+							}
+						}
+					}
+					if(senderr) {
+						PacketChatMessage chat = new PacketChatMessage();
+						chat.message = "[ You are not op! ]";
+						connection.sendTCP(chat);
+					}
+				} catch(Exception e) {
+					
+				}
+				
+			} else {
+				MainServer.append(packet.message+"\n");
+				MainServer.server.sendToAllExceptTCP(connection.getID(), packet);
+			}
+			
 		}
 	}
 }

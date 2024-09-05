@@ -94,7 +94,6 @@ public class World {
 	}
 	
 	private void saveLevel() {
-		checkSessionLock();
 		NBTTagCompound nbttagcompound = new NBTTagCompound();
 		nbttagcompound.setLong("Seed", seed);
 		
@@ -125,22 +124,6 @@ public class World {
 			}
 		} catch(Exception exception) {
 			exception.printStackTrace();
-		}
-	}
-	
-	public void checkSessionLock() {
-		try {
-			File file = new File(worldDir, "session.lock");
-			DataInputStream datainputstream = new DataInputStream(new FileInputStream(file));
-			try {
-				if(datainputstream.readLong() != lockTimestamp) {
-					System.err.print("The save is being accessed from another location, aborting");
-				}
-			} finally {
-				datainputstream.close();
-			}
-		} catch(IOException ioexception) {
-			System.err.print("Failed to check session lock, aborting");
 		}
 	}
 	
@@ -188,6 +171,7 @@ public class World {
 	}
 	
 	public void saveWorld() {
+		MainServer.append("Saving world!\n");
 		try {
 			for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
 				MasterChunk master = entry.getValue();
@@ -206,8 +190,6 @@ public class World {
 	
 	public void quitWorld() {
 		this.chunkCreator.interrupt();
-		MainServer.logPanel.append("Saving world!\n");
-		System.exit(0);
 	}
 	public static World loadWorld() {
 		Logger.log(LogLevel.WARN, "Loading world!");

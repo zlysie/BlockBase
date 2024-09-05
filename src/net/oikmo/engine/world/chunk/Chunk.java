@@ -30,6 +30,7 @@ public class Chunk {
 		this.blocks = blocks;
 		
 		if(Maths.indexOf(blocks, new byte[] { -1 }) != -1) { 
+			System.out.println("has a minus!!");
 			for(int i = 0; i < blocks.length; i++) {
 				blocks[i] = (byte) (blocks[i] + 1);
 			}

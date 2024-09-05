@@ -77,7 +77,6 @@ public class ChunkLoader {
 	}
 
 	public void saveChunk(MasterChunk chunk) {
-		MainServer.theWorld.checkSessionLock();
 		File file = chunkFileForXZ((int)chunk.getOrigin().x, (int)chunk.getOrigin().z);
 		try {
 			File file1 = new File(saveDir, "tmp_chunk.dat");
