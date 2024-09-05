@@ -56,8 +56,17 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		components.add(this);
 	}
 
+	private int ticks;
+	private boolean showMarker = true;
+	
 	@Override
 	public void tick() {
+		ticks++;
+		if(ticks > 30) {
+			showMarker = !showMarker;
+			ticks = 0;
+		}
+		
 		float mouseX = Mouse.getX();
 		float mouseY = Math.abs(Display.getHeight()-Mouse.getY());
 		
@@ -96,6 +105,9 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		
 		if(grabbed) {
 			handleKeyboardInput();
+		} else {
+			ticks = 0;
+			showMarker = false;
 		}
 
 		drawTexture(backgroundTexture, x, y, width, height);
@@ -103,7 +115,11 @@ public class GuiTextField  extends Gui implements GuiComponent {
 		if(inputText.length() == 0 && current != this) {
 			drawShadowString(Color.darkGray, (x+3)-width/2, y-fontSize/2, backgroundText);
 		} else {
-			drawShadowString((x+3)-width/2, y-fontSize/2, inputText);
+			String text = getInputText();
+			if(text.length() > 17) {
+				text = text.substring(text.length()-17, text.length());
+			}
+			drawShadowString((x+3)-width/2, y-fontSize/2, text + (showMarker ? "_" : ""));
 		}
 	}
 
@@ -121,7 +137,7 @@ public class GuiTextField  extends Gui implements GuiComponent {
 
 	protected void keyTyped(char c, int i) {
 		if(isValidCharacter(c)) {
-			if(x+width > x+font.getWidth(getInputText() + c)) {
+			if(getInputText().length() < 255) {
 				setInputText(getInputText() + c);
 			}
 		}

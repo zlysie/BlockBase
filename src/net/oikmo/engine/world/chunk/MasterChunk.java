@@ -92,7 +92,6 @@ public class MasterChunk {
 						}
 					}
 					
-					
 					chunk.setBlock(localX, localY, localZ, Block.Type.AIR.ordinal());
 					dirty = true;
 				}

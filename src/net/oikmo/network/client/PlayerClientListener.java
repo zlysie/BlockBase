@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -64,7 +65,6 @@ public class PlayerClientListener extends Listener {
 			if(response.getResponseText().equalsIgnoreCase("ok")){
 				Logger.log(LogLevel.INFO,"Login Ok");
 			} else {
-				Main.theNetwork.disconnect();
 				System.out.println(response.PROTOCOL + " " + NetworkHandler.NETWORK_PROTOCOL);
 				if(response.PROTOCOL != NetworkHandler.NETWORK_PROTOCOL) {
 					Main.disconnect(false, Main.lang.translateKey("network.disconnect.p").replace("%s", ""+response.PROTOCOL));
@@ -81,7 +81,8 @@ public class PlayerClientListener extends Listener {
 
 			OtherPlayer newPlayer = new OtherPlayer();
 			if(Main.theNetwork == null) {
-				Main.disconnect(false, Main.lang.translateKey("network.disconnect.n"));
+				System.out.println("return at PacketAddPlayer");
+				return;
 			} else {
 				if(!Main.theNetwork.players.containsKey(packet.id)) {
 					Main.theNetwork.players.put(packet.id, newPlayer);
@@ -112,8 +113,8 @@ public class PlayerClientListener extends Listener {
 		else if(object instanceof PacketUserName){
 			PacketUserName packet = (PacketUserName) object;
 			if(Main.theNetwork == null) {
-				Main.theNetwork.disconnect();
-				Main.disconnect(false, Main.lang.translateKey("network.disconnect.u"));
+				System.out.println("return at PacketUserName");
+				return;
 			} else if(Main.theNetwork.players == null) {
 				Main.theNetwork.players = new HashMap<>();
 			}
@@ -273,21 +274,14 @@ public class PlayerClientListener extends Listener {
 			PacketChunk packet = (PacketChunk) object;
 
 			byte[] blocks = new byte[1];
-			try {
-				blocks = (byte[])Maths.uncompressStream(packet.data);
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-			}
+			blocks = (byte[])Maths.uncompressStream(packet.data);
 			ChunkCoordinates chunkPos = ChunkCoordHelper.create(packet.x, packet.z);
-			
-			theWorld.addChunk(new MasterChunk(chunkPos, blocks));
+			Main.theWorld.addChunk(new MasterChunk(chunkPos, blocks));
 		}
 		else if(object instanceof PacketModifyChunk) {
 			PacketModifyChunk packet = (PacketModifyChunk) object;
 			Vector3f blockPos = new Vector3f(packet.x,packet.y,packet.z);
 			Block block = Block.getBlockFromOrdinal(packet.block);
-			
-			System.out.println(blockPos + " " + block);
 			
 			if(packet.refresh) {
 				theWorld.setBlockNoNet(blockPos, block);
@@ -305,8 +299,6 @@ public class PlayerClientListener extends Listener {
 			Main.thePlayer.setPos(packet.x,packet.y,packet.z);
 			
 			Main.thePlayer.getCamera().setRotation(packet.rotX, packet.rotY, packet.rotZ);
-			
-			System.out.println("Server world seed:" + packet.seed + " pos:" + packet.x + " " + packet.y + " " + packet.z);
 		} 
 		else if(object instanceof PacketTickPlayer) {
 			PacketTickPlayer packet = (PacketTickPlayer) object;
@@ -336,7 +328,6 @@ public class PlayerClientListener extends Listener {
 						Main.theNetwork.players.get(packet.id).userName =  packet.message.split(">")[0].replace("<", "").replace(">","").trim();
 					}
 				}
-				
 			}
 			
 			if(Main.currentScreen instanceof GuiChat) {

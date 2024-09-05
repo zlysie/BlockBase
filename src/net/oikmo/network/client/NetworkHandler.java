@@ -270,7 +270,7 @@ public class NetworkHandler {
 	}
 	
 	public void updateChunk(Vector3f position, Block block, boolean refresh) {
-		byte b = block != null ? block.getByteType() : -1;
+		byte b = block != null ? block.getByteType() : 0;
 		PacketModifyChunk packet = new PacketModifyChunk();
 		packet.refresh = refresh;
 		packet.x = (int) position.x;

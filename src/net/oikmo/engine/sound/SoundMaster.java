@@ -89,9 +89,6 @@ public class SoundMaster {
 	 * Reads audio files from {@link Main#getResources()}/music/
 	 */
 	private static void registerMusic() {
-		
-		registerMusicByte("music.undecided", "menu/undecided.ogg");
-		
 		registerMusicByte("music.jackblack", "jackblock.ogg");
 
 		registerMusicByte("music.minecraft", "calm1.ogg");

@@ -23,6 +23,7 @@ public class ChunkCoordHelper {
 	}
 	
 	public static void cleanUp() {
+		System.out.println("clean");
 		coords.clear();
 		System.gc();
 	}

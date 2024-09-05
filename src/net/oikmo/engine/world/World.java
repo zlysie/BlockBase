@@ -254,11 +254,12 @@ public class World {
 					MasterChunk master = (MasterChunk) chunkMap.values().toArray()[m];
 
 					if(master != null) {
-						if(!isInValidRange(master.getOrigin())) {
+						if(!isInValidRange(2, master.getOrigin())) {
 							if(master.timer > 0) {
 								master.timer--;
 							}
 							if(master.timer <= 0) {
+								System.out.println("BYE BITCH AT " + master.getOrigin());
 								chunkMap.remove(master.getOrigin());
 								hasAsked.remove(master.getOrigin());
 							}
@@ -599,6 +600,8 @@ public class World {
 					while (!Main.displayRequest) {
 						if(Main.thePlayer != null && Main.thePlayer.getCurrentChunk() != null && !Main.thePlayer.tick) {
 							Main.thePlayer.tick = true;
+						} else if(Main.thePlayer != null && Main.thePlayer.getCurrentChunk() == null) {
+							Main.thePlayer.tick = false;
 						}
 						for (int x = -RENDER_SIZE; x < RENDER_SIZE; x++) {
 							for (int z = -RENDER_SIZE; z < RENDER_SIZE; z++) {
@@ -615,6 +618,7 @@ public class World {
 												MasterChunk m = new MasterChunk(noise, chunkPos);
 												addChunk(m);
 											}
+											
 										}
 									}
 								}
@@ -635,24 +639,33 @@ public class World {
 					if(Main.thePlayer != null) {
 						if(Main.thePlayer.getCurrentChunk() != null && !Main.thePlayer.tick) {
 							Main.thePlayer.tick = true;
+						} else if(Main.thePlayer.getCurrentChunk() == null && Main.thePlayer.tick) {
+							Main.thePlayer.tick = false;
 						}
 					}
 
 					for (int x = -RENDER_SIZE; x < RENDER_SIZE; x++) {
 						for (int z = -RENDER_SIZE; z < RENDER_SIZE; z++) {
-							if(FastMath.abs(x) + FastMath.abs(z) > RENDER_SIZE) continue;
+							if(FastMath.abs(x) + FastMath.abs(z) > RENDER_SIZE) { continue; }
+							if(Main.thePlayer == null) { continue; }
 							if(Main.thePlayer.getCurrentChunkPosition() != null) {
 								ChunkCoordinates playerChunk = Main.thePlayer.getCurrentChunkPosition();
 								ChunkCoordinates chunkPos = ChunkCoordHelper.create((int)(playerChunk.x + (x*16)), (int)(playerChunk.z + (z*16)));
 								synchronized(hasAsked) {
-									if(!hasAsked.contains(chunkPos)) {
+									if(!hasAsked.contains(chunkPos) || chunkMap.get(chunkPos) == null) {
 										hasAsked.add(chunkPos);
 
 										PacketRequestChunk packet = new PacketRequestChunk();
 										packet.x = chunkPos.x;
 										packet.z = chunkPos.z;
-										Main.theNetwork.client.sendTCP(packet);
-										//System.out.println("sent request for my pookie boo server");
+										if(Main.theNetwork != null && Main.theNetwork.client != null) {
+											Main.theNetwork.client.sendTCP(packet);
+										}
+										
+										try {
+											Thread.sleep(100);
+										} catch (InterruptedException e) {}
+										//System.out.println("sent request for my pookie boo server " + chunkPos);
 									} else {
 										continue;
 									}	

@@ -268,6 +268,7 @@ public class GuiServerList extends GuiScreen {
 			serverCompound.setString("IP", s.getIP());
 			serverCompound.setString("Name", s.getName());
 			base.setCompoundTag("server-"+i, serverCompound);
+			System.out.println(i);
 		}
 		File save = new File( Main.getWorkingDirectory(), "/servers.dat");
 		try {

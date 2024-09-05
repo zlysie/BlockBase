@@ -70,12 +70,10 @@ public class Camera {
 	boolean perspectiveLock = false;
 	
 	/**
-	 * Fly cam
-	 * @param heightOffset 
+	 * Attaches to the player
+	 * @param player
 	 */
 	public void update(Player player) {
-		
-		
 		if(Keyboard.isKeyDown(Keyboard.KEY_F5)) {
 			if(!perspectiveLock) {
 				perspective = !perspective;
@@ -221,6 +219,7 @@ public class Camera {
 			}
 			
 			if(perspective) {
+				
 				calculateAngleAroundPlayer();
 				float horizontalDistance = calculateHorizontalDistance();
 				float verticalDistance = calculateVerticalDistance();

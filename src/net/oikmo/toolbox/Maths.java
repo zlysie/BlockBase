@@ -278,14 +278,17 @@ public class Maths {
 		oos.close();
 		return baos.toByteArray();
 	}
-
-	public static Object uncompressStream(byte[] data) throws ClassNotFoundException, IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(data);
-		GZIPInputStream gzipIn = new GZIPInputStream(bais);
-		ObjectInputStream objectIn = new ObjectInputStream(gzipIn);
-		Object obj = objectIn.readObject();
-		objectIn.close();
-
+	
+	public static Object uncompressStream(byte[] data) {
+		Object obj = null;
+		try {
+			ByteArrayInputStream bais = new ByteArrayInputStream(data);
+			GZIPInputStream gzipIn = new GZIPInputStream(bais);
+			ObjectInputStream objectIn = new ObjectInputStream(gzipIn);
+			obj = objectIn.readObject();
+			objectIn.close();
+		} catch(ClassNotFoundException | IOException e) {}
+		
 		return obj;
 	}
 

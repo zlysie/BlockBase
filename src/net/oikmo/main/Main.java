@@ -62,7 +62,7 @@ public class Main {
 	/**  set as "BlockBase" used for UIs and windows */
 	public static final String gameName = "BlockBase";
 	/** used in the form of "xN.N" with x being type of version, a = alpha, b = beta and N.N being the version e.g 0.1.2 or 1.2.6 */
-	public static final String version = "a0.2.0 [2] [DEV]";
+	public static final String version = "a0.2.0 [3] [DEV]";
 	/** a combination of both gameName and version */
 	public static final String gameVersion = gameName + " " + version;
 	

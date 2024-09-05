@@ -1,7 +1,6 @@
 package net.oikmo.engine.world.chunk;
 
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import org.lwjgl.util.vector.Vector3f;
 
