@@ -54,9 +54,8 @@ public class Chunk {
 	}
 
 	/**
-	 * Creates blocks from the top layer (given by {@link PerlinNoiseGenerator}) and is extended down to YLevel 0 in which it is refactored via {@link #calculateBlockType(int)}
-	 * @param origin
-	 * @param noiseGen
+	 * Creates blocks from the top layer (given by {@link net.oikmo.toolbox.noise.OpenSimplexNoise}) and is extended down to YLevel 0 in which it is refactored by it's height.
+	 * @param noiseGen The noise generator used to have the heights
 	 */
 	private void generateChunk(OpenSimplexNoise noiseGen) {
 		for (byte x = 0; x < CHUNK_SIZE; x++) {

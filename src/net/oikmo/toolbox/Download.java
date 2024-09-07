@@ -8,9 +8,9 @@ import java.net.URL;
 import java.util.Observable;
 
 /**
- * {@link https://stackoverflow.com/questions/14069848/download-a-file-while-also-updating-a-jprogressbar}
+ * <a href="https://stackoverflow.com/questions/14069848/download-a-file-while-also-updating-a-jprogressbar">https://stackoverflow.com/questions/14069848/download-a-file-while-also-updating-a-jprogressbar</a>
  * <br>
- * thank you pookie bear <3
+ * thank you pookie bear &#60;3
  * @author SomeJavaGuy
  *
  */

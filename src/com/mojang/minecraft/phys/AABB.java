@@ -1,14 +1,34 @@
 package com.mojang.minecraft.phys;
 
+/**
+ * Bounding boxes
+ * @author Notch
+ */
 public class AABB {
+	/** Amount of error */
 	private float epsilon = 0.0F;
+	/** The first x coordinate of a bounding box. */
 	public float minX;
+	/** The first y coordinate of a bounding box. */
 	public float minY;
+	/** The first z coordinate of a bounding box. */
 	public float minZ;
+	/** The second x coordinate of a bounding box. */
 	public float maxX;
+	/** The second y coordinate of a bounding box. */
 	public float maxY;
+	/** The second z coordinate of a bounding box. */
 	public float maxZ;
-
+	
+	/**
+	 * AABB Constructor
+	 * @param x0 The first x coordinate of a bounding box.
+	 * @param y0 The first y coordinate of a bounding box.
+	 * @param z0 The first z coordinate of a bounding box.
+	 * @param x1 The second x coordinate of a bounding box.
+	 * @param y1 The second y coordinate of a bounding box.
+	 * @param z1 The second z coordinate of a bounding box.
+	 */
 	public AABB(float x0, float y0, float z0, float x1, float y1, float z1) {
 		this.minX = x0;
 		this.minY = y0;
@@ -18,6 +38,13 @@ public class AABB {
 		this.maxZ = z1;
 	}
 
+	/**
+	 * Returns a bounding box expanded by the specified vector (if negative numbers are given it will shrink). 
+	 * @param xa X size to expand to
+	 * @param ya Y size to expand to
+	 * @param za Z size to expand to
+	 * @return {@link AABB}
+	 */
 	public AABB expand(float xa, float ya, float za) {
 		float _x0 = this.minX;
 		float _y0 = this.minY;
@@ -51,7 +78,15 @@ public class AABB {
 
 		return new AABB(_x0, _y0, _z0, _x1, _y1, _z1);
 	}
-
+	
+	
+	/** 
+	 * Same as {@link #expand(float, float, float)}
+	 * @param xa X size to grow to
+	 * @param ya Y size to grow to
+	 * @param za Z size to grow to
+	 * @return {@link AABB}
+	 */
 	public AABB grow(float xa, float ya, float za) {
 		float _x0 = this.minX - xa;
 		float _y0 = this.minY - ya;
@@ -61,7 +96,12 @@ public class AABB {
 		float _z1 = this.maxZ + za;
 		return new AABB(_x0, _y0, _z0, _x1, _y1, _z1);
 	}
-
+	
+	/** Returns the amount of clipping occuring between two AABBs (and it's expected xa)
+	 * @param c other bounding box
+	 * @param xa predicted move to
+	 * @return {@link Float}
+	 */
 	public float clipXCollide(AABB c, float xa) {
 		if(c.maxY > this.minY && c.minY < this.maxY) {
 			if(c.maxZ > this.minZ && c.minZ < this.maxZ) {
@@ -89,6 +129,11 @@ public class AABB {
 		}
 	}
 
+	/** Returns the amount of clipping occurring between two AABBs (and it's expected ya)
+	 * @param c other bounding box
+	 * @param ya predicted move to
+	 * @return {@link Float}
+	 */
 	public float clipYCollide(AABB c, float ya) {
 		if(c.maxX > this.minX && c.minX < this.maxX) {
 			if(c.maxZ > this.minZ && c.minZ < this.maxZ) {
@@ -116,6 +161,11 @@ public class AABB {
 		}
 	}
 
+	/** Returns the amount of clipping occuring between two AABBs (and it's expected za)
+	 * @param c other bounding box
+	 * @param za predicted move to
+	 * @return {@link Float}
+	 */
 	public float clipZCollide(AABB c, float za) {
 		if(c.maxX > this.minX && c.minX < this.maxX) {
 			if(c.maxY > this.minY && c.minY < this.maxY) {
@@ -143,10 +193,20 @@ public class AABB {
 		}
 	}
 
+	/** 
+	 * Returns whether the given bounding box intersects with this one 
+	 * @param c other bounding box
+	 * @return {@link Boolean}
+	 */
 	public boolean intersects(AABB c) {
 		return c.maxX > this.minX && c.minX < this.maxX ? (c.maxY > this.minY && c.minY < this.maxY ? c.maxZ > this.minZ && c.minZ < this.maxZ : false) : false;
 	}
-
+	
+	/** Moves this bounding box by specified vector 
+	 * @param xa X to move by
+	 * @param ya Y to move by
+	 * @param za Z to move by
+	 */
 	public void move(float xa, float ya, float za) {
 		this.minX += xa;
 		this.minY += ya;

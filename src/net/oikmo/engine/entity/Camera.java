@@ -45,7 +45,6 @@ public class Camera {
 	 * 
 	 * @param position
 	 * @param rotation
-	 * @param scale
 	 */
 	public Camera(Vector3f position, Vector3f rotation) {
 		this.position = position;
@@ -273,7 +272,7 @@ public class Camera {
 
 	/**
 	 * Sets position to given 3D Vector
-	 * @param vector
+	 * @param v
 	 */
 	public void setPosition(Vector3f v) {
 		this.position = v;

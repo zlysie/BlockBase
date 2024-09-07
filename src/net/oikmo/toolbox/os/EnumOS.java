@@ -24,13 +24,13 @@ public enum EnumOS
 	 * <br>
 	 * OS' it tries to find.
 	 * <ul>
-	 * <li>Windows (win,  {@code {@link EnumOS#windows})</li>
-	 * <li>Linux (linux, {@code {@link EnumOS#linux})</li>
-	 * <li>Unix (unix, {@code {@link EnumOS#linux})</li>
-	 * <li>Mac (mac, {@code {@link EnumOS#macos})</li>
-	 * <li>Solaris (solaris, {@code {@link EnumOS#solaris})</li>
-	 * <li>Sunos (sunos, {@code {@link EnumOS#unknown})</li>
-	 * <li>If it can find one ({@code {@link EnumOS#unknown})</li>
+	 * <li>Windows (win, {@link EnumOS#windows})</li>
+	 * <li>Linux (linux, {@link EnumOS#linux})</li>
+	 * <li>Unix (unix, {@link EnumOS#linux})</li>
+	 * <li>Mac (mac, {@link EnumOS#macos})</li>
+	 * <li>Solaris (solaris, {@link EnumOS#solaris})</li>
+	 * <li>Sunos (sunos, {@link EnumOS#unknown})</li>
+	 * <li>If it can find one ({@link EnumOS#unknown})</li>
 	 * </ul>
 	 * @return {@link EnumOS}
 	 */

@@ -706,8 +706,8 @@ final public class FastMath {
 	/**
 	 * Returns a random float between 0 and 1.
 	 * 
-	 * @return A random float between <tt>0.0f</tt> (inclusive) to
-	 *         <tt>1.0f</tt> (exclusive).
+	 * @return A random float between <code>0.0f</code> (inclusive) to
+	 *         <code>1.0f</code> (exclusive).
 	 */
 	public static float nextRandomFloat() {
 		return rand.nextFloat();
@@ -716,8 +716,8 @@ final public class FastMath {
 	/**
 	 * Returns a random integer between min and max.
 	 * 
-	 * @return A random int between <tt>min</tt> (inclusive) to
-	 *         <tt>max</tt> (inclusive).
+	 * @return A random int between <code>min</code> (inclusive) to
+	 *         <code>max</code> (inclusive).
 	 */
 	public static int nextRandomInt(int min, int max) {
 		return (int) (nextRandomFloat() * (max - min + 1)) + min;
