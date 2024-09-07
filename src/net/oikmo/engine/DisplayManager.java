@@ -134,7 +134,7 @@ public class DisplayManager {
 	/**
 	 * Captures a frame of the screen (getImage()) and saves it to the screenshots folder.
 	 * 
-	 * @see {@link #getImage(BufferedImage, ByteBuffer)}
+	 * @see getImage(BufferedImage, ByteBuffer)
 	 */
 	public static void saveScreenshot() {
 		File saveDirectory =  new File(Main.getWorkingDirectory().getPath()+"/screenshots/");

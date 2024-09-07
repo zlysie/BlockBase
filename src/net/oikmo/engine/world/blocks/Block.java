@@ -24,7 +24,7 @@ public abstract class Block {
 	/** Oak log block */
 	public static final Block oaklog = new BlockOakLog(Type.WOOD);
 	/** Oak leaves block */
-	public static final Block oakleaf = new BlockOakLeaf(Type.LEAVES);
+	public static final Block oakleaf = new BlockOakLeaves(Type.LEAVES);
 	/** Oak plank block */
 	public static final Block oakplanks = new BlockOakPlanks(Type.PLANKS);
 	/** Glass block */

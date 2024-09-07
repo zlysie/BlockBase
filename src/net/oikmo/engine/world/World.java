@@ -27,6 +27,7 @@ import net.oikmo.engine.entity.Player;
 import net.oikmo.engine.models.RawModel;
 import net.oikmo.engine.models.TexturedModel;
 import net.oikmo.engine.nbt.NBTTagCompound;
+import net.oikmo.engine.network.packet.PacketRequestChunk;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.renderers.chunk.ChunkEntity;
 import net.oikmo.engine.sound.SoundMaster;
@@ -38,7 +39,6 @@ import net.oikmo.engine.world.chunk.coordinate.ChunkCoordHelper;
 import net.oikmo.engine.world.chunk.coordinate.ChunkCoordinates;
 import net.oikmo.main.Main;
 import net.oikmo.main.gui.GuiMainMenu;
-import net.oikmo.network.shared.PacketRequestChunk;
 import net.oikmo.toolbox.CompressedStreamTools;
 import net.oikmo.toolbox.FastMath;
 import net.oikmo.toolbox.Logger;
@@ -606,6 +606,9 @@ public class World {
 						for (int x = -RENDER_SIZE; x < RENDER_SIZE; x++) {
 							for (int z = -RENDER_SIZE; z < RENDER_SIZE; z++) {
 								if(FastMath.abs(x) + FastMath.abs(z) > RENDER_SIZE) continue;
+								if(Main.thePlayer == null) {
+									return;
+								}
 								if(Main.thePlayer.getCurrentChunkPosition() != null) {
 									ChunkCoordinates playerChunk = Main.thePlayer.getCurrentChunkPosition();
 									ChunkCoordinates chunkPos = ChunkCoordHelper.create((int)(playerChunk.x + (x*16)), (int)(playerChunk.z + (z*16)));
@@ -705,11 +708,10 @@ public class World {
 	}
 
 	public int getHeightFromPosition(Vector3f position) {
-		ChunkCoordinates chunkPos = Maths.calculateChunkPosition(position);
-		MasterChunk m = getChunkFromPosition(chunkPos);
+		MasterChunk m = getChunkFromPosition(Maths.calculateChunkPosition(position));
 
 		if(m != null) {
-			return m.getChunk().getHeightFromPosition(chunkPos, position);
+			return m.getChunk().getHeightFromPosition(position);
 		}
 		return -1;
 	}
@@ -725,7 +727,6 @@ public class World {
 	public boolean isInValidRange(int size, ChunkCoordinates origin) {
 		return isInValidRange(size, origin.x, origin.z);
 	}
-
 
 	public boolean isInValidRange(int size, float x, float z) {
 		int distX = (int) FastMath.abs((Main.camPos.x) - x);

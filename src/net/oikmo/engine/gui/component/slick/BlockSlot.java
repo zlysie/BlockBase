@@ -9,18 +9,34 @@ import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
 
+/**
+ * The block item that shows in the creative menu
+ * @author Oikmo
+ */
 public class BlockSlot extends Gui implements GuiComponent {
+	/** Actively hovering slot */
 	public static BlockSlot currentlyHoveringSlot;
+	/** True if any instance of the slot is being selected */
 	private static boolean lockedRightNow = false;
 	
+	/** If the mouse is hovering over the slot */
 	private boolean isHovering;
 	
+	/** What item does it hold */
 	private Item item;
 	
+	/** Dimensions of the slot */
 	private float x, y, width=32, height=32;
-
+	
+	/** To prevent action being repeated in multiple frames at once */
 	private boolean lockButton = false;
 	
+	/**
+	 * BlockSlot constructor
+	 * @param item Item to store in slot
+	 * @param x X coordinate of where slot should be
+	 * @param y Y coordinate of where slot should be
+	 */
 	public BlockSlot(Item item, float x, float y) {
 		this.item = item;
 		this.x = x;
@@ -64,11 +80,20 @@ public class BlockSlot extends Gui implements GuiComponent {
 		drawImage(item.getImage(), x, y, width, height);
 	}
 	
+	/**
+	 * Sets the position of the slot
+	 * @param x X position to be set to
+	 * @param y Y position to be set to
+	 */
 	public void setPosition(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 	
+	/**
+	 * Returns the stored item
+	 * @return {@link Item}
+	 */
 	public Item getItem() {
 		return item;
 	}
@@ -76,6 +101,7 @@ public class BlockSlot extends Gui implements GuiComponent {
 	@Override
 	public void onCleanUp() {}
 
+	/** Drops the active static instance */
 	public static void dropCurrent() {
 		currentlyHoveringSlot = null;
 		lockedRightNow = false;

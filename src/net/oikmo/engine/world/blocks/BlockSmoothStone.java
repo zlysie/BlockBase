@@ -1,7 +1,15 @@
 package net.oikmo.engine.world.blocks;
 
+/**
+ * Stone block but smooth...
+ * @author Oikmo
+ */
 public class BlockSmoothStone extends Block {
 	
+	/**
+	 * Smooth stone constructor
+	 * @param type Block type
+	 */
 	public BlockSmoothStone(Type type) {
 		super(type);
 	}

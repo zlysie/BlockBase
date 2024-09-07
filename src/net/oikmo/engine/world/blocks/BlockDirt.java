@@ -1,7 +1,15 @@
 package net.oikmo.engine.world.blocks;
 
+/**
+ * A block of dirt... wow...
+ * @author Oikmo
+ */
 public class BlockDirt extends Block {
-
+	
+	/**
+	 * Dirt block constructor
+	 * @param type Block type
+	 */
 	public BlockDirt(Type type) {
 		super(type);
 	}

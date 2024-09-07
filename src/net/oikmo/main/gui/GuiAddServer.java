@@ -8,8 +8,8 @@ import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
 import net.oikmo.engine.gui.component.slick.textfield.GuiTextField;
+import net.oikmo.engine.network.Server;
 import net.oikmo.main.Main;
-import net.oikmo.network.client.Server;
 
 public class GuiAddServer extends GuiScreen {
 	

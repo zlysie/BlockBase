@@ -12,8 +12,8 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiChatBar;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
+import net.oikmo.engine.network.packet.PacketChatMessage;
 import net.oikmo.main.Main;
-import net.oikmo.network.shared.PacketChatMessage;
 
 public class GuiChat extends GuiScreen {
 	

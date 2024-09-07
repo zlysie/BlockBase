@@ -8,9 +8,9 @@ import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.gui.component.slick.GuiCommand;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
+import net.oikmo.engine.network.OtherPlayer;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.Main;
-import net.oikmo.network.client.OtherPlayer;
 
 public class GuiPauseMenu extends GuiScreen {
 	

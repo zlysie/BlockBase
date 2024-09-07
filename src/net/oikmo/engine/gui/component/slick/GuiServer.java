@@ -29,9 +29,9 @@ import org.newdawn.slick.opengl.TextureLoader;
 import net.oikmo.engine.ResourceLoader;
 import net.oikmo.engine.gui.Gui;
 import net.oikmo.engine.gui.component.slick.button.GuiButton;
+import net.oikmo.engine.network.Server;
 import net.oikmo.engine.sound.SoundMaster;
 import net.oikmo.main.gui.GuiServerList;
-import net.oikmo.network.client.Server;
 import net.oikmo.toolbox.Maths;
 
 public class GuiServer extends Gui implements GuiComponent {

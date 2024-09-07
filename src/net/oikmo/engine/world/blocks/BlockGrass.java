@@ -1,7 +1,15 @@
 package net.oikmo.engine.world.blocks;
 
+/**
+ * Dirt with a nice green blanket
+ * @author Oikmo
+ */
 public class BlockGrass extends Block {
 
+	/**
+	 * Grass block constructor
+	 * @param type Block type
+	 */
 	public BlockGrass(Type type) {
 		super(type);
 	}
@@ -11,7 +19,7 @@ public class BlockGrass extends Block {
 	}
 	
 	public float getStrength() {
-		return 0.3f;
+		return 0.2f;
 	}
 	
 	public boolean blocksLight() {

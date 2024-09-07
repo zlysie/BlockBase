@@ -1,7 +1,15 @@
 package net.oikmo.engine.world.blocks;
 
+/**
+ * Iron block, holds iron
+ * @author Oikmo
+ */
 public class BlockIronBlock extends Block {
 
+	/**
+	 * Iron block constructor
+	 * @param type Block type
+	 */
 	public BlockIronBlock(Type type) {
 		super(type);
 	}
@@ -11,7 +19,7 @@ public class BlockIronBlock extends Block {
 	}
 	
 	public float getStrength() {
-		return 1f;
+		return 0.6f;
 	}
 	
 	public boolean blocksLight() {

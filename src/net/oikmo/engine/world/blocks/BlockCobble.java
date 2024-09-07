@@ -1,7 +1,16 @@
 package net.oikmo.engine.world.blocks;
 
+/**
+ * Cobblestone... cool i guess
+ * @author Oikmo
+ *
+ */
 public class BlockCobble extends Block {
 	
+	/**
+	 * Cobble contructor
+	 * @param type Block type
+	 */
 	public BlockCobble(Type type) {
 		super(type);
 	}

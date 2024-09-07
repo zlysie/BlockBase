@@ -17,13 +17,23 @@ import net.oikmo.toolbox.noise.OpenSimplexNoise;
  * @author Oikmo
  */
 public class Chunk {
+	/** Static size for all chunks */
 	public static final byte CHUNK_SIZE = 16;
 	
-	private byte[] blocks;
-	private int[][] heights;
-	private int[][][] lightDepths;
+	/** Position of chunk in the world */
 	private ChunkCoordinates origin;
+	/** Blocks array (holds block indexes) */
+	private byte[] blocks;
+	/** Holds the highest block heights */
+	private int[][] heights;
+	/** Light values */
+	private int[][][] lightDepths;
 	
+	/**
+	 * Creates an entirely new chunk in which it calls {@link #generateChunk(OpenSimplexNoise)} and generates light values {@link #calcLightDepths(int, int, int, int)}
+	 * @param noiseGen Noise generator to use
+	 * @param origin Position of chunk in the world
+	 */
 	public Chunk(OpenSimplexNoise noiseGen, ChunkCoordinates origin) {
 		blocks = new byte[32768];
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
@@ -34,9 +44,9 @@ public class Chunk {
 	}
 	
 	/**
-	 * Loads chunk from file using bytes
-	 * @param blocks
-	 * @param origin
+	 * Loads chunk using bytes
+	 * @param blocks Given blocks array 
+	 * @param origin Position of chunk in the world
 	 */
 	public Chunk(byte[] blocks, ChunkCoordinates origin) {
 		this.blocks = blocks;
@@ -96,6 +106,14 @@ public class Chunk {
 		calculateHeights();
 	}
 	
+	/**
+	 * Gets the brightness values from given vector
+	 * 
+	 * @param x X position of block to check
+	 * @param y Y position of block to check
+	 * @param z Z position of block to check
+	 * @return {@link Float}
+	 */
 	public float getBrightness(int x, int y, int z) {
 		if(x == -1 || y == -1 || z == -1 || x == CHUNK_SIZE || y == CHUNK_SIZE || z == CHUNK_SIZE) {
 			int actualX = origin.x + x;
@@ -110,9 +128,16 @@ public class Chunk {
 		return this.isLit(x, y, z) ? 1.0F : 0.6F;
 	}
 	
-	public void calcLightDepths(int x0, int y0, int x1, int y1) {
-		for(int x = x0; x < x0 + x1; ++x) {
-			for(int z = y0; z < y0 + y1; ++z) {
+	/**
+	 * Calculates light brightness from a certain area in the chunk (going from the top to the bottom)
+	 * @param minX Minimum X
+	 * @param minZ Minimum Z
+	 * @param maxX Maximum X
+	 * @param maxZ Maximum Z
+	 */
+	public void calcLightDepths(int minX, int minZ, int maxX, int maxZ) {
+		for(int x = minX; x < minX + maxX; ++x) {
+			for(int z = minZ; z < minZ + maxZ; ++z) {
 				for(int y = 0; y < World.WORLD_HEIGHT; y++) {
 					int oldDepth = this.lightDepths[x][y][z];
 					int calculatedY;
@@ -128,15 +153,33 @@ public class Chunk {
 		}
 	}
 	
+	/**
+	 * Returns if the block at the given vector blocks the light
+	 * @param x X position of block
+	 * @param y Y position of block
+	 * @param z Z position of block
+	 * @return {@link Boolean}
+	 */
 	public boolean isLightBlocker(int x, int y, int z) {
 		Block block = Block.getBlockFromOrdinal((byte)getBlock(x, y, z));
 		return block == null ? false : block.blocksLight();
 	}
 	
+	/**
+	 * Checks if the specified vector has light or not
+	 * @param x X position of block
+	 * @param y Y position of block
+	 * @param z Z position of block
+	 * @return {@link Boolean}
+	 */
 	public boolean isLit(int x, int y, int z) {
 		return x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < World.WORLD_HEIGHT && z < CHUNK_SIZE ? y >= this.lightDepths[x][y][z] : false;
 	}
 	
+	/**
+	 * Chooses a random area of the chunk and attempts to generate at that position
+	 * @param seed World seed
+	 */
 	private void generateTrees(long seed) {
 		Random rand = new Random(seed);
 		
@@ -144,12 +187,16 @@ public class Chunk {
 			int x = new Random().nextInt(CHUNK_SIZE);
 			int z = new Random().nextInt(CHUNK_SIZE);
 			
-			checkForTree(x, z);
+			checkAndGenerateTree(x, z);
 		}
-		
 	}
 	
-	private void checkForTree(int x, int z) {
+	/**
+	 * Checks if it is in a valid range and has no oak leaves nearby, if so generate tree
+	 * @param x X position of tree
+	 * @param z Z position of tree
+	 */
+	private void checkAndGenerateTree(int x, int z) {
 		if(x > 2 && x < CHUNK_SIZE-2 && z > 2 && z < CHUNK_SIZE-2) {
 			int height = heights[x][z];
 			if(!blockHasSpecificNeighbours(Block.oaklog, x,height,z)) {
@@ -246,7 +293,7 @@ public class Chunk {
 		} else {
 			x = new Random().nextInt(CHUNK_SIZE);
 			z = new Random().nextInt(CHUNK_SIZE);
-			checkForTree(x, z);
+			checkAndGenerateTree(x, z);
 		}
 	}
 	
@@ -296,7 +343,13 @@ public class Chunk {
 		}
 	}
 	
-	public int getHeightFromPosition(ChunkCoordinates origin, Vector3f position) {
+	/**
+	 * Returns the height from 
+	 * @param origin
+	 * @param position
+	 * @return
+	 */
+	public int getHeightFromPosition(Vector3f position) {
 		Vector3f rounded = Maths.roundVectorTo(position);
 		int x = (int) (rounded.x - origin.x);
 		if(x < 0) {x = 0;}
@@ -307,18 +360,42 @@ public class Chunk {
 		return heights[x][z] + 2;
 	}
 	
+	/**
+	 * Returns the heighest point on specified coordinates
+	 * @param x X coordinate
+	 * @param z Y coordinate
+	 * @return {@link Integer}
+	 */
 	public int getHeightFromPosition(int x, int z) {
 		return heights[x][z];
 	}
 	
+	/**
+	 * 	Sets a block ID for a position in the chunk.
+	 * @param x X position of block
+	 * @param y Y position of block
+	 * @param z Z position of block
+	 * @param block ID of block to be set to
+	 */
 	public void setBlock(int x, int y, int z, int block) {
 		blocks[x << 11 | z << 7 | y] = (byte)block;
 	}
 	
+	/**
+	 * Return the ID of a block in the chunk.
+	 * @param x X position of block
+	 * @param y Y position of block
+	 * @param z Z position of block
+	 * @return {@link Byte}
+	 */
 	public byte getBlock(int x, int y, int z) {
         return blocks[x << 11 | z << 7 | y];
     }
-
+	
+	/**
+	 * Returns the {@link #blocks} array
+	 * @return {@link #blocks}[]
+	 */
 	public byte[] getBlocks() {
 		return blocks;
 	}

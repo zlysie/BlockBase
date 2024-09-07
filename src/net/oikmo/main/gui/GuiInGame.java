@@ -13,10 +13,10 @@ import net.oikmo.engine.gui.GuiScreen;
 import net.oikmo.engine.inventory.Container;
 import net.oikmo.engine.inventory.Item;
 import net.oikmo.engine.inventory.Slot;
+import net.oikmo.engine.network.packet.PacketUpdateWithheldBlock;
 import net.oikmo.engine.renderers.MasterRenderer;
 import net.oikmo.engine.world.blocks.Block;
 import net.oikmo.main.Main;
-import net.oikmo.network.shared.PacketUpdateWithheldBlock;
 import net.oikmo.toolbox.properties.OptionsHandler;
 
 public class GuiInGame extends GuiScreen {

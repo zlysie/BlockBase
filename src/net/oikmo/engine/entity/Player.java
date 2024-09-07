@@ -129,7 +129,7 @@ public class Player extends Entity {
 	public void resetPos() {
 		MasterChunk currentChunk = getCurrentChunk();
 		if(currentChunk != null) {
-			this.setPos(1, currentChunk.getChunk().getHeightFromPosition(currentChunk.getOrigin(), getPosition()), 1);
+			this.setPos(1, currentChunk.getChunk().getHeightFromPosition(getPosition()), 1);
 		}
 	}
 
