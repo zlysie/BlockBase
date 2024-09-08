@@ -273,22 +273,20 @@ public class SoundMaster {
 		soundSystem.setListenerPosition((float)x, (float)y, (float)z);
 		soundSystem.setListenerOrientation(lookX, lookY, lookZ, upX, upY, upZ);
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	public static void cleanUp() {
 		if(soundSystem != null) {
 			soundSystem.cleanup();
 		}
 		if(musicThread != null) {
-			musicThread.stop();
+			musicThread.interrupt();
 		}
 
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	public static void stopMusic() {
 		if(musicThread != null) {
-			musicThread.stop();
+			musicThread.interrupt();
 		}
 		soundSystem.stop("music");
 	}

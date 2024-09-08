@@ -77,9 +77,9 @@ public class MasterRenderer {
 		if(!dir.exists()) {
 			dir.mkdirs();
 		} else {
-			File customPack = new File(dir + "/customPack.png");
+			File customPack = new File(dir + "/terrain.png");
 			if(customPack.exists()) {
-				customTexturePack = ResourceLoader.loadCustomTexture("customPack");
+				customTexturePack = ResourceLoader.loadCustomTexture("terrain");
 			} else {
 				customTexturePack = defaultTexturePack;
 				Logger.log(LogLevel.WARN, "customPack.png was not found! Defaulting to defaultPack.png");
@@ -91,8 +91,8 @@ public class MasterRenderer {
 			try {
 				readme.createNewFile();
 				try {
-					BufferedImage example = ImageIO.read(MasterRenderer.class.getResourceAsStream("/assets/textures/defaultPack.png"));
-					File examplePng = new File(dir+"/examplePack.png");
+					BufferedImage example = ImageIO.read(MasterRenderer.class.getResourceAsStream("/assets/textures/terrain.png"));
+					File examplePng = new File(dir+"/example_terrain.png");
 					ImageIO.write(example, "png", examplePng);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
