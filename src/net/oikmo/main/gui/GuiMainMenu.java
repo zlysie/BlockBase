@@ -56,7 +56,6 @@ public class GuiMainMenu extends GuiScreen {
 				"music.mutation",
 				"music.beginning",
 				"music.floatingtrees",
-				"music.undecided",
 		};
 		this.menuIDS = menuIDS;
 		

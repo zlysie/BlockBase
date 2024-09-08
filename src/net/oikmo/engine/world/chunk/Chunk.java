@@ -21,7 +21,7 @@ public class Chunk {
 	public static final byte CHUNK_SIZE = 16;
 	
 	/** Position of chunk in the world */
-	private ChunkCoordinates origin;
+	ChunkCoordinates origin;
 	/** Blocks array (holds block indexes) */
 	private byte[] blocks;
 	/** Holds the highest block heights */
