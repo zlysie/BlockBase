@@ -159,7 +159,7 @@ public class SoundMaster {
 				soundSystem.backgroundMusic("music", music.getFileLocation(), music.getFileName(), false);
 				soundSystem.setVolume("music", GameSettings.globalVolume);
 				soundSystem.play("music");
-				Logger.log(LogLevel.INFO, (String.format("Playing {0} ({1})", music.getFileName(),music.getID())));
+				Logger.log(LogLevel.INFO, (String.format("Playing %s (%s)", music.getFileName(),music.getID())));
 			}	
 		}
 	}
