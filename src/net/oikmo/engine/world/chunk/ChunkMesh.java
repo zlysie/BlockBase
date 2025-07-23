@@ -13,13 +13,11 @@ import net.oikmo.engine.world.blocks.Block;
 
 public class ChunkMesh {
 	private List<Vertex> vertices;
-	private static HashMap<Chunk, HashMap<Vector3f, Vertex>> uniqueVertices = new HashMap<>();
 	public int[] positions, normals;
 	public float[] uvs;
 
 	public ChunkMesh(Chunk chunk) {
 		vertices = new ArrayList<Vertex>();
-		uniqueVertices.put(chunk, new HashMap<>());
 		buildMesh(chunk);
 	}
 
@@ -123,39 +121,6 @@ public class ChunkMesh {
 				}
 			}
 		}
-		populateLists(chunk);
-		
-	}
-	
-	
-
-	private void addFaceVertices(Chunk chunk, byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, float normal) {
-		byte type = block;
-		int startIndex = type * 6;
-
-		for (int k = 0; k < 6; k++) {
-			Vector3f position = new Vector3f(positions[k].x + x, positions[k].y + y, positions[k].z + z);
-			Vertex vertex = uniqueVertices.get(chunk).get(position);
-			if(vertex == null) {
-				vertex = new Vertex(position, normal, uvs[startIndex + k]);
-				uniqueVertices.get(chunk).put(position,vertex);
-				vertices.add(vertex);
-			}
-			//block.setFaceIndex(k, vertices.indexOf(vertex));
-		}
-	}
-
-	public void removeMeshInfo() {
-		this.positions = null;
-		this.uvs = null;
-		this.normals = null;		
-	}
-
-	public boolean hasMeshInfo() {
-		return this.positions != null && this.uvs != null && this.normals != null;
-	}
-
-	private void populateLists(Chunk chunk) {
 		int numVertices = vertices.size();
 		positions = new int[numVertices]; // Each vertex has 3 position components
 		uvs = new float[numVertices * 2]; // Each vertex has 2 uv components
@@ -177,8 +142,39 @@ public class ChunkMesh {
 			normals[normalIndex] = vertex.normal;
 		}
 		
-		uniqueVertices.get(chunk).clear();
-		uniqueVertices.remove(chunk);
-		this.vertices.clear();
+		//uniqueVertices.get(chunk).clear();
+		//uniqueVertices.remove(chunk);
+		vertices.clear();
+		
+		
+	}
+	
+	
+
+	private void addFaceVertices(Chunk chunk, byte block, int x, int y, int z, Vector3f[] positions, Vector2f[] uvs, float normal) {
+		byte type = block;
+		int startIndex = type * 6;
+
+		for (int k = 0; k < 6; k++) {
+			Vector3f position = new Vector3f(positions[k].x + x, positions[k].y + y, positions[k].z + z);
+			/*Vertex vertex = uniqueVertices.get(chunk).get(position);
+			if(vertex == null) {
+				vertex = new Vertex(position, normal, uvs[startIndex + k]);
+				uniqueVertices.get(chunk).put(position,vertex);
+				
+			}*/
+			vertices.add(new Vertex(position, normal, uvs[startIndex + k]));
+			//block.setFaceIndex(k, vertices.indexOf(vertex));
+		}
+	}
+
+	public void removeMeshInfo() {
+		this.positions = null;
+		this.uvs = null;
+		this.normals = null;		
+	}
+
+	public boolean hasMeshInfo() {
+		return this.positions != null && this.uvs != null && this.normals != null;
 	}
 } 

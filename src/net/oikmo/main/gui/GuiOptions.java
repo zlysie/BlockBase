@@ -113,7 +113,7 @@ public class GuiOptions extends GuiScreen {
 		renderDistanceButton.setGuiCommand(new GuiCommand() {
 			public void invoke() {
 				renderDistance++;
-				if(renderDistance > 5) {
+				if(renderDistance > 4) {
 					renderDistance = 2;
 				}
 				
@@ -172,12 +172,9 @@ public class GuiOptions extends GuiScreen {
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.tiny"));
 			break;
 		case 3:
-			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.small"));
-			break;
-		case 4:
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.normal"));
 			break;
-		case 5:
+		case 4:
 			renderDistanceButton.setText(text + Main.lang.translateKey("options.distance.far"));
 			break;
 		}

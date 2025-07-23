@@ -14,14 +14,17 @@ options.title=Opcje
 options.fov.low=Bardzo ciasne
 options.fov.normal=Normalne
 options.fov.high=Jakbyś grał w Quake'a
-options.volume=Dźwięk
 options.fov=Pole widzenia
+options.sensitivity.low=Wolne
+options.sensitivity.szybkie
+options.sensitivity=Wrażliwość
+options.volume=Dźwięk
 
 inventory.title=Bloki
 
 world.select.create=Stworzyć nowy świat...
 
-network.connecting=Łączysz się
+network.connecting=łączysz się
 
 network.error.noinput=Nie podałeś adresu!
 network.error.server=Nie można połączyć się z serwerem!

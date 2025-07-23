@@ -221,7 +221,6 @@ public class World {
 												RawModel raw = Loader.loadToVAO(master.getMesh().positions, master.getMesh().uvs, master.getMesh().normals);
 												TexturedModel texModel = new TexturedModel(raw, MasterRenderer.currentTexturePack);
 												ChunkEntity entity = new ChunkEntity(texModel, master.getOrigin());
-												master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
 												master.setEntity(entity);
 												if(master.getMesh() != null) {
 													master.getMesh().removeMeshInfo();
@@ -230,7 +229,6 @@ public class World {
 												master.dirty = false;
 											}
 										} else {
-											master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
 											master.createMesh();
 										}
 									}
@@ -615,11 +613,9 @@ public class World {
 									synchronized(chunkMap) {
 										if(chunkMap.get(chunkPos) == null && getChunkFromPosition(chunkPos) == null) {
 											if(provider.loadChunk(chunkPos.x, chunkPos.z) != null) {
-												MasterChunk m = provider.loadChunk(chunkPos.x, chunkPos.z);
-												addChunk(m);
+												addChunk(provider.loadChunk(chunkPos.x, chunkPos.z));
 											} else {
-												MasterChunk m = new MasterChunk(noise, chunkPos);
-												addChunk(m);
+												addChunk(new MasterChunk(noise, chunkPos));
 											}
 											
 										}
@@ -700,7 +696,7 @@ public class World {
 			for(int i = 0; i < currentMasterChunks.size(); i++) {
 				MasterChunk master = currentMasterChunks.get(i);
 				if(master != null) {
-					master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
+					//master.getChunk().calcLightDepths(0, 0, Chunk.CHUNK_SIZE, Chunk.CHUNK_SIZE);
 					master.dirty = true;
 				}
 			}
@@ -750,7 +746,7 @@ public class World {
 	}
 
 	public void saveWorld() {
-		this.chunkCreator.interrupt();
+		//this.chunkCreator.interrupt();
 		for(Map.Entry<ChunkCoordinates, MasterChunk> entry : chunkMap.entrySet()) {
 			MasterChunk master = entry.getValue();
 			provider.saveChunk(master);

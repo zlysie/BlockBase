@@ -95,7 +95,7 @@ public class ResourceLoader {
 		}
 		uiTextures.clear();
 		for(int id : textures.values()) {
-			GL11.glDeleteTextures(id);
+			//GL11.glDeleteTextures(id);
 		}
 		textures.clear();
 		audioFiles.clear();

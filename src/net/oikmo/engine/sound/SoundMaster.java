@@ -23,7 +23,6 @@ import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundSystemException;
 import paulscode.sound.codecs.CodecJOrbis;
-import paulscode.sound.libraries.LibraryJavaSound;
 import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 
 public class SoundMaster {
@@ -41,12 +40,11 @@ public class SoundMaster {
 	/**
 	 * Initalises soundsystem along
 	 */
-	public static void init() {
+	public static void init() {	
 		ticksBeforeMusic = 12000 + new Random().nextInt(12000);
 		
 		try {
 			SoundSystemConfig.addLibrary(LibraryLWJGLOpenAL.class);
-			SoundSystemConfig.addLibrary(LibraryJavaSound.class);
 			SoundSystemConfig.setCodec("ogg", CodecJOrbis.class);
 		} catch( SoundSystemException e ) {
 			System.err.println("error linking with the plug-ins");

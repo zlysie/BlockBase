@@ -40,7 +40,6 @@ public class Chunk {
 		this.origin = origin;
 		generateChunk(noiseGen);
 		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
-		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
 	}
 	
 	/**
@@ -59,8 +58,7 @@ public class Chunk {
 		heights = new int[CHUNK_SIZE][CHUNK_SIZE];
 		this.lightDepths = new int[CHUNK_SIZE][World.WORLD_HEIGHT][CHUNK_SIZE];
 		this.origin = origin;
-		this.calcLightDepths(0, 0, CHUNK_SIZE, CHUNK_SIZE);
-		calculateHeights();	
+		//calculateHeights();	
 	}
 
 	/**
@@ -75,6 +73,7 @@ public class Chunk {
 					int actualZ = origin.z + z;
 					
 					int height = (int) ((noiseGen.noise(actualX/14f, actualZ/14f)*7f) + (noiseGen.noise((-actualZ)/16f,(-actualX)/16f)*12f) + (noiseGen.noise((actualZ)/6f,(actualX)/6f)*4f))+60;
+					//int height = 30;
 					setBlock(x, height, z, Block.grass.getByteType());
 					heights[x][z] = height+1;
 					for (int y = 0; y < World.WORLD_HEIGHT; y++) {
@@ -103,7 +102,7 @@ public class Chunk {
 			generateTrees(noiseGen.getSeed());
 		}
 		
-		calculateHeights();
+		//alculateHeights();
 	}
 	
 	/**
