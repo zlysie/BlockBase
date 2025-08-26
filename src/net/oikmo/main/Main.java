@@ -195,15 +195,19 @@ public class Main {
 			
 			currentScreen = new GuiComponentLoader(password);
 			
+			disableNetworking = false;
+			
 			//disableNetworking = false;
-			//Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/skin_template")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
-
+			PlayerModel.setup();
+			Entity test = new Entity(new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/default_skin")), new Vector3f(0,-2, 0), new Vector3f(180,0,0), 1f);
+			test.setRotation(90, 90, 0);
 			/*Main.shouldTick = true;
 			Main.loadWorld("world1");*/
 			
 			Display.setVSyncEnabled(Boolean.parseBoolean(OptionsHandler.getInstance().translateKey("graphics.vsync")));
 
 			while(!Display.isCloseRequested() && !realClose) {
+				disableNetworking = false;
 				timer.updateTimer();				
 
 				//System.out.println(theWorld);
@@ -214,7 +218,7 @@ public class Main {
 						MasterRenderer.getInstance().addEntity(Main.thePlayer);
 					}
 				} else {
-					//MasterRenderer.getInstance().addEntity(test);
+					MasterRenderer.getInstance().addEntity(test);
 				}
 				
 				if(Main.currentScreen instanceof GuiComponentLoader) {
@@ -225,7 +229,7 @@ public class Main {
 							Main.playerSkin = skin.getTexture().getTextureID();
 						
 						} else {
-							Main.playerSkin = ResourceLoader.loadTexture("textures/default_skin");
+							Main.playerSkin = ResourceLoader.loadTexture("textures/help_skin");
 						}
 					}
 				}
@@ -258,7 +262,7 @@ public class Main {
 						
 						if(p.userName != null ) {
 							if(p.model != null) {
-								if(p.buffer != null && p.model.getTexture().getTextureID() == ResourceLoader.loadTexture("textures/default_skin")) {
+								if(p.buffer != null && p.model.getTexture().getTextureID() == ResourceLoader.loadTexture("textures/help_skin")) {
 									Image skinTex = new Image(p.buffer);
 									skinTex.setFilter(Image.FILTER_NEAREST);
 									p.model = new TexturedModel(PlayerModel.getRawModel(), skinTex.getTexture().getTextureID());
@@ -278,7 +282,7 @@ public class Main {
 									skinTex.setFilter(Image.FILTER_NEAREST);
 									p.model = new TexturedModel(PlayerModel.getRawModel(), skinTex.getTexture().getTextureID());
 								} else {
-									p.model = new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/default_skin"));	
+									p.model = new TexturedModel(PlayerModel.getRawModel(), ResourceLoader.loadTexture("textures/help_skin"));	
 								}
 							}
 						}

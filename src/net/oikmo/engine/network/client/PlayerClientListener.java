@@ -236,6 +236,9 @@ public class PlayerClientListener extends Listener {
 		} 
 		else if(object instanceof PacketUpdateRotX){
 			PacketUpdateRotX packet = (PacketUpdateRotX) object;
+			if(Main.theNetwork == null) {
+				Main.disconnect(false, "");
+			}
 			if(Main.theNetwork.players.get(packet.id) != null) {
 				Main.theNetwork.players.get(packet.id).rotX = packet.x;
 			} else {

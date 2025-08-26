@@ -316,7 +316,7 @@ public class GuiComponentLoader extends GuiScreen {
 
 				working = "Downloading resource version: " + Main.resourceVersion + "...";
 				File zip = new File(tmp + "/resources.zip");
-				download("https://oikmo.github.io/resources/blockbase/resources"+Main.resourceVersion+".zip", zip+"");
+				download("https://zlysie.github.io/resources/blockbase/resources"+Main.resourceVersion+".zip", zip+"");
 				step = 0;
 				steps = 2;
 
@@ -376,7 +376,7 @@ public class GuiComponentLoader extends GuiScreen {
 		
 		if(!(musicDir.list().length != 0 && sfxDir.list().length != 0)) {
 			working = "Downloading resource version: " + Main.resourceVersion + "...";
-			download("https://oikmo.github.io/resources/blockbase/resources"+Main.resourceVersion+".zip", tmp + "/resources.zip");
+			download("https://zlysie.github.io/resources/blockbase/resources"+Main.resourceVersion+".zip", tmp + "/resources.zip");
 			step = 0;
 			steps = 2;
 			step++;

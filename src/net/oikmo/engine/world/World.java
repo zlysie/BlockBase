@@ -264,7 +264,7 @@ public class World {
 						}
 					}
 				}
-			} catch(java.util.ConcurrentModificationException e) {}
+			} catch(Exception e) {}
 		} else {
 			try {
 				for(int m = 0; m < chunkMap.values().size(); m++) {

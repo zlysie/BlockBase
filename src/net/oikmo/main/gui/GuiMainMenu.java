@@ -168,9 +168,12 @@ public class GuiMainMenu extends GuiScreen {
 					
 					Logger.log(LogLevel.INFO, "Playing " + FilenameUtils.getName(musicByte.getFileLocation().getPath()) + " (" + musicByte.getID() + ") and sleeping for " + duration + "ms with (random) " + randomLong + "+ ms with the sum of: " + (sum) + "ms");
 					
-					try {
-						Thread.sleep(sum);
-					} catch (InterruptedException e) {}
+					long time = System.currentTimeMillis();
+					long expectedTime = time + sum;
+					
+					while(time < expectedTime) {
+						// fuck all
+					}
 				}
 
 				doRandomMusic();
@@ -187,6 +190,9 @@ public class GuiMainMenu extends GuiScreen {
 	private boolean lockTick = false;
 	public void onUpdate() {
 		if(Main.isPaused()) {
+			
+			//mainMenuCamera.pitch = 90;
+			
 			/*if(mainMenuCamera.pitch < -45) {
 				isNegative = true;
 			} else if(mainMenuCamera.pitch > 45) {
@@ -208,7 +214,7 @@ public class GuiMainMenu extends GuiScreen {
 			drawTexture(Main.jmode ? ResourceLoader.loadUITexture("ui/title_j") : ResourceLoader.loadUITexture("ui/title"), x, y, width, height);
 			
 			drawShadowStringCentered(Color.yellow, x,(y+height/2)+5, splashText);
-			drawShadowStringCentered(font.getWidth("Created by Oikmo")/2,Display.getHeight()-fontSize/2, "Created by Oikmo");
+			drawShadowStringCentered(font.getWidth("Created by Zlysie")/2,Display.getHeight()-fontSize/2, "Created by Zlysie");
 			playButton.tick(lockTick);
 			multiplayerButton.tick(lockTick && !Main.disableNetworking);
 			optionsButton.tick(lockTick);
@@ -229,11 +235,9 @@ public class GuiMainMenu extends GuiScreen {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void stopMusic() {
 		if(musicThread != null) {
 			musicThread.interrupt();
-			musicThread.stop();
 		}
 	}
 
